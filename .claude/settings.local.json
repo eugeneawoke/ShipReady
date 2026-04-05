@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls \"/Users/eugene.gusakov/Downloads/files \\(1\\)/\")",
+      "Bash(cat \"/Users/eugene.gusakov/Downloads/files \\(1\\)/CHECKS.md\")",
+      "Bash(git commit:*)"
+    ]
+  }
+}

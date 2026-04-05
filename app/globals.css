@@ -1,26 +1,200 @@
 @import "tailwindcss";
 
+/* ─── ShipReady Design Tokens ─────────────────────────────────────── */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Backgrounds */
+  --bg-primary:    #0E0E0F;
+  --bg-secondary:  #161618;
+  --bg-tertiary:   #1E1E21;
+  --bg-elevated:   #232328;
+
+  /* Borders */
+  --border-subtle:  rgba(255, 255, 255, 0.06);
+  --border-default: rgba(255, 255, 255, 0.10);
+  --border-strong:  rgba(255, 255, 255, 0.18);
+
+  /* Text */
+  --text-primary:   #F1F0EE;
+  --text-secondary: #8B8A85;
+  --text-tertiary:  #5A5955;
+  --text-code:      #E8C77D;
+
+  /* Severity */
+  --critical:    #FF4444;  --critical-bg: rgba(255, 68, 68, 0.08);
+  --high:        #FF8C42;  --high-bg:     rgba(255, 140, 66, 0.08);
+  --medium:      #F5C518;  --medium-bg:   rgba(245, 197, 24, 0.08);
+  --low:         #4A9EFF;  --low-bg:      rgba(74, 158, 255, 0.08);
+  --pass:        #3DDC84;  --pass-bg:     rgba(61, 220, 132, 0.08);
+
+  /* Accent */
+  --accent:       #6E56CF;
+  --accent-hover: #7C68D4;
+
+  /* ─── shadcn/ui CSS variables (dark-first) ──────────────────────── */
+  --background:   #0E0E0F;
+  --foreground:   #F1F0EE;
+
+  --card:         #161618;
+  --card-foreground: #F1F0EE;
+
+  --popover:      #1E1E21;
+  --popover-foreground: #F1F0EE;
+
+  --primary:      #6E56CF;
+  --primary-foreground: #F1F0EE;
+
+  --secondary:    #1E1E21;
+  --secondary-foreground: #8B8A85;
+
+  --muted:        #161618;
+  --muted-foreground: #8B8A85;
+
+  --accent-ui:    #1E1E21;
+  --accent-ui-foreground: #F1F0EE;
+
+  --destructive:  #FF4444;
+  --destructive-foreground: #F1F0EE;
+
+  --border:       rgba(255, 255, 255, 0.10);
+  --input:        rgba(255, 255, 255, 0.10);
+  --ring:         #6E56CF;
+
+  --radius: 0.5rem;
 }
+
+/* ─── Tailwind v4 Theme Extension ──────────────────────────────────── */
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Fonts — map to geist CSS variables injected by layout.tsx */
+  --font-sans: var(--font-geist-sans), Inter, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), 'JetBrains Mono', monospace;
+
+  /* Background palette */
+  --color-bg-primary:   #0E0E0F;
+  --color-bg-secondary: #161618;
+  --color-bg-tertiary:  #1E1E21;
+  --color-bg-elevated:  #232328;
+
+  /* Severity palette */
+  --color-severity-critical: #FF4444;
+  --color-severity-high:     #FF8C42;
+  --color-severity-medium:   #F5C518;
+  --color-severity-low:      #4A9EFF;
+  --color-severity-pass:     #3DDC84;
+
+  /* Accent */
+  --color-accent:       #6E56CF;
+  --color-accent-hover: #7C68D4;
+
+  /* Border tokens (as named colors so bg-border-subtle etc. work) */
+  --color-border-subtle:  rgba(255, 255, 255, 0.06);
+  --color-border-default: rgba(255, 255, 255, 0.10);
+  --color-border-strong:  rgba(255, 255, 255, 0.18);
+
+  /* Text palette */
+  --color-text-primary:   #F1F0EE;
+  --color-text-secondary: #8B8A85;
+  --color-text-tertiary:  #5A5955;
+  --color-text-code:      #E8C77D;
+
+  /* shadcn/ui semantic colors */
+  --color-background:         var(--background);
+  --color-foreground:         var(--foreground);
+  --color-card:               var(--card);
+  --color-card-foreground:    var(--card-foreground);
+  --color-popover:            var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary:            var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary:          var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted:              var(--muted);
+  --color-muted-foreground:   var(--muted-foreground);
+  --color-destructive:        var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border:             var(--border);
+  --color-input:              var(--input);
+  --color-ring:               var(--ring);
+
+  --radius: 0.5rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ─── Animations ────────────────────────────────────────────────────── */
+
+/* Score ring entrance */
+@keyframes scoreIn {
+  from { opacity: 0; transform: scale(0.8); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.score-ring {
+  animation: scoreIn 400ms ease-out;
+}
+
+/* Category card fade-up */
+@keyframes cardFadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.category-card {
+  animation: cardFadeUp 300ms ease-out both;
+}
+
+.category-card:nth-child(1) { animation-delay:   0ms; }
+.category-card:nth-child(2) { animation-delay:  80ms; }
+.category-card:nth-child(3) { animation-delay: 160ms; }
+.category-card:nth-child(4) { animation-delay: 240ms; }
+
+/* Issue card prompt expand */
+.issue-prompts {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 300ms ease;
+}
+
+.issue-prompts.open {
+  max-height: 500px;
+}
+
+/* ─── Base Styles ───────────────────────────────────────────────────── */
+
+html {
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-geist-sans), Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Numbers and scores always monospaced */
+.font-score,
+[data-score],
+.score-value {
+  font-family: var(--font-geist-mono), 'JetBrains Mono', monospace;
+}
+
+/* Severity badge shared base */
+.severity-badge {
+  font-size: 0.6875rem;   /* 11px */
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Prompt blocks */
+.prompt-block {
+  font-family: var(--font-geist-mono), 'JetBrains Mono', monospace;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  font-size: 0.8125rem;   /* 13px */
+  line-height: 1.6;
+  color: var(--text-code);
 }

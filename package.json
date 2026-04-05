@@ -1,5 +1,5 @@
 {
-  "name": "shipready-temp",
+  "name": "shipready",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,9 +9,26 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.82.0",
+    "@lemonsqueezy/lemonsqueezy.js": "^4.0.0",
+    "@sparticuz/chromium": "^143.0.4",
+    "@supabase/ssr": "^0.10.0",
+    "@supabase/supabase-js": "^2.101.1",
+    "cheerio": "^1.2.0",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.38.0",
+    "geist": "^1.7.0",
+    "lighthouse": "^13.0.3",
+    "lucide-react": "^1.7.0",
     "next": "16.2.2",
+    "next-intl": "^4.9.0",
+    "puppeteer-core": "^24.40.0",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "resend": "^6.10.0",
+    "ssl-checker": "^3.0.0",
+    "tailwind-merge": "^3.5.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
