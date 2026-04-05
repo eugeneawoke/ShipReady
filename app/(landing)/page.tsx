@@ -104,6 +104,7 @@ const T = {
       colLegal: 'Legal',
       howItWorks: 'How it works',
       pricing: 'Pricing',
+      roadmap: 'Roadmap',
       exampleReport: 'Example report',
       emailLabel: 'Email support',
       xLabel: 'X (Twitter)',
@@ -200,6 +201,7 @@ const T = {
       colLegal: 'Документы',
       howItWorks: 'Как это работает',
       pricing: 'Тарифы',
+      roadmap: 'Роадмэп',
       exampleReport: 'Пример отчёта',
       emailLabel: 'Email',
       xLabel: 'X (Twitter)',
@@ -222,7 +224,7 @@ type Translations = {
   ai: { eyebrow: string; title: string; sub: string; bullets: readonly string[]; fileLabel: string; ready: string; copyBtn: string; pasteHint: string }
   pricing: { eyebrow: string; title: string; sub: string; popular: string; cancelAnytime: string; comingSoon: string; plans: readonly { name: string; nameKey: string; price: string; period: string | null; desc: string; features: readonly string[]; cta: string; highlight: boolean; coming: boolean }[] }
   cta: { title: string; sub: string }
-  footer: { tagline: string; madeBy: string; colProduct: string; colSupport: string; colLegal: string; howItWorks: string; pricing: string; exampleReport: string; emailLabel: string; xLabel: string; tgLabel: string; privacy: string; terms: string; copy: string }
+  footer: { tagline: string; madeBy: string; colProduct: string; colSupport: string; colLegal: string; howItWorks: string; pricing: string; roadmap: string; exampleReport: string; emailLabel: string; xLabel: string; tgLabel: string; privacy: string; terms: string; copy: string }
 }
 
 // ─── animation helpers ────────────────────────────────────────────────────────
@@ -294,9 +296,9 @@ function Nav({ t, lang, setLang }: { t: Translations; lang: Lang; setLang: (l: L
               </button>
             ))}
           </div>
-          <button className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors hidden sm:block">
+          <a href="/auth/login" className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors hidden sm:block">
             {t.nav.signIn}
-          </button>
+          </a>
           <a
             href="#pricing"
             className="text-sm px-4 py-1.5 rounded-lg bg-[#6E56CF] text-white hover:bg-[#7C68D4] transition-colors font-medium"
@@ -689,18 +691,24 @@ function PricingSection({ t }: { t: Translations }) {
                   </li>
                 ))}
               </ul>
-              <button
-                disabled={plan.coming}
-                className={`w-full py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                  plan.coming
-                    ? 'bg-[#1E1E21] border border-white/[0.06] text-[#5A5955] cursor-not-allowed'
-                    : plan.highlight
-                    ? 'bg-[#6E56CF] text-white hover:bg-[#7C68D4]'
-                    : 'bg-[#1E1E21] border border-white/[0.08] text-[#F1F0EE] hover:bg-[#232328]'
-                }`}
-              >
-                {plan.coming ? t.pricing.comingSoon : plan.cta}
-              </button>
+              {plan.coming ? (
+                <a
+                  href="/roadmap"
+                  className="block w-full py-2.5 rounded-xl text-sm font-medium text-center bg-[#1E1E21] border border-white/[0.06] text-[#5A5955] hover:text-[#8B8A85] hover:border-white/[0.10] transition-colors"
+                >
+                  {t.pricing.comingSoon} →
+                </a>
+              ) : (
+                <button
+                  className={`w-full py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                    plan.highlight
+                      ? 'bg-[#6E56CF] text-white hover:bg-[#7C68D4]'
+                      : 'bg-[#1E1E21] border border-white/[0.08] text-[#F1F0EE] hover:bg-[#232328]'
+                  }`}
+                >
+                  {plan.cta}
+                </button>
+              )}
               {!plan.coming && plan.period && (
                 <p className="mt-2.5 text-center text-[11px] text-[#5A5955]">
                   {t.pricing.cancelAnytime}
@@ -765,6 +773,7 @@ function Footer({ t }: { t: Translations }) {
             {[
               { label: t.footer.howItWorks,    href: '#how-it-works' },
               { label: t.footer.pricing,       href: '#pricing' },
+              { label: t.footer.roadmap,       href: '/roadmap' },
               { label: t.footer.exampleReport, href: '#' },
             ].map(item => (
               <li key={item.href}>
