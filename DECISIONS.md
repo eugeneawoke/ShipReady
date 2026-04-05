@@ -43,9 +43,9 @@
 
 > Добавлять при каждом новом архитектурном решении.
 
-```
-### D-XX: Название
-Решение: что делаем
-Почему: конкретные причины
-Отклонено: [альтернатива] — [почему нет]
-```
+### D-09: Lighthouse runner на Railway, фронт на Vercel
+Решение: Vercel (Hobby) деплоит фронт + все API кроме Lighthouse. Railway (Hobby $5/мес) запускает `/api/run-scan` — тяжёлый Lighthouse scan.
+Почему: Vercel Hobby лимит 1024MB RAM и 10 сек timeout. Lighthouse + Chromium требуют ~2GB и ~40 сек. Railway Hobby даёт до 8GB RAM, без timeout.
+Связь: Vercel вызывает `RAILWAY_SCANNER_URL/api/run-scan` с `Authorization: Bearer SCANNER_SECRET`. Lighthouse обновляет Supabase напрямую.
+Fallback: если `RAILWAY_SCANNER_URL` не задан — запуск локально через setTimeout (dev режим).
+Отклонено: Vercel Pro — $20/мес дороже. Отдельный Express сервис — дублирование кода.

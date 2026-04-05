@@ -3,7 +3,7 @@ import { isValidUrl, normalizeUrl } from '@/lib/utils'
 import { createClient, createServiceClient } from '@/lib/supabase'
 import { FREE_SCAN_LIMIT } from '@/lib/auth'
 
-export const maxDuration = 60
+export const maxDuration = 10
 
 export async function POST(request: NextRequest) {
   try {
@@ -67,16 +67,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to create scan' }, { status: 500 })
     }
 
-    // Fire and forget — do not await
-    // Will be replaced with proper background processing
-    setTimeout(async () => {
-      try {
-        const { runAllChecks } = await import('@/lib/checks/index')
-        await runAllChecks(url, data.id)
-      } catch (e) {
-        console.error('Scan failed:', e)
-      }
-    }, 0)
+    const railwayUrl = process.env.RAILWAY_SCANNER_URL
+    const scannerSecret = process.env.SCANNER_SECRET
+
+    if (railwayUrl && scannerSecret) {
+      // Delegate to Railway scanner — fire and forget
+      fetch(`${railwayUrl}/api/run-scan`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${scannerSecret}`,
+        },
+        body: JSON.stringify({ url, scanId: data.id }),
+      }).catch(e => console.error('Railway scanner call failed:', e))
+    } else {
+      // Fallback: run locally (dev / no Railway configured)
+      setTimeout(async () => {
+        try {
+          const { runAllChecks } = await import('@/lib/checks/index')
+          await runAllChecks(url, data.id)
+        } catch (e) {
+          console.error('Scan failed:', e)
+        }
+      }, 0)
+    }
 
     return NextResponse.json({ id: data.id }, { status: 202 })
   } catch {
