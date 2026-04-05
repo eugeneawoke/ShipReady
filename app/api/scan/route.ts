@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isValidUrl, normalizeUrl } from '@/lib/utils'
-import { createServiceClient } from '@/lib/supabase'
+import { createClient, createServiceClient } from '@/lib/supabase'
+import { FREE_SCAN_LIMIT } from '@/lib/auth'
 
 export const maxDuration = 60
 
@@ -14,11 +15,51 @@ export async function POST(request: NextRequest) {
     }
 
     const url = normalizeUrl(raw)
+
+    // Check auth and rate-limit free tier
+    let userId: string | null = null
+    try {
+      const userSupabase = await createClient()
+      const { data: { user } } = await userSupabase.auth.getUser()
+      if (user) {
+        userId = user.id
+
+        const { data: profile } = await userSupabase
+          .from('profiles')
+          .select('plan')
+          .eq('id', user.id)
+          .single()
+
+        const plan = profile?.plan ?? 'free'
+
+        if (plan === 'free') {
+          const startOfMonth = new Date()
+          startOfMonth.setDate(1)
+          startOfMonth.setHours(0, 0, 0, 0)
+
+          const { count } = await userSupabase
+            .from('scans')
+            .select('id', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .gte('created_at', startOfMonth.toISOString())
+
+          if ((count ?? 0) >= FREE_SCAN_LIMIT) {
+            return NextResponse.json(
+              { error: 'Free limit reached', upgradeUrl: '/pricing' },
+              { status: 429 }
+            )
+          }
+        }
+      }
+    } catch {
+      // Auth check is best-effort — unauthenticated scans proceed normally
+    }
+
     const supabase = createServiceClient()
 
     const { data, error } = await supabase
       .from('scans')
-      .insert({ url, status: 'pending' })
+      .insert({ url, status: 'pending', ...(userId ? { user_id: userId } : {}) })
       .select('id')
       .single()
 
