@@ -194,6 +194,18 @@ h1, h2, h3, h4 {
   text-transform: uppercase;
 }
 
+/* ─── Hero entrance — CSS-based so it runs on every mount (incl. back nav) ── */
+
+@keyframes heroSlideUp {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.hero-1 { animation: heroSlideUp 0.55s cubic-bezier(0.16,1,0.3,1) 0.05s both; }
+.hero-2 { animation: heroSlideUp 0.55s cubic-bezier(0.16,1,0.3,1) 0.15s both; }
+.hero-3 { animation: heroSlideUp 0.55s cubic-bezier(0.16,1,0.3,1) 0.25s both; }
+.hero-4 { animation: heroSlideUp 0.55s cubic-bezier(0.16,1,0.3,1) 0.38s both; }
+
 /* ─── Works-with chip gradient border ───────────────────────────────────── */
 
 @keyframes borderGradientSpin {

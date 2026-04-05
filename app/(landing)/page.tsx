@@ -107,6 +107,16 @@ const T = {
       sub: 'A complete breakdown of every issue with context, severity, and ready-to-use AI prompts.',
       upgradeBtn: 'Upgrade to see AI fix',
     },
+    demo: {
+      score: 'SCORE',
+      grade: 'Good',
+      severity: 'Critical',
+      issueTitle: 'Content Security Policy header missing',
+      issueDesc: 'Without CSP, your app is open to XSS attacks. An attacker can inject scripts that steal session tokens or user data.',
+      fixCursor: 'Fix with Cursor ↗',
+      fixBolt: 'Fix with Bolt ↗',
+      prompt: "Add Content-Security-Policy to next.config.ts:\nheaders: [{ key: 'Content-Security-Policy',\n  value: \"default-src 'self'; script-src 'self'\" }]\nThis fixes the critical security issue immediately.",
+    },
     features: {
       eyebrow: 'What we check',
       title: '25+ checks across 4 categories',
@@ -130,7 +140,9 @@ const T = {
       fileLabel: 'cursor_prompt.txt',
       ready: 'ready to paste',
       copyBtn: 'Copy prompt',
+      copiedBtn: 'Copied!',
       pasteHint: '→ paste into Cursor chat',
+      promptText: "Fix the missing Content-Security-Policy header\nin my Next.js app.\n\nAdd to next.config.ts headers():\n{\n  key: 'Content-Security-Policy',\n  value: [\n    \"default-src 'self'\",\n    \"script-src 'self' 'unsafe-eval'\",\n    \"style-src 'self' 'unsafe-inline'\",\n  ].join('; ')\n}\n\nThis protects against XSS and will score\n100/100 on security headers.",
     },
     pricing: {
       eyebrow: 'Pricing',
@@ -203,6 +215,16 @@ const T = {
       sub: 'Полный разбор каждой проблемы с контекстом, серьёзностью и готовыми AI-промптами.',
       upgradeBtn: 'Обновитесь чтобы увидеть исправление',
     },
+    demo: {
+      score: 'ОЦЕНКА',
+      grade: 'Хорошо',
+      severity: 'Критично',
+      issueTitle: 'Отсутствует заголовок Content Security Policy',
+      issueDesc: 'Без CSP ваше приложение уязвимо для XSS-атак. Злоумышленник может внедрить скрипты, которые украдут токены сессий или данные пользователей.',
+      fixCursor: 'Исправить в Cursor ↗',
+      fixBolt: 'Исправить в Bolt ↗',
+      prompt: "Добавьте Content-Security-Policy в next.config.ts:\nheaders: [{ key: 'Content-Security-Policy',\n  value: \"default-src 'self'; script-src 'self'\" }]\nЭто исправит критическую проблему безопасности.",
+    },
     features: {
       eyebrow: 'Что проверяем',
       title: '25+ проверок по 4 категориям',
@@ -226,7 +248,9 @@ const T = {
       fileLabel: 'cursor_prompt.txt',
       ready: 'готов к вставке',
       copyBtn: 'Скопировать промпт',
+      copiedBtn: 'Скопировано!',
       pasteHint: '→ вставьте в чат Cursor',
+      promptText: "Исправьте отсутствующий заголовок Content-Security-Policy\nв вашем Next.js приложении.\n\nДобавьте в next.config.ts headers():\n{\n  key: 'Content-Security-Policy',\n  value: [\n    \"default-src 'self'\",\n    \"script-src 'self' 'unsafe-eval'\",\n    \"style-src 'self' 'unsafe-inline'\",\n  ].join('; ')\n}\n\nЭто защитит от XSS и даст\n100/100 по заголовкам безопасности.",
     },
     pricing: {
       eyebrow: 'Тарифы',
@@ -272,8 +296,9 @@ type Translations = {
   stats: readonly { value: string; label: string }[]
   how: { eyebrow: string; title: string; steps: readonly { step: string; emoji: string; title: string; desc: string }[] }
   preview: { eyebrow: string; title: string; sub: string; upgradeBtn: string }
+  demo: { score: string; grade: string; severity: string; issueTitle: string; issueDesc: string; fixCursor: string; fixBolt: string; prompt: string }
   features: { eyebrow: string; title: string; sub: string; items: readonly { title: string; desc: string; checks: readonly string[] }[] }
-  ai: { eyebrow: string; title: string; sub: string; bullets: readonly string[]; fileLabel: string; ready: string; copyBtn: string; pasteHint: string }
+  ai: { eyebrow: string; title: string; sub: string; bullets: readonly string[]; fileLabel: string; ready: string; copyBtn: string; copiedBtn: string; pasteHint: string; promptText: string }
   pricing: { eyebrow: string; title: string; sub: string; popular: string; cancelAnytime: string; comingSoon: string; plans: readonly { name: string; nameKey: string; price: string; period: string | null; desc: string; features: readonly string[]; cta: string; highlight: boolean; coming: boolean }[] }
   cta: { title: string; sub: string }
   footer: { tagline: string; madeBy: string; colProduct: string; colSupport: string; colLegal: string; howItWorks: string; pricing: string; roadmap: string; exampleReport: string; emailLabel: string; xLabel: string; tgLabel: string; privacy: string; terms: string; copy: string }
@@ -282,10 +307,10 @@ type Translations = {
 // ─── animation helpers ────────────────────────────────────────────────────────
 
 const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 24 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true },
-  transition: { duration: 0.5, delay, ease: [0.25, 0.1, 0.25, 1] as const },
+  initial: { opacity: 0, y: 28, scale: 0.98 },
+  whileInView: { opacity: 1, y: 0, scale: 1 },
+  viewport: { once: true, amount: 0.05 },
+  transition: { duration: 0.65, delay, ease: [0.16, 1, 0.3, 1] as const },
 })
 
 // ─── feature meta ─────────────────────────────────────────────────────────────
@@ -400,61 +425,38 @@ function Nav({ t, lang, setLang }: { t: Translations; lang: Lang; setLang: (l: L
 
 function HeroSection({ t }: { t: Translations }) {
   return (
-    <section className="relative pt-36 pb-28 px-6 text-center overflow-hidden">
+    <section className="relative pt-36 pb-28 px-6 text-center overflow-hidden min-h-[680px] flex flex-col justify-center">
       <div
         className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[500px] rounded-full opacity-30"
         style={{ background: 'radial-gradient(ellipse at center, #6E56CF 0%, transparent 70%)' }}
       />
-      <motion.div
-        className="max-w-3xl mx-auto relative"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6 }}
-      >
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="text-[52px] md:text-[68px] font-semibold leading-[1.0] tracking-[-0.03em]"
+      <div className="max-w-3xl mx-auto relative">
+        <h1
+          className="hero-1 text-[52px] md:text-[68px] font-semibold leading-[1.0] tracking-[-0.03em]"
           style={{ fontFamily: 'var(--font-syne)' }}
         >
           {t.hero.h1a}
           <span className="block text-[#8B8A85] mt-1">{t.hero.h1b}</span>
-        </motion.h1>
+        </h1>
 
-        <motion.p
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="mt-6 text-lg text-[#8B8A85] max-w-xl mx-auto leading-relaxed"
-        >
+        <p className="hero-2 mt-6 text-lg text-[#8B8A85] max-w-xl mx-auto leading-relaxed">
           {t.hero.sub}
-        </motion.p>
+        </p>
 
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="mt-10"
-        >
+        <div className="hero-3 mt-10">
           <ScanForm />
           <p className="mt-3 text-xs text-[#5A5955]">{t.hero.noSignup}</p>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.45 }}
-          className="mt-8 flex flex-wrap items-center justify-center gap-2"
-        >
+        <div className="hero-4 mt-8 flex flex-wrap items-center justify-center gap-2">
           <span className="text-xs text-[#5A5955] mr-1">{t.hero.worksWith}</span>
           {['Cursor', 'Bolt', 'Lovable', 'v0', 'Replit', 'Windsurf', 'Claude', 'OpenAI'].map(p => (
             <div key={p} className="works-chip">
               <span className="works-chip-inner">{p}</span>
             </div>
           ))}
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     </section>
   )
 }
@@ -548,10 +550,10 @@ function ReportPreviewSection({ t }: { t: Translations }) {
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
                     <span className="text-[22px] font-mono font-medium">78</span>
-                    <span className="text-[8px] text-[#5A5955] uppercase tracking-widest">SCORE</span>
+                    <span className="text-[8px] text-[#5A5955] uppercase tracking-widest">{t.demo.score}</span>
                   </div>
                 </div>
-                <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#7BC67E]/10 text-[#7BC67E] font-mono">Good</span>
+                <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#7BC67E]/10 text-[#7BC67E] font-mono">{t.demo.grade}</span>
               </div>
 
               <div className="flex-1 grid grid-cols-2 gap-3 w-full">
@@ -579,23 +581,18 @@ function ReportPreviewSection({ t }: { t: Translations }) {
             <div className="rounded-xl border border-[#FF4444]/25 bg-[#FF4444]/[0.04] overflow-hidden">
               <div className="flex items-center gap-3 px-4 py-3 border-b border-[#FF4444]/15">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#FF4444]" />
-                <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-[#FF4444]">Critical</span>
-                <span className="text-sm font-medium">Content Security Policy header missing</span>
+                <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-[#FF4444]">{t.demo.severity}</span>
+                <span className="text-sm font-medium">{t.demo.issueTitle}</span>
               </div>
               <div className="px-4 py-4">
-                <p className="text-sm text-[#8B8A85] mb-4 leading-relaxed">
-                  Without CSP, your app is open to XSS attacks. An attacker can inject scripts that steal session tokens or user data.
-                </p>
+                <p className="text-sm text-[#8B8A85] mb-4 leading-relaxed">{t.demo.issueDesc}</p>
                 <div className="flex gap-2 mb-4">
-                  <button className="text-xs px-3 py-1.5 rounded-lg bg-[#6E56CF] text-white hover:bg-[#7C68D4] transition-colors">Fix with Cursor ↗</button>
-                  <button className="text-xs px-3 py-1.5 rounded-lg bg-[#1E1E21] border border-white/[0.08] text-[#8B8A85] hover:bg-[#232328] transition-colors">Fix with Bolt ↗</button>
+                  <button className="text-xs px-3 py-1.5 rounded-lg bg-[#6E56CF] text-white hover:bg-[#7C68D4] transition-colors">{t.demo.fixCursor}</button>
+                  <button className="text-xs px-3 py-1.5 rounded-lg bg-[#1E1E21] border border-white/[0.08] text-[#8B8A85] hover:bg-[#232328] transition-colors">{t.demo.fixBolt}</button>
                 </div>
                 <div className="relative rounded-lg bg-[#0E0E0F] border border-white/[0.06] overflow-hidden">
                   <div className="px-4 py-3">
-                    <pre className="text-[11px] font-mono text-[#8B8A85] blur-sm select-none leading-relaxed">{`Add Content-Security-Policy to next.config.ts:
-headers: [{ key: 'Content-Security-Policy',
-  value: "default-src 'self'; script-src 'self'" }]
-This fixes the critical security issue immediately.`}</pre>
+                    <pre className="text-[11px] font-mono text-[#8B8A85] blur-sm select-none leading-relaxed">{t.demo.prompt}</pre>
                   </div>
                   <div className="absolute inset-0 flex items-center justify-center bg-[#0E0E0F]/70 backdrop-blur-[2px]">
                     <a href="#pricing" className="text-xs px-4 py-2 rounded-lg bg-[#6E56CF] text-white hover:bg-[#7C68D4] transition-colors font-medium flex items-center gap-1.5">
@@ -660,6 +657,15 @@ function FeaturesSection({ t }: { t: Translations }) {
 // ─── AI prompts ───────────────────────────────────────────────────────────────
 
 function AIPromptsSection({ t }: { t: Translations }) {
+  const [copied, setCopied] = useState(false)
+
+  function handleCopy() {
+    navigator.clipboard.writeText(t.ai.promptText).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
+
   return (
     <section className="py-24 px-6 bg-[#161618] border-y border-white/[0.06]">
       <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-12 items-center">
@@ -688,25 +694,26 @@ function AIPromptsSection({ t }: { t: Translations }) {
             </span>
           </div>
           <div className="p-5">
-            <pre className="text-[11px] font-mono text-[#E8C77D] leading-relaxed whitespace-pre-wrap">{`Fix the missing Content-Security-Policy header
-in my Next.js app.
-
-Add to next.config.ts headers():
-{
-  key: 'Content-Security-Policy',
-  value: [
-    "default-src 'self'",
-    "script-src 'self' 'unsafe-eval'",
-    "style-src 'self' 'unsafe-inline'",
-  ].join('; ')
-}
-
-This protects against XSS and will score
-100/100 on security headers.`}</pre>
+            <pre className="text-[11px] font-mono text-[#E8C77D] leading-relaxed whitespace-pre-wrap">{t.ai.promptText}</pre>
           </div>
           <div className="px-4 py-3 border-t border-white/[0.06] flex items-center gap-3">
-            <button className="text-xs px-3 py-1.5 rounded-lg bg-[#6E56CF] text-white hover:bg-[#7C68D4] transition-colors flex items-center gap-1.5">
-              <IconCopy /> {t.ai.copyBtn}
+            <button
+              onClick={handleCopy}
+              className={`text-xs px-3 py-1.5 rounded-lg transition-all duration-200 flex items-center gap-1.5 ${
+                copied
+                  ? 'bg-[#3DDC84]/20 text-[#3DDC84] border border-[#3DDC84]/30'
+                  : 'bg-[#6E56CF] text-white hover:bg-[#7C68D4]'
+              }`}
+            >
+              {copied ? (
+                <>
+                  <IconCheckCircle size={12} color="currentColor" /> {t.ai.copiedBtn}
+                </>
+              ) : (
+                <>
+                  <IconCopy /> {t.ai.copyBtn}
+                </>
+              )}
             </button>
             <span className="text-xs text-[#5A5955]">{t.ai.pasteHint}</span>
           </div>
