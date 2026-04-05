@@ -39,6 +39,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
   useEffect(() => {
     if (!id) return
 
+    // eslint-disable-next-line prefer-const
     let interval: NodeJS.Timeout
 
     async function poll() {

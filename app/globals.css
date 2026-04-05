@@ -66,9 +66,10 @@
 /* ─── Tailwind v4 Theme Extension ──────────────────────────────────── */
 
 @theme inline {
-  /* Fonts — map to geist CSS variables injected by layout.tsx */
-  --font-sans: var(--font-geist-sans), Inter, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), 'JetBrains Mono', monospace;
+  /* Fonts */
+  --font-sans:    var(--font-space-grotesk), system-ui, sans-serif;
+  --font-mono:    var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  --font-heading: var(--font-syne), system-ui, sans-serif;
 
   /* Background palette */
   --color-bg-primary:   #0E0E0F;
@@ -167,16 +168,22 @@ html {
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  font-family: var(--font-geist-sans), Inter, system-ui, sans-serif;
+  font-family: var(--font-space-grotesk), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Display headings — Syne for impact */
+h1, h2, h3, h4 {
+  font-family: var(--font-syne), system-ui, sans-serif;
+  letter-spacing: -0.03em;
 }
 
 /* Numbers and scores always monospaced */
 .font-score,
 [data-score],
 .score-value {
-  font-family: var(--font-geist-mono), 'JetBrains Mono', monospace;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
 }
 
 /* Severity badge shared base */
@@ -187,9 +194,49 @@ body {
   text-transform: uppercase;
 }
 
+/* ─── Works-with chip gradient border ───────────────────────────────────── */
+
+@keyframes borderGradientSpin {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.works-chip {
+  padding: 1px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  cursor: default;
+  transition: background 0.4s ease;
+  display: inline-block;
+}
+
+.works-chip:hover {
+  background: linear-gradient(135deg, #6E56CF 0%, #FF8C42 30%, #4A9EFF 60%, #3DDC84 85%, #6E56CF 100%);
+  background-size: 300% 300%;
+  animation: borderGradientSpin 2.5s ease infinite;
+}
+
+.works-chip-inner {
+  display: block;
+  padding: 4px 10px;
+  border-radius: 5px;
+  background: #161618;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: #8B8A85;
+  user-select: none;
+  transition: color 0.3s;
+  white-space: nowrap;
+}
+
+.works-chip:hover .works-chip-inner {
+  color: #F1F0EE;
+}
+
 /* Prompt blocks */
 .prompt-block {
-  font-family: var(--font-geist-mono), 'JetBrains Mono', monospace;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
   background-color: var(--bg-tertiary);
   border: 1px solid var(--border-default);
   border-radius: 6px;

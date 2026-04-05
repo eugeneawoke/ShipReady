@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { BackButton } from '@/components/BackButton'
 
 export const metadata: Metadata = {
   title: 'Terms of Service — ShipReady',
@@ -15,9 +16,7 @@ export default function TermsPage() {
       {/* nav */}
       <nav className="border-b border-white/[0.06] bg-[#0E0E0F]/80 backdrop-blur-md">
         <div className="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between">
-          <Link href="/" className="font-semibold tracking-tight hover:text-[#8B8A85] transition-colors">
-            ← ShipReady
-          </Link>
+          <BackButton />
           <span className="text-xs text-[#5A5955]">Last updated: {UPDATED}</span>
         </div>
       </nav>

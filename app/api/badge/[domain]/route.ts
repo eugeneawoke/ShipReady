@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase'
+import type { ScanResult } from '@/types/scan'
 
 export async function GET(
   _request: NextRequest,
@@ -17,7 +18,7 @@ export async function GET(
     .limit(1)
     .single()
 
-  const score = (data?.results as any)?.totalScore ?? 0
+  const score = (data?.results as ScanResult | null)?.totalScore ?? 0
   const color = score >= 90 ? '#3DDC84' : score >= 70 ? '#7BC67E' : score >= 50 ? '#F5C518' : '#FF4444'
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="20">

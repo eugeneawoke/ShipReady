@@ -1,4 +1,5 @@
 import { createServiceClient } from '@/lib/supabase'
+import type { ScanResult } from '@/types/scan'
 import { buildScanResult } from '@/lib/scoring'
 import { runLighthouse } from '@/lib/checks/lighthouse'
 import { runSEOChecks } from '@/lib/checks/seo'
@@ -30,7 +31,7 @@ export async function runAllChecks(url: string, scanId: string): Promise<void> {
 
     await supabase
       .from('scans')
-      .update({ status: 'done', results: result as any, updated_at: new Date().toISOString() })
+      .update({ status: 'done', results: result as ScanResult, updated_at: new Date().toISOString() })
       .eq('id', scanId)
   } catch (e) {
     console.error('runAllChecks error:', e)

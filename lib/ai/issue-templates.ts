@@ -1,4 +1,4 @@
-import type { Issue, IssueCategory, IssueSeverity } from '@/types/scan'
+import type { Issue } from '@/types/scan'
 
 type IssueTemplate = Omit<Issue, 'value'>
 

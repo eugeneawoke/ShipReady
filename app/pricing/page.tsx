@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { getUserWithPlan } from '@/lib/auth'
 
 export default async function PricingPage() {
@@ -45,7 +46,7 @@ export default async function PricingPage() {
       {/* Nav */}
       <nav className="fixed top-0 inset-x-0 z-50 border-b border-white/6 bg-[#0E0E0F]/80 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto px-6 h-14 flex items-center">
-          <a href="/" className="font-semibold tracking-tight hover:text-[#8B8A85] transition-colors">ShipReady</a>
+          <Link href="/" className="font-semibold tracking-tight hover:text-[#8B8A85] transition-colors">ShipReady</Link>
         </div>
       </nav>
 

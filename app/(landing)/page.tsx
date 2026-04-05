@@ -1,19 +1,73 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import {
-  Zap, Shield, Search, Smartphone, CheckCircle2, Copy, ArrowRight
-} from 'lucide-react'
 import { ScanForm } from '@/components/landing/ScanForm'
 
-// ─── contact info (update these) ─────────────────────────────────────────────
+// ─── contact ──────────────────────────────────────────────────────────────────
 
 const CONTACT = {
   email: 'hi@shipready.app',
   x:     'https://x.com/eugenegusakoff',
   tg:    'https://t.me/eugenegusakoff',
 }
+
+// ─── inline SVG icons ────────────────────────────────────────────────────────
+
+const IconZap = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M13 2L3 14h9l-1 8 10-12h-9z"/>
+  </svg>
+)
+
+const IconSearch = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="11" cy="11" r="8"/>
+    <path d="m21 21-4.35-4.35"/>
+  </svg>
+)
+
+const IconShield = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+  </svg>
+)
+
+const IconPhone = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="5" y="2" width="14" height="20" rx="2"/>
+    <circle cx="12" cy="17" r="1" fill="currentColor" stroke="none"/>
+  </svg>
+)
+
+const IconCheckCircle = ({ size = 14, color }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color ?? 'currentColor'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10"/>
+    <path d="M9 12l2 2 4-4"/>
+  </svg>
+)
+
+const IconCopy = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="9" y="9" width="13" height="13" rx="2"/>
+    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+  </svg>
+)
+
+const IconArrow = ({ size = 12 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M5 12h14"/>
+    <path d="m12 5 7 7-7 7"/>
+  </svg>
+)
+
+const IconGlobe = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10"/>
+    <path d="M2 12h20"/>
+    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+  </svg>
+)
 
 // ─── translations ─────────────────────────────────────────────────────────────
 
@@ -26,7 +80,6 @@ const T = {
       getStarted: 'Get started',
     },
     hero: {
-      badge: 'Built for Cursor · Bolt · Lovable · v0',
       h1a: 'Your vibe-coded app,',
       h1b: 'ship-ready in 30 sec',
       sub: 'Paste your URL. Get a full audit — performance, SEO, security, mobile — with AI fix prompts for Cursor and Bolt.',
@@ -123,7 +176,6 @@ const T = {
       getStarted: 'Начать',
     },
     hero: {
-      badge: 'Для Cursor · Bolt · Lovable · v0',
       h1a: 'Ваше vibe-coded приложение,',
       h1b: 'готово к деплою за 30 сек',
       sub: 'Вставьте URL и получите полный аудит — производительность, SEO, безопасность, мобильный — с AI-промптами для Cursor и Bolt.',
@@ -181,9 +233,9 @@ const T = {
       title: 'Просто и прозрачно',
       sub: 'Начните бесплатно. Обновитесь когда нужно.',
       plans: [
-        { name: 'Бесплатно', nameKey: 'FREE',   price: '$0',  period: null,  desc: 'Попробуйте',         features: ['3 скана / месяц', 'Все категориальные оценки', 'Описания проблем', 'AI-промпты размыты'],                            cta: 'Начать бесплатно', highlight: false, coming: false },
-        { name: 'Pro',       nameKey: 'PRO',    price: '$14', period: '/мес', desc: 'Для соло-фаундеров', features: ['Безлимитные сканы', 'Все AI-промпты', 'Экспорт PDF', 'Еженедельный мониторинг', 'Email-уведомления'],               cta: 'Получить Pro',     highlight: true,  coming: false },
-        { name: 'Агентство', nameKey: 'AGENCY', price: '$39', period: '/мес', desc: 'Для команд',         features: ['10 доменов', 'PDF с белым лейблом', 'Всё из Pro', 'Приоритетная поддержка', 'Доступ к API'],                        cta: 'Для агентств',     highlight: false, coming: true  },
+        { name: 'Бесплатно', nameKey: 'FREE',   price: '$0',  period: null,   desc: 'Попробуйте',         features: ['3 скана / месяц', 'Все категориальные оценки', 'Описания проблем', 'AI-промпты размыты'],                      cta: 'Начать бесплатно', highlight: false, coming: false },
+        { name: 'Pro',       nameKey: 'PRO',    price: '$14', period: '/мес', desc: 'Для соло-фаундеров', features: ['Безлимитные сканы', 'Все AI-промпты', 'Экспорт PDF', 'Еженедельный мониторинг', 'Email-уведомления'],         cta: 'Получить Pro',     highlight: true,  coming: false },
+        { name: 'Агентство', nameKey: 'AGENCY', price: '$39', period: '/мес', desc: 'Для команд',         features: ['10 доменов', 'PDF с белым лейблом', 'Всё из Pro', 'Приоритетная поддержка', 'Доступ к API'],                  cta: 'Для агентств',     highlight: false, coming: true  },
       ],
       popular: 'Популярный',
       cancelAnytime: 'Отмена в любой момент',
@@ -216,7 +268,7 @@ const T = {
 type Lang = keyof typeof T
 type Translations = {
   nav: { howItWorks: string; pricing: string; signIn: string; getStarted: string }
-  hero: { badge: string; h1a: string; h1b: string; sub: string; noSignup: string; worksWith: string }
+  hero: { h1a: string; h1b: string; sub: string; noSignup: string; worksWith: string }
   stats: readonly { value: string; label: string }[]
   how: { eyebrow: string; title: string; steps: readonly { step: string; emoji: string; title: string; desc: string }[] }
   preview: { eyebrow: string; title: string; sub: string; upgradeBtn: string }
@@ -236,18 +288,20 @@ const fadeUp = (delay = 0) => ({
   transition: { duration: 0.5, delay, ease: [0.25, 0.1, 0.25, 1] as const },
 })
 
+// ─── feature meta ─────────────────────────────────────────────────────────────
+
 const FEATURE_META = [
-  { Icon: Zap,        color: '#FF8C42' },
-  { Icon: Search,     color: '#4A9EFF' },
-  { Icon: Shield,     color: '#FF4444' },
-  { Icon: Smartphone, color: '#3DDC84' },
+  { Icon: IconZap,    color: '#FF8C42' },
+  { Icon: IconSearch, color: '#4A9EFF' },
+  { Icon: IconShield, color: '#FF4444' },
+  { Icon: IconPhone,  color: '#3DDC84' },
 ]
 
 // ─── page ─────────────────────────────────────────────────────────────────────
 
 export default function LandingPage() {
   const [lang, setLang] = useState<Lang>('EN')
-  const t = T[lang]
+  const t = T[lang] as unknown as Translations
 
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE] overflow-x-hidden">
@@ -268,40 +322,71 @@ export default function LandingPage() {
 // ─── Nav ──────────────────────────────────────────────────────────────────────
 
 function Nav({ t, lang, setLang }: { t: Translations; lang: Lang; setLang: (l: Lang) => void }) {
+  const [langOpen, setLangOpen] = useState(false)
+  const langRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function onClickOutside(e: MouseEvent) {
+      if (langRef.current && !langRef.current.contains(e.target as Node)) {
+        setLangOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [])
+
   return (
     <nav className="fixed top-0 inset-x-0 z-50 border-b border-white/[0.06] bg-[#0E0E0F]/80 backdrop-blur-md">
       <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+        {/* left */}
         <div className="flex items-center gap-8">
-          <span className="font-semibold tracking-tight">ShipReady</span>
+          <span className="font-semibold tracking-tight" style={{ fontFamily: 'var(--font-syne)' }}>ShipReady</span>
           <div className="hidden md:flex items-center gap-6">
-            <a href="#how-it-works" className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors">
+            <a href="#how-it-works" className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors whitespace-nowrap">
               {t.nav.howItWorks}
             </a>
-            <a href="#pricing" className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors">
+            <a href="#pricing" className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors whitespace-nowrap">
               {t.nav.pricing}
             </a>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center rounded-md bg-[#161618] border border-white/[0.06] p-0.5">
-            {(['EN', 'RU'] as const).map(l => (
-              <button
-                key={l}
-                onClick={() => setLang(l)}
-                className={`px-2.5 py-1 rounded text-xs font-medium transition-all ${
-                  lang === l ? 'bg-[#6E56CF] text-white' : 'text-[#8B8A85] hover:text-[#F1F0EE]'
-                }`}
-              >
-                {l}
-              </button>
-            ))}
+
+        {/* right */}
+        <div className="flex items-center gap-4">
+          {/* globe language picker */}
+          <div className="relative" ref={langRef}>
+            <button
+              onClick={() => setLangOpen(v => !v)}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[#8B8A85] hover:text-[#F1F0EE] hover:bg-white/[0.04] transition-colors"
+              aria-label="Switch language"
+            >
+              <IconGlobe />
+              <span className="text-xs font-mono">{lang}</span>
+            </button>
+            {langOpen && (
+              <div className="absolute right-0 top-full mt-1.5 py-1 bg-[#161618] border border-white/[0.08] rounded-xl shadow-xl z-50 w-[86px] overflow-hidden">
+                {(['EN', 'RU'] as const).map(l => (
+                  <button
+                    key={l}
+                    onClick={() => { setLang(l); setLangOpen(false) }}
+                    className={`w-full flex items-center gap-2 px-3 py-2 text-left text-xs font-mono transition-colors ${
+                      lang === l ? 'text-[#F1F0EE] bg-white/[0.05]' : 'text-[#8B8A85] hover:text-[#F1F0EE] hover:bg-white/[0.03]'
+                    }`}
+                  >
+                    <span>{l === 'EN' ? '🇬🇧' : '🇷🇺'}</span>
+                    {l}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-          <a href="/auth/login" className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors hidden sm:block">
+
+          <a href="/auth/login" className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors hidden sm:block whitespace-nowrap">
             {t.nav.signIn}
           </a>
           <a
-            href="#pricing"
-            className="text-sm px-4 py-1.5 rounded-lg bg-[#6E56CF] text-white hover:bg-[#7C68D4] transition-colors font-medium"
+            href="/auth/login?mode=signup"
+            className="text-sm px-4 py-1.5 rounded-lg bg-[#6E56CF] text-white hover:bg-[#7C68D4] transition-colors font-medium whitespace-nowrap"
           >
             {t.nav.getStarted}
           </a>
@@ -326,21 +411,12 @@ function HeroSection({ t }: { t: Translations }) {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
       >
-        <motion.div
-          initial={{ opacity: 0, y: -12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#6E56CF]/10 border border-[#6E56CF]/25 text-[#9D8CDF] text-sm mb-8"
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-[#6E56CF] animate-pulse" />
-          {t.hero.badge}
-        </motion.div>
-
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.15 }}
-          className="text-[52px] md:text-[64px] font-medium leading-[1.05] tracking-tight"
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="text-[52px] md:text-[68px] font-semibold leading-[1.0] tracking-[-0.03em]"
+          style={{ fontFamily: 'var(--font-syne)' }}
         >
           {t.hero.h1a}
           <span className="block text-[#8B8A85] mt-1">{t.hero.h1b}</span>
@@ -349,8 +425,8 @@ function HeroSection({ t }: { t: Translations }) {
         <motion.p
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.25 }}
-          className="mt-5 text-lg text-[#8B8A85] max-w-xl mx-auto leading-relaxed"
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mt-6 text-lg text-[#8B8A85] max-w-xl mx-auto leading-relaxed"
         >
           {t.hero.sub}
         </motion.p>
@@ -358,7 +434,7 @@ function HeroSection({ t }: { t: Translations }) {
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.35 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
           className="mt-10"
         >
           <ScanForm />
@@ -368,17 +444,14 @@ function HeroSection({ t }: { t: Translations }) {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
+          transition={{ duration: 0.5, delay: 0.45 }}
           className="mt-8 flex flex-wrap items-center justify-center gap-2"
         >
           <span className="text-xs text-[#5A5955] mr-1">{t.hero.worksWith}</span>
-          {['Cursor', 'Bolt', 'Lovable', 'v0', 'Replit', 'Windsurf'].map(p => (
-            <span
-              key={p}
-              className="px-2.5 py-1 rounded-md border border-white/[0.06] bg-[#161618] text-xs text-[#8B8A85] font-mono hover:border-white/[0.12] transition-colors"
-            >
-              {p}
-            </span>
+          {['Cursor', 'Bolt', 'Lovable', 'v0', 'Replit', 'Windsurf', 'Claude', 'OpenAI'].map(p => (
+            <div key={p} className="works-chip">
+              <span className="works-chip-inner">{p}</span>
+            </div>
           ))}
         </motion.div>
       </motion.div>
@@ -393,9 +466,9 @@ function StatsBar({ t }: { t: Translations }) {
     <section className="border-y border-white/[0.06] py-8 px-6">
       <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
         {t.stats.map((s, i) => (
-          <motion.div key={s.label} {...fadeUp(i * 0.07)} className="text-center">
+          <motion.div key={i} {...fadeUp(i * 0.07)} className="text-center">
             <div className="text-2xl font-mono font-medium">{s.value}</div>
-            <div className="text-xs text-[#5A5955] mt-1">{s.label}</div>
+            <div className="text-xs text-[#5A5955] mt-1 min-h-[1.25rem]">{s.label}</div>
           </motion.div>
         ))}
       </div>
@@ -413,7 +486,7 @@ function HowItWorksSection({ t }: { t: Translations }) {
           <p className="text-[11px] text-[#6E56CF] uppercase tracking-[0.15em] mb-3 font-mono">
             {t.how.eyebrow}
           </p>
-          <h2 className="text-[32px] font-medium tracking-tight">{t.how.title}</h2>
+          <h2 className="text-[32px] font-semibold tracking-[-0.03em]">{t.how.title}</h2>
         </motion.div>
 
         <div className="grid md:grid-cols-3 gap-5 relative">
@@ -426,7 +499,7 @@ function HowItWorksSection({ t }: { t: Translations }) {
             >
               <div className="font-mono text-xs text-[#5A5955] mb-5 tracking-widest">{item.step}</div>
               <div className="text-3xl mb-4">{item.emoji}</div>
-              <h3 className="font-medium mb-2">{item.title}</h3>
+              <h3 className="font-semibold mb-2 tracking-tight">{item.title}</h3>
               <p className="text-sm text-[#8B8A85] leading-relaxed">{item.desc}</p>
             </motion.div>
           ))}
@@ -440,13 +513,13 @@ function HowItWorksSection({ t }: { t: Translations }) {
 
 function ReportPreviewSection({ t }: { t: Translations }) {
   return (
-    <section className="py-8 px-6 overflow-hidden">
+    <section id="preview" className="py-8 px-6 overflow-hidden">
       <div className="max-w-5xl mx-auto">
         <motion.div {...fadeUp()} className="text-center mb-12">
           <p className="text-[11px] text-[#6E56CF] uppercase tracking-[0.15em] mb-3 font-mono">
             {t.preview.eyebrow}
           </p>
-          <h2 className="text-[32px] font-medium tracking-tight">{t.preview.title}</h2>
+          <h2 className="text-[32px] font-semibold tracking-[-0.03em]">{t.preview.title}</h2>
           <p className="mt-3 text-[#8B8A85] max-w-lg mx-auto text-sm">{t.preview.sub}</p>
         </motion.div>
 
@@ -526,7 +599,8 @@ This fixes the critical security issue immediately.`}</pre>
                   </div>
                   <div className="absolute inset-0 flex items-center justify-center bg-[#0E0E0F]/70 backdrop-blur-[2px]">
                     <a href="#pricing" className="text-xs px-4 py-2 rounded-lg bg-[#6E56CF] text-white hover:bg-[#7C68D4] transition-colors font-medium flex items-center gap-1.5">
-                      <span>{t.preview.upgradeBtn}</span><ArrowRight className="w-3 h-3" />
+                      <span>{t.preview.upgradeBtn}</span>
+                      <IconArrow />
                     </a>
                   </div>
                 </div>
@@ -547,7 +621,7 @@ function FeaturesSection({ t }: { t: Translations }) {
       <div className="max-w-5xl mx-auto">
         <motion.div {...fadeUp()} className="text-center mb-16">
           <p className="text-[11px] text-[#6E56CF] uppercase tracking-[0.15em] mb-3 font-mono">{t.features.eyebrow}</p>
-          <h2 className="text-[32px] font-medium tracking-tight">{t.features.title}</h2>
+          <h2 className="text-[32px] font-semibold tracking-[-0.03em]">{t.features.title}</h2>
           <p className="mt-3 text-[#8B8A85] text-sm max-w-md mx-auto">{t.features.sub}</p>
         </motion.div>
 
@@ -561,10 +635,10 @@ function FeaturesSection({ t }: { t: Translations }) {
                 className="p-6 rounded-2xl bg-[#161618] border border-white/[0.06] hover:border-white/[0.10] transition-all"
               >
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 rounded-xl" style={{ background: `${color}16` }}>
-                    <Icon className="w-5 h-5" style={{ color }} />
+                  <div className="p-2 rounded-xl" style={{ background: `${color}16`, color }}>
+                    <Icon />
                   </div>
-                  <h3 className="font-medium">{f.title}</h3>
+                  <h3 className="font-semibold tracking-tight">{f.title}</h3>
                 </div>
                 <p className="text-sm text-[#8B8A85] mb-5 leading-relaxed">{f.desc}</p>
                 <div className="flex flex-wrap gap-1.5">
@@ -591,12 +665,14 @@ function AIPromptsSection({ t }: { t: Translations }) {
       <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-12 items-center">
         <motion.div {...fadeUp()}>
           <p className="text-[11px] text-[#6E56CF] uppercase tracking-[0.15em] mb-4 font-mono">{t.ai.eyebrow}</p>
-          <h2 className="text-[32px] font-medium tracking-tight mb-4 whitespace-pre-line">{t.ai.title}</h2>
+          <h2 className="text-[32px] font-semibold tracking-[-0.03em] mb-4 whitespace-pre-line">{t.ai.title}</h2>
           <p className="text-[#8B8A85] leading-relaxed mb-6 text-sm">{t.ai.sub}</p>
           <ul className="space-y-3">
-            {t.ai.bullets.map(item => (
-              <li key={item} className="flex items-start gap-3 text-sm text-[#8B8A85]">
-                <CheckCircle2 className="w-4 h-4 text-[#3DDC84] mt-0.5 shrink-0" />
+            {t.ai.bullets.map((item, i) => (
+              <li key={i} className="flex items-start gap-3 text-sm text-[#8B8A85]">
+                <span className="mt-0.5 shrink-0 text-[#3DDC84]">
+                  <IconCheckCircle size={14} color="#3DDC84" />
+                </span>
                 {item}
               </li>
             ))}
@@ -630,7 +706,7 @@ This protects against XSS and will score
           </div>
           <div className="px-4 py-3 border-t border-white/[0.06] flex items-center gap-3">
             <button className="text-xs px-3 py-1.5 rounded-lg bg-[#6E56CF] text-white hover:bg-[#7C68D4] transition-colors flex items-center gap-1.5">
-              <Copy className="w-3 h-3" /> {t.ai.copyBtn}
+              <IconCopy /> {t.ai.copyBtn}
             </button>
             <span className="text-xs text-[#5A5955]">{t.ai.pasteHint}</span>
           </div>
@@ -648,7 +724,7 @@ function PricingSection({ t }: { t: Translations }) {
       <div className="max-w-4xl mx-auto">
         <motion.div {...fadeUp()} className="text-center mb-12">
           <p className="text-[11px] text-[#6E56CF] uppercase tracking-[0.15em] mb-3 font-mono">{t.pricing.eyebrow}</p>
-          <h2 className="text-[32px] font-medium tracking-tight">{t.pricing.title}</h2>
+          <h2 className="text-[32px] font-semibold tracking-[-0.03em]">{t.pricing.title}</h2>
           <p className="mt-3 text-[#8B8A85] text-sm">{t.pricing.sub}</p>
         </motion.div>
 
@@ -684,9 +760,11 @@ function PricingSection({ t }: { t: Translations }) {
                 </div>
               </div>
               <ul className="space-y-2.5 mb-6">
-                {plan.features.map(f => (
-                  <li key={f} className={`text-sm flex items-center gap-2 ${plan.coming ? 'text-[#5A5955]' : plan.highlight ? 'text-[#F1F0EE]' : 'text-[#8B8A85]'}`}>
-                    <CheckCircle2 className={`w-3.5 h-3.5 shrink-0 ${plan.coming ? 'text-[#3A3A3A]' : 'text-[#3DDC84]'}`} />
+                {plan.features.map((f, fi) => (
+                  <li key={fi} className={`text-sm flex items-center gap-2 ${plan.coming ? 'text-[#5A5955]' : plan.highlight ? 'text-[#F1F0EE]' : 'text-[#8B8A85]'}`}>
+                    <span className="shrink-0">
+                      <IconCheckCircle size={13} color={plan.coming ? '#3A3A3A' : '#3DDC84'} />
+                    </span>
                     {f}
                   </li>
                 ))}
@@ -733,7 +811,7 @@ function BottomCTA({ t }: { t: Translations }) {
           style={{ background: 'radial-gradient(ellipse at center, rgba(110,86,207,0.12) 0%, transparent 70%)' }}
         />
         <motion.div {...fadeUp()} className="relative">
-          <h2 className="text-[40px] font-medium tracking-tight mb-3">{t.cta.title}</h2>
+          <h2 className="text-[40px] font-semibold tracking-[-0.03em] mb-3">{t.cta.title}</h2>
           <p className="text-[#8B8A85] mb-10 text-sm">{t.cta.sub}</p>
           <ScanForm />
         </motion.div>
@@ -747,11 +825,10 @@ function BottomCTA({ t }: { t: Translations }) {
 function Footer({ t }: { t: Translations }) {
   return (
     <footer className="border-t border-white/[0.06] bg-[#0E0E0F]">
-      {/* main columns */}
       <div className="max-w-6xl mx-auto px-6 py-14 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
         {/* brand */}
         <div className="md:col-span-1">
-          <span className="font-semibold text-sm">ShipReady</span>
+          <span className="font-semibold text-sm" style={{ fontFamily: 'var(--font-syne)' }}>ShipReady</span>
           <p className="mt-3 text-xs text-[#5A5955] leading-relaxed max-w-[200px]">{t.footer.tagline}</p>
           <p className="mt-4 text-xs text-[#5A5955]">
             {t.footer.madeBy}{' '}
@@ -774,9 +851,9 @@ function Footer({ t }: { t: Translations }) {
               { label: t.footer.howItWorks,    href: '#how-it-works' },
               { label: t.footer.pricing,       href: '#pricing' },
               { label: t.footer.roadmap,       href: '/roadmap' },
-              { label: t.footer.exampleReport, href: '#' },
+              { label: t.footer.exampleReport, href: '#preview' },
             ].map(item => (
-              <li key={item.href}>
+              <li key={item.label}>
                 <a href={item.href} className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors">
                   {item.label}
                 </a>
@@ -791,17 +868,29 @@ function Footer({ t }: { t: Translations }) {
           <ul className="space-y-3">
             <li>
               <a href={`mailto:${CONTACT.email}`} className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors flex items-center gap-2">
-                <span className="text-[#5A5955]">✉</span> {t.footer.emailLabel}
+                <span className="text-[#5A5955]">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="4" width="20" height="16" rx="2"/>
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                  </svg>
+                </span>
+                {t.footer.emailLabel}
               </a>
             </li>
             <li>
               <a href={CONTACT.x} target="_blank" rel="noopener noreferrer" className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors flex items-center gap-2">
-                <span className="text-[#5A5955] font-bold text-xs">𝕏</span> {t.footer.xLabel}
+                <span className="text-[#5A5955] font-bold text-xs">𝕏</span>
+                {t.footer.xLabel}
               </a>
             </li>
             <li>
               <a href={CONTACT.tg} target="_blank" rel="noopener noreferrer" className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors flex items-center gap-2">
-                <span className="text-[#5A5955]">✈</span> {t.footer.tgLabel}
+                <span className="text-[#5A5955]">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21.5 2.5 2.5 10l7 2.5M21.5 2.5l-12 9M21.5 2.5 9.5 21.5l-0-9"/>
+                  </svg>
+                </span>
+                {t.footer.tgLabel}
               </a>
             </li>
           </ul>
@@ -825,7 +914,6 @@ function Footer({ t }: { t: Translations }) {
         </div>
       </div>
 
-      {/* bottom bar */}
       <div className="border-t border-white/[0.06] px-6 py-5">
         <p className="max-w-6xl mx-auto text-xs text-[#5A5955] text-center">{t.footer.copy}</p>
       </div>
