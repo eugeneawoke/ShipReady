@@ -1,0 +1,52 @@
+{
+  "landing": {
+    "title": "Pre-deploy quality gate",
+    "subtitle": "for vibe-coded apps",
+    "tagline": "25+ checks · 30 seconds · AI fix prompts",
+    "placeholder": "https://your-app.vercel.app",
+    "cta": "Scan →",
+    "scanning": "Scanning...",
+    "demoLabel": "Example report ↓"
+  },
+  "nav": {
+    "brand": "ShipReady",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "pricing": "Pricing"
+  },
+  "report": {
+    "score": "SCORE",
+    "share": "Share",
+    "exportPdf": "Export PDF",
+    "checksPassedLabel": "checks passed",
+    "checking": {
+      "performance": "Checking performance...",
+      "seo": "Analyzing SEO & social...",
+      "security": "Security audit...",
+      "mobile": "Mobile checks..."
+    },
+    "categories": {
+      "performance": "Performance",
+      "seo": "SEO & Social",
+      "security": "Security",
+      "mobile": "Mobile"
+    }
+  },
+  "pricing": {
+    "title": "Simple, transparent pricing",
+    "subtitle": "Start free. Upgrade when you need the fix prompts.",
+    "free": "Free",
+    "pro": "Pro",
+    "agency": "Agency",
+    "mostPopular": "Most popular",
+    "getStarted": "Get started",
+    "getPro": "Get Pro",
+    "getAgency": "Get Agency",
+    "footer": "Payments via Lemon Squeezy · Cancel anytime · No questions asked"
+  },
+  "errors": {
+    "invalidUrl": "Please enter a valid URL",
+    "scanFailed": "Scan failed — please try again",
+    "freeLimitReached": "Free limit reached — upgrade to Pro for unlimited scans"
+  }
+}

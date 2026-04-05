@@ -1,0 +1,52 @@
+{
+  "landing": {
+    "title": "Качество перед деплоем",
+    "subtitle": "для vibe-coded приложений",
+    "tagline": "25+ проверок · 30 секунд · AI-промпты для исправлений",
+    "placeholder": "https://your-app.vercel.app",
+    "cta": "Проверить →",
+    "scanning": "Проверяем...",
+    "demoLabel": "Пример отчёта ↓"
+  },
+  "nav": {
+    "brand": "ShipReady",
+    "signIn": "Войти",
+    "signOut": "Выйти",
+    "pricing": "Тарифы"
+  },
+  "report": {
+    "score": "ОЦЕНКА",
+    "share": "Поделиться",
+    "exportPdf": "Экспорт PDF",
+    "checksPassedLabel": "проверок пройдено",
+    "checking": {
+      "performance": "Проверяем производительность...",
+      "seo": "Анализируем SEO и соцсети...",
+      "security": "Аудит безопасности...",
+      "mobile": "Мобильные проверки..."
+    },
+    "categories": {
+      "performance": "Производительность",
+      "seo": "SEO и соцсети",
+      "security": "Безопасность",
+      "mobile": "Мобильный"
+    }
+  },
+  "pricing": {
+    "title": "Прозрачные тарифы",
+    "subtitle": "Начните бесплатно. Обновитесь когда нужны промпты.",
+    "free": "Бесплатно",
+    "pro": "Pro",
+    "agency": "Агентство",
+    "mostPopular": "Популярный",
+    "getStarted": "Начать",
+    "getPro": "Получить Pro",
+    "getAgency": "Для агентств",
+    "footer": "Оплата через Lemon Squeezy · Отмена в любое время"
+  },
+  "errors": {
+    "invalidUrl": "Введите корректный URL",
+    "scanFailed": "Проверка не удалась — попробуйте ещё раз",
+    "freeLimitReached": "Бесплатный лимит исчерпан — обновитесь до Pro"
+  }
+}
