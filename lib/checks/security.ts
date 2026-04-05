@@ -1,27 +1,7 @@
 import * as cheerio from 'cheerio'
 import sslChecker from 'ssl-checker'
 import type { Issue } from '@/types/scan'
-
-function makeIssue(
-  id: string,
-  category: Issue['category'],
-  severity: Issue['severity'],
-  title: string,
-  plainEnglish: string,
-  value?: string,
-): Issue {
-  return {
-    id,
-    category,
-    severity,
-    title,
-    description: title,
-    plainEnglish,
-    cursorPrompt: '',
-    boltPrompt: '',
-    ...(value ? { value } : {}),
-  }
-}
+import { T } from '@/lib/ai/issue-templates'
 
 export async function runSecurityChecks(url: string, html: string): Promise<Issue[]> {
   try {
@@ -29,15 +9,7 @@ export async function runSecurityChecks(url: string, html: string): Promise<Issu
 
     // Early exit — no HTTPS at all
     if (!url.startsWith('https://')) {
-      return [
-        makeIssue(
-          'no-https',
-          'security',
-          'critical',
-          'Site not served over HTTPS',
-          'Your site uses plain HTTP. Browsers warn users about it, search engines rank it lower, and any data sent between visitors and your server is unencrypted.',
-        ),
-      ]
+      return [{ ...T['no-https'] }]
     }
 
     // Fetch headers
@@ -45,74 +17,26 @@ export async function runSecurityChecks(url: string, html: string): Promise<Issu
     const h = res.headers
 
     if (!h.get('strict-transport-security')) {
-      issues.push(
-        makeIssue(
-          'missing-hsts',
-          'security',
-          'high',
-          'HSTS header missing',
-          'Without HSTS, browsers can be tricked into loading your site over plain HTTP even when HTTPS is available. Add the Strict-Transport-Security header.',
-        ),
-      )
+      issues.push({ ...T['missing-hsts'] })
     }
 
     if (!h.get('x-frame-options')) {
-      issues.push(
-        makeIssue(
-          'missing-x-frame',
-          'security',
-          'medium',
-          'X-Frame-Options header missing',
-          'Your page can be embedded in an iframe on any other site. This enables clickjacking attacks where users think they\'re clicking your UI but they\'re really clicking something else.',
-        ),
-      )
+      issues.push({ ...T['missing-x-frame'] })
     }
 
     if (!h.get('x-content-type-options')) {
-      issues.push(
-        makeIssue(
-          'missing-xcto',
-          'security',
-          'medium',
-          'X-Content-Type-Options header missing',
-          'Browsers may try to guess the type of files you serve and execute them unexpectedly. The nosniff header prevents this.',
-        ),
-      )
+      issues.push({ ...T['missing-xcto'] })
     }
 
     if (!h.get('referrer-policy')) {
-      issues.push(
-        makeIssue(
-          'missing-referrer-policy',
-          'security',
-          'low',
-          'Referrer-Policy header missing',
-          'When users click links leaving your site, their browser sends your full URL to the destination. Set a Referrer-Policy to control how much information is shared.',
-        ),
-      )
+      issues.push({ ...T['missing-referrer-policy'] })
     }
 
     const csp = h.get('content-security-policy')
     if (!csp) {
-      issues.push(
-        makeIssue(
-          'missing-csp',
-          'security',
-          'high',
-          'Content Security Policy missing',
-          'Without a CSP header, your site has no protection against cross-site scripting (XSS) attacks — malicious scripts injected into your pages.',
-        ),
-      )
+      issues.push({ ...T['missing-csp'] })
     } else if (csp.includes("'unsafe-inline'") || csp.includes("'unsafe-eval'")) {
-      issues.push(
-        makeIssue(
-          'unsafe-csp',
-          'security',
-          'high',
-          'Content Security Policy uses unsafe directives',
-          "Your CSP includes 'unsafe-inline' or 'unsafe-eval', which largely defeats the purpose of having a CSP. These allow inline scripts and eval() — common XSS vectors.",
-        ),
-      )
+      issues.push({ ...T['unsafe-csp'] })
     }
 
     // SSL expiry
@@ -120,16 +44,7 @@ export async function runSecurityChecks(url: string, html: string): Promise<Issu
     try {
       const ssl = await sslChecker(domain, { timeout: 5000 })
       if (ssl.daysRemaining < 30) {
-        issues.push(
-          makeIssue(
-            'ssl-expiring',
-            'security',
-            'high',
-            'SSL certificate expiring soon',
-            `Your SSL certificate expires in ${ssl.daysRemaining} days. When it expires, all visitors will see a browser warning and your site will be inaccessible to most users.`,
-            `${ssl.daysRemaining} days`,
-          ),
-        )
+        issues.push({ ...T['ssl-expiring'], value: `${ssl.daysRemaining} days` })
       }
     } catch {
       // SSL check failure is non-fatal — skip
@@ -143,16 +58,7 @@ export async function runSecurityChecks(url: string, html: string): Promise<Issu
         if (r.status === 200) {
           const text = await r.text()
           if (text.includes('=') && !text.includes('<html')) {
-            issues.push(
-              makeIssue(
-                'exposed-env-file',
-                'security',
-                'critical',
-                'Environment file publicly accessible',
-                'Your API keys and passwords are visible to anyone right now. Attackers scan for this automatically — rotate your keys immediately.',
-                file,
-              ),
-            )
+            issues.push({ ...T['exposed-env-file'], value: file })
             break
           }
         }
@@ -172,16 +78,7 @@ export async function runSecurityChecks(url: string, html: string): Promise<Issu
     for (const { re, name } of keyPatterns) {
       if (re.test(html)) {
         console.warn(`[security] API key pattern detected in HTML: ${name}`)
-        issues.push(
-          makeIssue(
-            'api-key-in-html',
-            'security',
-            'critical',
-            'API key exposed in HTML source',
-            `A ${name} was found in your page's HTML source. Anyone who views your source code can steal it and use it at your expense. Move it to server-side environment variables immediately.`,
-            name,
-          ),
-        )
+        issues.push({ ...T['api-key-in-html'], value: name })
         break
       }
     }
@@ -189,15 +86,7 @@ export async function runSecurityChecks(url: string, html: string): Promise<Issu
     // Mixed content
     const $ = cheerio.load(html)
     if ($('script[src^="http://"], link[href^="http://"], img[src^="http://"]').length > 0) {
-      issues.push(
-        makeIssue(
-          'mixed-content',
-          'security',
-          'high',
-          'Mixed content detected',
-          'Your HTTPS page loads some resources (scripts, stylesheets, or images) over plain HTTP. Browsers block these, breaking your site\'s functionality and appearance.',
-        ),
-      )
+      issues.push({ ...T['mixed-content'] })
     }
 
     return issues

@@ -1,15 +1,6 @@
 import * as cheerio from 'cheerio';
 import type { Issue } from '@/types/scan';
-
-function makeIssue(
-  id: string,
-  category: Issue['category'],
-  severity: Issue['severity'],
-  title: string,
-  plainEnglish: string,
-): Issue {
-  return { id, category, severity, title, description: title, plainEnglish, cursorPrompt: '', boltPrompt: '' };
-}
+import { T } from '@/lib/ai/issue-templates';
 
 export async function runLinksCheck(url: string, html: string): Promise<Issue[]> {
   const $ = cheerio.load(html);
@@ -38,17 +29,6 @@ export async function runLinksCheck(url: string, html: string): Promise<Issue[]>
     .map(r => r.value.url);
 
   return broken.length > 0
-    ? [
-        {
-          ...makeIssue(
-            'broken-links',
-            'seo',
-            'high',
-            'Broken internal links found',
-            `${broken.length} internal link(s) return 404 or 5xx errors. Broken links hurt SEO rankings and frustrate visitors who can't reach the destination.`,
-          ),
-          value: `${broken.length} broken`,
-        },
-      ]
+    ? [{ ...T['broken-links'], value: `${broken.length} broken` }]
     : [];
 }

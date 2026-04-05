@@ -5,6 +5,7 @@ import { runSEOChecks } from '@/lib/checks/seo'
 import { runSecurityChecks } from '@/lib/checks/security'
 import { runMobileChecks } from '@/lib/checks/mobile'
 import { runLinksCheck } from '@/lib/checks/links'
+import { generateAISummary } from '@/lib/ai/generate-summary'
 
 export async function runAllChecks(url: string, scanId: string): Promise<void> {
   const supabase = createServiceClient()
@@ -23,8 +24,9 @@ export async function runAllChecks(url: string, scanId: string): Promise<void> {
 
     const result = buildScanResult(url, lh, seoIssues, secIssues, mobIssues, linkIssues)
 
-    // AI summary — Phase 4 will add this
-    // try { result.aiSummary = await generateAISummary(result) } catch {}
+    if (process.env.ANTHROPIC_API_KEY) {
+      try { result.aiSummary = await generateAISummary(result) } catch {}
+    }
 
     await supabase
       .from('scans')
