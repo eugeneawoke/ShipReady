@@ -1,7 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  serverExternalPackages: [
+    'lighthouse',
+    'puppeteer-core',
+    '@sparticuz/chromium',
+    '@paulirish/trace_engine',
+    'ssl-checker',
+    'cheerio',
+  ],
 };
 
 export default nextConfig;

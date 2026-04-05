@@ -3,7 +3,11 @@
     "allow": [
       "Bash(ls \"/Users/eugene.gusakov/Downloads/files \\(1\\)/\")",
       "Bash(cat \"/Users/eugene.gusakov/Downloads/files \\(1\\)/CHECKS.md\")",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(export NVM_DIR=\"$HOME/.nvm\")",
+      "Bash(source \"$NVM_DIR/nvm.sh\")",
+      "Bash(npm run:*)",
+      "Bash(npm install:*)"
     ]
   }
 }

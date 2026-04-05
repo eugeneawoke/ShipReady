@@ -1,29 +1,34 @@
 import { createServiceClient } from '@/lib/supabase'
 import { buildScanResult } from '@/lib/scoring'
+import { runLighthouse } from '@/lib/checks/lighthouse'
+import { runSEOChecks } from '@/lib/checks/seo'
+import { runSecurityChecks } from '@/lib/checks/security'
+import { runMobileChecks } from '@/lib/checks/mobile'
+import { runLinksCheck } from '@/lib/checks/links'
 
 export async function runAllChecks(url: string, scanId: string): Promise<void> {
   const supabase = createServiceClient()
   await supabase.from('scans').update({ status: 'running' }).eq('id', scanId)
 
   try {
-    // Phase 2: real checks — stubs for now
     const html = await fetch(url, { signal: AbortSignal.timeout(10000) }).then(r => r.text())
 
-    // Suppress unused variable warning until Phase 2 wires this in
-    void html
-
-    // TODO Phase 2: replace with real lighthouse
-    const lh = { performanceScore: 0, seoScore: 0, a11yScore: 0, lcp: 0, cls: 0, inp: 0, fcp: 0 }
-    const seoIssues: never[] = []
-    const secIssues: never[] = []
-    const mobIssues: never[] = []
-    const linkIssues: never[] = []
+    const [lh, seoIssues, secIssues, mobIssues, linkIssues] = await Promise.all([
+      runLighthouse(url),
+      runSEOChecks(url, html),
+      runSecurityChecks(url, html),
+      runMobileChecks(html),
+      runLinksCheck(url, html),
+    ])
 
     const result = buildScanResult(url, lh, seoIssues, secIssues, mobIssues, linkIssues)
 
+    // AI summary — Phase 4 will add this
+    // try { result.aiSummary = await generateAISummary(result) } catch {}
+
     await supabase
       .from('scans')
-      .update({ status: 'done', results: result, updated_at: new Date().toISOString() })
+      .update({ status: 'done', results: result as any, updated_at: new Date().toISOString() })
       .eq('id', scanId)
   } catch (e) {
     console.error('runAllChecks error:', e)
