@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
 /* ─── ShipReady Design Tokens ─────────────────────────────────────── */
 
 :root {
@@ -119,7 +121,37 @@
   --color-ring:               var(--ring);
 
   --radius: 0.5rem;
-}
+
+  --animate-gradient:    gradient 8s linear infinite;
+  @keyframes gradient {
+  to {
+    background-position:    var(--bg-size, 300%) 0;
+    }
+  }
+  --animate-shiny-text:    shiny-text 8s infinite
+;
+  @keyframes shiny-text {
+  0%, 90%, 100% {
+    background-position:    calc(-100% - var(--shiny-width)) 0;
+    }
+  30%, 60% {
+    background-position:    calc(100% + var(--shiny-width)) 0;
+    }
+  }
+  --animate-meteor:    meteor 5s linear infinite;
+  @keyframes meteor {
+  0% {
+    transform:    rotate(var(--angle)) translateX(0);
+    opacity:    1;
+    }
+  70% {
+    opacity:    1;
+    }
+  100% {
+    transform:    rotate(var(--angle)) translateX(-500px);
+    opacity:    0;
+    }
+  }}
 
 /* ─── Animations ────────────────────────────────────────────────────── */
 

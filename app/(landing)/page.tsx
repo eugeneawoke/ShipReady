@@ -3,6 +3,15 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { ScanForm } from '@/components/landing/ScanForm'
+import { Particles } from '@/components/ui/particles'
+import { HeroNoise } from '@/components/ui/hero-noise'
+import { AnimatedGradientText } from '@/components/ui/animated-gradient-text'
+import { NumberTicker } from '@/components/ui/number-ticker'
+import { AnimatedShinyText } from '@/components/ui/animated-shiny-text'
+import { DotPattern } from '@/components/ui/dot-pattern'
+import { Meteors } from '@/components/ui/meteors'
+import { FlickeringGrid } from '@/components/ui/flickering-grid'
+import { CinematicFooter } from '@/components/ui/motion-footer'
 
 // ─── contact ──────────────────────────────────────────────────────────────────
 
@@ -339,7 +348,7 @@ export default function LandingPage() {
       <AIPromptsSection t={t} />
       <PricingSection t={t} />
       <BottomCTA t={t} />
-      <Footer t={t} />
+      <CinematicFooter />
     </div>
   )
 }
@@ -426,17 +435,33 @@ function Nav({ t, lang, setLang }: { t: Translations; lang: Lang; setLang: (l: L
 function HeroSection({ t }: { t: Translations }) {
   return (
     <section className="relative pt-36 pb-28 px-6 text-center overflow-hidden min-h-[680px] flex flex-col justify-center">
-      <div
-        className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[500px] rounded-full opacity-30"
-        style={{ background: 'radial-gradient(ellipse at center, #6E56CF 0%, transparent 70%)' }}
+      {/* WebGL domain-warped FBM noise shader */}
+      <HeroNoise className="z-0" />
+      {/* Particles on top of noise */}
+      <Particles
+        className="absolute inset-0 z-[1]"
+        quantity={60}
+        color="#a78bfa"
+        ease={100}
+        size={0.4}
+        staticity={60}
       />
-      <div className="max-w-3xl mx-auto relative">
+      <div className="max-w-3xl mx-auto relative z-10">
         <h1
           className="hero-1 text-[52px] md:text-[68px] font-semibold leading-[1.0] tracking-[-0.03em]"
           style={{ fontFamily: 'var(--font-syne)' }}
         >
           {t.hero.h1a}
-          <span className="block text-[#8B8A85] mt-1">{t.hero.h1b}</span>
+          <span className="block mt-1">
+            <AnimatedGradientText
+              colorFrom="#6E56CF"
+              colorTo="#a78bfa"
+              speed={2}
+              className="text-[52px] md:text-[68px] font-semibold leading-[1.0] tracking-[-0.03em]"
+            >
+              {t.hero.h1b}
+            </AnimatedGradientText>
+          </span>
         </h1>
 
         <p className="hero-2 mt-6 text-lg text-[#8B8A85] max-w-xl mx-auto leading-relaxed">
@@ -467,12 +492,22 @@ function StatsBar({ t }: { t: Translations }) {
   return (
     <section className="border-y border-white/[0.06] py-8 px-6">
       <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
-        {t.stats.map((s, i) => (
-          <motion.div key={i} {...fadeUp(i * 0.07)} className="text-center">
-            <div className="text-2xl font-mono font-medium">{s.value}</div>
-            <div className="text-xs text-[#5A5955] mt-1 min-h-[1.25rem]">{s.label}</div>
-          </motion.div>
-        ))}
+        {t.stats.map((s, i) => {
+          const numMatch = s.value.match(/^(\d+)([+\w]*)$/)
+          return (
+            <motion.div key={i} {...fadeUp(i * 0.07)} className="text-center">
+              <div className="text-2xl font-mono font-medium">
+                {numMatch ? (
+                  <>
+                    <NumberTicker value={parseInt(numMatch[1])} className="text-2xl font-mono font-medium text-[#F1F0EE]" />
+                    {numMatch[2]}
+                  </>
+                ) : s.value}
+              </div>
+              <div className="text-xs text-[#5A5955] mt-1 min-h-[1.25rem]">{s.label}</div>
+            </motion.div>
+          )
+        })}
       </div>
     </section>
   )
@@ -485,9 +520,14 @@ function HowItWorksSection({ t }: { t: Translations }) {
     <section id="how-it-works" className="py-24 px-6">
       <div className="max-w-5xl mx-auto">
         <motion.div {...fadeUp()} className="text-center mb-16">
-          <p className="text-[11px] text-[#6E56CF] uppercase tracking-[0.15em] mb-3 font-mono">
-            {t.how.eyebrow}
-          </p>
+          <div className="inline-flex items-center gap-2 mb-3">
+            <AnimatedShinyText
+              shimmerWidth={120}
+              className="text-[11px] text-[#6E56CF] uppercase tracking-[0.15em] font-mono"
+            >
+              {t.how.eyebrow}
+            </AnimatedShinyText>
+          </div>
           <h2 className="text-[32px] font-semibold tracking-[-0.03em]">{t.how.title}</h2>
         </motion.div>
 
@@ -497,12 +537,15 @@ function HowItWorksSection({ t }: { t: Translations }) {
             <motion.div
               key={item.step}
               {...fadeUp(i * 0.12)}
-              className="relative p-6 rounded-2xl bg-[#161618] border border-white/[0.06] hover:border-white/[0.10] transition-colors"
+              className="relative p-6 rounded-2xl bg-[#161618] border border-white/[0.06] hover:border-white/[0.10] transition-colors overflow-hidden"
             >
-              <div className="font-mono text-xs text-[#5A5955] mb-5 tracking-widest">{item.step}</div>
-              <div className="text-3xl mb-4">{item.emoji}</div>
-              <h3 className="font-semibold mb-2 tracking-tight">{item.title}</h3>
-              <p className="text-sm text-[#8B8A85] leading-relaxed">{item.desc}</p>
+              <Meteors number={6} minDuration={8} maxDuration={16} className="text-[#6E56CF]/60" />
+              <div className="relative z-10">
+                <div className="font-mono text-xs text-[#5A5955] mb-5 tracking-widest">{item.step}</div>
+                <div className="text-3xl mb-4">{item.emoji}</div>
+                <h3 className="font-semibold mb-2 tracking-tight">{item.title}</h3>
+                <p className="text-sm text-[#8B8A85] leading-relaxed">{item.desc}</p>
+              </div>
             </motion.div>
           ))}
         </div>
@@ -518,16 +561,21 @@ function ReportPreviewSection({ t }: { t: Translations }) {
     <section id="preview" className="py-8 px-6 overflow-hidden">
       <div className="max-w-5xl mx-auto">
         <motion.div {...fadeUp()} className="text-center mb-12">
-          <p className="text-[11px] text-[#6E56CF] uppercase tracking-[0.15em] mb-3 font-mono">
-            {t.preview.eyebrow}
-          </p>
+          <div className="inline-flex items-center gap-2 mb-3">
+            <AnimatedShinyText
+              shimmerWidth={120}
+              className="text-[11px] text-[#6E56CF] uppercase tracking-[0.15em] font-mono"
+            >
+              {t.preview.eyebrow}
+            </AnimatedShinyText>
+          </div>
           <h2 className="text-[32px] font-semibold tracking-[-0.03em]">{t.preview.title}</h2>
           <p className="mt-3 text-[#8B8A85] max-w-lg mx-auto text-sm">{t.preview.sub}</p>
         </motion.div>
 
         <motion.div
           {...fadeUp(0.1)}
-          className="rounded-2xl bg-[#161618] border border-white/[0.06] overflow-hidden shadow-[0_0_80px_rgba(110,86,207,0.06)]"
+          className="relative rounded-2xl bg-[#161618] border border-white/[0.06] overflow-hidden shadow-[0_0_80px_rgba(110,86,207,0.08)]"
         >
           <div className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.06] bg-[#0E0E0F]">
             <div className="flex gap-1.5">
@@ -617,7 +665,14 @@ function FeaturesSection({ t }: { t: Translations }) {
     <section className="py-24 px-6">
       <div className="max-w-5xl mx-auto">
         <motion.div {...fadeUp()} className="text-center mb-16">
-          <p className="text-[11px] text-[#6E56CF] uppercase tracking-[0.15em] mb-3 font-mono">{t.features.eyebrow}</p>
+          <div className="inline-flex items-center gap-2 mb-3">
+            <AnimatedShinyText
+              shimmerWidth={120}
+              className="text-[11px] text-[#6E56CF] uppercase tracking-[0.15em] font-mono"
+            >
+              {t.features.eyebrow}
+            </AnimatedShinyText>
+          </div>
           <h2 className="text-[32px] font-semibold tracking-[-0.03em]">{t.features.title}</h2>
           <p className="mt-3 text-[#8B8A85] text-sm max-w-md mx-auto">{t.features.sub}</p>
         </motion.div>
@@ -629,16 +684,21 @@ function FeaturesSection({ t }: { t: Translations }) {
               <motion.div
                 key={f.title}
                 {...fadeUp(i * 0.09)}
-                className="p-6 rounded-2xl bg-[#161618] border border-white/[0.06] hover:border-white/[0.10] transition-all"
+                className="group relative p-6 rounded-2xl bg-[#161618] border border-white/[0.06] hover:border-white/[0.10] transition-all overflow-hidden"
               >
-                <div className="flex items-center gap-3 mb-4">
+                {/* Category color glow on hover */}
+                <div
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-2xl"
+                  style={{ background: `radial-gradient(circle at 10% 10%, ${color}18 0%, transparent 65%)` }}
+                />
+                <div className="flex items-center gap-3 mb-4 relative z-10">
                   <div className="p-2 rounded-xl" style={{ background: `${color}16`, color }}>
                     <Icon />
                   </div>
                   <h3 className="font-semibold tracking-tight">{f.title}</h3>
                 </div>
-                <p className="text-sm text-[#8B8A85] mb-5 leading-relaxed">{f.desc}</p>
-                <div className="flex flex-wrap gap-1.5">
+                <p className="text-sm text-[#8B8A85] mb-5 leading-relaxed relative z-10">{f.desc}</p>
+                <div className="flex flex-wrap gap-1.5 relative z-10">
                   {f.checks.map(check => (
                     <span key={check} className="text-[11px] px-2 py-0.5 rounded-md bg-[#1E1E21] border border-white/[0.06] text-[#5A5955] font-mono">
                       {check}
@@ -667,10 +727,23 @@ function AIPromptsSection({ t }: { t: Translations }) {
   }
 
   return (
-    <section className="py-24 px-6 bg-[#161618] border-y border-white/[0.06]">
-      <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+    <section className="py-24 px-6 bg-[#161618] border-y border-white/[0.06] relative overflow-hidden">
+      <DotPattern
+        className="z-0 opacity-[0.025] [mask-image:radial-gradient(ellipse_60%_80%_at_70%_50%,black,transparent)]"
+        width={20}
+        height={20}
+        cr={1}
+      />
+      <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-12 items-center relative z-10">
         <motion.div {...fadeUp()}>
-          <p className="text-[11px] text-[#6E56CF] uppercase tracking-[0.15em] mb-4 font-mono">{t.ai.eyebrow}</p>
+          <div className="inline-flex items-center gap-2 mb-4">
+            <AnimatedShinyText
+              shimmerWidth={120}
+              className="text-[11px] text-[#6E56CF] uppercase tracking-[0.15em] font-mono"
+            >
+              {t.ai.eyebrow}
+            </AnimatedShinyText>
+          </div>
           <h2 className="text-[32px] font-semibold tracking-[-0.03em] mb-4 whitespace-pre-line">{t.ai.title}</h2>
           <p className="text-[#8B8A85] leading-relaxed mb-6 text-sm">{t.ai.sub}</p>
           <ul className="space-y-3">
@@ -685,18 +758,29 @@ function AIPromptsSection({ t }: { t: Translations }) {
           </ul>
         </motion.div>
 
-        <motion.div {...fadeUp(0.15)} className="rounded-2xl bg-[#0E0E0F] border border-white/[0.10] overflow-hidden">
-          <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06]">
+        <motion.div {...fadeUp(0.15)} className="relative rounded-2xl bg-[#0E0E0F] border border-white/[0.10] overflow-hidden">
+          {/* Flickering grid — terminal/matrix feel */}
+          <div className="absolute inset-0 pointer-events-none">
+            <FlickeringGrid
+              squareSize={3}
+              gridGap={5}
+              flickerChance={0.04}
+              color="#6E56CF"
+              maxOpacity={0.12}
+              className="h-full w-full"
+            />
+          </div>
+          <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06] relative z-10">
             <span className="text-xs font-mono text-[#5A5955]">{t.ai.fileLabel}</span>
             <span className="ml-auto text-[11px] text-[#3DDC84] font-mono flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-[#3DDC84]" />
               {t.ai.ready}
             </span>
           </div>
-          <div className="p-5">
+          <div className="p-5 relative z-10">
             <pre className="text-[11px] font-mono text-[#E8C77D] leading-relaxed whitespace-pre-wrap">{t.ai.promptText}</pre>
           </div>
-          <div className="px-4 py-3 border-t border-white/[0.06] flex items-center gap-3">
+          <div className="px-4 py-3 border-t border-white/[0.06] flex items-center gap-3 relative z-10">
             <button
               onClick={handleCopy}
               className={`text-xs px-3 py-1.5 rounded-lg transition-all duration-200 flex items-center gap-1.5 ${
@@ -730,7 +814,14 @@ function PricingSection({ t }: { t: Translations }) {
     <section id="pricing" className="py-24 px-6">
       <div className="max-w-4xl mx-auto">
         <motion.div {...fadeUp()} className="text-center mb-12">
-          <p className="text-[11px] text-[#6E56CF] uppercase tracking-[0.15em] mb-3 font-mono">{t.pricing.eyebrow}</p>
+          <div className="inline-flex items-center gap-2 mb-3">
+            <AnimatedShinyText
+              shimmerWidth={120}
+              className="text-[11px] text-[#6E56CF] uppercase tracking-[0.15em] font-mono"
+            >
+              {t.pricing.eyebrow}
+            </AnimatedShinyText>
+          </div>
           <h2 className="text-[32px] font-semibold tracking-[-0.03em]">{t.pricing.title}</h2>
           <p className="mt-3 text-[#8B8A85] text-sm">{t.pricing.sub}</p>
         </motion.div>
@@ -744,10 +835,16 @@ function PricingSection({ t }: { t: Translations }) {
                 plan.coming
                   ? 'bg-[#161618] border-white/[0.04] opacity-70'
                   : plan.highlight
-                  ? 'bg-[#6E56CF]/[0.05] border-[#6E56CF] shadow-[0_0_40px_rgba(110,86,207,0.10)]'
+                  ? 'bg-[#6E56CF]/[0.05] border-[#6E56CF] shadow-[0_0_60px_rgba(110,86,207,0.15)]'
                   : 'bg-[#161618] border-white/[0.06]'
               }`}
             >
+              {/* Meteors for Pro card */}
+              {plan.highlight && !plan.coming && (
+                <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
+                  <Meteors number={10} minDuration={6} maxDuration={14} className="text-[#a78bfa]/70" />
+                </div>
+              )}
               {plan.highlight && !plan.coming && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] bg-[#6E56CF] text-white px-3 py-1 rounded-full uppercase tracking-[0.1em] whitespace-nowrap font-medium">
                   {t.pricing.popular}
@@ -811,8 +908,14 @@ function PricingSection({ t }: { t: Translations }) {
 
 function BottomCTA({ t }: { t: Translations }) {
   return (
-    <section className="py-24 px-6">
-      <div className="max-w-2xl mx-auto text-center relative">
+    <section className="py-24 px-6 relative overflow-hidden">
+      <DotPattern
+        className="z-0 opacity-[0.04] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,black,transparent)]"
+        width={20}
+        height={20}
+        cr={1}
+      />
+      <div className="max-w-2xl mx-auto text-center relative z-10">
         <div
           className="pointer-events-none absolute inset-0"
           style={{ background: 'radial-gradient(ellipse at center, rgba(110,86,207,0.12) 0%, transparent 70%)' }}
@@ -827,103 +930,3 @@ function BottomCTA({ t }: { t: Translations }) {
   )
 }
 
-// ─── Footer ───────────────────────────────────────────────────────────────────
-
-function Footer({ t }: { t: Translations }) {
-  return (
-    <footer className="border-t border-white/[0.06] bg-[#0E0E0F]">
-      <div className="max-w-6xl mx-auto px-6 py-14 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
-        {/* brand */}
-        <div className="md:col-span-1">
-          <span className="font-semibold text-sm" style={{ fontFamily: 'var(--font-syne)' }}>ShipReady</span>
-          <p className="mt-3 text-xs text-[#5A5955] leading-relaxed max-w-[200px]">{t.footer.tagline}</p>
-          <p className="mt-4 text-xs text-[#5A5955]">
-            {t.footer.madeBy}{' '}
-            <a
-              href="https://x.com/eugenegusakoff"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#8B8A85] hover:text-[#F1F0EE] transition-colors"
-            >
-              Eugene Gusakov
-            </a>
-          </p>
-        </div>
-
-        {/* product */}
-        <div>
-          <p className="text-[10px] uppercase tracking-[0.15em] text-[#5A5955] font-mono mb-4">{t.footer.colProduct}</p>
-          <ul className="space-y-3">
-            {[
-              { label: t.footer.howItWorks,    href: '#how-it-works' },
-              { label: t.footer.pricing,       href: '#pricing' },
-              { label: t.footer.roadmap,       href: '/roadmap' },
-              { label: t.footer.exampleReport, href: '#preview' },
-            ].map(item => (
-              <li key={item.label}>
-                <a href={item.href} className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors">
-                  {item.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* support */}
-        <div>
-          <p className="text-[10px] uppercase tracking-[0.15em] text-[#5A5955] font-mono mb-4">{t.footer.colSupport}</p>
-          <ul className="space-y-3">
-            <li>
-              <a href={`mailto:${CONTACT.email}`} className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors flex items-center gap-2">
-                <span className="text-[#5A5955]">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="2" y="4" width="20" height="16" rx="2"/>
-                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
-                  </svg>
-                </span>
-                {t.footer.emailLabel}
-              </a>
-            </li>
-            <li>
-              <a href={CONTACT.x} target="_blank" rel="noopener noreferrer" className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors flex items-center gap-2">
-                <span className="text-[#5A5955] font-bold text-xs">𝕏</span>
-                {t.footer.xLabel}
-              </a>
-            </li>
-            <li>
-              <a href={CONTACT.tg} target="_blank" rel="noopener noreferrer" className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors flex items-center gap-2">
-                <span className="text-[#5A5955]">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21.5 2.5 2.5 10l7 2.5M21.5 2.5l-12 9M21.5 2.5 9.5 21.5l-0-9"/>
-                  </svg>
-                </span>
-                {t.footer.tgLabel}
-              </a>
-            </li>
-          </ul>
-        </div>
-
-        {/* legal */}
-        <div>
-          <p className="text-[10px] uppercase tracking-[0.15em] text-[#5A5955] font-mono mb-4">{t.footer.colLegal}</p>
-          <ul className="space-y-3">
-            <li>
-              <a href="/privacy" className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors">
-                {t.footer.privacy}
-              </a>
-            </li>
-            <li>
-              <a href="/terms" className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors">
-                {t.footer.terms}
-              </a>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <div className="border-t border-white/[0.06] px-6 py-5">
-        <p className="max-w-6xl mx-auto text-xs text-[#5A5955] text-center">{t.footer.copy}</p>
-      </div>
-    </footer>
-  )
-}
