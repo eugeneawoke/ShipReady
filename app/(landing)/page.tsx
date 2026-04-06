@@ -13,6 +13,25 @@ import { Meteors } from '@/components/ui/meteors'
 import { FlickeringGrid } from '@/components/ui/flickering-grid'
 import { CinematicFooter } from '@/components/ui/motion-footer'
 
+// ─── smooth scroll ────────────────────────────────────────────────────────────
+
+function smoothScrollTo(selector: string) {
+  const el = document.querySelector(selector)
+  if (!el) return
+  const NAV_H = 64
+  const start = window.scrollY
+  const end = el.getBoundingClientRect().top + window.scrollY - NAV_H
+  const duration = 550
+  const startTime = performance.now()
+  const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3)
+  function step(now: number) {
+    const progress = Math.min((now - startTime) / duration, 1)
+    window.scrollTo(0, start + (end - start) * easeOutCubic(progress))
+    if (progress < 1) requestAnimationFrame(step)
+  }
+  requestAnimationFrame(step)
+}
+
 // ─── contact ──────────────────────────────────────────────────────────────────
 
 const CONTACT = {
@@ -374,14 +393,20 @@ function Nav({ t, lang, setLang }: { t: Translations; lang: Lang; setLang: (l: L
       <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
         {/* left */}
         <div className="flex items-center gap-8">
-          <span className="font-semibold tracking-tight" style={{ fontFamily: 'var(--font-syne)' }}>ShipReady</span>
+          <a href="/" className="font-semibold tracking-tight cursor-pointer hover:opacity-80 transition-opacity" style={{ fontFamily: 'var(--font-syne)' }}>ShipReady</a>
           <div className="hidden md:flex items-center gap-6">
-            <a href="#how-it-works" className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors whitespace-nowrap">
+            <button
+              onClick={() => smoothScrollTo('#how-it-works')}
+              className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors whitespace-nowrap cursor-pointer"
+            >
               {t.nav.howItWorks}
-            </a>
-            <a href="#pricing" className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors whitespace-nowrap">
+            </button>
+            <button
+              onClick={() => smoothScrollTo('#pricing')}
+              className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors whitespace-nowrap cursor-pointer"
+            >
               {t.nav.pricing}
-            </a>
+            </button>
           </div>
         </div>
 
@@ -481,6 +506,7 @@ function HeroSection({ t }: { t: Translations }) {
             </div>
           ))}
         </div>
+
       </div>
     </section>
   )
@@ -643,10 +669,13 @@ function ReportPreviewSection({ t }: { t: Translations }) {
                     <pre className="text-[11px] font-mono text-[#8B8A85] blur-sm select-none leading-relaxed">{t.demo.prompt}</pre>
                   </div>
                   <div className="absolute inset-0 flex items-center justify-center bg-[#0E0E0F]/70 backdrop-blur-[2px]">
-                    <a href="#pricing" className="text-xs px-4 py-2 rounded-lg bg-[#6E56CF] text-white hover:bg-[#7C68D4] transition-colors font-medium flex items-center gap-1.5">
+                    <button
+                      onClick={() => smoothScrollTo('#pricing')}
+                      className="text-xs px-4 py-2 rounded-lg bg-[#6E56CF] text-white hover:bg-[#7C68D4] transition-colors font-medium flex items-center gap-1.5 cursor-pointer"
+                    >
                       <span>{t.preview.upgradeBtn}</span>
                       <IconArrow />
-                    </a>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -882,7 +911,8 @@ function PricingSection({ t }: { t: Translations }) {
                 </a>
               ) : (
                 <button
-                  className={`w-full py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                  onClick={() => { if (!plan.highlight) smoothScrollTo('#cta') }}
+                  className={`w-full py-2.5 rounded-xl text-sm font-medium transition-colors cursor-pointer ${
                     plan.highlight
                       ? 'bg-[#6E56CF] text-white hover:bg-[#7C68D4]'
                       : 'bg-[#1E1E21] border border-white/[0.08] text-[#F1F0EE] hover:bg-[#232328]'
@@ -908,7 +938,7 @@ function PricingSection({ t }: { t: Translations }) {
 
 function BottomCTA({ t }: { t: Translations }) {
   return (
-    <section className="py-24 px-6 relative overflow-hidden">
+    <section id="cta" className="py-24 px-6 relative overflow-hidden">
       <DotPattern
         className="z-0 opacity-[0.04] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,black,transparent)]"
         width={20}

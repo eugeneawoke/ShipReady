@@ -10,6 +10,23 @@ if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger)
 }
 
+function smoothScrollTo(selector: string) {
+  const el = document.querySelector(selector)
+  if (!el) return
+  const NAV_H = 64
+  const start = window.scrollY
+  const end = el.getBoundingClientRect().top + window.scrollY - NAV_H
+  const duration = 550
+  const startTime = performance.now()
+  const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3)
+  function step(now: number) {
+    const progress = Math.min((now - startTime) / duration, 1)
+    window.scrollTo(0, start + (end - start) * easeOutCubic(progress))
+    if (progress < 1) requestAnimationFrame(step)
+  }
+  requestAnimationFrame(step)
+}
+
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
 const STYLES = `
@@ -253,8 +270,8 @@ export function CinematicFooter() {
               {/* Primary CTAs */}
               <div className="flex flex-wrap justify-center gap-4 w-full">
                 <MagneticButton
-                  as="a"
-                  href="/"
+                  as="button"
+                  onClick={() => smoothScrollTo('#cta')}
                   className="sr-glass-pill px-10 py-5 rounded-full text-[#F1F0EE] font-bold text-sm md:text-base flex items-center gap-3 group"
                 >
                   <span className="text-[#6E56CF] group-hover:text-[#a78bfa] transition-colors text-lg">⬡</span>
@@ -262,8 +279,8 @@ export function CinematicFooter() {
                 </MagneticButton>
 
                 <MagneticButton
-                  as="a"
-                  href="#pricing"
+                  as="button"
+                  onClick={() => smoothScrollTo('#pricing')}
                   className="sr-glass-pill px-10 py-5 rounded-full text-[#8B8A85] font-bold text-sm md:text-base flex items-center gap-3 group"
                 >
                   <span className="text-[#6E56CF] group-hover:text-[#a78bfa] transition-colors">$</span>
