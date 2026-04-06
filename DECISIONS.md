@@ -11,7 +11,7 @@
 |----|---------|--------|
 | D-01 | Lemon Squeezy, не Stripe | Stripe требует юр. лицо. LS — merchant of record: налоги сами, карты СНГ, нет требований |
 | D-02 | @sparticuz/chromium для Lighthouse | Единственный Chrome билд для Vercel serverless (~50MB). Playwright там не работает |
-| D-03 | Статичные issue templates + один Claude вызов | Claude на каждый issue = 25 вызовов = $0.25+/скан. Один вызов для summary — достаточно |
+| D-03 | Статичные issue templates + один AI вызов | AI на каждый issue = 25 вызовов = $0.25+/скан. Один вызов для summary — достаточно |
 | D-04 | Supabase для PostgreSQL + Auth + Storage | Free tier включает всё. @supabase/ssr хорошо интегрируется с Next.js |
 | D-05 | HTML fetчится один раз, передаётся строкой | Несколько fetch = медленнее + риск разных HTML если страница динамическая |
 | D-06 | Vercel region fra1 (Frankfurt) | Ближе к СНГ + Европе. US добавляет 100–200ms на каждый fetch |
@@ -42,6 +42,12 @@
 ## Лог новых решений
 
 > Добавлять при каждом новом архитектурном решении.
+
+### D-10: OpenAI вместо Anthropic для AI summary
+Решение: `gpt-4o-mini` вместо `claude-sonnet-4-20250514` для генерации summary.
+Почему: Anthropic недоступен для оплаты на старте. OpenAI уже оплачен. gpt-4o-mini дешевле и достаточен для 2–3 предложений summary.
+Переменная: `OPENAI_API_KEY` вместо `ANTHROPIC_API_KEY`.
+Отклонено: Anthropic — вернуться можно в v2 если нужно.
 
 ### D-09: Lighthouse runner на Railway, фронт на Vercel
 Решение: Vercel (Hobby) деплоит фронт + все API кроме Lighthouse. Railway (Hobby $5/мес) запускает `/api/run-scan` — тяжёлый Lighthouse scan.
