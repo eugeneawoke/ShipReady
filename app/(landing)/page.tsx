@@ -748,26 +748,30 @@ function FeaturesSection({ t }: { t: Translations }) {
               <motion.div
                 key={f.title}
                 {...fadeUp(i * 0.09)}
-                className="group relative p-6 rounded-2xl bg-[#161618] border border-white/[0.06] hover:border-white/[0.10] transition-all overflow-hidden"
+                className={`group relative p-6 rounded-2xl bg-[#161618] border border-white/[0.06] hover:border-white/[0.10] transition-all overflow-hidden${i === 4 ? ' md:col-span-2' : ''}`}
               >
                 {/* Category color glow on hover */}
                 <div
                   className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-2xl"
                   style={{ background: `radial-gradient(circle at 10% 10%, ${color}18 0%, transparent 65%)` }}
                 />
-                <div className="flex items-center gap-3 mb-4 relative z-10">
-                  <div className="p-2 rounded-xl" style={{ background: `${color}16`, color }}>
-                    <Icon />
+                <div className={`relative z-10 ${i === 4 ? 'md:flex md:gap-8 md:items-start' : ''}`}>
+                  <div className={i === 4 ? 'md:flex-1' : ''}>
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 rounded-xl" style={{ background: `${color}16`, color }}>
+                        <Icon />
+                      </div>
+                      <h3 className="font-semibold tracking-tight">{f.title}</h3>
+                    </div>
+                    <p className="text-sm text-[#8B8A85] mb-5 leading-relaxed">{f.desc}</p>
                   </div>
-                  <h3 className="font-semibold tracking-tight">{f.title}</h3>
-                </div>
-                <p className="text-sm text-[#8B8A85] mb-5 leading-relaxed relative z-10">{f.desc}</p>
-                <div className="flex flex-wrap gap-1.5 relative z-10">
-                  {f.checks.map(check => (
-                    <span key={check} className="text-[11px] px-2 py-0.5 rounded-md bg-[#1E1E21] border border-white/[0.06] text-[#5A5955] font-mono">
-                      {check}
-                    </span>
-                  ))}
+                  <div className={`flex flex-wrap gap-1.5 ${i === 4 ? 'md:flex-1 md:mb-0 mb-0' : ''}`}>
+                    {f.checks.map(check => (
+                      <span key={check} className="text-[11px] px-2 py-0.5 rounded-md bg-[#1E1E21] border border-white/[0.06] text-[#5A5955] font-mono">
+                        {check}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </motion.div>
             )

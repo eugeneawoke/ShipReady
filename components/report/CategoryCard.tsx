@@ -1,21 +1,24 @@
 'use client'
 
 import { useState } from 'react'
-import { Zap, Search, Shield, Smartphone, ChevronDown } from 'lucide-react'
+import React from 'react'
+import { Zap, Search, Shield, Smartphone, Bot, ChevronDown } from 'lucide-react'
 import type { CategoryScore, IssueCategory } from '@/types/scan'
 
-const ICONS = {
+const ICONS: Record<IssueCategory, React.ComponentType<{ className?: string }>> = {
   performance: Zap,
   seo: Search,
   security: Shield,
   mobile: Smartphone,
+  ai_visibility: Bot,
 }
 
-const LABELS = {
+const LABELS: Record<IssueCategory, string> = {
   performance: 'Performance',
   seo: 'SEO & Social',
   security: 'Security',
   mobile: 'Mobile',
+  ai_visibility: 'AI Visibility',
 }
 
 const SEVERITY_COLORS: Record<string, string> = {

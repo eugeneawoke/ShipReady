@@ -18,14 +18,28 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
   }
 
-  const event = JSON.parse(payload)
-  const eventName: string = event.meta?.event_name ?? ''
-  const userId: string = event.meta?.custom_data?.user_id ?? ''
-  const customerId: string = event.data?.attributes?.customer_id?.toString() ?? ''
-  const subscriptionId: string = event.data?.id?.toString() ?? ''
-  const variantName: string = event.data?.attributes?.variant_name?.toLowerCase() ?? ''
+  let event: Record<string, unknown>
+  try {
+    event = JSON.parse(payload)
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
+  }
 
-  if (!userId) return NextResponse.json({ ok: true })
+  const meta = event.meta as Record<string, unknown> | undefined
+  const data = event.data as Record<string, unknown> | undefined
+  const attrs = data?.attributes as Record<string, unknown> | undefined
+
+  const eventName: string = typeof meta?.event_name === 'string' ? meta.event_name : ''
+  const userId: string = typeof (meta?.custom_data as Record<string, unknown> | undefined)?.user_id === 'string'
+    ? (meta!.custom_data as Record<string, unknown>).user_id as string
+    : ''
+  const customerId: string = attrs?.customer_id?.toString() ?? ''
+  const subscriptionId: string = data?.id?.toString() ?? ''
+  const variantName: string = typeof attrs?.variant_name === 'string' ? attrs.variant_name.toLowerCase() : ''
+
+  // Validate userId is a proper UUID to prevent injection or account confusion
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  if (!userId || !UUID_RE.test(userId)) return NextResponse.json({ ok: true })
 
   const supabase = createServiceClient()
 

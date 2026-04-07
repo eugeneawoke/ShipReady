@@ -2,24 +2,49 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase'
 import type { ScanResult } from '@/types/scan'
 
+// Valid hostname: letters, digits, hyphens, dots — no wildcards or path separators
+const HOSTNAME_RE = /^[a-zA-Z0-9][a-zA-Z0-9.-]{0,251}[a-zA-Z0-9]$/
+
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ domain: string }> }
 ) {
   const { domain } = await params
+
+  if (!domain || !HOSTNAME_RE.test(domain)) {
+    return badgeSvg(0)
+  }
+
   const supabase = createServiceClient()
 
+  // Match only scans whose URL is exactly this domain (with or without trailing path)
+  // Using prefix match prevents subdomain confusion: example.com.evil.com won't match https://example.com/%
   const { data } = await supabase
     .from('scans')
     .select('results')
-    .ilike('url', `%${domain}%`)
+    .or(
+      [
+        `url.eq.https://${domain}`,
+        `url.eq.http://${domain}`,
+        `url.like.https://${domain}/%`,
+        `url.like.http://${domain}/%`,
+      ].join(',')
+    )
     .eq('status', 'done')
     .order('created_at', { ascending: false })
     .limit(1)
     .single()
 
   const score = (data?.results as ScanResult | null)?.totalScore ?? 0
-  const color = score >= 90 ? '#3DDC84' : score >= 70 ? '#7BC67E' : score >= 50 ? '#F5C518' : '#FF4444'
+
+  return badgeSvg(score)
+}
+
+function badgeSvg(score: number): NextResponse {
+  const color =
+    score >= 90 ? '#3DDC84' :
+    score >= 70 ? '#7BC67E' :
+    score >= 50 ? '#F5C518' : '#FF4444'
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="20">
   <linearGradient id="s" x2="0" y2="100%">

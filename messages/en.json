@@ -3,7 +3,7 @@
     "title": "Pre-deploy quality gate",
     "subtitle": "for vibe-coded apps",
     "tagline": "33+ checks · 30 seconds · AI fix prompts",
-    "placeholder": "https://your-app.vercel.app",
+    "placeholder": "https://yoursite.com",
     "cta": "Scan →",
     "scanning": "Scanning...",
     "demoLabel": "Example report ↓"

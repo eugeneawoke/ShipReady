@@ -1,6 +1,7 @@
 import * as cheerio from 'cheerio';
 import type { Issue } from '@/types/scan';
 import { T } from '@/lib/ai/issue-templates';
+import { isValidUrl } from '@/lib/utils';
 
 export async function runSEOChecks(url: string, html: string): Promise<Issue[]> {
   const $ = cheerio.load(html);
@@ -39,6 +40,8 @@ export async function runSEOChecks(url: string, html: string): Promise<Issue[]> 
 
   if (!ogImage) {
     issues.push({ ...T['missing-og-image'] });
+  } else if (!isValidUrl(ogImage)) {
+    issues.push({ ...T['og-image-invalid'] });
   } else {
     try {
       const r = await fetch(ogImage, { method: 'HEAD', signal: AbortSignal.timeout(4000) });

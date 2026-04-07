@@ -1,101 +1,69 @@
 # TODO
 
 > Формат: `[ ]` ожидает · `[~]` в процессе · `[x]` готово · `[!]` заблокировано
-> Обновлять статусы по ходу работы. Завершённые шаги не удалять.
 
 ---
 
-## Фаза 0 — Подготовка (активная)
+## Фаза 0 — Подготовка (часть не сделана)
 
-- [ ] Зарегистрировать домен shipready.app (Namecheap или Cloudflare Registrar, ~$12)
-- [x] Создать GitHub репозиторий `shipready`
-- [ ] Подключить Vercel к репозиторию (Hobby plan, автодеплой из main)
+- [x] Создать GitHub репозиторий
+- [x] `npx create-next-app@latest` с TypeScript + Tailwind + App Router
+- [ ] Зарегистрировать домен shipready.app
+- [ ] Подключить Vercel к репозиторию (автодеплой из main)
 - [ ] Создать проект Supabase, регион Frankfurt (fra1)
-- [ ] Добавить env variables в Vercel: APP_URL, SUPABASE_URL, SUPABASE_ANON_KEY, SERVICE_ROLE_KEY, ANTHROPIC_API_KEY, LS_API_KEY, LS_WEBHOOK_SECRET, RESEND_API_KEY
-- [ ] Создать `.env.local` локально, проверить что в `.gitignore`
-- [ ] `npx create-next-app@latest shipready --typescript --tailwind --app`
-- [ ] Первый деплой — пустая страница на кастомном домене
-- [ ] Создать Figma файл: Cover / Components / Report / Landing / Auth
+- [ ] `npx supabase db push` — применить миграции
+- [ ] Добавить env variables в Vercel (APP_URL, SUPABASE_*, ANTHROPIC_API_KEY, LS_*, RESEND_API_KEY)
+- [ ] Создать `.env.local` локально
+- [ ] Первый живой деплой на кастомном домене
 
 ---
 
-## Фаза 1 — Скелет
+## Фаза 1–5 — Скелет + Checks + UI
 
-- [ ] Установить зависимости (см. CHECKS.md — Installation)
-- [ ] `npx shadcn-ui@latest init` + добавить компоненты: button card badge progress tabs input
-- [ ] Создать `types/scan.ts` — полные типы из CLAUDE.md
-- [ ] Настроить Tailwind — цвета и шрифты из DESIGN.md
-- [ ] Установить Geist: `npm i geist`, подключить в layout.tsx
-- [ ] Создать `lib/supabase.ts` (server client через @supabase/ssr)
-- [ ] Создать `supabase/migrations/001_initial.sql` — схема из CLAUDE.md
-- [ ] Создать `vercel.json` — maxDuration:60, memory:3009, region:fra1
-- [ ] Создать `app/globals.css` — CSS переменные из DESIGN.md
-- [ ] `app/api/scan/route.ts` — POST: валидация URL → Supabase insert → return {id}
-- [ ] `app/api/scan/[id]/route.ts` — GET: вернуть {status, results}
-- [ ] `app/(landing)/page.tsx` — ScanForm, отправляет POST, редирект на /report/[id]
-- [ ] `app/report/[id]/page.tsx` — polling каждые 2 сек, skeleton пока loading
-
----
-
-## Фаза 2 — Core checks
-
-- [ ] `lib/checks/lighthouse.ts` — @sparticuz/chromium + lighthouse
-- [ ] Протестировать Lighthouse на Vercel (главный технический риск) → записать в EVIDENCE.md
-- [ ] `lib/checks/seo.ts` — 12 SEO/OG checks, cheerio
-- [ ] `lib/checks/mobile.ts` — 4 mobile checks
-- [ ] `lib/checks/links.ts` — internal links max 20, HEAD requests
-- [ ] `lib/checks/index.ts` — оркестратор: fetch HTML один раз → Promise.all
-- [ ] `lib/scoring.ts` — алгоритм из CLAUDE.md
-
----
-
-## Фаза 3 — Security
-
-- [ ] `lib/checks/security.ts` — все 11 checks (см. CHECKS.md)
-- [ ] Security issue templates в `lib/ai/issue-templates.ts`
-- [ ] Тест: scan сайта с намеренно открытым .env → убедиться что находит
+- [x] `types/scan.ts` — полные типы (включая ai_visibility)
+- [x] `lib/supabase.ts` — server client
+- [x] `supabase/migrations/001_initial.sql` — scans таблица
+- [x] `supabase/migrations/002_profiles.sql` — profiles таблица
+- [x] `vercel.json` — maxDuration, region
+- [x] `app/api/scan/route.ts` — POST создаёт scan
+- [x] `app/api/scan/[id]/route.ts` — GET polling
+- [x] `app/api/run-scan/` — воркер выполняет checks
+- [x] `lib/checks/index.ts` — оркестратор
+- [x] `lib/checks/lighthouse.ts`
+- [x] `lib/checks/seo.ts`
+- [x] `lib/checks/security.ts`
+- [x] `lib/checks/mobile.ts`
+- [x] `lib/checks/links.ts`
+- [x] `lib/checks/ai-visibility.ts` — 8 AEO/GEO checks
+- [x] `lib/scoring.ts`
+- [x] `lib/ai/generate-summary.ts`
+- [x] `lib/ai/issue-templates.ts`
+- [x] `components/report/` — все 5 компонентов
+- [x] `app/report/[id]/page.tsx`
+- [x] `app/(landing)/page.tsx` — лендинг с анимациями
+- [x] `app/opengraph-image.tsx`
+- [x] `app/sitemap.ts`
+- [x] `app/robots.ts`
 
 ---
 
-## Фаза 4 — AI Engine
+## Фаза 6 — Монетизация (активная)
 
-- [ ] Все 25 issue templates с cursorPrompt + boltPrompt
-- [ ] Тест качества: скопировать 5 prompts в Cursor → проверить что работают
-- [ ] `lib/ai/generate-summary.ts` — один вызов Claude, max 300 tokens
-- [ ] `lib/scoring.ts` → `buildScanResult()` собирает полный ScanResult
-
----
-
-## Фаза 5 — Report UI
-
-- [ ] `components/report/ScoreRing.tsx` — SVG анимированное кольцо
-- [ ] `components/report/ReportSkeleton.tsx` — loading state
-- [ ] `components/report/CategoryCard.tsx` — карточка категории, collapsible
-- [ ] `components/report/IssueCard.tsx` — issue + blur paywall + copy prompt
-- [ ] `components/report/OGPreview.tsx` — Twitter / Telegram / WhatsApp tabs
-- [ ] `app/report/[id]/page.tsx` — обновить с реальными компонентами + stagger анимация
-- [ ] Скриншот-тест: показать 3 людям → "это выглядит профессионально?"
-
----
-
-## Фаза 6 — Монетизация
-
-- [ ] Supabase Auth: Google OAuth + `app/auth/callback/route.ts`
-- [ ] `lib/auth.ts` → `getUserWithPlan()` возвращает user + plan
-- [ ] Rate limiting в scan API: 3/мес для free (по user_id или IP)
+- [x] `lib/auth.ts` — `getUserWithPlan()`
+- [x] `app/auth/callback/` — OAuth callback
+- [x] `app/auth/login/` — страница входа
+- [x] `app/pricing/page.tsx` — три карточки
+- [ ] Rate limiting: 3 скана/мес для free (по IP + user_id)
 - [ ] Создать продукты в Lemon Squeezy: Pro $14, Agency $39
-- [ ] `app/api/webhooks/ls/route.ts` — subscription_created → plan='pro', cancelled → 'free'
-- [ ] `app/pricing/page.tsx` — три карточки, Pro выделена border-accent
-- [ ] Тест: купить свой план тестовой картой → промпты разблокировались
+- [ ] `app/api/webhooks/ls/route.ts` — subscription_created → plan='pro'
+- [ ] IssueCard paywall — блюрить cursorPrompt/boltPrompt для free
+- [ ] Тест: купить план тестовой картой → промпты разблокировались
 
 ---
 
 ## Фаза 7 — Запуск
 
-- [ ] Лендинг: платформы (Cursor/Bolt/Lovable/v0/Replit), how it works, demo report
-- [ ] `app/opengraph-image.tsx` — динамический OG через next/og
-- [ ] `app/sitemap.ts`
+- [ ] Self-audit: scan shipready.app → исправить все Critical/High
 - [ ] `app/api/badge/[domain]/route.ts` — SVG badge со score
 - [ ] Vercel Cron: weekly rescan для Pro/Agency
-- [ ] Self-audit: scan shipready.app → исправить все Critical/High
 - [ ] Twitter/X thread + Product Hunt + vc.ru + Show HN

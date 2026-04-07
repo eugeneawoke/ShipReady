@@ -17,12 +17,13 @@ const SEVERITY_ORDER: Record<string, number> = {
   pass: 4,
 }
 
-const CATEGORIES: IssueCategory[] = ['performance', 'seo', 'security', 'mobile']
+const CATEGORIES: IssueCategory[] = ['performance', 'seo', 'security', 'mobile', 'ai_visibility']
 const CATEGORY_LABELS: Record<IssueCategory, string> = {
   performance: 'Performance',
   seo: 'SEO',
   security: 'Security',
   mobile: 'Mobile',
+  ai_visibility: 'AI Visibility',
 }
 
 export default function ReportPage({ params }: { params: Promise<{ id: string }> }) {

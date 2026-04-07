@@ -114,7 +114,7 @@ const faqSchema = {
   let prevLevel = 0
   let hierarchyBroken = false
   $('h1,h2,h3,h4,h5,h6').each((_, el) => {
-    const level = parseInt((el as cheerio.Element & { tagName: string }).tagName[1])
+    const level = parseInt((el as unknown as { tagName: string }).tagName[1])
     if (prevLevel > 0 && level > prevLevel + 1) {
       hierarchyBroken = true
       return false

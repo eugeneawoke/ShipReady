@@ -3,25 +3,25 @@
 ## Текущая фаза
 
 ```
-ФАЗА:   0 — Подготовка
-СТАТУС: не начата
-ЦЕЛЬ:   инфраструктура готова, первый деплой пустой страницы на Vercel
+ФАЗА:   6 — Монетизация
+СТАТУС: в процессе
+ЦЕЛЬ:   Auth работает, оплата проходит, paywall включён
 ```
 
 ---
 
 ## Фазы
 
-| # | Название | Цель | Готово когда |
-|---|---------|------|-------------|
-| 0 | Подготовка | Инфраструктура | Живой URL, все env подключены |
-| 1 | Скелет | Next.js + роуты + DB | POST /api/scan работает, /report/[id] показывает polling |
-| 2 | Core checks | Lighthouse + SEO + mobile + links | scan URL → JSON с реальными данными |
-| 3 | Security | 11 security проверок | exposed .env и API keys in HTML находит |
-| 4 | AI Engine | 25 issue templates + Claude summary | cursorPrompt/boltPrompt работают при вставке в Cursor |
-| 5 | Report UI | ScoreRing + IssueCard + OGPreview | Выглядит профессионально, промпты копируются |
-| 6 | Монетизация | Auth + Lemon Squeezy + paywall | Первая оплата технически возможна |
-| 7 | Запуск | Product Hunt + vc.ru + HN | Первый платный пользователь |
+| # | Название | Цель | Статус |
+|---|---------|------|--------|
+| 0 | Подготовка | Инфраструктура | ✅ частично (домен + Vercel + Supabase не задеплоены) |
+| 1 | Скелет | Next.js + роуты + DB | ✅ готово |
+| 2 | Core checks | Lighthouse + SEO + mobile + links | ✅ готово |
+| 3 | Security | 11 security проверок | ✅ готово |
+| 4 | AI Engine | issue templates + Claude summary + AI Visibility | ✅ готово |
+| 5 | Report UI | ScoreRing + IssueCard + OGPreview | ✅ готово |
+| 6 | Монетизация | Auth + Lemon Squeezy + paywall | 🔄 в процессе |
+| 7 | Запуск | Product Hunt + vc.ru + HN | ⏳ не начата |
 
 ---
 
@@ -29,4 +29,4 @@
 
 | Дата | Из фазы | В фазу | Заметка |
 |------|---------|--------|---------|
-| —    | —       | —      | —       |
+| 2026-04-07 | 0 | 6 | Фазы 1–5 реализованы локально, деплой ещё не сделан |
