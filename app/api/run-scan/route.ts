@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { isValidUrl } from '@/lib/utils'
 
 // This endpoint is deployed on Railway only.
 // Vercel calls it to offload heavy Lighthouse scans.
 export const maxDuration = 300
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 export async function POST(request: NextRequest) {
   const auth = request.headers.get('authorization')
@@ -21,6 +24,14 @@ export async function POST(request: NextRequest) {
 
   if (!url || !scanId) {
     return NextResponse.json({ error: 'Missing url or scanId' }, { status: 400 })
+  }
+
+  if (!isValidUrl(url)) {
+    return NextResponse.json({ error: 'Invalid URL' }, { status: 400 })
+  }
+
+  if (!UUID_RE.test(scanId)) {
+    return NextResponse.json({ error: 'Invalid scanId' }, { status: 400 })
   }
 
   try {
