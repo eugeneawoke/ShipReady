@@ -58,6 +58,11 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
 
     // eslint-disable-next-line prefer-const
     let interval: NodeJS.Timeout
+    // Stop polling after 90s — prevents infinite pending
+    const timeout = setTimeout(() => {
+      clearInterval(interval)
+      setScan(prev => prev ? { ...prev, status: 'error' } : null)
+    }, 90_000)
 
     async function poll() {
       const res = await fetch(`/api/scan/${id}`)
@@ -66,12 +71,13 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
       setScan(data)
       if (data.status === 'done' || data.status === 'error') {
         clearInterval(interval)
+        clearTimeout(timeout)
       }
     }
 
     poll()
     interval = setInterval(poll, 2000)
-    return () => clearInterval(interval)
+    return () => { clearInterval(interval); clearTimeout(timeout) }
   }, [id])
 
   if (!scan || scan.status === 'pending' || scan.status === 'running') {

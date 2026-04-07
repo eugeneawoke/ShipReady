@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
     const scannerSecret = process.env.SCANNER_SECRET
 
     if (railwayUrl && scannerSecret) {
-      // Delegate to Railway scanner — fire and forget
+      // Delegate to Railway scanner — fire and forget, but catch failures
       fetch(`${railwayUrl}/api/run-scan`, {
         method: 'POST',
         headers: {
@@ -125,11 +125,15 @@ export async function POST(request: NextRequest) {
           'Authorization': `Bearer ${scannerSecret}`,
         },
         body: JSON.stringify({ url, scanId: data.id }),
-      }).catch(() => {
-        // Railway call failed — scan will stay in 'pending' state
+      }).then(async res => {
+        if (!res.ok) {
+          await supabase.from('scans').update({ status: 'error' }).eq('id', data.id)
+        }
+      }).catch(async () => {
+        await supabase.from('scans').update({ status: 'error' }).eq('id', data.id)
       })
-    } else {
-      // Fallback: run locally (dev / no Railway configured)
+    } else if (process.env.NODE_ENV === 'development') {
+      // Fallback: run locally in dev only
       setTimeout(async () => {
         try {
           const { runAllChecks } = await import('@/lib/checks/index')
@@ -138,6 +142,9 @@ export async function POST(request: NextRequest) {
           // runAllChecks marks the scan as 'error' internally
         }
       }, 0)
+    } else {
+      // Production without Railway — fail immediately with clear error
+      await supabase.from('scans').update({ status: 'error' }).eq('id', data.id)
     }
 
     return NextResponse.json({ id: data.id }, { status: 202 })
