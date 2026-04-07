@@ -62,7 +62,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
     const timeout = setTimeout(() => {
       clearInterval(interval)
       setScan(prev => prev ? { ...prev, status: 'error' } : null)
-    }, 90_000)
+    }, 45_000)
 
     async function poll() {
       const res = await fetch(`/api/scan/${id}`)
