@@ -1,6 +1,6 @@
 export type ScanStatus = 'pending' | 'running' | 'done' | 'error';
 export type IssueSeverity = 'critical' | 'high' | 'medium' | 'low' | 'pass';
-export type IssueCategory = 'performance' | 'seo' | 'security' | 'mobile';
+export type IssueCategory = 'performance' | 'seo' | 'security' | 'mobile' | 'ai_visibility';
 
 export interface Issue {
   id: string;
@@ -31,6 +31,7 @@ export interface ScanResult {
   seo: CategoryScore;
   security: CategoryScore;
   mobile: CategoryScore;
+  ai_visibility: CategoryScore;
   aiSummary?: string;
 }
 

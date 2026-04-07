@@ -2,7 +2,7 @@
   "landing": {
     "title": "Pre-deploy quality gate",
     "subtitle": "for vibe-coded apps",
-    "tagline": "25+ checks · 30 seconds · AI fix prompts",
+    "tagline": "33+ checks · 30 seconds · AI fix prompts",
     "placeholder": "https://your-app.vercel.app",
     "cta": "Scan →",
     "scanning": "Scanning...",
@@ -23,13 +23,15 @@
       "performance": "Checking performance...",
       "seo": "Analyzing SEO & social...",
       "security": "Security audit...",
-      "mobile": "Mobile checks..."
+      "mobile": "Mobile checks...",
+      "ai_visibility": "AI visibility audit..."
     },
     "categories": {
       "performance": "Performance",
       "seo": "SEO & Social",
       "security": "Security",
-      "mobile": "Mobile"
+      "mobile": "Mobile",
+      "ai_visibility": "AI Visibility"
     }
   },
   "pricing": {

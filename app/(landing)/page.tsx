@@ -83,6 +83,15 @@ const IconCopy = () => (
   </svg>
 )
 
+const IconBot = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="11" width="18" height="10" rx="2"/>
+    <path d="M12 11V7"/>
+    <circle cx="12" cy="5" r="2"/>
+    <path d="M8 15h.01M16 15h.01"/>
+  </svg>
+)
+
 const IconArrow = ({ size = 12 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M5 12h14"/>
@@ -111,13 +120,13 @@ const T = {
     hero: {
       h1a: 'Your vibe-coded app,',
       h1b: 'ship-ready in 30 sec',
-      sub: 'Paste your URL. Get a full audit — performance, SEO, security, mobile — with AI fix prompts for Cursor and Bolt.',
+      sub: 'Paste your URL. Get a full audit — performance, SEO, security, mobile, AI visibility — with AI fix prompts for Cursor and Bolt.',
       noSignup: 'No signup required for first scan',
       worksWith: 'Works with',
     },
     stats: [
-      { value: '25+', label: 'automated checks' },
-      { value: '4',   label: 'categories covered' },
+      { value: '33+', label: 'automated checks' },
+      { value: '5',   label: 'categories covered' },
       { value: '30s', label: 'average scan time' },
       { value: 'AI',  label: 'fix prompt per issue' },
     ],
@@ -126,7 +135,7 @@ const T = {
       title: 'Three steps to ship-ready',
       steps: [
         { step: '01', emoji: '🔗', title: 'Paste your URL',       desc: 'Drop any live URL — Vercel, Netlify, custom domain. No setup or browser extension needed.' },
-        { step: '02', emoji: '⚙️', title: '25+ checks run',       desc: 'Lighthouse, SEO meta, security headers, SSL, mobile viewport — all in parallel within 30 seconds.' },
+        { step: '02', emoji: '⚙️', title: '33+ checks run',       desc: 'Lighthouse, SEO meta, security headers, SSL, mobile viewport, AI visibility — all in parallel within 30 seconds.' },
         { step: '03', emoji: '✨', title: 'Get AI fix prompts',   desc: 'Each issue has a plain-English explanation and a ready-to-paste prompt for Cursor or Bolt.' },
       ],
     },
@@ -148,13 +157,14 @@ const T = {
     },
     features: {
       eyebrow: 'What we check',
-      title: '25+ checks across 4 categories',
+      title: '33+ checks across 5 categories',
       sub: 'Every check that matters before your app goes live.',
       items: [
-        { title: 'Performance', desc: 'Real Lighthouse run in a headless browser. Core Web Vitals, LCP, CLS, INP, FCP, Speed Index.',       checks: ['LCP < 2.5s', 'CLS < 0.1', 'INP < 200ms', 'FCP < 1.8s', 'Speed Index'] },
-        { title: 'SEO & Social', desc: 'Complete meta audit. OG tags, Twitter cards, canonical, robots.txt, sitemap, structured data.',    checks: ['Title & description', 'OG image & tags', 'Canonical URL', 'Sitemap.xml', 'Twitter card'] },
-        { title: 'Security',    desc: '11 security checks: HTTP headers, SSL cert validity, exposed .env files, API key detection.',        checks: ['CSP header', 'HSTS', 'X-Frame-Options', 'SSL/TLS cert', 'Exposed .env'] },
-        { title: 'Mobile',      desc: 'Viewport meta, touch target sizes, font readability, horizontal overflow, tap target spacing.',    checks: ['Viewport meta', 'Touch 44px+', 'Font size ≥ 16px', 'No horiz. scroll', 'Tap spacing'] },
+        { title: 'Performance',    desc: 'Real Lighthouse run in a headless browser. Core Web Vitals, LCP, CLS, INP, FCP, Speed Index.',       checks: ['LCP < 2.5s', 'CLS < 0.1', 'INP < 200ms', 'FCP < 1.8s', 'Speed Index'] },
+        { title: 'SEO & Social',   desc: 'Complete meta audit. OG tags, Twitter cards, canonical, robots.txt, sitemap, structured data.',    checks: ['Title & description', 'OG image & tags', 'Canonical URL', 'Sitemap.xml', 'Twitter card'] },
+        { title: 'Security',       desc: '11 security checks: HTTP headers, SSL cert validity, exposed .env files, API key detection.',        checks: ['CSP header', 'HSTS', 'X-Frame-Options', 'SSL/TLS cert', 'Exposed .env'] },
+        { title: 'Mobile',         desc: 'Viewport meta, touch target sizes, font readability, horizontal overflow, tap target spacing.',    checks: ['Viewport meta', 'Touch 44px+', 'Font size ≥ 16px', 'No horiz. scroll', 'Tap spacing'] },
+        { title: 'AI Visibility',  desc: 'AEO + GEO checks: Schema.org, FAQ schema, llms.txt, AI crawler access, sitemap, author entity.',  checks: ['Schema.org JSON-LD', 'llms.txt', 'AI crawlers', 'Sitemap.xml', 'FAQ schema'] },
       ],
     },
     ai: {
@@ -219,13 +229,13 @@ const T = {
     hero: {
       h1a: 'Ваше vibe-coded приложение,',
       h1b: 'готово к деплою за 30 сек',
-      sub: 'Вставьте URL и получите полный аудит — производительность, SEO, безопасность, мобильный — с AI-промптами для Cursor и Bolt.',
+      sub: 'Вставьте URL и получите полный аудит — производительность, SEO, безопасность, мобильный, видимость для ИИ — с AI-промптами для Cursor и Bolt.',
       noSignup: 'Первый скан без регистрации',
       worksWith: 'Работает с',
     },
     stats: [
-      { value: '25+', label: 'автоматических проверок' },
-      { value: '4',   label: 'категории' },
+      { value: '33+', label: 'автоматических проверок' },
+      { value: '5',   label: 'категорий' },
       { value: '30с', label: 'среднее время скана' },
       { value: 'AI',  label: 'промпт на каждую проблему' },
     ],
@@ -234,7 +244,7 @@ const T = {
       title: 'Три шага до готовности',
       steps: [
         { step: '01', emoji: '🔗', title: 'Вставьте URL',          desc: 'Любой живой URL — Vercel, Netlify, свой домен. Без настройки и расширений.' },
-        { step: '02', emoji: '⚙️', title: 'Запускаем 25+ проверок', desc: 'Lighthouse, SEO-мета, заголовки безопасности, SSL, мобильный вьюпорт — параллельно за 30 секунд.' },
+        { step: '02', emoji: '⚙️', title: 'Запускаем 33+ проверок', desc: 'Lighthouse, SEO-мета, заголовки безопасности, SSL, мобильный вьюпорт, видимость для ИИ — параллельно за 30 секунд.' },
         { step: '03', emoji: '✨', title: 'Получаете AI-промпты',   desc: 'К каждой проблеме — понятное объяснение и готовый промпт для Cursor или Bolt.' },
       ],
     },
@@ -256,13 +266,14 @@ const T = {
     },
     features: {
       eyebrow: 'Что проверяем',
-      title: '25+ проверок по 4 категориям',
+      title: '33+ проверок по 5 категориям',
       sub: 'Всё что важно до деплоя вашего приложения.',
       items: [
-        { title: 'Производительность', desc: 'Реальный Lighthouse в headless-браузере. Core Web Vitals, LCP, CLS, INP, FCP, Speed Index.',  checks: ['LCP < 2.5с', 'CLS < 0.1', 'INP < 200мс', 'FCP < 1.8с', 'Speed Index'] },
-        { title: 'SEO и соцсети',      desc: 'Полный аудит мета-тегов. OG, Twitter cards, canonical, robots.txt, sitemap.',               checks: ['Title & description', 'OG изображение', 'Canonical URL', 'Sitemap.xml', 'Twitter card'] },
-        { title: 'Безопасность',       desc: '11 проверок: HTTP-заголовки, SSL, открытые .env файлы, обнаружение API-ключей.',             checks: ['CSP заголовок', 'HSTS', 'X-Frame-Options', 'SSL/TLS', 'Открытый .env'] },
-        { title: 'Мобильный',          desc: 'Viewport meta, размеры кнопок, читаемость шрифтов, горизонтальный скролл.',                 checks: ['Viewport meta', 'Тач 44px+', 'Шрифт ≥ 16px', 'Без гор. скролла', 'Отступы'] },
+        { title: 'Производительность',  desc: 'Реальный Lighthouse в headless-браузере. Core Web Vitals, LCP, CLS, INP, FCP, Speed Index.',  checks: ['LCP < 2.5с', 'CLS < 0.1', 'INP < 200мс', 'FCP < 1.8с', 'Speed Index'] },
+        { title: 'SEO и соцсети',       desc: 'Полный аудит мета-тегов. OG, Twitter cards, canonical, robots.txt, sitemap.',               checks: ['Title & description', 'OG изображение', 'Canonical URL', 'Sitemap.xml', 'Twitter card'] },
+        { title: 'Безопасность',        desc: '11 проверок: HTTP-заголовки, SSL, открытые .env файлы, обнаружение API-ключей.',             checks: ['CSP заголовок', 'HSTS', 'X-Frame-Options', 'SSL/TLS', 'Открытый .env'] },
+        { title: 'Мобильный',           desc: 'Viewport meta, размеры кнопок, читаемость шрифтов, горизонтальный скролл.',                 checks: ['Viewport meta', 'Тач 44px+', 'Шрифт ≥ 16px', 'Без гор. скролла', 'Отступы'] },
+        { title: 'Видимость для ИИ',    desc: 'AEO + GEO: Schema.org, FAQ-разметка, llms.txt, доступ ИИ-краулеров, sitemap, автор.',       checks: ['Schema.org JSON-LD', 'llms.txt', 'ИИ-краулеры', 'Sitemap.xml', 'FAQ schema'] },
       ],
     },
     ai: {
@@ -349,6 +360,7 @@ const FEATURE_META = [
   { Icon: IconSearch, color: '#4A9EFF' },
   { Icon: IconShield, color: '#FF4444' },
   { Icon: IconPhone,  color: '#3DDC84' },
+  { Icon: IconBot,    color: '#A78BFA' },
 ]
 
 // ─── page ─────────────────────────────────────────────────────────────────────
@@ -658,6 +670,7 @@ function ReportPreviewSection({ t }: { t: Translations }) {
                   { name: 'SEO',         score: 85, color: '#4A9EFF', icon: '🔍' },
                   { name: 'Security',    score: 61, color: '#FF4444', icon: '🛡️' },
                   { name: 'Mobile',      score: 93, color: '#3DDC84', icon: '📱' },
+                  { name: 'AI Visibility', score: 48, color: '#A78BFA', icon: '🤖' },
                 ].map(cat => (
                   <div key={cat.name} className="p-3 rounded-xl bg-[#1E1E21] border border-white/[0.05]">
                     <div className="flex items-center justify-between mb-2">

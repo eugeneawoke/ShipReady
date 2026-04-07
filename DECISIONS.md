@@ -49,6 +49,11 @@
 Переменная: `OPENAI_API_KEY` вместо `ANTHROPIC_API_KEY`.
 Отклонено: Anthropic — вернуться можно в v2 если нужно.
 
+### D-11: Добавить категорию ai_visibility (AEO + GEO)
+Решение: 5-я категория `ai_visibility` (8 проверок) — AEO (Schema.org, FAQ schema, heading hierarchy, thin content) + GEO (llms.txt, AI crawlers в robots.txt, sitemap.xml, author entity).
+Почему: Аудитория — indie hackers которые хотят попасть в ChatGPT/Perplexity/Google SGE. Ни один конкурент (Cheeeck, Lighthouse, VibeEval) это не проверяет — это наш дифференциатор.
+Веса scoring обновлены: performance×0.25 + seo×0.20 + security×0.25 + mobile×0.10 + ai_visibility×0.20 = 1.0.
+
 ### D-09: Lighthouse runner на Railway, фронт на Vercel
 Решение: Vercel (Hobby) деплоит фронт + все API кроме Lighthouse. Railway (Hobby $5/мес) запускает `/api/run-scan` — тяжёлый Lighthouse scan.
 Почему: Vercel Hobby лимит 1024MB RAM и 10 сек timeout. Lighthouse + Chromium требуют ~2GB и ~40 сек. Railway Hobby даёт до 8GB RAM, без timeout.

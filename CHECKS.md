@@ -313,6 +313,34 @@ Rules: no jargon without explanation · direct not scary · impact first · if s
 
 ---
 
+## lib/checks/ai-visibility.ts
+
+```typescript
+export async function runAIVisibilityChecks(url: string, html: string): Promise<Issue[]>
+```
+
+**AEO checks (Answer Engine Optimization):**
+
+| ID | Условие | Severity |
+|----|---------|----------|
+| `missing-schema-org` | Нет `<script type="application/ld+json">` | high |
+| `missing-faq-schema` | Есть FAQ контент, но нет FAQPage schema | medium |
+| `poor-heading-hierarchy` | H1→H3 без H2, или другие пропуски уровней | medium |
+| `thin-content` | Менее 300 слов текста на странице | medium |
+
+**GEO checks (Generative Engine Optimization):**
+
+| ID | Условие | Severity |
+|----|---------|----------|
+| `missing-llms-txt` | `/llms.txt` возвращает не 200 | medium |
+| `ai-crawlers-blocked` | `robots.txt` блокирует GPTBot/ClaudeBot/PerplexityBot/CCBot | high |
+| `missing-sitemap` | Нет `/sitemap.xml` и нет `<link rel="sitemap">` | medium |
+| `missing-author-entity` | Нет About/Contact ссылки и нет Organization/Person schema | low |
+
+**Scoring weight:** `ai_visibility × 0.20` (пересмотрены все веса: perf×0.25, seo×0.20, sec×0.25, mob×0.10, ai×0.20)
+
+---
+
 ## lib/ai/issue-templates.ts — формат
 
 ```typescript
@@ -362,13 +390,15 @@ Upload a 1200×630px image to your public folder.`,
   // ... остальные 23 шаблона по той же структуре
 };
 
-// Полный список всех 25 ID:
-// Performance: lcp-slow, cls-high, inp-slow, fcp-slow, perf-score-low, a11y-score-low
-// SEO/Social:  missing-title, title-length, missing-description, missing-h1, missing-canonical,
-//              missing-og-title, missing-og-description, missing-og-image, og-image-invalid,
-//              missing-twitter-card, placeholder-text
-// Security:    no-https, missing-hsts, missing-x-frame, missing-xcto, missing-referrer-policy,
-//              missing-csp, unsafe-csp, ssl-expiring, exposed-env-file, api-key-in-html, mixed-content
-// Mobile:      missing-viewport, blocking-viewport, missing-favicon, missing-touch-icon
-// Links:       broken-links
+// Полный список всех 33 ID:
+// Performance:   lcp-slow, cls-high, inp-slow, fcp-slow, perf-score-low, a11y-score-low
+// SEO/Social:    missing-title, title-length, missing-description, missing-h1, missing-canonical,
+//                missing-og-title, missing-og-description, missing-og-image, og-image-invalid,
+//                missing-twitter-card, placeholder-text
+// Security:      no-https, missing-hsts, missing-x-frame, missing-xcto, missing-referrer-policy,
+//                missing-csp, unsafe-csp, ssl-expiring, exposed-env-file, api-key-in-html, mixed-content
+// Mobile:        missing-viewport, blocking-viewport, missing-favicon, missing-touch-icon
+// Links:         broken-links
+// AI Visibility: missing-schema-org, missing-faq-schema, poor-heading-hierarchy, thin-content,
+//                missing-llms-txt, ai-crawlers-blocked, missing-sitemap, missing-author-entity
 ```

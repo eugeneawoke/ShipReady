@@ -39,7 +39,7 @@ export function ScanForm() {
           onChange={e => setUrl(e.target.value)}
           placeholder="https://your-app.vercel.app"
           disabled={loading}
-          className="flex-1 h-full px-4 rounded-lg font-mono text-sm bg-[#161618] border border-white/10 text-[#F1F0EE] placeholder:text-[#5A5955] focus:outline-none focus:border-white/20 disabled:opacity-50 transition-colors"
+          className="flex-1 h-full px-4 rounded-lg font-mono text-base sm:text-sm bg-[#161618] border border-white/10 text-[#F1F0EE] placeholder:text-[#5A5955] focus:outline-none focus:border-white/20 disabled:opacity-50 transition-colors"
         />
         <button
           type="submit"

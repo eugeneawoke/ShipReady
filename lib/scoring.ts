@@ -13,6 +13,7 @@ const TOTAL_CHECKS = {
   seo: 11,
   security: 11,
   mobile: 4,
+  ai_visibility: 8,
 }
 
 function scoreLabel(score: number): CategoryScore['label'] {
@@ -44,6 +45,7 @@ export function getAllIssues(result: ScanResult): Issue[] {
     ...result.seo.issues,
     ...result.security.issues,
     ...result.mobile.issues,
+    ...result.ai_visibility.issues,
   ]
 }
 
@@ -62,6 +64,7 @@ export function buildScanResult(
   secIssues: Issue[],
   mobIssues: Issue[],
   linkIssues: Issue[],
+  aiVisibilityIssues: Issue[],
 ): ScanResult {
   const perfIssues: Issue[] = []
 
@@ -168,12 +171,14 @@ export function buildScanResult(
   const seo = buildCategoryScore(allSeoIssues, 'seo')
   const security = buildCategoryScore(secIssues, 'security')
   const mobile = buildCategoryScore(mobIssues, 'mobile')
+  const ai_visibility = buildCategoryScore(aiVisibilityIssues, 'ai_visibility')
 
   const totalScore = Math.round(
-    performance.score * 0.3 +
-      seo.score * 0.25 +
-      security.score * 0.3 +
-      mobile.score * 0.15,
+    performance.score * 0.25 +
+      seo.score * 0.20 +
+      security.score * 0.25 +
+      mobile.score * 0.10 +
+      ai_visibility.score * 0.20,
   )
 
   return {
@@ -184,5 +189,6 @@ export function buildScanResult(
     seo,
     security,
     mobile,
+    ai_visibility,
   }
 }
