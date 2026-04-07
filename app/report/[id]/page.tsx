@@ -8,7 +8,7 @@ import { CategoryCard } from '@/components/report/CategoryCard'
 import { IssueCard } from '@/components/report/IssueCard'
 import { OGPreview } from '@/components/report/OGPreview'
 import type { Scan, Issue, IssueCategory } from '@/types/scan'
-import { createBrowserClient } from '@/lib/supabase'
+import { createBrowserClient } from '@/lib/supabase-browser'
 
 const SEVERITY_ORDER: Record<string, number> = {
   critical: 0,
