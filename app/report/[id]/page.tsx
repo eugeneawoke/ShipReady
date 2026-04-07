@@ -301,32 +301,41 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
           )}
         </section>
 
-        {/* Category tabs */}
+        {/* Category tabs — screen only */}
         <section>
-          <div className="flex border-b border-white/6 mb-6 overflow-x-auto">
-            {CATEGORIES.map(cat => {
-              const score = results[cat].score
-              const isActive = activeCategory === cat
-              return (
-                <button
-                  key={cat}
-                  onClick={() => setActiveCategory(cat)}
-                  className={`flex items-center gap-1.5 px-4 py-2.5 text-sm whitespace-nowrap relative transition-colors cursor-pointer ${
-                    isActive ? 'text-[#F1F0EE]' : 'text-[#8B8A85] hover:text-[#F1F0EE]'
-                  }`}
-                >
-                  {CATEGORY_LABELS[cat]}
-                  <span className="font-mono text-xs" style={{ color: isActive ? '#F1F0EE' : '#5A5955' }}>
-                    {score}
-                  </span>
-                  {isActive && (
-                    <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#6E56CF] rounded-t-full" />
-                  )}
-                </button>
-              )
-            })}
+          <div className="print:hidden">
+            <div className="flex border-b border-white/6 mb-6 overflow-x-auto">
+              {CATEGORIES.map(cat => {
+                const score = results[cat].score
+                const isActive = activeCategory === cat
+                return (
+                  <button
+                    key={cat}
+                    onClick={() => setActiveCategory(cat)}
+                    className={`flex items-center gap-1.5 px-4 py-2.5 text-sm whitespace-nowrap relative transition-colors cursor-pointer ${
+                      isActive ? 'text-[#F1F0EE]' : 'text-[#8B8A85] hover:text-[#F1F0EE]'
+                    }`}
+                  >
+                    {CATEGORY_LABELS[cat]}
+                    <span className="font-mono text-xs" style={{ color: isActive ? '#F1F0EE' : '#5A5955' }}>
+                      {score}
+                    </span>
+                    {isActive && (
+                      <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#6E56CF] rounded-t-full" />
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+            <CategoryCard category={activeCategory} data={results[activeCategory]} />
           </div>
-          <CategoryCard category={activeCategory} data={results[activeCategory]} />
+
+          {/* Print only — all categories stacked */}
+          <div className="hidden print:block space-y-4">
+            {CATEGORIES.map(cat => (
+              <CategoryCard key={cat} category={cat} data={results[cat]} />
+            ))}
+          </div>
         </section>
 
         {/* Fix everything prompts — hidden in print */}

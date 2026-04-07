@@ -312,48 +312,57 @@ h1, h2, h3, h4 {
 /* ─── Print styles ──────────────────────────────────────────────────── */
 
 @media print {
-  /* Force white background throughout */
   * {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
-  body {
+  html, body {
     background: #fff !important;
     color: #111 !important;
   }
 
-  /* Hide browser chrome artifacts */
+  /* All dark hex backgrounds → white */
+  [class*="bg-[#"] {
+    background-color: #fff !important;
+  }
+
+  /* Opacity-based backgrounds → transparent */
+  [class*="bg-white/"],
+  [class*="bg-black/"] {
+    background-color: transparent !important;
+  }
+
+  /* All dark hex text → near-black */
+  [class*="text-[#"] {
+    color: #222 !important;
+  }
+
+  /* Restore inline-style severity colors (set via style={}, not class) — no override needed */
+
+  /* Borders → light gray */
+  [class*="border-white"] {
+    border-color: #e0e0e0 !important;
+  }
+
+  /* Un-clamp AI summary so full text prints */
+  [class*="line-clamp"] {
+    -webkit-line-clamp: unset !important;
+    display: block !important;
+    overflow: visible !important;
+  }
+
+  /* Header — de-sticky, no blur */
   header {
     position: static !important;
     background: transparent !important;
-    border: none !important;
+    border-bottom: 1px solid #e0e0e0 !important;
     backdrop-filter: none !important;
-  }
-
-  /* Keep dark cards but ensure text is readable */
-  [class*="bg-[#161618]"] {
-    background: #f8f8f8 !important;
-  }
-
-  [class*="bg-[#1E1E21]"] {
-    background: #f0f0f0 !important;
-  }
-
-  [class*="text-[#F1F0EE]"],
-  [class*="text-[#8B8A85]"],
-  [class*="text-[#5A5955]"] {
-    color: #333 !important;
   }
 
   /* Page breaks */
   section {
     break-inside: avoid;
-  }
-
-  /* Category tabs — hide tab bar, show all categories stacked */
-  .category-tabs-bar {
-    display: none !important;
   }
 }
 
