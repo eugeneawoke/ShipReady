@@ -6,8 +6,8 @@ import { FREE_SCAN_LIMIT } from '@/lib/auth'
 
 export const maxDuration = 60
 
-// Anonymous users: max scans per IP per hour
-const ANON_HOURLY_LIMIT = 5
+// Anonymous users: same monthly limit as free tier, tracked by IP
+const ANON_MONTHLY_LIMIT = 3
 
 function getClientIp(request: NextRequest): string {
   return (
@@ -78,20 +78,20 @@ export async function POST(request: NextRequest) {
       // Auth check is best-effort — unauthenticated scans proceed to IP rate limit
     }
 
-    // IP-based rate limit for anonymous users
+    // IP-based rate limit for anonymous users — same as free tier (3/month)
     if (!userId) {
       const ip = getClientIp(request)
-      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
       const { count } = await supabase
         .from('scans')
         .select('id', { count: 'exact', head: true })
         .eq('ip_address', ip)
         .is('user_id', null)
-        .gte('created_at', oneHourAgo)
+        .gte('created_at', thirtyDaysAgo)
 
-      if ((count ?? 0) >= ANON_HOURLY_LIMIT) {
+      if ((count ?? 0) >= ANON_MONTHLY_LIMIT) {
         return NextResponse.json(
-          { error: 'Rate limit exceeded. Sign in for more scans.', upgradeUrl: '/pricing' },
+          { error: 'Free limit reached. Sign in to continue.', upgradeUrl: '/pricing' },
           { status: 429 }
         )
       }
@@ -129,10 +129,14 @@ export async function POST(request: NextRequest) {
           },
           body: JSON.stringify({ url, scanId: data.id }),
         }).then(async res => {
+          console.log(`[scan] Railway response: ${res.status} for scanId=${data.id}`)
           if (!res.ok) {
+            const body = await res.text().catch(() => '')
+            console.error(`[scan] Railway error body: ${body}`)
             await supabase.from('scans').update({ status: 'error' }).eq('id', data.id)
           }
-        }).catch(async () => {
+        }).catch(async (err) => {
+          console.error(`[scan] Railway fetch failed: ${err}`)
           await supabase.from('scans').update({ status: 'error' }).eq('id', data.id)
         })
       )
