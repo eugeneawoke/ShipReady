@@ -2,10 +2,16 @@ import OpenAI from 'openai'
 import type { ScanResult, Issue } from '@/types/scan'
 import { getAllIssues } from '@/lib/scoring'
 
+interface IssuePrompt {
+  technical: string
+  vibe: string
+}
+
 interface AIOutput {
   summary: string
   technicalPrompt: string
   vibePrompt: string
+  issuePrompts: Record<string, IssuePrompt>
 }
 
 export async function generateAISummary(result: ScanResult): Promise<AIOutput> {
@@ -17,18 +23,20 @@ export async function generateAISummary(result: ScanResult): Promise<AIOutput> {
   const high = activeIssues.filter((i: Issue) => i.severity === 'high').length
 
   const issueList = activeIssues
-    .slice(0, 15)
-    .map((i: Issue) => `- [${i.severity.toUpperCase()}] ${i.title}${i.value ? ` (${i.value})` : ''}`)
+    .slice(0, 20)
+    .map((i: Issue) => `- [${i.severity.toUpperCase()}] ${i.id}: ${i.title}${i.value ? ` (${i.value})` : ''}`)
     .join('\n')
+
+  const issueIds = activeIssues.slice(0, 20).map((i: Issue) => i.id)
 
   const completion = await client.chat.completions.create({
     model: 'gpt-4o-mini',
-    max_tokens: 1000,
+    max_tokens: 3000,
     response_format: { type: 'json_object' },
     messages: [
       {
         role: 'user',
-        content: `You are a web quality expert. Analyze this site audit and return a JSON object.
+        content: `You are a web quality expert helping indie hackers fix their sites. Analyze this audit and return a JSON object.
 
 URL: ${result.url}
 Score: ${result.totalScore}/100
@@ -36,14 +44,21 @@ Critical: ${critical}, High: ${high}
 Performance: ${result.performance.score} | SEO: ${result.seo.score} | Security: ${result.security.score} | Mobile: ${result.mobile.score} | AI Visibility: ${result.ai_visibility.score}
 
 Issues found:
-${issueList || 'No issues found — great job!'}
+${issueList || 'No issues — site looks great!'}
 
-Return this exact JSON:
+Return EXACTLY this JSON (no extra fields):
 {
-  "summary": "2-3 sentence plain-English summary for a non-technical indie hacker. No jargon. Direct, not scary. Impact first. If score > 70, end with encouragement.",
-  "technicalPrompt": "A single ready-to-paste prompt for code-aware AI tools (Cursor, Windsurf, Claude Code). Reference the actual URL ${result.url}. Be specific: mention exact file paths (e.g. app/layout.tsx, next.config.js), HTTP response headers to add, meta tags to insert. Write as step-by-step instructions to an AI coding assistant that has full codebase access.",
-  "vibePrompt": "A single ready-to-paste prompt for no-code/vibe AI builders (Bolt, Lovable, v0, Replit). Reference the actual URL ${result.url}. High-level and UI-focused: describe what to add or change without mentioning file paths. Use plain language a non-developer understands. Focus on outcomes (e.g. 'add a security header', 'make the site mobile-friendly') not implementation details."
-}`,
+  "summary": "2-3 sentence plain-English summary for a non-technical indie hacker. No jargon. Direct, not scary. If score > 70, end with encouragement.",
+  "technicalPrompt": "A ready-to-paste prompt for code-aware AI tools (Cursor, Windsurf, Claude Code, Codex). Must reference URL ${result.url}. Include specific file paths (app/layout.tsx, next.config.js, etc), exact HTTP headers to add, meta tags to insert. Step-by-step instructions for an AI that has full codebase access. Cover ALL issues found.",
+  "vibePrompt": "A ready-to-paste prompt for no-code AI builders (Bolt, Lovable, v0, Replit, ChatGPT). Must reference URL ${result.url}. High-level and outcome-focused. No file paths. Plain language. Cover ALL issues found.",
+  "issuePrompts": {
+    ${issueIds.map(id => `"${id}": { "technical": "...", "vibe": "..." }`).join(',\n    ')}
+  }
+}
+
+For each issuePrompts entry:
+- "technical": 2-5 step fix for this SPECIFIC issue for Cursor/Windsurf/Claude Code/Codex. Reference exact file paths and code. Be direct and actionable.
+- "vibe": 1-3 sentence plain-language fix for this SPECIFIC issue for Bolt/Lovable/v0. No file paths. Focus on what to add/change and why.`,
       },
     ],
   })
@@ -55,8 +70,9 @@ Return this exact JSON:
       summary: parsed.summary ?? '',
       technicalPrompt: parsed.technicalPrompt ?? '',
       vibePrompt: parsed.vibePrompt ?? '',
+      issuePrompts: parsed.issuePrompts ?? {},
     }
   } catch {
-    return { summary: raw, technicalPrompt: '', vibePrompt: '' }
+    return { summary: raw, technicalPrompt: '', vibePrompt: '', issuePrompts: {} }
   }
 }

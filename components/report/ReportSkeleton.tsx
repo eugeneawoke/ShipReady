@@ -46,6 +46,44 @@ export function ReportSkeleton({ status }: { status: string }) {
     return () => clearInterval(barTimer)
   }, [status])
 
+  if (status === 'completing') {
+    return (
+      <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE] flex items-center justify-center transition-opacity duration-500">
+        <div className="max-w-sm w-full px-6">
+          <div className="mb-8">
+            <p className="text-sm text-[#3DDC84] mb-3">✓ Scan complete!</p>
+            <div className="h-[3px] bg-[#1E1E21] rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full"
+                style={{
+                  width: '100%',
+                  background: 'linear-gradient(90deg, #6E56CF, #4A9EFF)',
+                  transition: 'width 0.4s ease-out',
+                }}
+              />
+            </div>
+            <p className="mt-2 text-xs text-[#5A5955]">Loading your report…</p>
+          </div>
+          <div className="space-y-2">
+            {STEPS.map((step, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-lg border"
+                style={{
+                  background: '#161618',
+                  borderColor: 'rgba(255,255,255,0.06)',
+                }}
+              >
+                <CheckCircle2 className="w-4 h-4 shrink-0 text-[#3DDC84]" />
+                <span className="text-sm text-[#5A5955]">{step.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   if (status === 'error') {
     return (
       <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE] flex items-center justify-center">

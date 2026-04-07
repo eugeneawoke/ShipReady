@@ -35,6 +35,7 @@ export interface ScanResult {
   aiSummary?: string;
   aiTechnicalPrompt?: string;
   aiVibePrompt?: string;
+  issuePrompts?: Record<string, { technical: string; vibe: string }>;
 }
 
 export interface Scan {

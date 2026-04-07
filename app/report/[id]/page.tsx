@@ -9,15 +9,17 @@ import { IssueCard } from '@/components/report/IssueCard'
 import type { Scan, Issue, IssueCategory } from '@/types/scan'
 import { createBrowserClient } from '@/lib/supabase-browser'
 
-const AI_TOOLS = [
-  { id: 'cursor',   label: 'Cursor',   type: 'technical' as const },
-  { id: 'windsurf', label: 'Windsurf', type: 'technical' as const },
-  { id: 'claude',   label: 'Claude',   type: 'technical' as const },
-  { id: 'bolt',     label: 'Bolt',     type: 'vibe' as const },
-  { id: 'lovable',  label: 'Lovable',  type: 'vibe' as const },
-  { id: 'v0',       label: 'v0',       type: 'vibe' as const },
-  { id: 'replit',   label: 'Replit',   type: 'vibe' as const },
-  { id: 'openai',   label: 'ChatGPT',  type: 'vibe' as const },
+const FIX_TABS = [
+  {
+    id: 'technical' as const,
+    label: 'Technical',
+    subtitle: 'Cursor · Windsurf · Claude Code · Codex',
+  },
+  {
+    id: 'vibe' as const,
+    label: 'Vibe',
+    subtitle: 'Bolt · Lovable · v0 · Replit · ChatGPT',
+  },
 ]
 
 function FixPromptSection({ technicalPrompt, vibePrompt, isPro }: {
@@ -25,13 +27,14 @@ function FixPromptSection({ technicalPrompt, vibePrompt, isPro }: {
   vibePrompt?: string
   isPro: boolean
 }) {
-  const [activeTool, setActiveTool] = useState('cursor')
+  const [activeTab, setActiveTab] = useState<'technical' | 'vibe'>('technical')
   const [copied, setCopied] = useState(false)
 
-  const tool = AI_TOOLS.find(t => t.id === activeTool) ?? AI_TOOLS[0]
-  const prompt = tool.type === 'technical'
+  const prompt = activeTab === 'technical'
     ? (technicalPrompt ?? vibePrompt ?? '')
     : (vibePrompt ?? technicalPrompt ?? '')
+
+  const hasPrompt = !!(technicalPrompt || vibePrompt)
 
   function copy() {
     if (!prompt) return
@@ -40,23 +43,26 @@ function FixPromptSection({ technicalPrompt, vibePrompt, isPro }: {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const hasPrompt = !!(technicalPrompt || vibePrompt)
-
   return (
     <div className="rounded-xl bg-[#161618] border border-white/6 overflow-hidden">
-      {/* Tool selector */}
-      <div className="flex overflow-x-auto border-b border-white/6">
-        {AI_TOOLS.map(t => (
+      {/* 2 big tabs */}
+      <div className="grid grid-cols-2 border-b border-white/6">
+        {FIX_TABS.map(tab => (
           <button
-            key={t.id}
-            onClick={() => setActiveTool(t.id)}
-            className={`px-3 py-2.5 text-xs whitespace-nowrap transition-colors relative shrink-0 cursor-pointer ${
-              activeTool === t.id ? 'text-[#F1F0EE]' : 'text-[#5A5955] hover:text-[#8B8A85]'
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`py-3 px-4 text-left transition-colors cursor-pointer relative ${
+              activeTab === tab.id ? 'bg-[#1A1625]' : 'hover:bg-white/[0.02]'
             }`}
           >
-            {t.label}
-            {activeTool === t.id && (
-              <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#6E56CF] rounded-t-full" />
+            <span className={`text-sm font-medium block ${
+              activeTab === tab.id ? 'text-[#F1F0EE]' : 'text-[#5A5955]'
+            }`}>
+              {tab.label}
+            </span>
+            <span className="text-[11px] text-[#5A5955] mt-0.5 block">{tab.subtitle}</span>
+            {activeTab === tab.id && (
+              <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#6E56CF]" />
             )}
           </button>
         ))}
@@ -64,55 +70,46 @@ function FixPromptSection({ technicalPrompt, vibePrompt, isPro }: {
 
       {/* Prompt content */}
       <div className="p-4">
-        <p className="text-[11px] text-[#5A5955] mb-3">
-          {tool.type === 'technical'
-            ? 'Code-aware prompt — paste into your editor\'s AI chat'
-            : 'High-level prompt — paste into the AI builder\'s chat or prompt field'}
-        </p>
-        <div className="relative">
-          {!hasPrompt ? (
-            <div className="text-xs text-[#5A5955] bg-[#1E1E21] rounded-lg p-3 text-center">
-              AI prompt not available for this scan
-            </div>
-          ) : isPro ? (
-            <>
-              <pre className="text-xs text-[#E8C77D] bg-[#1E1E21] rounded-lg p-3 overflow-x-auto whitespace-pre-wrap leading-relaxed font-mono max-h-56">
-                {prompt}
-              </pre>
-              <div className="mt-2">
-                <button
-                  onClick={copy}
-                  className="flex items-center gap-1.5 text-xs text-[#8B8A85] hover:text-[#F1F0EE] transition-colors cursor-pointer"
+        {!hasPrompt ? (
+          <div className="text-xs text-[#5A5955] bg-[#1E1E21] rounded-lg p-3 text-center">
+            AI prompt not available for this scan
+          </div>
+        ) : isPro ? (
+          <>
+            <pre className="text-xs text-[#E8C77D] bg-[#1E1E21] rounded-lg p-3 overflow-x-auto whitespace-pre-wrap leading-relaxed font-mono max-h-56">
+              {prompt}
+            </pre>
+            <button
+              onClick={copy}
+              className="flex items-center gap-1.5 text-xs text-[#8B8A85] hover:text-[#F1F0EE] transition-colors mt-2 cursor-pointer"
+            >
+              {copied
+                ? <><Check className="w-3 h-3 text-[#3DDC84]" /><span className="text-[#3DDC84]">Copied</span></>
+                : <><Copy className="w-3 h-3" />Copy prompt</>
+              }
+            </button>
+          </>
+        ) : (
+          <div className="relative">
+            <pre
+              className="text-xs text-[#E8C77D] bg-[#1E1E21] rounded-lg p-3 overflow-x-auto whitespace-pre-wrap leading-relaxed font-mono max-h-56 select-none"
+              style={{ filter: 'blur(5px)', userSelect: 'none' }}
+            >
+              {prompt}
+            </pre>
+            <div className="absolute inset-0 flex items-center justify-center bg-[#0E0E0F]/60 rounded-lg backdrop-blur-[2px]">
+              <div className="flex flex-col items-center gap-2">
+                <Lock className="w-4 h-4 text-[#8B8A85]" />
+                <a
+                  href="/pricing"
+                  className="text-xs text-white bg-[#6E56CF] hover:bg-[#7C68D4] px-3 py-1.5 rounded-md transition-colors"
                 >
-                  {copied
-                    ? <><Check className="w-3 h-3 text-[#3DDC84]" /><span className="text-[#3DDC84]">Copied</span></>
-                    : <><Copy className="w-3 h-3" />Copy prompt</>
-                  }
-                </button>
-              </div>
-            </>
-          ) : (
-            <div className="relative">
-              <pre
-                className="text-xs text-[#E8C77D] bg-[#1E1E21] rounded-lg p-3 overflow-x-auto whitespace-pre-wrap leading-relaxed font-mono max-h-56 select-none"
-                style={{ filter: 'blur(5px)', userSelect: 'none' }}
-              >
-                {prompt}
-              </pre>
-              <div className="absolute inset-0 flex items-center justify-center bg-[#0E0E0F]/60 rounded-lg backdrop-blur-[2px]">
-                <div className="flex flex-col items-center gap-2">
-                  <Lock className="w-4 h-4 text-[#8B8A85]" />
-                  <a
-                    href="/pricing"
-                    className="text-xs text-white bg-[#6E56CF] hover:bg-[#7C68D4] px-3 py-1.5 rounded-md transition-colors"
-                  >
-                    Upgrade to Pro →
-                  </a>
-                </div>
+                  Upgrade to Pro →
+                </a>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -146,6 +143,8 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
   // true while we haven't received the first response — shows minimal spinner, not scan skeleton
   const [initialLoading, setInitialLoading] = useState(true)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [completing, setCompleting] = useState(false)
+  const [reportVisible, setReportVisible] = useState(false)
 
   useEffect(() => {
     params.then(p => setId(p.id))
@@ -187,6 +186,15 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
       if (data.status === 'done' || data.status === 'error') {
         clearInterval(interval)
         clearTimeout(timeout)
+        if (data.status === 'done') {
+          setCompleting(true)
+          setTimeout(() => {
+            setCompleting(false)
+            setTimeout(() => setReportVisible(true), 50)
+          }, 1200)
+        } else {
+          setReportVisible(true)
+        }
       }
     }
 
@@ -204,8 +212,8 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
     )
   }
 
-  if (!scan || scan.status === 'pending' || scan.status === 'running') {
-    return <ReportSkeleton status={scan?.status ?? 'pending'} />
+  if (!scan || scan.status === 'pending' || scan.status === 'running' || completing) {
+    return <ReportSkeleton status={completing ? 'completing' : (scan?.status ?? 'pending')} />
   }
 
   if (scan.status === 'error' || !scan.results) {
@@ -232,7 +240,10 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
   }
 
   return (
-    <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE]">
+    <div
+      className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE] transition-opacity duration-500"
+      style={{ opacity: reportVisible ? 1 : 0 }}
+    >
       {/* Nav */}
       <header className="sticky top-0 z-10 bg-[#0E0E0F]/90 backdrop-blur-md border-b border-white/6">
         <div className="max-w-3xl mx-auto px-4 h-14 flex items-center gap-3">

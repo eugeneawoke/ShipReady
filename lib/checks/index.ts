@@ -57,6 +57,21 @@ export async function runAllChecks(url: string, scanId: string): Promise<void> {
         result.aiSummary = ai.summary
         result.aiTechnicalPrompt = ai.technicalPrompt
         result.aiVibePrompt = ai.vibePrompt
+        result.issuePrompts = ai.issuePrompts
+
+        // Upgrade static per-issue prompts with AI-generated ones
+        const categories = ['performance', 'seo', 'security', 'mobile', 'ai_visibility'] as const
+        for (const cat of categories) {
+          result[cat].issues = result[cat].issues.map(issue => {
+            const aiPrompt = ai.issuePrompts?.[issue.id]
+            if (!aiPrompt) return issue
+            return {
+              ...issue,
+              cursorPrompt: aiPrompt.technical || issue.cursorPrompt,
+              boltPrompt: aiPrompt.vibe || issue.boltPrompt,
+            }
+          })
+        }
       } catch (e) {
         console.error('[checks] AI summary failed:', e)
       }
