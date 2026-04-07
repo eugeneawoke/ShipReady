@@ -16,7 +16,16 @@ export async function runLighthouse(url: string) {
 
   const browser = await puppeteer.launch({
     args: systemChromium
-      ? ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+      ? [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-gpu',
+          '--disable-software-rasterizer',
+          '--no-first-run',
+          '--no-zygote',
+          '--single-process',
+        ]
       : chromium.args,
     defaultViewport: chromium.defaultViewport,
     executablePath,
