@@ -6,9 +6,11 @@
 
 export async function runLighthouse(url: string) {
   // eval prevents Turbopack from tracing into these packages at build time
-  const chromium   = eval("require('@sparticuz/chromium')")  as any
-  const lighthouse = eval("require('lighthouse')")           as any
-  const puppeteer  = eval("require('puppeteer-core')")       as any
+  const chromium        = eval("require('@sparticuz/chromium')")  as any
+  const lighthouseMod   = eval("require('lighthouse')")           as any
+  // Lighthouse 11+ is ESM-wrapped — the callable is at .default
+  const lighthouse      = (lighthouseMod.default ?? lighthouseMod) as any
+  const puppeteer       = eval("require('puppeteer-core')")       as any
 
   // On Railway (Docker) use the system Chromium; elsewhere use @sparticuz/chromium
   const systemChromium = process.env.CHROMIUM_PATH
