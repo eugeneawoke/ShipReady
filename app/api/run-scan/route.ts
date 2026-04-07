@@ -34,12 +34,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid scanId' }, { status: 400 })
   }
 
-  try {
-    const { runAllChecks } = await import('@/lib/checks/index')
-    await runAllChecks(url, scanId)
-    return NextResponse.json({ ok: true })
-  } catch (e) {
-    console.error('run-scan failed:', e)
-    return NextResponse.json({ error: 'Scan failed' }, { status: 500 })
-  }
+  // Respond immediately — Railway is a persistent server so the Promise
+  // continues running after the response is sent (unlike Vercel serverless)
+  const { runAllChecks } = await import('@/lib/checks/index')
+  runAllChecks(url, scanId).catch((e: unknown) => {
+    console.error('run-scan background error:', e)
+  })
+
+  return NextResponse.json({ ok: true }, { status: 202 })
 }

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { waitUntil } from '@vercel/functions'
 import { isValidUrl, normalizeUrl } from '@/lib/utils'
 import { createClient, createServiceClient } from '@/lib/supabase'
 import { FREE_SCAN_LIMIT } from '@/lib/auth'
@@ -117,21 +118,24 @@ export async function POST(request: NextRequest) {
     const scannerSecret = process.env.SCANNER_SECRET
 
     if (railwayUrl && scannerSecret) {
-      // Delegate to Railway scanner — fire and forget, but catch failures
-      fetch(`${railwayUrl}/api/run-scan`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${scannerSecret}`,
-        },
-        body: JSON.stringify({ url, scanId: data.id }),
-      }).then(async res => {
-        if (!res.ok) {
+      // Delegate to Railway scanner — use waitUntil so Vercel keeps the function
+      // alive until Railway acknowledges (Railway responds 202 immediately)
+      waitUntil(
+        fetch(`${railwayUrl}/api/run-scan`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${scannerSecret}`,
+          },
+          body: JSON.stringify({ url, scanId: data.id }),
+        }).then(async res => {
+          if (!res.ok) {
+            await supabase.from('scans').update({ status: 'error' }).eq('id', data.id)
+          }
+        }).catch(async () => {
           await supabase.from('scans').update({ status: 'error' }).eq('id', data.id)
-        }
-      }).catch(async () => {
-        await supabase.from('scans').update({ status: 'error' }).eq('id', data.id)
-      })
+        })
+      )
     } else if (process.env.NODE_ENV === 'development') {
       // Fallback: run locally in dev only
       setTimeout(async () => {
