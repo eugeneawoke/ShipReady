@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { ArrowLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { getUserWithPlan } from '@/lib/auth'
 import { SignOutButton } from '@/components/auth/SignOutButton'
@@ -25,8 +26,8 @@ export default async function DashboardPage() {
       {/* Nav */}
       <nav className="border-b border-white/[0.06] bg-[#0E0E0F]/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight hover:opacity-80 transition-opacity">
-            <img src="/logo.svg" alt="ShipReady" className="w-6 h-6" />
+          <Link href="/" className="flex items-center gap-1.5 text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors">
+            <ArrowLeft className="w-4 h-4" />
             ShipReady
           </Link>
           <div className="flex items-center gap-4">
