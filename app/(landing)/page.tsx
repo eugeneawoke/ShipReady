@@ -125,7 +125,7 @@ const T = {
       worksWith: 'Works with',
     },
     stats: [
-      { value: '33+', label: 'automated checks' },
+      { value: '40+', label: 'automated checks' },
       { value: '5',   label: 'categories covered' },
       { value: '30s', label: 'average scan time' },
       { value: 'AI',  label: 'fix prompt per issue' },
@@ -135,7 +135,7 @@ const T = {
       title: 'Three steps to ship-ready',
       steps: [
         { step: '01', emoji: '🔗', title: 'Paste your URL',       desc: 'Drop any live URL — Vercel, Netlify, custom domain. No setup or browser extension needed.' },
-        { step: '02', emoji: '⚙️', title: '33+ checks run',       desc: 'Lighthouse, SEO meta, security headers, SSL, mobile viewport, AI visibility — all in parallel within 30 seconds.' },
+        { step: '02', emoji: '⚙️', title: '40+ checks run',       desc: 'Lighthouse, SEO meta, security headers, SSL, mobile viewport, AI visibility — all in parallel within 30 seconds.' },
         { step: '03', emoji: '✨', title: 'Get AI fix prompts',   desc: 'Each issue has a plain-English explanation and a ready-to-paste prompt for Cursor or Bolt.' },
       ],
     },
@@ -157,7 +157,7 @@ const T = {
     },
     features: {
       eyebrow: 'What we check',
-      title: '33+ checks across 5 categories',
+      title: '40+ checks across 5 categories',
       sub: 'Every check that matters before your app goes live.',
       items: [
         { title: 'Performance',    desc: 'Real Lighthouse run in a headless browser. Core Web Vitals, LCP, CLS, INP, FCP, Speed Index.',       checks: ['LCP < 2.5s', 'CLS < 0.1', 'INP < 200ms', 'FCP < 1.8s', 'Speed Index'] },
@@ -234,7 +234,7 @@ const T = {
       worksWith: 'Работает с',
     },
     stats: [
-      { value: '33+', label: 'автоматических проверок' },
+      { value: '40+', label: 'автоматических проверок' },
       { value: '5',   label: 'категорий' },
       { value: '30с', label: 'среднее время скана' },
       { value: 'AI',  label: 'промпт на каждую проблему' },
@@ -244,7 +244,7 @@ const T = {
       title: 'Три шага до готовности',
       steps: [
         { step: '01', emoji: '🔗', title: 'Вставьте URL',          desc: 'Любой живой URL — Vercel, Netlify, свой домен. Без настройки и расширений.' },
-        { step: '02', emoji: '⚙️', title: 'Запускаем 33+ проверок', desc: 'Lighthouse, SEO-мета, заголовки безопасности, SSL, мобильный вьюпорт, видимость для ИИ — параллельно за 30 секунд.' },
+        { step: '02', emoji: '⚙️', title: 'Запускаем 40+ проверок', desc: 'Lighthouse, SEO-мета, заголовки безопасности, SSL, мобильный вьюпорт, видимость для ИИ — параллельно за 30 секунд.' },
         { step: '03', emoji: '✨', title: 'Получаете AI-промпты',   desc: 'К каждой проблеме — понятное объяснение и готовый промпт для Cursor или Bolt.' },
       ],
     },
@@ -266,7 +266,7 @@ const T = {
     },
     features: {
       eyebrow: 'Что проверяем',
-      title: '33+ проверок по 5 категориям',
+      title: '40+ проверок по 5 категориям',
       sub: 'Всё что важно до деплоя вашего приложения.',
       items: [
         { title: 'Производительность',  desc: 'Реальный Lighthouse в headless-браузере. Core Web Vitals, LCP, CLS, INP, FCP, Speed Index.',  checks: ['LCP < 2.5с', 'CLS < 0.1', 'INP < 200мс', 'FCP < 1.8с', 'Speed Index'] },

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { ChevronDown, Share2 } from 'lucide-react'
+import { ChevronDown, Share2, Check, Copy, Lock } from 'lucide-react'
 import { ReportSkeleton } from '@/components/report/ReportSkeleton'
 import { ScoreRing } from '@/components/report/ScoreRing'
 import { CategoryCard } from '@/components/report/CategoryCard'
@@ -9,6 +9,106 @@ import { IssueCard } from '@/components/report/IssueCard'
 import { OGPreview } from '@/components/report/OGPreview'
 import type { Scan, Issue, IssueCategory } from '@/types/scan'
 import { createBrowserClient } from '@/lib/supabase-browser'
+
+const AI_TOOLS = [
+  { id: 'cursor',   label: 'Cursor',   type: 'technical' as const },
+  { id: 'windsurf', label: 'Windsurf', type: 'technical' as const },
+  { id: 'claude',   label: 'Claude',   type: 'technical' as const },
+  { id: 'bolt',     label: 'Bolt',     type: 'vibe' as const },
+  { id: 'lovable',  label: 'Lovable',  type: 'vibe' as const },
+  { id: 'v0',       label: 'v0',       type: 'vibe' as const },
+  { id: 'replit',   label: 'Replit',   type: 'vibe' as const },
+  { id: 'openai',   label: 'ChatGPT',  type: 'vibe' as const },
+]
+
+function FixPromptSection({ technicalPrompt, vibePrompt, isPro }: {
+  technicalPrompt: string
+  vibePrompt: string
+  isPro: boolean
+}) {
+  const [activeTool, setActiveTool] = useState('cursor')
+  const [copied, setCopied] = useState(false)
+
+  const tool = AI_TOOLS.find(t => t.id === activeTool) ?? AI_TOOLS[0]
+  const prompt = tool.type === 'technical' ? technicalPrompt : vibePrompt
+
+  function copy() {
+    navigator.clipboard.writeText(prompt)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <div className="rounded-xl bg-[#161618] border border-white/6 overflow-hidden">
+      {/* Tool selector */}
+      <div className="flex overflow-x-auto border-b border-white/6">
+        {AI_TOOLS.map(t => (
+          <button
+            key={t.id}
+            onClick={() => setActiveTool(t.id)}
+            className={`px-3 py-2.5 text-xs whitespace-nowrap transition-colors relative shrink-0 ${
+              activeTool === t.id ? 'text-[#F1F0EE]' : 'text-[#5A5955] hover:text-[#8B8A85]'
+            }`}
+          >
+            {t.label}
+            {activeTool === t.id && (
+              <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#6E56CF] rounded-t-full" />
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Prompt content */}
+      <div className="p-4">
+        <p className="text-[11px] text-[#5A5955] mb-3">
+          {tool.type === 'technical'
+            ? 'Code-aware prompt — paste into your editor\'s AI chat'
+            : 'High-level prompt — paste into the AI builder\'s chat or prompt field'}
+        </p>
+        <div className="relative">
+          {isPro ? (
+            <>
+              <pre className="text-xs text-[#E8C77D] bg-[#1E1E21] rounded-lg p-3 overflow-x-auto whitespace-pre-wrap leading-relaxed font-mono max-h-56">
+                {prompt}
+              </pre>
+              <div className="mt-2">
+                <button
+                  onClick={copy}
+                  className="flex items-center gap-1.5 text-xs text-[#8B8A85] hover:text-[#F1F0EE] transition-colors"
+                >
+                  {copied
+                    ? <><Check className="w-3 h-3 text-[#3DDC84]" /><span className="text-[#3DDC84]">Copied</span></>
+                    : <><Copy className="w-3 h-3" />Copy prompt</>
+                  }
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className="relative">
+              <pre
+                className="text-xs text-[#E8C77D] bg-[#1E1E21] rounded-lg p-3 overflow-x-auto whitespace-pre-wrap leading-relaxed font-mono max-h-56 select-none"
+                style={{ filter: 'blur(5px)', userSelect: 'none' }}
+              >
+                {prompt}
+              </pre>
+              <div className="absolute inset-0 flex items-center justify-center bg-[#0E0E0F]/60 rounded-lg backdrop-blur-[2px]">
+                <div className="flex flex-col items-center gap-2">
+                  <Lock className="w-4 h-4 text-[#8B8A85]" />
+                  <a
+                    href="/pricing"
+                    className="text-xs text-white bg-[#6E56CF] hover:bg-[#7C68D4] px-3 py-1.5 rounded-md transition-colors"
+                  >
+                    Upgrade to Pro →
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 const SEVERITY_ORDER: Record<string, number> = {
   critical: 0,
@@ -184,13 +284,25 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
           <CategoryCard category={activeCategory} data={results[activeCategory]} />
         </section>
 
+        {/* Fix everything prompts */}
+        {(results.aiTechnicalPrompt || results.aiVibePrompt) && (
+          <section>
+            <h2 className="text-sm font-medium text-[#F1F0EE] mb-4">Fix everything</h2>
+            <FixPromptSection
+              technicalPrompt={results.aiTechnicalPrompt ?? ''}
+              vibePrompt={results.aiVibePrompt ?? ''}
+              isPro={isPro}
+            />
+          </section>
+        )}
+
         {/* All issues */}
         {activeIssues.length > 0 && (
           <section>
             <h2 className="text-sm font-medium text-[#F1F0EE] mb-4">Issues to fix</h2>
             <div className="space-y-2">
               {activeIssues.map(issue => (
-                <IssueCard key={issue.id} issue={issue} isPro={isPro} />
+                <IssueCard key={issue.id} issue={issue} />
               ))}
             </div>
           </section>
@@ -228,7 +340,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
             {passedOpen && passedIssues.length > 0 && (
               <div className="mt-3 space-y-2">
                 {passedIssues.map(issue => (
-                  <IssueCard key={issue.id} issue={issue} isPro={isPro} />
+                  <IssueCard key={issue.id} issue={issue} />
                 ))}
               </div>
             )}

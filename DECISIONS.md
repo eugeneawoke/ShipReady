@@ -54,6 +54,10 @@
 Почему: Аудитория — indie hackers которые хотят попасть в ChatGPT/Perplexity/Google SGE. Ни один конкурент (Cheeeck, Lighthouse, VibeEval) это не проверяет — это наш дифференциатор.
 Веса scoring обновлены: performance×0.25 + seo×0.20 + security×0.25 + mobile×0.10 + ai_visibility×0.20 = 1.0.
 
+### D-12: Два AI промпта на весь скан + UI-селектор инструмента
+Решение: GPT генерирует два варианта в одном вызове: `aiTechnicalPrompt` (Cursor, Windsurf, Claude Code — файловые пути, конкретные теги) и `aiVibePrompt` (Bolt, Lovable, v0, Replit — высокоуровнево). UI показывает таббар с иконками инструментов, маппинг: Cursor/Windsurf/Claude → technical, Bolt/Lovable/v0/Replit/OpenAI → vibe.
+Почему: Пересматривает D-03. Один GPT вызов, два поля. Технические и vibe-инструменты реально нуждаются в разном стиле промптов. Per-issue промпты убраны из UI.
+
 ### D-09: Lighthouse runner на Railway, фронт на Vercel
 Решение: Vercel (Hobby) деплоит фронт + все API кроме Lighthouse. Railway (Hobby $5/мес) запускает `/api/run-scan` — тяжёлый Lighthouse scan.
 Почему: Vercel Hobby лимит 1024MB RAM и 10 сек timeout. Lighthouse + Chromium требуют ~2GB и ~40 сек. Railway Hobby даёт до 8GB RAM, без timeout.

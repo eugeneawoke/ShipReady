@@ -81,7 +81,7 @@ export function ScanForm() {
               If the problem persists, contact me:{' '}
               <a href="https://t.me/eugenegusakov" target="_blank" rel="noopener noreferrer" className="text-[#6E56CF] hover:underline">Telegram</a>
               {' '}or{' '}
-              <a href="mailto:egusakov74@gmail.com" className="text-[#6E56CF] hover:underline">egusakov74@gmail.com</a>
+              <a href="mailto:egusakov74@gmail.com" className="text-[#6E56CF] hover:underline">Email</a>
             </p>
           )}
         </div>

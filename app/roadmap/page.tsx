@@ -32,7 +32,7 @@ const phases: {
   {
     id: '02',
     title: 'Full Audit Engine',
-    subtitle: '25+ checks across 4 categories',
+    subtitle: '40+ checks across 5 categories',
     status: 'done',
     items: [
       'Lighthouse performance (Core Web Vitals)',

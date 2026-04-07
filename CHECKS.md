@@ -390,7 +390,7 @@ Upload a 1200×630px image to your public folder.`,
   // ... остальные 23 шаблона по той же структуре
 };
 
-// Полный список всех 33 ID:
+// Полный список всех 41 ID:
 // Performance:   lcp-slow, cls-high, inp-slow, fcp-slow, perf-score-low, a11y-score-low
 // SEO/Social:    missing-title, title-length, missing-description, missing-h1, missing-canonical,
 //                missing-og-title, missing-og-description, missing-og-image, og-image-invalid,

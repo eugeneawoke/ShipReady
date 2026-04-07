@@ -27,8 +27,13 @@ export async function runAllChecks(url: string, scanId: string): Promise<void> {
 
     const result = buildScanResult(url, lh, seoIssues, secIssues, mobIssues, linkIssues, aiVisibilityIssues)
 
-    if (process.env.ANTHROPIC_API_KEY) {
-      try { result.aiSummary = await generateAISummary(result) } catch {}
+    if (process.env.OPENAI_API_KEY) {
+      try {
+        const ai = await generateAISummary(result)
+        result.aiSummary = ai.summary
+        result.aiTechnicalPrompt = ai.technicalPrompt
+        result.aiVibePrompt = ai.vibePrompt
+      } catch {}
     }
 
     await supabase

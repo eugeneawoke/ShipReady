@@ -34,9 +34,9 @@ ShipReady — вставляешь URL → отчёт за 30 сек: performanc
 
 ```
 Next.js 14 App Router · TypeScript strict · Tailwind CSS · shadcn/ui
-Supabase (PostgreSQL + Auth) · Anthropic claude-sonnet-4-20250514
-Lemon Squeezy · @sparticuz/chromium + lighthouse · cheerio · ssl-checker
-next-intl · Resend · lucide-react · Vercel (fra1)
+Supabase (PostgreSQL + Auth) · OpenAI gpt-4o-mini
+@sparticuz/chromium + lighthouse · cheerio · ssl-checker
+Resend · lucide-react · Vercel (fra1)
 ```
 
 ---
@@ -59,7 +59,7 @@ npx supabase db push  # apply migrations
 - HTML fetчится ОДИН раз в оркестраторе → передаётся строкой во все checks
 - Типы только из `types/scan.ts` — никогда inline
 - API логика только в `lib/` или `app/api/` — не в компонентах
-- Claude API: один вызов на весь скан, max_tokens 300
+- OpenAI API: один вызов на весь скан, max_tokens 300
 - Новый check → сначала запись в `CHECKS.md`, потом код
 - Новое архитектурное решение → сначала запись в `DECISIONS.md`, потом код
 
@@ -225,8 +225,6 @@ NEXT_PUBLIC_APP_URL
 NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY
 SUPABASE_SERVICE_ROLE_KEY
-ANTHROPIC_API_KEY
-LEMON_SQUEEZY_API_KEY
-LEMON_SQUEEZY_WEBHOOK_SECRET
+OPENAI_API_KEY
 RESEND_API_KEY
 ```

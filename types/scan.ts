@@ -33,6 +33,8 @@ export interface ScanResult {
   mobile: CategoryScore;
   ai_visibility: CategoryScore;
   aiSummary?: string;
+  aiTechnicalPrompt?: string;
+  aiVibePrompt?: string;
 }
 
 export interface Scan {
