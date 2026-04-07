@@ -8,6 +8,7 @@ import { CategoryCard } from '@/components/report/CategoryCard'
 import { IssueCard } from '@/components/report/IssueCard'
 import { OGPreview } from '@/components/report/OGPreview'
 import type { Scan, Issue, IssueCategory } from '@/types/scan'
+import { createBrowserClient } from '@/lib/supabase'
 
 const SEVERITY_ORDER: Record<string, number> = {
   critical: 0,
@@ -32,10 +33,25 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
   const [activeCategory, setActiveCategory] = useState<IssueCategory>('performance')
   const [passedOpen, setPassedOpen] = useState(false)
   const [shareLabel, setShareLabel] = useState('Share')
+  const [isPro, setIsPro] = useState(false)
 
   useEffect(() => {
     params.then(p => setId(p.id))
   }, [params])
+
+  useEffect(() => {
+    const supabase = createBrowserClient()
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) return
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('plan')
+        .eq('id', user.id)
+        .single()
+      const plan = profile?.plan ?? 'free'
+      setIsPro(plan === 'pro' || plan === 'agency')
+    })
+  }, [])
 
   useEffect(() => {
     if (!id) return
@@ -168,7 +184,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
             <h2 className="text-sm font-medium text-[#F1F0EE] mb-4">Issues to fix</h2>
             <div className="space-y-2">
               {activeIssues.map(issue => (
-                <IssueCard key={issue.id} issue={issue} isPro={false} />
+                <IssueCard key={issue.id} issue={issue} isPro={isPro} />
               ))}
             </div>
           </section>
@@ -206,7 +222,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
             {passedOpen && passedIssues.length > 0 && (
               <div className="mt-3 space-y-2">
                 {passedIssues.map(issue => (
-                  <IssueCard key={issue.id} issue={issue} isPro={false} />
+                  <IssueCard key={issue.id} issue={issue} isPro={isPro} />
                 ))}
               </div>
             )}

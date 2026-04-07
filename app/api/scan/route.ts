@@ -19,7 +19,7 @@ function getClientIp(request: NextRequest): string {
 export async function POST(request: NextRequest) {
   // CSRF: only accept requests originating from our own app
   const origin = request.headers.get('origin')
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '')
   if (origin && appUrl) {
     const allowed = [appUrl, 'http://localhost:3000', 'http://localhost:3001']
     if (!allowed.some(o => origin.startsWith(o))) {
