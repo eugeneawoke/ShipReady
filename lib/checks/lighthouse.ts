@@ -10,11 +10,17 @@ export async function runLighthouse(url: string) {
   const lighthouse = eval("require('lighthouse')")           as any
   const puppeteer  = eval("require('puppeteer-core')")       as any
 
+  // On Railway (Docker) use the system Chromium; elsewhere use @sparticuz/chromium
+  const systemChromium = process.env.CHROMIUM_PATH
+  const executablePath = systemChromium ?? await chromium.executablePath()
+
   const browser = await puppeteer.launch({
-    args: chromium.args,
+    args: systemChromium
+      ? ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+      : chromium.args,
     defaultViewport: chromium.defaultViewport,
-    executablePath: await chromium.executablePath(),
-    headless: chromium.headless,
+    executablePath,
+    headless: true,
   })
 
   try {
