@@ -4,7 +4,7 @@ import { isValidUrl, normalizeUrl } from '@/lib/utils'
 import { createClient, createServiceClient } from '@/lib/supabase'
 import { FREE_SCAN_LIMIT } from '@/lib/auth'
 
-export const maxDuration = 10
+export const maxDuration = 60
 
 // Anonymous users: max scans per IP per hour
 const ANON_HOURLY_LIMIT = 5
