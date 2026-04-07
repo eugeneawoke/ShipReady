@@ -28,6 +28,7 @@ export function IssueCard({ issue }: IssueCardProps) {
 
   return (
     <div
+      id={`issue-${issue.id}`}
       className="rounded-r-xl py-3 px-4 space-y-2"
       style={{
         borderLeft: `2px solid ${color}`,

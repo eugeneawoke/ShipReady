@@ -58,6 +58,20 @@
 Решение: GPT генерирует два варианта в одном вызове: `aiTechnicalPrompt` (Cursor, Windsurf, Claude Code — файловые пути, конкретные теги) и `aiVibePrompt` (Bolt, Lovable, v0, Replit — высокоуровнево). UI показывает таббар с иконками инструментов, маппинг: Cursor/Windsurf/Claude → technical, Bolt/Lovable/v0/Replit/OpenAI → vibe.
 Почему: Пересматривает D-03. Один GPT вызов, два поля. Технические и vibe-инструменты реально нуждаются в разном стиле промптов. Per-issue промпты убраны из UI.
 
+### Pending decisions (решить перед реализацией Phase 8)
+
+- **D-13: PDF generation** — puppeteer screenshot на Railway runner vs react-pdf/jsPDF на клиенте?
+  - Puppeteer: точный pixel-perfect вывод, но нужен Railway round-trip, медленно (~5 сек)
+  - react-pdf: быстро, на клиенте, но нужно вёрстать PDF отдельно
+  - Рекомендация: react-pdf — у нас уже есть Railway runner, но PDF дёшевле делать клиентом
+
+- **D-14: Monitored domains хранение** — отдельная таблица `monitored_domains` vs флаг в scans?
+  - Отдельная таблица: чище, позволяет хранить email + настройки per domain
+  - Флаг в scans: проще, но нет single source of truth для "какие домены мониторим"
+  - Рекомендация: отдельная таблица `monitored_domains`
+
+---
+
 ### D-09: Lighthouse runner на Railway, фронт на Vercel
 Решение: Vercel (Hobby) деплоит фронт + все API кроме Lighthouse. Railway (Hobby $5/мес) запускает `/api/run-scan` — тяжёлый Lighthouse scan.
 Почему: Vercel Hobby лимит 1024MB RAM и 10 сек timeout. Lighthouse + Chromium требуют ~2GB и ~40 сек. Railway Hobby даёт до 8GB RAM, без timeout.

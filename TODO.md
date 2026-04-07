@@ -47,7 +47,7 @@
 
 ---
 
-## Фаза 6 — Монетизация (активная)
+## Фаза 6 — Монетизация (почти готова)
 
 - [x] `lib/auth.ts` — `getUserWithPlan()`
 - [x] `app/auth/callback/` — OAuth callback
@@ -56,11 +56,83 @@
 - [x] `components/auth/SignOutButton.tsx` — кнопка выхода
 - [x] Nav лендинга — auth state (Dashboard / Sign in)
 - [x] `app/pricing/page.tsx` — три карточки
-- [ ] Rate limiting: 3 скана/мес для free (по IP + user_id)
+- [x] `app/api/webhooks/ls/route.ts` — subscription_created/cancelled → plan='pro'/'free'
 - [ ] Создать продукты в Lemon Squeezy: Pro $14, Agency $39
-- [ ] `app/api/webhooks/ls/route.ts` — subscription_created → plan='pro'
-- [ ] IssueCard paywall — блюрить cursorPrompt/boltPrompt для free
-- [ ] Тест: купить план тестовой картой → промпты разблокировались
+- [ ] Добавить env: `LEMON_SQUEEZY_WEBHOOK_SECRET`, `LEMON_SQUEEZY_API_KEY`
+- [ ] Rate limiting: 3 скана/мес для free (по IP + user_id)
+- [ ] Тест: купить план тестовой картой → `profiles.plan = 'pro'` в Supabase
+
+---
+
+## Фаза 8 — Pro Features (следующая)
+
+### 8.1 AI fix prompts — починить и показать
+
+- [ ] Убедиться что `OPENAI_API_KEY` задан в env (локально и в Railway)
+- [ ] Проверить что новый скан сохраняет `aiTechnicalPrompt` и `aiVibePrompt` в DB
+- [ ] IssueCard — добавить expandable промпт для каждого issue (pro only, blur для free)
+  - поле `cursorPrompt` и `boltPrompt` уже есть в типах и issue-templates.ts
+  - показывать как коллапсибл "Fix with AI →" внизу каждой карточки
+- [ ] Убрать сообщение "AI prompt not available" — заменить на skeleton/spinner если ещё loading
+
+### 8.2 PDF export
+
+- [ ] Решение: puppeteer screenshot → PDF (используем уже установленный puppeteer-core + @sparticuz/chromium)
+  - альтернатива: `react-pdf` если нет Railway runner
+  - **записать выбор в DECISIONS.md как D-13 перед реализацией**
+- [ ] `app/api/report/[id]/pdf/route.ts` — GET → возвращает PDF blob
+- [ ] Кнопка "Download PDF" в хедере отчёта — видна только для Pro/Agency
+- [ ] PDF включает: score, category scores, все issues с plainEnglish, aiSummary
+
+### 8.3 Weekly monitoring + email alerts
+
+- [ ] Понять концепцию для пользователя:
+  - **Monitoring** = система автоматически сканирует сохранённые домены раз в неделю
+  - **Email alerts** = если появились новые Critical/High issues или score упал >10 — письмо на email
+- [ ] `supabase/migrations/003_monitoring.sql` — таблица `monitored_domains` (user_id, domain, last_scan_id, notify_email)
+  - **или** добавить флаг `monitored: boolean` к scans и хранить per-domain
+  - **записать выбор в DECISIONS.md как D-14 перед реализацией**
+- [ ] UI в Dashboard — toggle "Monitor this domain weekly" (Pro only)
+- [ ] `app/api/cron/rescan/route.ts` — уже написан, нужно:
+  - добавить `CRON_SECRET` в env
+  - настроить в `vercel.json`: `"crons": [{"path": "/api/cron/rescan", "schedule": "0 9 * * 1"}]`
+  - после ресcan сравнить с предыдущим — если score упал >10 или новые critical → sendAlert()
+- [ ] `lib/email/send-alert.ts` — Resend: письмо с diff score, топ-3 новых issue, ссылка на отчёт
+  - нужен `RESEND_API_KEY` в env
+  - нужен `from:` домен в Resend (shipready.app)
+- [ ] Тест: создать monitored domain → запустить cron вручную → письмо пришло
+
+---
+
+## Фаза 9 — Качество отчёта
+
+### 9.1 Информативный summary сверху
+
+- [ ] Заменить текущий summary (2–3 строки) на структурированный блок:
+  - Самые важные 3 проблемы (critical + high, с иконками)
+  - Что хорошо (если есть strong categories ≥ 85)
+  - Quick wins — топ-2 проблемы которые проще всего починить (low/medium severity)
+- [ ] `generateAISummary` — добавить поле `keyIssues: string[]` (3 элемента) в JSON ответ
+- [ ] UI: карточки "Key Issues" перед category tabs, не после
+
+### 9.2 Информативность issue cards
+
+- [ ] Добавить в каждый IssueCard:
+  - Конкретные числа/значения (value поле уже есть — сделать prominent)
+  - Ссылку на docs (docsUrl уже есть — убедиться что у всех 41 шаблонов заполнено)
+  - "How to fix" в одну строку (уже есть как `plainEnglish` — проверить что тексты хорошие)
+- [ ] Пройтись по всем 41 шаблонам в `lib/ai/issue-templates.ts` — убедиться что:
+  - `plainEnglish` реально объясняет ПОЧЕМУ это важно для инди-хакера
+  - `docsUrl` заполнен везде где возможно
+  - `cursorPrompt` конкретен (с именами файлов, не абстрактен)
+
+### 9.3 Визуальная иерархия отчёта
+
+- [ ] Добавить "What's broken vs what's fine" секцию в начале (до category tabs)
+  - Визуальный breakdown: сколько critical / high / medium / low / pass
+  - Одна строка типа "3 critical, 7 high — needs immediate attention"
+- [ ] Category tabs — показывать цветной индикатор (🔴🟡🟢) по score рядом с числом
+- [ ] Passed checks — сделать более заметными, сейчас они "спрятаны" под кнопкой
 
 ---
 
@@ -68,5 +140,4 @@
 
 - [ ] Self-audit: scan shipready.app → исправить все Critical/High
 - [ ] `app/api/badge/[domain]/route.ts` — SVG badge со score
-- [ ] Vercel Cron: weekly rescan для Pro/Agency
 - [ ] Twitter/X thread + Product Hunt + vc.ru + Show HN
