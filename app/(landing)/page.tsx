@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { createBrowserClient } from '@supabase/ssr'
 import { motion } from 'framer-motion'
 import { ScanForm } from '@/components/landing/ScanForm'
 import { Particles } from '@/components/ui/particles'
@@ -390,6 +391,21 @@ export default function LandingPage() {
 function Nav({ t, lang, setLang }: { t: Translations; lang: Lang; setLang: (l: Lang) => void }) {
   const [langOpen, setLangOpen] = useState(false)
   const langRef = useRef<HTMLDivElement>(null)
+  const [userEmail, setUserEmail] = useState<string | null>(null)
+
+  useEffect(() => {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    if (!url || !key) return
+    const supabase = createBrowserClient(url, key)
+    supabase.auth.getUser().then(({ data }) => {
+      setUserEmail(data.user?.email ?? null)
+    })
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserEmail(session?.user?.email ?? null)
+    })
+    return () => subscription.unsubscribe()
+  }, [])
 
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
@@ -456,15 +472,26 @@ function Nav({ t, lang, setLang }: { t: Translations; lang: Lang; setLang: (l: L
             )}
           </div>
 
-          <a href="/auth/login" className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors hidden sm:block whitespace-nowrap">
-            {t.nav.signIn}
-          </a>
-          <a
-            href="/auth/login?mode=signup"
-            className="text-sm px-4 py-1.5 rounded-lg bg-[#6E56CF] text-white hover:bg-[#7C68D4] transition-colors font-medium whitespace-nowrap"
-          >
-            {t.nav.getStarted}
-          </a>
+          {userEmail ? (
+            <a
+              href="/dashboard"
+              className="text-sm px-4 py-1.5 rounded-lg bg-[#6E56CF] text-white hover:bg-[#7C68D4] transition-colors font-medium whitespace-nowrap"
+            >
+              Dashboard
+            </a>
+          ) : (
+            <>
+              <a href="/auth/login" className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors hidden sm:block whitespace-nowrap">
+                {t.nav.signIn}
+              </a>
+              <a
+                href="/auth/login?mode=signup"
+                className="text-sm px-4 py-1.5 rounded-lg bg-[#6E56CF] text-white hover:bg-[#7C68D4] transition-colors font-medium whitespace-nowrap"
+              >
+                {t.nav.getStarted}
+              </a>
+            </>
+          )}
         </div>
       </div>
     </nav>

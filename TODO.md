@@ -52,6 +52,9 @@
 - [x] `lib/auth.ts` — `getUserWithPlan()`
 - [x] `app/auth/callback/` — OAuth callback
 - [x] `app/auth/login/` — страница входа
+- [x] `app/dashboard/page.tsx` — список сканов пользователя
+- [x] `components/auth/SignOutButton.tsx` — кнопка выхода
+- [x] Nav лендинга — auth state (Dashboard / Sign in)
 - [x] `app/pricing/page.tsx` — три карточки
 - [ ] Rate limiting: 3 скана/мес для free (по IP + user_id)
 - [ ] Создать продукты в Lemon Squeezy: Pro $14, Agency $39
