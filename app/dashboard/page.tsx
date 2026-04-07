@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 import { getUserWithPlan } from '@/lib/auth'
 import { SignOutButton } from '@/components/auth/SignOutButton'
+import { ScanForm } from '@/components/landing/ScanForm'
 
 export default async function DashboardPage() {
   const user = await getUserWithPlan()
@@ -47,16 +48,10 @@ export default async function DashboardPage() {
           </p>
         </div>
 
-        {/* New scan CTA */}
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 mb-8 px-4 py-2.5 rounded-xl bg-[#6E56CF] text-white text-sm font-medium hover:bg-[#7C68D4] transition-colors"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 5v14M5 12h14"/>
-          </svg>
-          New scan
-        </Link>
+        {/* New scan form */}
+        <div className="mb-10">
+          <ScanForm />
+        </div>
 
         {/* Scans list */}
         {!scans || scans.length === 0 ? (
