@@ -278,6 +278,56 @@ h1, h2, h3, h4 {
   color: #F1F0EE;
 }
 
+/* ─── Print styles ──────────────────────────────────────────────────── */
+
+@media print {
+  /* Force white background throughout */
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body {
+    background: #fff !important;
+    color: #111 !important;
+  }
+
+  /* Hide browser chrome artifacts */
+  header {
+    position: static !important;
+    background: transparent !important;
+    border: none !important;
+    backdrop-filter: none !important;
+  }
+
+  /* Keep dark cards but ensure text is readable */
+  [class*="bg-[#161618]"] {
+    background: #f8f8f8 !important;
+  }
+
+  [class*="bg-[#1E1E21]"] {
+    background: #f0f0f0 !important;
+  }
+
+  [class*="text-[#F1F0EE]"],
+  [class*="text-[#8B8A85]"],
+  [class*="text-[#5A5955]"] {
+    color: #333 !important;
+  }
+
+  /* Page breaks */
+  section {
+    break-inside: avoid;
+  }
+
+  /* Category tabs — hide tab bar, show all categories stacked */
+  .category-tabs-bar {
+    display: none !important;
+  }
+}
+
+/* ─── Prompt blocks ─────────────────────────────────────────────────── */
+
 /* Prompt blocks */
 .prompt-block {
   font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;

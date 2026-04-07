@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { ChevronDown, Share2, Check, Copy, Lock, ArrowLeft } from 'lucide-react'
+import { ChevronDown, Share2, Check, Copy, Lock, ArrowLeft, FileDown } from 'lucide-react'
 import { ReportSkeleton } from '@/components/report/ReportSkeleton'
 import { ScoreRing } from '@/components/report/ScoreRing'
 import { CategoryCard } from '@/components/report/CategoryCard'
@@ -142,6 +142,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
   const [passedOpen, setPassedOpen] = useState(false)
   const [shareLabel, setShareLabel] = useState('Share')
   const [isPro, setIsPro] = useState(false)
+  const [plan, setPlan] = useState<'free' | 'pro' | 'agency'>('free')
   // true while we haven't received the first response — shows minimal spinner, not scan skeleton
   const [initialLoading, setInitialLoading] = useState(true)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -160,8 +161,9 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
         .select('plan')
         .eq('id', user.id)
         .single()
-      const plan = profile?.plan ?? 'free'
-      setIsPro(plan === 'pro' || plan === 'agency')
+      const userPlan = (profile?.plan ?? 'free') as 'free' | 'pro' | 'agency'
+      setPlan(userPlan)
+      setIsPro(userPlan === 'pro' || userPlan === 'agency')
     })
   }, [])
 
@@ -253,9 +255,18 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
           )}
           <span className="text-[#5A5955] text-sm">/</span>
           <span className="text-sm text-[#8B8A85] font-mono truncate flex-1">{domain}</span>
+          {isPro && (
+            <button
+              onClick={() => window.print()}
+              className="flex items-center gap-1.5 text-xs text-[#8B8A85] hover:text-[#F1F0EE] bg-[#161618] border border-white/6 px-3 py-1.5 rounded-lg transition-colors shrink-0 cursor-pointer print:hidden"
+            >
+              <FileDown className="w-3.5 h-3.5" />
+              PDF
+            </button>
+          )}
           <button
             onClick={handleShare}
-            className="flex items-center gap-1.5 text-xs text-[#8B8A85] hover:text-[#F1F0EE] bg-[#161618] border border-white/6 px-3 py-1.5 rounded-lg transition-colors shrink-0 cursor-pointer"
+            className="flex items-center gap-1.5 text-xs text-[#8B8A85] hover:text-[#F1F0EE] bg-[#161618] border border-white/6 px-3 py-1.5 rounded-lg transition-colors shrink-0 cursor-pointer print:hidden"
           >
             <Share2 className="w-3.5 h-3.5" />
             {shareLabel}
@@ -307,8 +318,8 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
           <CategoryCard category={activeCategory} data={results[activeCategory]} />
         </section>
 
-        {/* Fix everything prompts — always shown */}
-        <section>
+        {/* Fix everything prompts — hidden in print */}
+        <section className="print:hidden">
           <h2 className="text-sm font-medium text-[#F1F0EE] mb-4">Fix everything</h2>
           <FixPromptSection
             technicalPrompt={results.aiTechnicalPrompt}
@@ -323,7 +334,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
             <h2 className="text-sm font-medium text-[#F1F0EE] mb-4">Issues to fix</h2>
             <div className="space-y-2">
               {activeIssues.map(issue => (
-                <IssueCard key={issue.id} issue={issue} />
+                <IssueCard key={issue.id} issue={issue} isPro={isPro} />
               ))}
             </div>
           </section>
@@ -331,7 +342,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
 
         {/* Passed checks */}
         {totalPassed > 0 && (
-          <section>
+          <section className="print:hidden">
             <button
               onClick={() => setPassedOpen(o => !o)}
               className="flex items-center gap-2 text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors cursor-pointer"
@@ -347,7 +358,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
             {passedOpen && passedIssues.length > 0 && (
               <div className="mt-3 space-y-2">
                 {passedIssues.map(issue => (
-                  <IssueCard key={issue.id} issue={issue} />
+                  <IssueCard key={issue.id} issue={issue} isPro={isPro} />
                 ))}
               </div>
             )}
@@ -365,6 +376,16 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
               </div>
             )}
           </section>
+        )}
+
+        {/* Print branding — Pro only, not Agency (white-label) */}
+        {plan === 'pro' && (
+          <div className="hidden print:flex items-center justify-between pt-6 border-t border-black/10 mt-4">
+            <span className="text-xs text-black/40">
+              Generated by <span className="font-semibold text-black/60">ShipReady</span> · shipready.app
+            </span>
+            <span className="text-xs text-black/40 font-mono">{domain}</span>
+          </div>
         )}
       </main>
     </div>
