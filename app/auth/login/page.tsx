@@ -177,8 +177,8 @@ export default function LoginPage() {
         <div className="w-full max-w-sm">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="inline-flex w-10 h-10 rounded-2xl bg-[#6E56CF]/10 border border-[#6E56CF]/25 items-center justify-center mb-5">
-              <span className="text-[#6E56CF] text-lg font-semibold" style={{ fontFamily: 'var(--font-syne)' }}>S</span>
+            <div className="inline-flex w-12 h-12 rounded-2xl bg-[#6E56CF]/10 border border-[#6E56CF]/25 items-center justify-center mb-5 p-2">
+              <img src="/logo.svg" alt="ShipReady" className="w-full h-full" />
             </div>
             <h1 className="text-xl font-semibold tracking-tight mb-1.5">{titles[mode]}</h1>
             <p className="text-sm text-[#5A5955]">{subs[mode]}</p>
@@ -247,7 +247,7 @@ export default function LoginPage() {
                   placeholder="you@example.com"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl bg-[#161618] border border-white/[0.08] text-sm text-[#F1F0EE] placeholder-[#5A5955] focus:outline-none focus:border-[#6E56CF]/60 transition-colors"
+                  className="w-full px-4 py-3 rounded-xl bg-[#161618] border border-white/[0.08] text-base sm:text-sm text-[#F1F0EE] placeholder-[#5A5955] focus:outline-none focus:border-[#6E56CF]/60 transition-colors"
                 />
 
                 {/* Password */}
@@ -259,7 +259,7 @@ export default function LoginPage() {
                       placeholder={mode === 'signup' ? 'Choose a password (8+ chars)' : 'Password'}
                       value={password}
                       onChange={e => setPassword(e.target.value)}
-                      className="w-full px-4 py-3 pr-10 rounded-xl bg-[#161618] border border-white/[0.08] text-sm text-[#F1F0EE] placeholder-[#5A5955] focus:outline-none focus:border-[#6E56CF]/60 transition-colors"
+                      className="w-full px-4 py-3 pr-10 rounded-xl bg-[#161618] border border-white/[0.08] text-base sm:text-sm text-[#F1F0EE] placeholder-[#5A5955] focus:outline-none focus:border-[#6E56CF]/60 transition-colors"
                     />
                     <button
                       type="button"
@@ -280,7 +280,7 @@ export default function LoginPage() {
                       placeholder="Confirm password"
                       value={confirmPassword}
                       onChange={e => setConfirmPassword(e.target.value)}
-                      className="w-full px-4 py-3 pr-10 rounded-xl bg-[#161618] border border-white/[0.08] text-sm text-[#F1F0EE] placeholder-[#5A5955] focus:outline-none focus:border-[#6E56CF]/60 transition-colors"
+                      className="w-full px-4 py-3 pr-10 rounded-xl bg-[#161618] border border-white/[0.08] text-base sm:text-sm text-[#F1F0EE] placeholder-[#5A5955] focus:outline-none focus:border-[#6E56CF]/60 transition-colors"
                     />
                   </div>
                 )}

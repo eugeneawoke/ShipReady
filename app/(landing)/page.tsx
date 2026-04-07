@@ -11,6 +11,7 @@ import { AnimatedShinyText } from '@/components/ui/animated-shiny-text'
 import { DotPattern } from '@/components/ui/dot-pattern'
 import { Meteors } from '@/components/ui/meteors'
 import { FlickeringGrid } from '@/components/ui/flickering-grid'
+import { SpotlightCard } from '@/components/ui/spotlight-card'
 import { CinematicFooter } from '@/components/ui/motion-footer'
 
 // ─── smooth scroll ────────────────────────────────────────────────────────────
@@ -393,7 +394,10 @@ function Nav({ t, lang, setLang }: { t: Translations; lang: Lang; setLang: (l: L
       <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
         {/* left */}
         <div className="flex items-center gap-8">
-          <a href="/" className="font-semibold tracking-tight cursor-pointer hover:opacity-80 transition-opacity" style={{ fontFamily: 'var(--font-syne)' }}>ShipReady</a>
+          <a href="/" className="flex items-center gap-2 font-semibold tracking-tight cursor-pointer hover:opacity-80 transition-opacity" style={{ fontFamily: 'var(--font-syne)' }}>
+              <img src="/logo.svg" alt="ShipReady logo" className="w-7 h-7 flex-shrink-0" />
+              ShipReady
+            </a>
           <div className="hidden md:flex items-center gap-6">
             <button
               onClick={() => smoothScrollTo('#how-it-works')}
@@ -560,18 +564,36 @@ function HowItWorksSection({ t }: { t: Translations }) {
         <div className="grid md:grid-cols-3 gap-5 relative">
           <div className="hidden md:block absolute top-10 left-[calc(33%+24px)] right-[calc(33%+24px)] h-px bg-gradient-to-r from-[#6E56CF]/20 via-[#6E56CF]/40 to-[#6E56CF]/20" />
           {t.how.steps.map((item, i) => (
-            <motion.div
-              key={item.step}
-              {...fadeUp(i * 0.12)}
-              className="relative p-6 rounded-2xl bg-[#161618] border border-white/[0.06] hover:border-white/[0.10] transition-colors overflow-hidden"
-            >
-              <Meteors number={6} minDuration={8} maxDuration={16} className="text-[#6E56CF]/60" />
-              <div className="relative z-10">
-                <div className="font-mono text-xs text-[#5A5955] mb-5 tracking-widest">{item.step}</div>
-                <div className="text-3xl mb-4">{item.emoji}</div>
-                <h3 className="font-semibold mb-2 tracking-tight">{item.title}</h3>
-                <p className="text-sm text-[#8B8A85] leading-relaxed">{item.desc}</p>
-              </div>
+            <motion.div key={item.step} {...fadeUp(i * 0.12)}>
+              <SpotlightCard className="h-full p-6 rounded-2xl bg-[#161618] border border-white/[0.06] hover:border-[#6E56CF]/30 transition-colors">
+                <div className="relative z-10">
+                  <div className="font-mono text-xs text-[#5A5955] mb-5 tracking-widest">{item.step}</div>
+                  <div className="mb-4 text-[#6E56CF]">
+                    {i === 0 && (
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                      </svg>
+                    )}
+                    {i === 1 && (
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M3 7V5a2 2 0 0 1 2-2h2"/>
+                        <path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+                        <path d="M21 17v2a2 2 0 0 1-2 2h-2"/>
+                        <path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+                        <rect x="7" y="7" width="10" height="10" rx="1"/>
+                      </svg>
+                    )}
+                    {i === 2 && (
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
+                      </svg>
+                    )}
+                  </div>
+                  <h3 className="font-semibold mb-2 tracking-tight">{item.title}</h3>
+                  <p className="text-sm text-[#8B8A85] leading-relaxed">{item.desc}</p>
+                </div>
+              </SpotlightCard>
             </motion.div>
           ))}
         </div>
