@@ -298,6 +298,17 @@ h1, h2, h3, h4 {
   color: #F1F0EE;
 }
 
+/* ─── Scan progress bar shimmer ────────────────────────────────────── */
+
+@keyframes bar-shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
+}
+
+.bar-shimmer {
+  animation: bar-shimmer 1.8s ease-in-out infinite;
+}
+
 /* ─── Print styles ──────────────────────────────────────────────────── */
 
 @media print {
