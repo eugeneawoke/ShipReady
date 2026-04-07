@@ -1,12 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { ChevronDown, Share2, Check, Copy, Lock } from 'lucide-react'
+import { ChevronDown, Share2, Check, Copy, Lock, ArrowLeft } from 'lucide-react'
 import { ReportSkeleton } from '@/components/report/ReportSkeleton'
 import { ScoreRing } from '@/components/report/ScoreRing'
 import { CategoryCard } from '@/components/report/CategoryCard'
 import { IssueCard } from '@/components/report/IssueCard'
-import { OGPreview } from '@/components/report/OGPreview'
 import type { Scan, Issue, IssueCategory } from '@/types/scan'
 import { createBrowserClient } from '@/lib/supabase-browser'
 
@@ -22,21 +21,26 @@ const AI_TOOLS = [
 ]
 
 function FixPromptSection({ technicalPrompt, vibePrompt, isPro }: {
-  technicalPrompt: string
-  vibePrompt: string
+  technicalPrompt?: string
+  vibePrompt?: string
   isPro: boolean
 }) {
   const [activeTool, setActiveTool] = useState('cursor')
   const [copied, setCopied] = useState(false)
 
   const tool = AI_TOOLS.find(t => t.id === activeTool) ?? AI_TOOLS[0]
-  const prompt = tool.type === 'technical' ? technicalPrompt : vibePrompt
+  const prompt = tool.type === 'technical'
+    ? (technicalPrompt ?? vibePrompt ?? '')
+    : (vibePrompt ?? technicalPrompt ?? '')
 
   function copy() {
+    if (!prompt) return
     navigator.clipboard.writeText(prompt)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
+
+  const hasPrompt = !!(technicalPrompt || vibePrompt)
 
   return (
     <div className="rounded-xl bg-[#161618] border border-white/6 overflow-hidden">
@@ -46,7 +50,7 @@ function FixPromptSection({ technicalPrompt, vibePrompt, isPro }: {
           <button
             key={t.id}
             onClick={() => setActiveTool(t.id)}
-            className={`px-3 py-2.5 text-xs whitespace-nowrap transition-colors relative shrink-0 ${
+            className={`px-3 py-2.5 text-xs whitespace-nowrap transition-colors relative shrink-0 cursor-pointer ${
               activeTool === t.id ? 'text-[#F1F0EE]' : 'text-[#5A5955] hover:text-[#8B8A85]'
             }`}
           >
@@ -66,7 +70,11 @@ function FixPromptSection({ technicalPrompt, vibePrompt, isPro }: {
             : 'High-level prompt — paste into the AI builder\'s chat or prompt field'}
         </p>
         <div className="relative">
-          {isPro ? (
+          {!hasPrompt ? (
+            <div className="text-xs text-[#5A5955] bg-[#1E1E21] rounded-lg p-3 text-center">
+              AI prompt not available for this scan
+            </div>
+          ) : isPro ? (
             <>
               <pre className="text-xs text-[#E8C77D] bg-[#1E1E21] rounded-lg p-3 overflow-x-auto whitespace-pre-wrap leading-relaxed font-mono max-h-56">
                 {prompt}
@@ -74,7 +82,7 @@ function FixPromptSection({ technicalPrompt, vibePrompt, isPro }: {
               <div className="mt-2">
                 <button
                   onClick={copy}
-                  className="flex items-center gap-1.5 text-xs text-[#8B8A85] hover:text-[#F1F0EE] transition-colors"
+                  className="flex items-center gap-1.5 text-xs text-[#8B8A85] hover:text-[#F1F0EE] transition-colors cursor-pointer"
                 >
                   {copied
                     ? <><Check className="w-3 h-3 text-[#3DDC84]" /><span className="text-[#3DDC84]">Copied</span></>
@@ -134,6 +142,9 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
   const [passedOpen, setPassedOpen] = useState(false)
   const [shareLabel, setShareLabel] = useState('Share')
   const [isPro, setIsPro] = useState(false)
+  // true while we haven't received the first response — shows minimal spinner, not scan skeleton
+  const [initialLoading, setInitialLoading] = useState(true)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
 
   useEffect(() => {
     params.then(p => setId(p.id))
@@ -143,6 +154,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
     const supabase = createBrowserClient()
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return
+      setIsLoggedIn(true)
       const { data: profile } = await supabase
         .from('profiles')
         .select('plan')
@@ -158,17 +170,18 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
 
     // eslint-disable-next-line prefer-const
     let interval: NodeJS.Timeout
-    // Stop polling after 90s — prevents infinite pending
     const timeout = setTimeout(() => {
       clearInterval(interval)
       setScan(prev => prev ? { ...prev, status: 'error' } : null)
+      setInitialLoading(false)
     }, 45_000)
 
     async function poll() {
       const res = await fetch(`/api/scan/${id}`)
-      if (!res.ok) return
+      if (!res.ok) { setInitialLoading(false); return }
       const data = await res.json()
       setScan(data)
+      setInitialLoading(false)
       if (data.status === 'done' || data.status === 'error') {
         clearInterval(interval)
         clearTimeout(timeout)
@@ -180,6 +193,15 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
     return () => { clearInterval(interval); clearTimeout(timeout) }
   }, [id])
 
+  // Minimal spinner while loading existing report
+  if (initialLoading) {
+    return (
+      <div className="min-h-screen bg-[#0E0E0F] flex items-center justify-center">
+        <div className="w-5 h-5 rounded-full border-2 border-[#6E56CF] border-t-transparent animate-spin" />
+      </div>
+    )
+  }
+
   if (!scan || scan.status === 'pending' || scan.status === 'running') {
     return <ReportSkeleton status={scan?.status ?? 'pending'} />
   }
@@ -190,7 +212,6 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
 
   const { results } = scan
 
-  // Gather all non-pass issues sorted by severity
   const allIssues: Issue[] = CATEGORIES.flatMap(cat => results[cat].issues).sort(
     (a, b) => (SEVERITY_ORDER[a.severity] ?? 9) - (SEVERITY_ORDER[b.severity] ?? 9)
   )
@@ -199,13 +220,8 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
   const passedIssues = allIssues.filter(i => i.severity === 'pass')
   const totalPassed = CATEGORIES.reduce((sum, cat) => sum + results[cat].passedChecks, 0)
 
-  // Extract domain for OGPreview
   let domain = scan.url
-  try {
-    domain = new URL(scan.url).hostname
-  } catch {
-    // use raw url
-  }
+  try { domain = new URL(scan.url).hostname } catch { /* use raw url */ }
 
   function handleShare() {
     navigator.clipboard.writeText(window.location.href)
@@ -218,12 +234,28 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
       {/* Nav */}
       <header className="sticky top-0 z-10 bg-[#0E0E0F]/90 backdrop-blur-md border-b border-white/6">
         <div className="max-w-3xl mx-auto px-4 h-14 flex items-center gap-3">
-          <span className="text-sm font-semibold tracking-tight shrink-0">ShipReady</span>
+          {isLoggedIn ? (
+            <a
+              href="/dashboard"
+              className="flex items-center gap-1.5 text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors shrink-0"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Dashboard
+            </a>
+          ) : (
+            <a
+              href="/"
+              className="flex items-center gap-1.5 text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors shrink-0"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              ShipReady
+            </a>
+          )}
           <span className="text-[#5A5955] text-sm">/</span>
           <span className="text-sm text-[#8B8A85] font-mono truncate flex-1">{domain}</span>
           <button
             onClick={handleShare}
-            className="flex items-center gap-1.5 text-xs text-[#8B8A85] hover:text-[#F1F0EE] bg-[#161618] border border-white/6 px-3 py-1.5 rounded-lg transition-colors shrink-0"
+            className="flex items-center gap-1.5 text-xs text-[#8B8A85] hover:text-[#F1F0EE] bg-[#161618] border border-white/6 px-3 py-1.5 rounded-lg transition-colors shrink-0 cursor-pointer"
           >
             <Share2 className="w-3.5 h-3.5" />
             {shareLabel}
@@ -257,19 +289,12 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
                 <button
                   key={cat}
                   onClick={() => setActiveCategory(cat)}
-                  className={`flex items-center gap-1.5 px-4 py-2.5 text-sm whitespace-nowrap relative transition-colors ${
-                    isActive
-                      ? 'text-[#F1F0EE]'
-                      : 'text-[#8B8A85] hover:text-[#F1F0EE]'
+                  className={`flex items-center gap-1.5 px-4 py-2.5 text-sm whitespace-nowrap relative transition-colors cursor-pointer ${
+                    isActive ? 'text-[#F1F0EE]' : 'text-[#8B8A85] hover:text-[#F1F0EE]'
                   }`}
                 >
                   {CATEGORY_LABELS[cat]}
-                  <span
-                    className="font-mono text-xs"
-                    style={{
-                      color: isActive ? '#F1F0EE' : '#5A5955',
-                    }}
-                  >
+                  <span className="font-mono text-xs" style={{ color: isActive ? '#F1F0EE' : '#5A5955' }}>
                     {score}
                   </span>
                   {isActive && (
@@ -279,22 +304,18 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
               )
             })}
           </div>
-
-          {/* Active category card */}
           <CategoryCard category={activeCategory} data={results[activeCategory]} />
         </section>
 
-        {/* Fix everything prompts */}
-        {(results.aiTechnicalPrompt || results.aiVibePrompt) && (
-          <section>
-            <h2 className="text-sm font-medium text-[#F1F0EE] mb-4">Fix everything</h2>
-            <FixPromptSection
-              technicalPrompt={results.aiTechnicalPrompt ?? ''}
-              vibePrompt={results.aiVibePrompt ?? ''}
-              isPro={isPro}
-            />
-          </section>
-        )}
+        {/* Fix everything prompts — always shown */}
+        <section>
+          <h2 className="text-sm font-medium text-[#F1F0EE] mb-4">Fix everything</h2>
+          <FixPromptSection
+            technicalPrompt={results.aiTechnicalPrompt}
+            vibePrompt={results.aiVibePrompt}
+            isPro={isPro}
+          />
+        </section>
 
         {/* All issues */}
         {activeIssues.length > 0 && (
@@ -308,26 +329,12 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
           </section>
         )}
 
-        {/* OG Preview */}
-        <section>
-          <h2 className="text-sm font-medium text-[#F1F0EE] mb-4">
-            How your links appear on social media
-          </h2>
-          <OGPreview
-            result={results}
-            ogTitle=""
-            ogDescription=""
-            ogImage={undefined}
-            siteName={domain}
-          />
-        </section>
-
         {/* Passed checks */}
         {totalPassed > 0 && (
           <section>
             <button
               onClick={() => setPassedOpen(o => !o)}
-              className="flex items-center gap-2 text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors"
+              className="flex items-center gap-2 text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors cursor-pointer"
             >
               <span className="text-[#3DDC84]">✓</span>
               {totalPassed} checks passed
