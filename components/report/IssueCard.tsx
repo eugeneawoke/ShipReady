@@ -48,7 +48,7 @@ export function IssueCard({ issue, isPro }: IssueCardProps) {
   return (
     <div
       id={`issue-${issue.id}`}
-      className="rounded-r-xl py-3 px-4 space-y-2"
+      className="group rounded-r-xl py-3 px-4 space-y-2"
       style={{ borderLeft: `2px solid ${color}`, background: bg }}
     >
       <div className="flex items-start gap-3">
@@ -86,11 +86,11 @@ export function IssueCard({ issue, isPro }: IssueCardProps) {
         <div className="print:hidden">
           <button
             onClick={() => setPromptOpen(o => !o)}
-            className="flex items-center gap-1 text-xs text-[#5A5955] hover:text-[#8B8A85] transition-colors cursor-pointer mt-1"
+            className="flex items-center gap-1 cursor-pointer mt-1"
           >
-            Fix with AI
+            <span className="fix-ai-text text-xs">Fix with AI</span>
             <ChevronDown
-              className="w-3 h-3 transition-transform duration-200"
+              className="w-3 h-3 text-[#5A5955] group-hover:text-[#6E56CF] transition-colors duration-500 transition-transform duration-200"
               style={{ transform: promptOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
             />
           </button>

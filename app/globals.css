@@ -180,6 +180,26 @@
 .category-card:nth-child(3) { animation-delay: 160ms; }
 .category-card:nth-child(4) { animation-delay: 240ms; }
 
+/* "Fix with AI" shimmer — triggered on parent card hover, runs once */
+.fix-ai-text {
+  color: #5A5955;
+  display: inline-block;
+}
+
+.group:hover .fix-ai-text {
+  background: linear-gradient(90deg, #6E56CF 0%, #4A9EFF 45%, #3DDC84 75%, #6E56CF 100%);
+  background-size: 250% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: fix-ai-shimmer 1s ease-out forwards;
+}
+
+@keyframes fix-ai-shimmer {
+  from { background-position: 100% center; }
+  to   { background-position: 0%   center; }
+}
+
 /* Issue card prompt expand */
 .issue-prompts {
   max-height: 0;
