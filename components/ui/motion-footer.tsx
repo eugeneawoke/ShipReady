@@ -223,9 +223,9 @@ function ContactButton() {
   const [hovered, setHovered] = useState(false)
 
   const contacts = [
-    { label: 'LinkedIn', href: 'https://linkedin.com/in/eugenegusakoff', icon: <IconLinkedIn /> },
-    { label: 'Email',    href: 'mailto:hi@shipready.app',                icon: <IconMail /> },
-    { label: 'Telegram', href: 'https://t.me/eugenegusakoff',            icon: <IconTelegram /> },
+    { label: 'LinkedIn', href: 'https://www.linkedin.com/in/eugene-gusakov/', icon: <IconLinkedIn /> },
+    { label: 'Email',    href: 'mailto:egusakov74@gmail.com',                 icon: <IconMail /> },
+    { label: 'Telegram', href: 'https://t.me/eugenegusakov',                  icon: <IconTelegram /> },
   ]
 
   return (
@@ -390,7 +390,7 @@ export function CinematicFooter() {
               <span className="sr-footer-heartbeat text-sm md:text-base text-[#FF4444]">❤</span>
               <span className="text-[#5A5955] text-[10px] md:text-xs font-bold uppercase tracking-widest">by</span>
               <a
-                href="https://x.com/eugenegusakoff"
+                href="https://www.linkedin.com/in/eugene-gusakov/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[#F1F0EE] font-black text-xs md:text-sm tracking-normal ml-1 hover:text-[#6E56CF] transition-colors"

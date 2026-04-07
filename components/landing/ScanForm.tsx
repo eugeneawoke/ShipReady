@@ -4,17 +4,29 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 
+const FRIENDLY_ERRORS: Record<string, string> = {
+  'Forbidden':             'Something went wrong on our end.',
+  'Failed to create scan': 'Could not start the scan. Please try again.',
+  'Invalid URL':           'Please enter a valid URL (e.g. https://yoursite.com)',
+  'Rate limit exceeded. Sign in for more scans.': 'Hourly limit reached. Sign in for more scans.',
+  'Free limit reached':    "You've used all 3 free scans this month.",
+}
+
+function friendlyMessage(raw: string): string {
+  return FRIENDLY_ERRORS[raw] ?? raw
+}
+
 export function ScanForm() {
   const [url, setUrl] = useState('')
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError] = useState<{ msg: string; showContact: boolean } | null>(null)
   const router = useRouter()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!url.trim()) return
     setLoading(true)
-    setError('')
+    setError(null)
     try {
       const res = await fetch('/api/scan', {
         method: 'POST',
@@ -22,10 +34,18 @@ export function ScanForm() {
         body: JSON.stringify({ url }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Failed to start scan')
+      if (!res.ok) {
+        const raw = data.error || 'Something went wrong'
+        const msg = friendlyMessage(raw)
+        // Show contact for unexpected server errors (5xx or unknown)
+        const showContact = res.status >= 500 || raw === 'Forbidden' || raw === 'Failed to create scan'
+        setError({ msg, showContact })
+        setLoading(false)
+        return
+      }
       router.push(`/report/${data.id}`)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong')
+    } catch {
+      setError({ msg: 'Could not reach the server. Please check your connection.', showContact: true })
       setLoading(false)
     }
   }
@@ -54,7 +74,17 @@ export function ScanForm() {
         </button>
       </div>
       {error && (
-        <p className="mt-2 text-sm text-[#FF4444]">{error}</p>
+        <div className="mt-2 text-sm text-[#FF4444] space-y-0.5">
+          <p>{error.msg}</p>
+          {error.showContact && (
+            <p className="text-[#8B8A85] text-xs">
+              If the problem persists, contact me:{' '}
+              <a href="https://t.me/eugenegusakov" target="_blank" rel="noopener noreferrer" className="text-[#6E56CF] hover:underline">Telegram</a>
+              {' '}or{' '}
+              <a href="mailto:egusakov74@gmail.com" className="text-[#6E56CF] hover:underline">egusakov74@gmail.com</a>
+            </p>
+          )}
+        </div>
       )}
     </form>
   )
