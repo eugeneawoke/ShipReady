@@ -15,40 +15,45 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const user = await getUserWithPlan()
-  if (!user || (user.plan !== 'pro' && user.plan !== 'agency')) {
-    return NextResponse.json({ error: 'Upgrade required' }, { status: 403 })
-  }
-
-  const { id } = await params
-  const supabase = await createClient()
-
-  const { data, error } = await supabase
-    .from('scans')
-    .select('id, url, results')
-    .eq('id', id)
-    .single()
-
-  if (error || !data?.results) {
-    return NextResponse.json({ error: 'Report not found' }, { status: 404 })
-  }
-
-  const result = data.results as ScanResult
-  let domain = data.url
   try {
-    domain = new URL(data.url).hostname
-  } catch {
-    // use raw url
+    const user = await getUserWithPlan()
+    if (!user || (user.plan !== 'pro' && user.plan !== 'agency')) {
+      return NextResponse.json({ error: 'Upgrade required' }, { status: 403 })
+    }
+
+    const { id } = await params
+    const supabase = await createClient()
+
+    const { data, error } = await supabase
+      .from('scans')
+      .select('id, url, results')
+      .eq('id', id)
+      .single()
+
+    if (error || !data?.results) {
+      return NextResponse.json({ error: 'Report not found' }, { status: 404 })
+    }
+
+    const result = data.results as ScanResult
+    let domain = data.url
+    try {
+      domain = new URL(data.url).hostname
+    } catch {
+      // use raw url
+    }
+
+    const whiteLabel = user.plan === 'agency' && request.nextUrl.searchParams.get('whiteLabel') === '1'
+    const pdf = await generateReportPdf(result, { whiteLabel, domain })
+
+    return new NextResponse(new Uint8Array(pdf), {
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="${filenameForDomain(domain)}"`,
+        'Cache-Control': 'private, no-store',
+      },
+    })
+  } catch (error) {
+    console.error('[pdf] export failed:', error)
+    return NextResponse.json({ error: 'PDF export failed' }, { status: 500 })
   }
-
-  const whiteLabel = user.plan === 'agency' && request.nextUrl.searchParams.get('whiteLabel') === '1'
-  const pdf = await generateReportPdf(result, { whiteLabel, domain })
-
-  return new NextResponse(new Uint8Array(pdf), {
-    headers: {
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename="${filenameForDomain(domain)}"`,
-      'Cache-Control': 'private, no-store',
-    },
-  })
 }

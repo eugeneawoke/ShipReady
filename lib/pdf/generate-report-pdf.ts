@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
+import chromium from '@sparticuz/chromium'
+import puppeteer from 'puppeteer-core'
 import type { ScanResult, IssueCategory } from '@/types/scan'
 
 const CATEGORY_LABELS: Record<IssueCategory, string> = {
@@ -135,9 +135,6 @@ export async function generateReportPdf(
   result: ScanResult,
   options: { whiteLabel: boolean; domain: string },
 ): Promise<Buffer> {
-  const chromium = eval("require('@sparticuz/chromium')") as any
-  const puppeteer = eval("require('puppeteer-core')") as any
-
   const systemChromium = process.env.CHROMIUM_PATH
   const executablePath = systemChromium ?? await chromium.executablePath()
 
