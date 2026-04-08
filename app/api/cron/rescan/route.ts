@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase'
+import { dispatchScanToRailway } from '@/lib/server/scanner-dispatch'
 
 export async function GET(request: NextRequest) {
   // Verify this is a legitimate Vercel Cron request
@@ -40,6 +41,10 @@ export async function GET(request: NextRequest) {
     return true
   })
 
+  if (!process.env.RAILWAY_SCANNER_URL || !process.env.SCANNER_SECRET) {
+    return NextResponse.json({ error: 'Scanner is not configured' }, { status: 500 })
+  }
+
   // Queue new scans
   let count = 0
   for (const scan of toRescan) {
@@ -50,14 +55,13 @@ export async function GET(request: NextRequest) {
       .single()
 
     if (data) {
-      // Fire and forget
-      setTimeout(async () => {
-        try {
-          const { runAllChecks } = await import('@/lib/checks/index')
-          await runAllChecks(scan.url, data.id)
-        } catch {}
-      }, 0)
-      count++
+      try {
+        await dispatchScanToRailway(data.id, scan.url)
+        count++
+      } catch (error) {
+        console.error('[cron] Failed to dispatch rescan:', error)
+        await supabase.from('scans').update({ status: 'error' }).eq('id', data.id)
+      }
     }
   }
 

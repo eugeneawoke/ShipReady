@@ -3,11 +3,34 @@ import { waitUntil } from '@vercel/functions'
 import { isValidUrl, normalizeUrl } from '@/lib/utils'
 import { createClient, createServiceClient } from '@/lib/supabase'
 import { FREE_SCAN_LIMIT } from '@/lib/auth'
+import { assertSafeScanUrl } from '@/lib/server/url-safety'
+import { dispatchScanToRailway } from '@/lib/server/scanner-dispatch'
 
 export const maxDuration = 60
 
 // Anonymous users: same monthly limit as free tier, tracked by IP
 const ANON_MONTHLY_LIMIT = 3
+
+function startOfCurrentMonth(): string {
+  const start = new Date()
+  start.setDate(1)
+  start.setHours(0, 0, 0, 0)
+  return start.toISOString()
+}
+
+function isAllowedOrigin(origin: string, appUrl: string): boolean {
+  try {
+    const normalizedOrigin = new URL(origin).origin
+    const allowedOrigins = new Set([
+      appUrl,
+      'http://localhost:3000',
+      'http://localhost:3001',
+    ])
+    return allowedOrigins.has(normalizedOrigin)
+  } catch {
+    return false
+  }
+}
 
 function getClientIp(request: NextRequest): string {
   return (
@@ -22,8 +45,7 @@ export async function POST(request: NextRequest) {
   const origin = request.headers.get('origin')
   const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '')
   if (origin && appUrl) {
-    const allowed = [appUrl, 'http://localhost:3000', 'http://localhost:3001']
-    if (!allowed.some(o => origin.startsWith(o))) {
+    if (!isAllowedOrigin(origin, appUrl)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
   }
@@ -37,6 +59,7 @@ export async function POST(request: NextRequest) {
     }
 
     const url = normalizeUrl(raw)
+    await assertSafeScanUrl(url)
     const supabase = createServiceClient()
 
     // Check auth and rate-limit free tier
@@ -56,15 +79,11 @@ export async function POST(request: NextRequest) {
         const plan = profile?.plan ?? 'free'
 
         if (plan === 'free') {
-          const startOfMonth = new Date()
-          startOfMonth.setDate(1)
-          startOfMonth.setHours(0, 0, 0, 0)
-
           const { count } = await userSupabase
             .from('scans')
             .select('id', { count: 'exact', head: true })
             .eq('user_id', user.id)
-            .gte('created_at', startOfMonth.toISOString())
+            .gte('created_at', startOfCurrentMonth())
 
           if ((count ?? 0) >= FREE_SCAN_LIMIT) {
             return NextResponse.json(
@@ -81,13 +100,12 @@ export async function POST(request: NextRequest) {
     // IP-based rate limit for anonymous users — same as free tier (3/month)
     if (!userId) {
       const ip = getClientIp(request)
-      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
       const { count } = await supabase
         .from('scans')
         .select('id', { count: 'exact', head: true })
         .eq('ip_address', ip)
         .is('user_id', null)
-        .gte('created_at', thirtyDaysAgo)
+        .gte('created_at', startOfCurrentMonth())
 
       if ((count ?? 0) >= ANON_MONTHLY_LIMIT) {
         return NextResponse.json(
@@ -114,28 +132,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to create scan' }, { status: 500 })
     }
 
-    const railwayUrl = process.env.RAILWAY_SCANNER_URL
-    const scannerSecret = process.env.SCANNER_SECRET
-
-    if (railwayUrl && scannerSecret) {
+    if (process.env.RAILWAY_SCANNER_URL && process.env.SCANNER_SECRET) {
       // Delegate to Railway scanner — use waitUntil so Vercel keeps the function
       // alive until Railway acknowledges (Railway responds 202 immediately)
       waitUntil(
-        fetch(`${railwayUrl}/api/run-scan`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${scannerSecret}`,
-          },
-          body: JSON.stringify({ url, scanId: data.id }),
-        }).then(async res => {
-          console.log(`[scan] Railway response: ${res.status} for scanId=${data.id}`)
-          if (!res.ok) {
-            const body = await res.text().catch(() => '')
-            console.error(`[scan] Railway error body: ${body}`)
-            await supabase.from('scans').update({ status: 'error' }).eq('id', data.id)
-          }
-        }).catch(async (err) => {
+        dispatchScanToRailway(data.id, url).catch(async (err) => {
           console.error(`[scan] Railway fetch failed: ${err}`)
           await supabase.from('scans').update({ status: 'error' }).eq('id', data.id)
         })

@@ -145,7 +145,7 @@ export function HeroNoise({ className = '' }: { className?: string }) {
 
     const { gl, uTime, uRes } = ctx
     let rafId: number
-    let start = performance.now()
+    const start = performance.now()
 
     const resize = () => {
       const w = canvas.offsetWidth

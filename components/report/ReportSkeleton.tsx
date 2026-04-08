@@ -36,7 +36,6 @@ export function ReportSkeleton({ status }: { status: string }) {
         clearInterval(timerRef.current)
         timerRef.current = null
       }
-      setIsLeaveModalOpen(false)
     }
   }, [status])
 

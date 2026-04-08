@@ -77,7 +77,7 @@ export default function NotFound() {
           </h1>
 
           <p className="text-[#8B8A85] max-w-sm text-sm leading-relaxed">
-            The page you're looking for doesn't exist or has been moved.
+            The page you&apos;re looking for doesn&apos;t exist or has been moved.
           </p>
 
           <div className="flex flex-wrap justify-center gap-3 mt-2">

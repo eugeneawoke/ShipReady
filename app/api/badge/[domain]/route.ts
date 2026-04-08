@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase'
 import type { ScanResult } from '@/types/scan'
 
 // Valid hostname: letters, digits, hyphens, dots — no wildcards or path separators
@@ -15,10 +15,9 @@ export async function GET(
     return badgeSvg(0)
   }
 
-  const supabase = createServiceClient()
+  const supabase = await createClient()
 
-  // Match only scans whose URL is exactly this domain (with or without trailing path)
-  // Using prefix match prevents subdomain confusion: example.com.evil.com won't match https://example.com/%
+  // RLS limits this route to anonymous/public scans only.
   const { data } = await supabase
     .from('scans')
     .select('results')

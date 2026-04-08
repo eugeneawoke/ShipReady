@@ -8,6 +8,7 @@ import { runMobileChecks } from '@/lib/checks/mobile'
 import { runLinksCheck } from '@/lib/checks/links'
 import { runAIVisibilityChecks } from '@/lib/checks/ai-visibility'
 import { generateAISummary } from '@/lib/ai/generate-summary'
+import { assertSafeScanUrl } from '@/lib/server/url-safety'
 
 // Wrap a promise with a timeout — resolves to fallback value on timeout/error
 async function safe<T>(promise: Promise<T>, fallback: T, name: string): Promise<T> {
@@ -29,8 +30,9 @@ export async function runAllChecks(url: string, scanId: string): Promise<void> {
   await supabase.from('scans').update({ status: 'running' }).eq('id', scanId)
 
   try {
+    const safeUrl = await assertSafeScanUrl(url)
     const html = await Promise.race([
-      fetch(url, { signal: AbortSignal.timeout(10000) }).then(r => r.text()),
+      fetch(safeUrl, { signal: AbortSignal.timeout(10000) }).then(r => r.text()),
       new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error('HTML fetch timed out')), 12_000)
       ),
@@ -38,18 +40,18 @@ export async function runAllChecks(url: string, scanId: string): Promise<void> {
 
     // Run all checks independently — one failure doesn't kill the rest
     const [lh, seoIssues, secIssues, mobIssues, linkIssues, aiVisibilityIssues] = await Promise.all([
-      safe(runLighthouse(url), {
+      safe(runLighthouse(safeUrl), {
         performanceScore: 0, seoScore: 0, a11yScore: 0,
         lcp: 0, cls: 0, inp: 0, fcp: 0,
       }, 'lighthouse'),
-      safe(runSEOChecks(url, html), [], 'seo'),
-      safe(runSecurityChecks(url, html), [], 'security'),
+      safe(runSEOChecks(safeUrl, html), [], 'seo'),
+      safe(runSecurityChecks(safeUrl, html), [], 'security'),
       safe(runMobileChecks(html), [], 'mobile'),
-      safe(runLinksCheck(url, html), [], 'links'),
-      safe(runAIVisibilityChecks(url, html), [], 'ai-visibility'),
+      safe(runLinksCheck(safeUrl, html), [], 'links'),
+      safe(runAIVisibilityChecks(safeUrl, html), [], 'ai-visibility'),
     ])
 
-    const result = buildScanResult(url, lh, seoIssues, secIssues, mobIssues, linkIssues, aiVisibilityIssues)
+    const result = buildScanResult(safeUrl, lh, seoIssues, secIssues, mobIssues, linkIssues, aiVisibilityIssues)
 
     if (process.env.OPENAI_API_KEY) {
       try {

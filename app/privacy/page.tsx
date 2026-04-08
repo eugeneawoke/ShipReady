@@ -80,7 +80,7 @@ export default function PrivacyPage() {
             <ul>
               <li>Access the personal data we hold about you.</li>
               <li>Correct inaccurate data.</li>
-              <li>Request deletion of your data ("right to be forgotten").</li>
+              <li>Request deletion of your data (&quot;right to be forgotten&quot;).</li>
               <li>Object to or restrict processing.</li>
               <li>Data portability.</li>
             </ul>

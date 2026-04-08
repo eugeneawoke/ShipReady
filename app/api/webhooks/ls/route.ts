@@ -2,11 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase'
 import crypto from 'crypto'
 
-async function verifySignature(payload: string, signature: string): Promise<boolean> {
+function verifySignature(payload: string, signature: string): boolean {
   const secret = process.env.LEMON_SQUEEZY_WEBHOOK_SECRET
   if (!secret) return false
   const hmac = crypto.createHmac('sha256', secret)
   const digest = hmac.update(payload).digest('hex')
+
+  if (!signature || signature.length !== digest.length) {
+    return false
+  }
+
   return crypto.timingSafeEqual(Buffer.from(digest), Buffer.from(signature))
 }
 
@@ -14,7 +19,7 @@ export async function POST(request: NextRequest) {
   const payload = await request.text()
   const signature = request.headers.get('x-signature') ?? ''
 
-  if (!await verifySignature(payload, signature)) {
+  if (!verifySignature(payload, signature)) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
   }
 

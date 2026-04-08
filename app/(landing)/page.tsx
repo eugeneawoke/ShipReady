@@ -1,5 +1,7 @@
 'use client'
 
+import Image from 'next/image'
+import Link from 'next/link'
 import { useState, useRef, useEffect } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { motion } from 'framer-motion'
@@ -35,12 +37,6 @@ function smoothScrollTo(selector: string) {
 }
 
 // ─── contact ──────────────────────────────────────────────────────────────────
-
-const CONTACT = {
-  email: 'hi@shipready.app',
-  x:     'https://x.com/eugenegusakoff',
-  tg:    'https://t.me/eugenegusakoff',
-}
 
 // ─── inline SVG icons ────────────────────────────────────────────────────────
 
@@ -422,10 +418,10 @@ function Nav({ t, lang, setLang }: { t: Translations; lang: Lang; setLang: (l: L
       <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
         {/* left */}
         <div className="flex items-center gap-8">
-          <a href="/" className="flex items-center gap-2 font-semibold tracking-tight cursor-pointer hover:opacity-80 transition-opacity" style={{ fontFamily: 'var(--font-syne)' }}>
-              <img src="/logo.svg" alt="ShipReady logo" className="w-7 h-7 flex-shrink-0" />
+          <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight cursor-pointer hover:opacity-80 transition-opacity" style={{ fontFamily: 'var(--font-syne)' }}>
+              <Image src="/logo.svg" alt="ShipReady logo" width={28} height={28} className="w-7 h-7 flex-shrink-0" />
               ShipReady
-            </a>
+            </Link>
           <div className="hidden md:flex items-center gap-6">
             <button
               onClick={() => smoothScrollTo('#how-it-works')}
@@ -1025,4 +1021,3 @@ function BottomCTA({ t }: { t: Translations }) {
     </section>
   )
 }
-

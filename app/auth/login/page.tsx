@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import Image from 'next/image'
+import { useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -53,7 +54,13 @@ function IconCheck() {
 
 export default function LoginPage() {
   const router = useRouter()
-  const [mode, setMode] = useState<Mode>('signin')
+  const [mode, setMode] = useState<Mode>(() => {
+    if (typeof window === 'undefined') return 'signin'
+    const candidate = new URLSearchParams(window.location.search).get('mode')
+    return candidate === 'signup' || candidate === 'signin' || candidate === 'reset'
+      ? candidate
+      : 'signin'
+  })
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -61,13 +68,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  // Read mode from URL param on mount
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const m = params.get('mode')
-    if (m === 'signup' || m === 'signin' || m === 'reset') setMode(m)
-  }, [])
 
   function resetForm() {
     setEmail('')
@@ -178,7 +178,7 @@ export default function LoginPage() {
           {/* Header */}
           <div className="text-center mb-8">
             <div className="inline-flex w-12 h-12 rounded-2xl bg-[#6E56CF]/10 border border-[#6E56CF]/25 items-center justify-center mb-5 p-2">
-              <img src="/logo.svg" alt="ShipReady" className="w-full h-full" />
+              <Image src="/logo.svg" alt="ShipReady" width={32} height={32} className="w-full h-full" />
             </div>
             <h1 className="text-xl font-semibold tracking-tight mb-1.5">{titles[mode]}</h1>
             <p className="text-sm text-[#5A5955]">{subs[mode]}</p>

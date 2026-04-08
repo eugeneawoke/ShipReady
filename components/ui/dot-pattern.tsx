@@ -5,6 +5,11 @@ import { motion } from "motion/react"
 
 import { cn } from "@/lib/utils"
 
+function seededRandom(seed: number) {
+  const value = Math.sin(seed) * 10000
+  return value - Math.floor(value)
+}
+
 /**
  *  DotPattern Component Props
  *
@@ -102,8 +107,8 @@ export function DotPattern({
       return {
         x: col * width + cx + x,
         y: row * height + cy + y,
-        delay: Math.random() * 5,
-        duration: Math.random() * 3 + 2,
+        delay: seededRandom(i + 1) * 5,
+        duration: seededRandom(i + 101) * 3 + 2,
       }
     }
   )

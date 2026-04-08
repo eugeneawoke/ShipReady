@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { ChevronDown, Share2, Check, Copy, Lock, ArrowLeft, FileDown } from 'lucide-react'
 import { ReportSkeleton } from '@/components/report/ReportSkeleton'
 import { ScoreRing } from '@/components/report/ScoreRing'
@@ -145,6 +146,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [completing, setCompleting] = useState(false)
   const [reportVisible, setReportVisible] = useState(false)
+  const [loadFailed, setLoadFailed] = useState(false)
 
   useEffect(() => {
     params.then(p => setId(p.id))
@@ -169,38 +171,51 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
   useEffect(() => {
     if (!id) return
 
-    // eslint-disable-next-line prefer-const
-    let interval: NodeJS.Timeout
-    const timeout = setTimeout(() => {
-      clearInterval(interval)
-      setScan(prev => prev ? { ...prev, status: 'error' } : null)
-      setInitialLoading(false)
-    }, 70_000)
-
     async function poll() {
-      const res = await fetch(`/api/scan/${id}`)
-      if (!res.ok) { setInitialLoading(false); return }
-      const data = await res.json()
-      setScan(data)
-      setInitialLoading(false)
-      if (data.status === 'done' || data.status === 'error') {
-        clearInterval(interval)
-        clearTimeout(timeout)
-        if (data.status === 'done') {
-          setCompleting(true)
-          setTimeout(() => {
-            setCompleting(false)
-            setTimeout(() => setReportVisible(true), 50)
-          }, 1200)
-        } else {
-          setReportVisible(true)
+      try {
+        const res = await fetch(`/api/scan/${id}`, {
+          cache: 'no-store',
+          signal: AbortSignal.timeout(10_000),
+        })
+
+        if (!res.ok) {
+          if (res.status === 404 || res.status === 403) {
+            setLoadFailed(true)
+            setInitialLoading(false)
+            clearInterval(interval)
+          }
+          return
         }
+
+        const data = await res.json()
+        setLoadFailed(false)
+        setScan(data)
+        setInitialLoading(false)
+
+        if (data.status === 'done' || data.status === 'error') {
+          clearInterval(interval)
+          if (data.status === 'done') {
+            setCompleting(true)
+            setTimeout(() => {
+              setCompleting(false)
+              setTimeout(() => setReportVisible(true), 50)
+            }, 1200)
+          } else {
+            setReportVisible(true)
+          }
+        }
+      } catch {
+        setLoadFailed(true)
+        setInitialLoading(false)
+        clearInterval(interval)
       }
     }
 
+    const interval = setInterval(poll, 2000)
     poll()
-    interval = setInterval(poll, 2000)
-    return () => { clearInterval(interval); clearTimeout(timeout) }
+    return () => {
+      clearInterval(interval)
+    }
   }, [id])
 
   // Minimal spinner while loading existing report
@@ -210,6 +225,10 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
         <div className="w-5 h-5 rounded-full border-2 border-[#6E56CF] border-t-transparent animate-spin" />
       </div>
     )
+  }
+
+  if (loadFailed && !scan) {
+    return <ReportSkeleton status="error" />
   }
 
   if (!scan || scan.status === 'pending' || scan.status === 'running' || completing) {
@@ -248,21 +267,21 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
       <header className="sticky top-0 z-10 bg-[#0E0E0F]/90 backdrop-blur-md border-b border-white/6">
         <div className="max-w-3xl mx-auto px-4 h-14 flex items-center gap-3">
           {isLoggedIn ? (
-            <a
+            <Link
               href="/dashboard"
               className="flex items-center gap-1.5 text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors shrink-0"
             >
               <ArrowLeft className="w-4 h-4" />
               Dashboard
-            </a>
+            </Link>
           ) : (
-            <a
+            <Link
               href="/"
               className="flex items-center gap-1.5 text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors shrink-0"
             >
               <ArrowLeft className="w-4 h-4" />
               ShipReady
-            </a>
+            </Link>
           )}
           <span className="text-[#5A5955] text-sm">/</span>
           <span className="text-sm text-[#8B8A85] font-mono truncate flex-1">{domain}</span>

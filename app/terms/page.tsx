@@ -28,7 +28,7 @@ export default function TermsPage() {
         <div className="space-y-10 text-[#8B8A85] text-sm leading-relaxed">
 
           <Section title="1. Acceptance">
-            By accessing or using ShipReady ("the Service"), you agree to be bound by these Terms.
+            By accessing or using ShipReady (&quot;the Service&quot;), you agree to be bound by these Terms.
             If you do not agree, do not use the Service. ShipReady is operated by Eugene Gusakov.
           </Section>
 
@@ -71,7 +71,7 @@ export default function TermsPage() {
           </Section>
 
           <Section title="7. Disclaimer of warranties">
-            The Service is provided <strong className="text-[#F1F0EE]">"as is"</strong> without warranties of any kind.
+            The Service is provided <strong className="text-[#F1F0EE]">&quot;as is&quot;</strong> without warranties of any kind.
             We do not guarantee that audit results are complete, accurate, or that applying fixes will resolve all issues.
             Scores are computed heuristically and may differ from other tools.
           </Section>
@@ -86,7 +86,7 @@ export default function TermsPage() {
           <Section title="9. Intellectual property">
             ShipReady, its branding, and UI are the intellectual property of Eugene Gusakov.
             Report data generated from your URLs belongs to you.
-            AI-generated prompts are provided under the same terms as Anthropic's usage policies.
+            AI-generated prompts are provided under the same terms as Anthropic&apos;s usage policies.
           </Section>
 
           <Section title="10. Termination">
