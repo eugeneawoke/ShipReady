@@ -54,7 +54,7 @@ export default function OGImage() {
             Pre-deploy quality gate for vibe-coded apps
           </span>
           <span style={{ color: '#5A5955', fontSize: '20px', marginTop: '8px' }}>
-            40+ checks · 30 seconds · AI fix prompts
+            40+ checks · fast truth pass · AI fix prompts
           </span>
         </div>
 

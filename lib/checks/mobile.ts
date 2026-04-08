@@ -1,26 +1,27 @@
-import * as cheerio from 'cheerio';
-import type { Issue } from '@/types/scan';
-import { T } from '@/lib/ai/issue-templates';
+import * as cheerio from 'cheerio'
+import type { Issue } from '@/types/scan'
+import { T } from '@/lib/ai/issue-templates'
+import { evidence, withIssueMeta } from '@/lib/checks/issue-meta'
 
 export async function runMobileChecks(html: string): Promise<Issue[]> {
-  const $ = cheerio.load(html);
-  const issues: Issue[] = [];
+  const $ = cheerio.load(html)
+  const issues: Issue[] = []
 
-  const viewport = $('meta[name="viewport"]').attr('content') ?? '';
+  const viewport = $('meta[name="viewport"]').attr('content') ?? ''
 
   if (!viewport) {
-    issues.push({ ...T['missing-viewport'] });
+    issues.push(withIssueMeta({ ...T['missing-viewport'] }, 'dom', [evidence('selector', 'meta[name=viewport]', 'missing')]))
   } else if (viewport.includes('user-scalable=no')) {
-    issues.push({ ...T['blocking-viewport'] });
+    issues.push(withIssueMeta({ ...T['blocking-viewport'] }, 'dom', [evidence('text', 'Viewport content', viewport)]))
   }
 
   if (!$('link[rel*="icon"]').first().attr('href')) {
-    issues.push({ ...T['missing-favicon'] });
+    issues.push(withIssueMeta({ ...T['missing-favicon'] }, 'dom', [evidence('selector', 'link[rel*=icon]', 'missing')]))
   }
 
   if (!$('link[rel="apple-touch-icon"]').length) {
-    issues.push({ ...T['missing-touch-icon'] });
+    issues.push(withIssueMeta({ ...T['missing-touch-icon'] }, 'dom', [evidence('selector', 'link[rel="apple-touch-icon"]', 'missing')]))
   }
 
-  return issues;
+  return issues
 }

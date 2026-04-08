@@ -81,7 +81,7 @@ export default async function DashboardPage() {
                   <div className="flex items-center gap-4 ml-4 shrink-0">
                     {scan.status === 'done' && score !== null ? (
                       <span className={`text-sm font-semibold font-mono ${scoreColor}`}>{score}</span>
-                    ) : scan.status === 'running' || scan.status === 'pending' ? (
+                    ) : ['running', 'running_fast', 'running_deep', 'enriching', 'pending'].includes(scan.status) ? (
                       <span className="text-xs text-[#8B8A85]">scanning…</span>
                     ) : scan.status === 'error' ? (
                       <span className="text-xs text-[#FF6B6B]">error</span>

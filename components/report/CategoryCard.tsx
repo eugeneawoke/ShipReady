@@ -100,7 +100,8 @@ export function CategoryCard({ category, data }: CategoryCardProps) {
   const [passedOpen, setPassedOpen] = useState(false)
   const Icon = ICONS[category]
   const labelColor =
-    data.score >= 90 ? '#3DDC84'
+    data.score === null ? '#8B8A85'
+    : data.score >= 90 ? '#3DDC84'
     : data.score >= 70 ? '#7BC67E'
     : data.score >= 50 ? '#F5C518'
     : '#FF4444'
@@ -110,6 +111,7 @@ export function CategoryCard({ category, data }: CategoryCardProps) {
     good: 'Good',
     'needs-work': 'Needs work',
     poor: 'Poor',
+    unavailable: 'Unavailable',
   }
 
   const failedIds = new Set(data.issues.map(i => i.id))
@@ -140,11 +142,11 @@ export function CategoryCard({ category, data }: CategoryCardProps) {
           <div className="hidden sm:block w-24 h-1.5 bg-white/6 rounded-full overflow-hidden">
             <div
               className="h-full rounded-full transition-all duration-700"
-              style={{ width: `${data.score}%`, background: labelColor }}
+              style={{ width: `${data.score ?? 0}%`, background: labelColor }}
             />
           </div>
           <span className="font-mono text-sm" style={{ color: labelColor }}>
-            {data.score}
+            {data.score ?? '—'}
           </span>
           <span className="text-xs text-[#5A5955]">/100</span>
           <span className="text-xs text-[#8B8A85] hidden sm:inline">
@@ -160,11 +162,20 @@ export function CategoryCard({ category, data }: CategoryCardProps) {
       {/* Issues list */}
       {expanded && (
         <div className="border-t border-white/6">
+          {data.measurement && data.measurement.status !== 'measured' && (
+            <div className="px-4 py-3 border-b border-white/[0.04] bg-white/[0.02]">
+              <p className="text-xs text-[#E8A83E]">
+                {data.measurement.label}: {data.measurement.message || 'Could not verify yet'}
+              </p>
+            </div>
+          )}
           {data.issues.length === 0 ? (
             <div className="px-4 py-3 flex items-center gap-2">
               <span className="text-[#3DDC84] text-xs">✓</span>
               <span className="text-sm text-[#8B8A85]">
-                All {data.totalChecks} checks passed
+                {data.measurement?.status === 'measured'
+                  ? `All ${data.totalChecks} checks passed`
+                  : 'No confirmed issues in this category yet'}
               </span>
             </div>
           ) : (
@@ -183,6 +194,11 @@ export function CategoryCard({ category, data }: CategoryCardProps) {
                     >
                       {issue.severity}
                     </span>
+                    {issue.confidence && (
+                      <span className="text-[10px] font-mono text-[#5A5955] uppercase tracking-[0.08em]">
+                        · {issue.confidence}
+                      </span>
+                    )}
                     {issue.value !== undefined && (
                       <span className="text-[10px] font-mono text-[#8B8A85]">· {issue.value}</span>
                     )}
@@ -195,7 +211,7 @@ export function CategoryCard({ category, data }: CategoryCardProps) {
               ))}
 
               {/* Passed checks — collapsed by default */}
-              {passedChecks.length > 0 && (
+              {data.measurement?.status === 'measured' && passedChecks.length > 0 && (
                 <div className="border-t border-white/[0.04]">
                   <button
                     onClick={() => setPassedOpen(o => !o)}

@@ -231,7 +231,13 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
     return <ReportSkeleton status="error" />
   }
 
-  if (!scan || scan.status === 'pending' || scan.status === 'running' || completing) {
+  const shouldShowSkeleton =
+    !scan ||
+    scan.status === 'pending' ||
+    scan.status === 'running' ||
+    ((scan.status === 'running_fast' || scan.status === 'running_deep' || scan.status === 'enriching') && !scan.results)
+
+  if (shouldShowSkeleton || completing) {
     return <ReportSkeleton status={completing ? 'completing' : (scan?.status ?? 'pending')} />
   }
 
@@ -305,17 +311,37 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
       </header>
 
       <main className="max-w-3xl mx-auto px-4 py-10 space-y-10">
+        {(scan.status === 'running_deep' || scan.status === 'enriching') && (
+          <section className="rounded-xl border border-[#E8A83E]/20 bg-[#E8A83E]/5 px-4 py-3">
+            <p className="text-sm text-[#F1F0EE]">Partial report ready</p>
+            <p className="text-xs text-[#8B8A85] mt-1">
+              Fast truth checks are available now. Deep measurements and AI enrichment are still running, so some categories may remain unavailable for a moment.
+            </p>
+          </section>
+        )}
+
         {/* Score + Summary */}
         <section className="flex flex-col sm:flex-row items-center sm:items-start gap-8">
           <div className="shrink-0">
             <ScoreRing score={results.totalScore} />
           </div>
-          {results.aiSummary && (
+          {(results.aiSummary || results.topPriorities?.length) && (
             <div className="flex-1 pt-2">
               <p className="text-sm font-medium text-[#F1F0EE] mb-2">Summary</p>
-              <p className="text-sm text-[#8B8A85] leading-relaxed line-clamp-3">
-                {results.aiSummary}
-              </p>
+              {results.aiSummary && (
+                <p className="text-sm text-[#8B8A85] leading-relaxed">
+                  {results.aiSummary}
+                </p>
+              )}
+              {results.topPriorities && results.topPriorities.length > 0 && (
+                <div className="mt-3 space-y-1">
+                  {results.topPriorities.slice(0, 3).map((priority, index) => (
+                    <p key={`${priority}-${index}`} className="text-xs text-[#8B8A85]">
+                      {index + 1}. {priority}
+                    </p>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </section>
@@ -337,7 +363,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
                   >
                     {CATEGORY_LABELS[cat]}
                     <span className="font-mono text-xs" style={{ color: isActive ? '#F1F0EE' : '#5A5955' }}>
-                      {score}
+                      {score ?? '—'}
                     </span>
                     {isActive && (
                       <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#6E56CF] rounded-t-full" />

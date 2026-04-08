@@ -3,11 +3,12 @@
 import { useEffect, useRef } from 'react'
 
 interface ScoreRingProps {
-  score: number
+  score: number | null
   size?: number
 }
 
-function getScoreColor(score: number): string {
+function getScoreColor(score: number | null): string {
+  if (score === null) return '#8B8A85'
   if (score >= 90) return '#3DDC84'
   if (score >= 70) return '#7BC67E'
   if (score >= 50) return '#F5C518'
@@ -23,7 +24,7 @@ export function ScoreRing({ score, size = 180 }: ScoreRingProps) {
 
   useEffect(() => {
     const circle = circleRef.current
-    if (!circle) return
+    if (!circle || score === null) return
     const offset = circumference - (score / 100) * circumference
     circle.style.strokeDasharray = `${circumference}`
     circle.style.strokeDashoffset = `${circumference}`
@@ -67,10 +68,10 @@ export function ScoreRing({ score, size = 180 }: ScoreRingProps) {
           className="font-mono text-[64px] font-medium leading-none"
           style={{ color }}
         >
-          {score}
+          {score ?? '—'}
         </span>
         <span className="text-[11px] text-[#5A5955] uppercase tracking-[0.08em] mt-1">
-          SCORE
+          {score === null ? 'PENDING' : 'SCORE'}
         </span>
       </div>
     </div>

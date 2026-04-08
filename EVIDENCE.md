@@ -13,6 +13,16 @@
 Факт: `npm run lint` и `npm run build` проходят на текущем коде после фиксов scan pipeline, RLS access model и report polling flow.
 Проверено: `npm run lint`, `npm run build`
 
+### E-02: Текущий scan pipeline ещё не отделяет failed measurement от healthy result
+Дата: 2026-04-08
+Факт: `runAllChecks()` подставляет нулевые Lighthouse metrics при timeout/error, а scoring логика не создаёт performance issues для `0`-значений и не маркирует measurement как unavailable.
+Проверено: чтение [`lib/checks/index.ts`](/Users/eugene.gusakov/Documents/self-projects/ShipReady/lib/checks/index.ts) и [`lib/scoring.ts`](/Users/eugene.gusakov/Documents/self-projects/ShipReady/lib/scoring.ts)
+
+### E-03: В security path есть лишний fetch и последовательные probes
+Дата: 2026-04-08
+Факт: `runSecurityChecks()` повторно делает `fetch(url)` для headers и затем проверяет `/.env*` файлы последовательно в цикле.
+Проверено: чтение [`lib/checks/security.ts`](/Users/eugene.gusakov/Documents/self-projects/ShipReady/lib/checks/security.ts)
+
 ---
 
 ## На проверке (гипотезы → после проверки перенести выше)

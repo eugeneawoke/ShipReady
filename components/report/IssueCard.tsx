@@ -20,6 +20,12 @@ const SEVERITY_BG: Record<string, string> = {
   pass: 'rgba(61,220,132,0.08)',
 }
 
+const CONFIDENCE_LABELS: Record<string, string> = {
+  verified: 'Verified',
+  likely: 'Likely',
+  heuristic: 'Heuristic',
+}
+
 interface IssueCardProps {
   issue: Issue
   isPro: boolean
@@ -60,6 +66,11 @@ export function IssueCard({ issue, isPro }: IssueCardProps) {
             >
               {issue.severity}
             </span>
+            {issue.confidence && (
+              <span className="text-[10px] font-mono text-[#5A5955] uppercase tracking-[0.08em]">
+                · {CONFIDENCE_LABELS[issue.confidence]}
+              </span>
+            )}
             {issue.value !== undefined && (
               <span className="text-[10px] font-mono text-[#8B8A85]">· {issue.value}</span>
             )}
@@ -69,6 +80,19 @@ export function IssueCard({ issue, isPro }: IssueCardProps) {
       </div>
 
       <p className="text-sm text-[#8B8A85] leading-relaxed">{issue.plainEnglish}</p>
+
+      {issue.evidence && issue.evidence.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {issue.evidence.slice(0, 3).map((item, index) => (
+            <span
+              key={`${issue.id}-evidence-${index}`}
+              className="text-[10px] font-mono text-[#8B8A85] rounded-full px-2 py-1 bg-white/[0.03] border border-white/[0.04]"
+            >
+              {item.label}: {item.value}
+            </span>
+          ))}
+        </div>
+      )}
 
       {issue.docsUrl && (
         <a

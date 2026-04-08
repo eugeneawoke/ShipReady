@@ -1,66 +1,105 @@
-import * as cheerio from 'cheerio';
-import type { Issue } from '@/types/scan';
-import { T } from '@/lib/ai/issue-templates';
-import { isValidUrl } from '@/lib/utils';
+import * as cheerio from 'cheerio'
+import type { Issue } from '@/types/scan'
+import { T } from '@/lib/ai/issue-templates'
+import { isValidUrl } from '@/lib/utils'
+import { evidence, withIssueMeta } from '@/lib/checks/issue-meta'
+import { fetchWithHeadFallback } from '@/lib/checks/fetch-context'
 
-export async function runSEOChecks(url: string, html: string): Promise<Issue[]> {
-  const $ = cheerio.load(html);
-  const issues: Issue[] = [];
+export async function runSEOChecks(
+  url: string,
+  html: string,
+  options?: { includeLikely?: boolean; includeHeuristics?: boolean },
+): Promise<Issue[]> {
+  const includeLikely = options?.includeLikely ?? true
+  const includeHeuristics = options?.includeHeuristics ?? true
+  const $ = cheerio.load(html)
+  const issues: Issue[] = []
 
-  const title = $('title').text().trim();
+  const title = $('title').text().trim()
   if (!title) {
-    issues.push({ ...T['missing-title'] });
-  } else if (title.length < 30 || title.length > 60) {
-    issues.push({ ...T['title-length'], value: `${title.length} chars` });
+    issues.push(withIssueMeta({ ...T['missing-title'] }, 'dom', [evidence('selector', 'title', 'missing')]))
+  } else if (includeHeuristics && (title.length < 30 || title.length > 60)) {
+    issues.push(withIssueMeta(
+      { ...T['title-length'], value: `${title.length} chars` },
+      'dom',
+      [evidence('text', 'Title text', title), evidence('count', 'Title length', title.length)],
+    ))
   }
 
-  const desc = $('meta[name="description"]').attr('content') ?? '';
+  const desc = $('meta[name="description"]').attr('content')?.trim() ?? ''
   if (!desc) {
-    issues.push({ ...T['missing-description'] });
+    issues.push(withIssueMeta({ ...T['missing-description'] }, 'dom', [evidence('selector', 'meta[name=description]', 'missing')]))
   }
 
-  const h1s = $('h1');
+  const h1s = $('h1')
   if (h1s.length !== 1) {
-    issues.push({ ...T['missing-h1'], value: `${h1s.length} found` });
+    issues.push(withIssueMeta(
+      { ...T['missing-h1'], value: `${h1s.length} found` },
+      'dom',
+      [evidence('count', 'H1 count', h1s.length)],
+    ))
   }
 
-  if (!$('link[rel="canonical"]').attr('href')) {
-    issues.push({ ...T['missing-canonical'] });
+  const canonical = $('link[rel="canonical"]').attr('href')
+  if (!canonical) {
+    issues.push(withIssueMeta({ ...T['missing-canonical'] }, 'dom', [evidence('selector', 'link[rel=canonical]', 'missing')]))
   }
 
-  const ogImage = $('meta[property="og:image"]').attr('content');
-
-  if (!$('meta[property="og:title"]').attr('content')) {
-    issues.push({ ...T['missing-og-title'] });
+  const ogTitle = $('meta[property="og:title"]').attr('content')
+  if (!ogTitle) {
+    issues.push(withIssueMeta({ ...T['missing-og-title'] }, 'dom', [evidence('selector', 'meta[property="og:title"]', 'missing')]))
   }
 
-  if (!$('meta[property="og:description"]').attr('content')) {
-    issues.push({ ...T['missing-og-description'] });
+  const ogDescription = $('meta[property="og:description"]').attr('content')
+  if (!ogDescription) {
+    issues.push(withIssueMeta({ ...T['missing-og-description'] }, 'dom', [evidence('selector', 'meta[property="og:description"]', 'missing')]))
   }
 
+  const ogImage = $('meta[property="og:image"]').attr('content')
   if (!ogImage) {
-    issues.push({ ...T['missing-og-image'] });
-  } else if (!isValidUrl(ogImage)) {
-    issues.push({ ...T['og-image-invalid'] });
-  } else {
+    issues.push(withIssueMeta({ ...T['missing-og-image'] }, 'dom', [evidence('selector', 'meta[property="og:image"]', 'missing')]))
+  } else if (includeLikely && !isValidUrl(ogImage)) {
+    issues.push(withIssueMeta(
+      { ...T['og-image-invalid'], value: 'invalid URL' },
+      'http',
+      [evidence('text', 'og:image', ogImage)],
+    ))
+  } else if (includeLikely) {
     try {
-      const r = await fetch(ogImage, { method: 'HEAD', signal: AbortSignal.timeout(4000) });
-      if (!r.ok) {
-        issues.push({ ...T['og-image-invalid'] });
+      const result = await fetchWithHeadFallback(ogImage, 2500)
+      if (!result.ok) {
+        issues.push(withIssueMeta(
+          { ...T['og-image-invalid'], value: `${result.status} via ${result.method}` },
+          'http',
+          [
+            evidence('text', 'og:image', ogImage),
+            evidence('response', `og:image ${result.method}`, result.status),
+          ],
+        ))
       }
     } catch {
-      issues.push({ ...T['og-image-invalid'] });
+      issues.push(withIssueMeta(
+        { ...T['og-image-invalid'], value: 'request failed' },
+        'http',
+        [evidence('text', 'og:image', ogImage)],
+      ))
     }
   }
 
   if (!$('meta[name="twitter:card"]').attr('content')) {
-    issues.push({ ...T['missing-twitter-card'] });
+    issues.push(withIssueMeta({ ...T['missing-twitter-card'] }, 'dom', [evidence('selector', 'meta[name="twitter:card"]', 'missing')]))
   }
 
-  const body = $('body').text().toLowerCase();
-  if (['lorem ipsum', 'your name here'].some(p => body.includes(p))) {
-    issues.push({ ...T['placeholder-text'] });
+  const body = $('body').clone()
+  body.find('script, style, noscript, template').remove()
+  const bodyText = body.text().toLowerCase()
+  if (includeHeuristics && ['lorem ipsum', 'your name here'].some(phrase => bodyText.includes(phrase))) {
+    issues.push(withIssueMeta(
+      { ...T['placeholder-text'] },
+      'dom',
+      [evidence('text', 'Matched placeholder phrase', 'lorem ipsum / your name here')],
+    ))
   }
 
-  return issues;
+  return issues
 }

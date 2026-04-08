@@ -41,15 +41,19 @@ POST /api/scan { url }
   → Supabase insert (status: 'pending') → return { id } немедленно
   → dispatch в Railway scanner (`RAILWAY_SCANNER_URL/api/run-scan`)
   → Railway /api/run-scan:
-      html = await fetch(url) → одна строка для всех checks
-      Promise.all([
-        runLighthouse(url),        ← отдельный Chrome процесс
-        runSEOChecks(url, html),   ← cheerio парсинг
-        runSecurityChecks(url, html),
-        runMobileChecks(html),
-        runLinksCheck(url, html),
-      ])
-      → generateAISummary(results) ← один Claude вызов
+      fastContext = fetch(url) → HTML + headers + final URL + timing
+      Fast Truth Pass:
+        - SEO verified checks
+        - security verified checks
+        - mobile checks
+        - AI visibility verified checks
+        - save partial truthful result
+      Deep Pass:
+        - Lighthouse
+        - broken links / og:image validation with HEAD→GET fallback
+        - noisy heuristics that must not affect score
+      AI enrichment:
+        - one evidence-grounded LLM call on top of collected facts
       → Supabase update (status: 'done', results: ScanResult)
 ```
 
@@ -57,6 +61,49 @@ POST /api/scan { url }
 - authenticated scans приватны для владельца
 - anonymous scans доступны по report URL
 - badge route читает только anonymous/public scans по текущей RLS модели
+
+## Quality contract
+
+ShipReady не должен показывать пользователю "здоровый" результат, если измерение не было выполнено.
+
+- Каждый finding получает `confidence`: `verified`, `likely`, `heuristic`
+- Каждый тяжёлый measurement получает `status`: `measured`, `partial`, `unavailable`
+- Только `verified` findings влияют на score
+- `likely` и `heuristic` можно показывать в UI, но они не должны штрафовать итоговый score
+- Если Lighthouse/links/AI enrichment не сработали, UI должен показывать "не удалось проверить", а не тихо считать, что всё в порядке
+
+## Immediate reliability issues to fix
+
+- Lighthouse fallback в нули сейчас может привести к ложному `performance = 100/100`, если измерение не состоялось
+- `runSecurityChecks()` делает повторный `fetch(url)` вместо reuse shared headers/response context
+- `.env` probes выполняются последовательно, а не параллельно
+- `og:image` и broken links сейчас используют `HEAD` без `GET` fallback
+- AI visibility word count сейчас не исключает `script/style/noscript/template`
+
+## Confidence map
+
+### Verified, score-eligible
+
+- Performance: `lcp-slow`, `cls-high`, `inp-slow`, `fcp-slow`, `perf-score-low`, `a11y-score-low`
+- SEO presence: `missing-title`, `missing-description`, `missing-h1`, `missing-canonical`, `missing-og-title`, `missing-og-description`, `missing-og-image`, `missing-twitter-card`
+- Security: `no-https`, `missing-hsts`, `missing-x-frame`, `missing-xcto`, `missing-referrer-policy`, `missing-csp`, `unsafe-csp`, `ssl-expiring`, `exposed-env-file`
+- Mobile: `missing-viewport`, `blocking-viewport`, `missing-favicon`, `missing-touch-icon`
+- AI visibility: `missing-schema-org`, `missing-llms-txt`, `ai-crawlers-blocked`, `missing-sitemap`
+
+### Likely, non-score
+
+- SEO: `og-image-invalid`, `broken-links`
+- Security: `api-key-in-html`, `mixed-content`
+- AI visibility: `missing-faq-schema`, `poor-heading-hierarchy`
+
+### Heuristic, non-score
+
+- SEO: `title-length`, `placeholder-text`
+- AI visibility: `thin-content`, `missing-author-entity`
+
+Примечание:
+- `title-length` остаётся полезным как evidence (`74 chars`), но продуктовый вывод "это точно вредит SEO" слишком эвристический для score path.
+- Если какой-то verified check не был измерен, это не превращает его в pass; это должно отражаться отдельным measurement status.
 
 ---
 

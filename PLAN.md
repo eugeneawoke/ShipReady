@@ -3,10 +3,11 @@
 ## Текущая фаза
 
 ```
-ФАЗА:   8 — Pro Features
-СТАТУС: не начата
-ЦЕЛЬ:   Платный тариф реально работает: AI промпты видны, PDF скачивается,
-        мониторинг сканирует и шлёт письма
+ФАЗА:   9 — Quality Overhaul
+СТАТУС: стартует
+ЦЕЛЬ:   Отчёт всегда правдивый: score строится только на подтверждённых фактах,
+        медленные проверки не маскируются под success, AI работает поверх evidence,
+        а product promise опирается на telemetry
 ```
 
 ---
@@ -24,8 +25,9 @@
 | 6 | Монетизация | Auth + Lemon Squeezy webhook + paywall UI | 🔄 в процессе (см. TODO) |
 | 7 | Запуск | Product Hunt + vc.ru + HN | ⏳ не начата |
 | 8 | Pro Features | AI промпты работают + PDF + мониторинг + email | ⏳ не начата |
-| 9 | Качество отчёта | Информативный summary + UX улучшения | ⏳ не начата |
-| 10 | AI Content Checks | AI-only проверки контента (D-15): value prop, CTA, tone — Pro-only аддон | 💡 идея |
+| 9 | Quality Overhaul | Confidence/evidence model, phased scan flow, truthful scoring, telemetry | 🔄 стартует |
+| 10 | Pro Features | AI промпты работают + PDF + мониторинг + email | ⏳ не начата |
+| 11 | AI Content Checks | AI-only wow insights поверх evidence, Pro-only аддон | 💡 идея |
 
 ---
 
@@ -40,6 +42,8 @@
 | PDF export | Не написано | — |
 | Email alerts | Не написано | — |
 | IssueCard per-issue prompts | `cursorPrompt`/`boltPrompt` есть в Issue type | IssueCard их не рендерит, промпты нигде не показаны |
+| Truthful scoring | Сейчас любой найденный issue штрафует score | Нет confidence model; heuristics и likely checks смешаны с verified findings |
+| Measurement status | Тяжёлые checks fallback'ятся молча | При провале Lighthouse система может не показать, что performance вообще не измерялся |
 
 ---
 
@@ -49,3 +53,4 @@
 |------|---------|--------|---------|
 | 2026-04-07 | 0 | 6 | Фазы 1–5 реализованы локально, деплой ещё не сделан |
 | 2026-04-07 | 6 | 8 | Фаза 6 частично сделана (auth + webhook код есть), переходим к pro features |
+| 2026-04-08 | 8 | 9 | Перед pro-фичами запускаем quality overhaul: без truthful scan model нельзя обещать high-quality product |

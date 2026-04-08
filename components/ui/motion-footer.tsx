@@ -356,7 +356,7 @@ export function CinematicFooter() {
                   className="sr-glass-pill px-10 py-5 rounded-full text-[#F1F0EE] font-bold text-sm md:text-base flex items-center gap-3 group"
                 >
                   <span className="text-[#6E56CF] group-hover:text-[#a78bfa] transition-colors text-lg">⬡</span>
-                  Free scan — 30 seconds
+                  Free scan — fast initial findings
                 </MagneticButton>
 
                 <MagneticButton

@@ -1,6 +1,6 @@
 # ShipReady
 
-Pre-deploy quality gate for vibe-coded apps. ShipReady scans a live URL and produces a report across performance, SEO, security, mobile, and AI visibility, with AI-generated fix prompts for paid plans.
+Pre-deploy quality gate for vibe-coded apps. ShipReady scans a live URL and produces a report across performance, SEO, security, mobile, and AI visibility. The product is being upgraded toward a trust-first model: only confirmed findings should affect score, slower checks must report "could not verify" instead of inventing healthy results, and AI acts as enrichment over evidence rather than as the source of truth.
 
 ## Stack
 
@@ -36,10 +36,26 @@ Core variables:
 
 ## Scan flow
 
+Current production flow:
+
 1. `POST /api/scan` validates URL safety, applies quota checks, creates a `pending` scan, and dispatches the job to Railway.
 2. Railway hits `/api/run-scan` with `Authorization: Bearer ${SCANNER_SECRET}`.
 3. The scanner runs deterministic checks plus optional AI summary generation.
 4. Results are written back to Supabase and polled from `/report/[id]`.
+
+Target flow for the next quality pass:
+
+1. `Fast Truth Pass` runs verified checks from a shared fetch context and saves partial results quickly.
+2. `Deep Pass` runs Lighthouse and slower/less certain checks without blocking initial truthful feedback.
+3. `AI enrichment` rewrites and prioritizes findings from evidence only; it does not invent score-bearing issues.
+4. Public UX avoids exact timing promises until telemetry is available for real `p50/p95` scan durations.
+
+## Quality model
+
+- Findings are moving to three confidence levels: `verified`, `likely`, `heuristic`.
+- Only `verified` findings should affect category and total scores.
+- Heavy checks such as Lighthouse must expose a measurement status like `measured` vs `unavailable`; a failed measurement must never silently look healthy.
+- Anonymous scans remain readable by report URL; authenticated scans remain private to the owner.
 
 ## Access model
 

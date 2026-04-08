@@ -159,7 +159,7 @@ export function ReportSkeleton({ status }: { status: string }) {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-baseline justify-between mb-3">
-            <p className="text-sm text-[#8B8A85]">Analyzing your site...</p>
+            <p className="text-sm text-[#8B8A85]">{statusLabel}</p>
             <p className="font-mono leading-none">
               <span style={{ fontSize: 22, color: '#6E56CF', fontWeight: 600 }}>
                 {Math.floor(elapsed / 10)}
@@ -191,8 +191,8 @@ export function ReportSkeleton({ status }: { status: string }) {
 
           <p className="mt-2 text-xs text-[#5A5955]">
             {elapsed > 400
-              ? <span style={{ color: '#E8A83E' }}>Taking longer than usual — almost there...</span>
-              : 'Usually 20–40 seconds · depends on site speed'
+              ? <span style={{ color: '#E8A83E' }}>Taking longer than usual. Fast checks finish first; deep checks can take longer on complex sites.</span>
+              : 'Running fast checks first, then deep analysis. Complex sites may take longer.'
             }
           </p>
         </div>
@@ -278,3 +278,11 @@ export function ReportSkeleton({ status }: { status: string }) {
     </div>
   )
 }
+  const statusLabel =
+    status === 'running_fast'
+      ? 'Running fast truth checks...'
+      : status === 'running_deep'
+        ? 'Running deep analysis...'
+        : status === 'enriching'
+          ? 'Writing the final report...'
+          : 'Analyzing your site...'

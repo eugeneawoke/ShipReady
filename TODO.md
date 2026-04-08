@@ -12,7 +12,7 @@
 - [ ] Подключить Vercel к репозиторию (автодеплой из main)
 - [ ] Создать проект Supabase, регион Frankfurt (fra1)
 - [ ] `npx supabase db push` — применить миграции
-- [ ] Добавить env variables в Vercel (APP_URL, SUPABASE_*, ANTHROPIC_API_KEY, LS_*, RESEND_API_KEY)
+- [ ] Добавить env variables в Vercel (APP_URL, SUPABASE_*, OPENAI_API_KEY, LS_*, RESEND_API_KEY)
 - [ ] Создать `.env.local` локально
 - [ ] Первый живой деплой на кастомном домене
 
@@ -64,9 +64,44 @@
 
 ---
 
-## Фаза 8 — Pro Features (следующая)
+## Фаза 9 — Quality Overhaul (следующая)
 
-### 8.1 AI fix prompts — починить и показать
+### 9.1 Truthful findings model
+
+- [ ] `types/scan.ts` — добавить `confidence`, `scoreEligible`, `evidence[]`, `source`
+- [ ] `types/scan.ts` — добавить `phase`, `confidenceSummary`, `timings`, measurement status для тяжёлых checks
+- [ ] `lib/scoring.ts` — учитывать только `scoreEligible === true`
+- [ ] UI: IssueCard показывает badge `Verified / Likely / Heuristic`
+- [ ] UI: отчёт показывает "Could not verify" если measurement unavailable
+
+### 9.2 Fast Truth Pass / Deep Pass
+
+- [ ] `lib/checks/index.ts` — разбить оркестрацию на `running_fast` → `running_deep` → `enriching` → `done`
+- [ ] Shared fetch context: один fetch должен давать HTML + headers + timing для быстрых checks
+- [ ] `runSecurityChecks()` перестаёт делать собственный `fetch(url)` и использует shared headers/context
+- [ ] Если Deep Pass падает, Fast Pass результат всё равно сохраняется и показывается пользователю
+- [ ] Убрать exact seconds из wait-state copy до появления telemetry baseline
+
+### 9.3 Garbage-data fixes
+
+- [ ] Исправить Lighthouse fallback: failed measurement ≠ `0` metrics ≠ `100/100`
+- [ ] `.env` probes перевести в parallel path или убрать из fast path, если они мешают latency
+- [ ] `og:image` validation: `HEAD` → `GET` fallback перед likely finding
+- [ ] `links` check: `HEAD` → `GET` fallback + custom 404 strategy или downgrade confidence
+- [ ] Word count / body text: исключать `script`, `style`, `noscript`, `template`
+- [ ] Перевести noisy checks из score path в `likely`/`heuristic`
+
+### 9.4 AI enrichment and telemetry
+
+- [ ] Разделить текущий `generate-summary.ts` на evidence enrichment и wow insights
+- [ ] Базовый AI pass: summary + priorities + wording only, без новых technical facts
+- [ ] Wow-pass только для Pro/Agency и только поверх уже собранного evidence
+- [ ] Сохранять phase timings: html fetch, fast pass, deep pass, AI enrichment, total
+- [ ] Добавить script/SQL recipe для `p50/p95/p99` scan duration и failure rate by phase
+
+## Фаза 10 — Pro Features
+
+### 10.1 AI fix prompts — починить и показать
 
 - [ ] Убедиться что `OPENAI_API_KEY` задан в env (локально и в Railway)
 - [ ] Проверить что новый скан сохраняет `aiTechnicalPrompt` и `aiVibePrompt` в DB
@@ -75,7 +110,7 @@
   - показывать как коллапсибл "Fix with AI →" внизу каждой карточки
 - [ ] Убрать сообщение "AI prompt not available" — заменить на skeleton/spinner если ещё loading
 
-### 8.2 PDF export
+### 10.2 PDF export
 
 - [ ] Решение: puppeteer screenshot → PDF (используем уже установленный puppeteer-core + @sparticuz/chromium)
   - альтернатива: `react-pdf` если нет Railway runner
@@ -84,7 +119,7 @@
 - [ ] Кнопка "Download PDF" в хедере отчёта — видна только для Pro/Agency
 - [ ] PDF включает: score, category scores, все issues с plainEnglish, aiSummary
 
-### 8.3 Weekly monitoring + email alerts
+### 10.3 Weekly monitoring + email alerts
 
 - [ ] Понять концепцию для пользователя:
   - **Monitoring** = система автоматически сканирует сохранённые домены раз в неделю
@@ -104,9 +139,9 @@
 
 ---
 
-## Фаза 9 — Качество отчёта
+## Фаза 11 — Качество отчёта / UX polish
 
-### 9.1 Информативный summary сверху
+### 11.1 Информативный summary сверху
 
 - [ ] Заменить текущий summary (2–3 строки) на структурированный блок:
   - Самые важные 3 проблемы (critical + high, с иконками)
@@ -115,7 +150,7 @@
 - [ ] `generateAISummary` — добавить поле `keyIssues: string[]` (3 элемента) в JSON ответ
 - [ ] UI: карточки "Key Issues" перед category tabs, не после
 
-### 9.2 Информативность issue cards
+### 11.2 Информативность issue cards
 
 - [ ] Добавить в каждый IssueCard:
   - Конкретные числа/значения (value поле уже есть — сделать prominent)
@@ -126,7 +161,7 @@
   - `docsUrl` заполнен везде где возможно
   - `cursorPrompt` конкретен (с именами файлов, не абстрактен)
 
-### 9.3 Визуальная иерархия отчёта
+### 11.3 Визуальная иерархия отчёта
 
 - [ ] Добавить "What's broken vs what's fine" секцию в начале (до category tabs)
   - Визуальный breakdown: сколько critical / high / medium / low / pass

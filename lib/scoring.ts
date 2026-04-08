@@ -1,4 +1,13 @@
-import type { Issue, CategoryScore, ScanResult, IssueSeverity } from '@/types/scan'
+import type {
+  CategoryScore,
+  Issue,
+  IssueSeverity,
+  MeasurementState,
+  ScanPhase,
+  ScanResult,
+  ScanTimings,
+} from '@/types/scan'
+import { measurement, withIssueMeta, evidence } from '@/lib/checks/issue-meta'
 
 const DEDUCTIONS: Record<IssueSeverity, number> = {
   critical: 25,
@@ -10,13 +19,22 @@ const DEDUCTIONS: Record<IssueSeverity, number> = {
 
 const TOTAL_CHECKS = {
   performance: 6,
-  seo: 11,
+  seo: 12,
   security: 11,
   mobile: 4,
   ai_visibility: 8,
 }
 
-function scoreLabel(score: number): CategoryScore['label'] {
+const CATEGORY_WEIGHTS = {
+  performance: 0.25,
+  seo: 0.20,
+  security: 0.25,
+  mobile: 0.10,
+  ai_visibility: 0.20,
+} as const
+
+function scoreLabel(score: number | null): CategoryScore['label'] {
+  if (score === null) return 'unavailable'
   if (score >= 90) return 'excellent'
   if (score >= 70) return 'good'
   if (score >= 50) return 'needs-work'
@@ -26,16 +44,21 @@ function scoreLabel(score: number): CategoryScore['label'] {
 export function buildCategoryScore(
   issues: Issue[],
   category: keyof typeof TOTAL_CHECKS,
+  options?: { measurement?: MeasurementState },
 ): CategoryScore {
-  const deduction = issues.reduce((sum, i) => sum + DEDUCTIONS[i.severity], 0)
-  const score = Math.max(0, 100 - deduction)
+  const measurementState = options?.measurement ?? measurement(category, 'measured')
+  const scorableIssues = issues.filter(issue => issue.scoreEligible)
+  const deduction = scorableIssues.reduce((sum, issue) => sum + DEDUCTIONS[issue.severity], 0)
+  const score = measurementState.status === 'unavailable' ? null : Math.max(0, 100 - deduction)
   const totalChecks = TOTAL_CHECKS[category]
+
   return {
     score,
     label: scoreLabel(score),
     issues,
-    passedChecks: totalChecks - issues.length,
+    passedChecks: measurementState.status === 'unavailable' ? 0 : Math.max(0, totalChecks - issues.length),
     totalChecks,
+    measurement: measurementState,
   }
 }
 
@@ -49,146 +72,176 @@ export function getAllIssues(result: ScanResult): Issue[] {
   ]
 }
 
-export function buildScanResult(
-  url: string,
-  lh: {
-    performanceScore: number
-    seoScore: number
-    a11yScore: number
-    lcp: number
-    cls: number
-    inp: number
-    fcp: number
-  },
-  seoIssues: Issue[],
-  secIssues: Issue[],
-  mobIssues: Issue[],
-  linkIssues: Issue[],
-  aiVisibilityIssues: Issue[],
-): ScanResult {
-  const perfIssues: Issue[] = []
+export function countConfidence(result: ScanResult) {
+  return getAllIssues(result).reduce(
+    (summary, issue) => {
+      if (issue.confidence === 'verified') summary.verified += 1
+      else if (issue.confidence === 'likely') summary.likely += 1
+      else summary.heuristic += 1
+      return summary
+    },
+    { verified: 0, likely: 0, heuristic: 0 },
+  )
+}
+
+function weightedTotal(result: Omit<ScanResult, 'totalScore' | 'confidenceSummary'>): number | null {
+  const available = (Object.keys(CATEGORY_WEIGHTS) as Array<keyof typeof CATEGORY_WEIGHTS>).reduce<Array<{ score: number; weight: number }>>(
+    (acc, key) => {
+      const score = result[key].score
+      if (score !== null) {
+        acc.push({ score, weight: CATEGORY_WEIGHTS[key] })
+      }
+      return acc
+    },
+    [],
+  )
+
+  if (available.length === 0) return null
+
+  const totalWeight = available.reduce((sum, entry) => sum + entry.weight, 0)
+  const score = available.reduce((sum, entry) => sum + entry.score * entry.weight, 0) / totalWeight
+  return Math.round(score)
+}
+
+export function buildPerformanceIssues(lh: {
+  performanceScore: number
+  a11yScore: number
+  lcp: number
+  cls: number
+  inp: number
+  fcp: number
+}): Issue[] {
+  const issues: Issue[] = []
 
   if (lh.lcp > 2500) {
-    perfIssues.push({
+    issues.push(withIssueMeta({
       id: 'lcp-slow',
       category: 'performance',
       severity: 'high',
-      title: 'LCP is slow',
+      title: 'Largest Contentful Paint is too slow',
       description: `LCP is ${(lh.lcp / 1000).toFixed(1)}s`,
       plainEnglish: `Your page takes ${(lh.lcp / 1000).toFixed(1)}s to show the main content. Google's target is under 2.5s.`,
-      cursorPrompt:
-        'Optimize Largest Contentful Paint: lazy load images below fold, add priority to hero image, use next/image with sizes prop',
-      boltPrompt:
-        'Add loading="eager" and fetchpriority="high" to your hero image. Move render-blocking scripts to bottom of body.',
+      cursorPrompt: 'Optimize Largest Contentful Paint: lazy load below-the-fold assets, prioritize the hero asset, and remove render-blocking work.',
+      boltPrompt: 'Prioritize the hero content and reduce render-blocking resources so the main content appears under 2.5 seconds.',
       value: `${(lh.lcp / 1000).toFixed(1)}s`,
-    })
+    }, 'lighthouse', [evidence('metric', 'LCP', `${(lh.lcp / 1000).toFixed(1)}s`) ]))
   }
 
   if (lh.cls > 0.1) {
-    perfIssues.push({
+    issues.push(withIssueMeta({
       id: 'cls-high',
       category: 'performance',
       severity: 'high',
-      title: 'Layout shift detected',
+      title: 'Layout shifts detected',
       description: `CLS score is ${lh.cls.toFixed(3)}`,
-      plainEnglish:
-        'Your page elements jump around while loading. This frustrates users and hurts SEO rankings.',
-      cursorPrompt:
-        'Fix Cumulative Layout Shift: add explicit width/height to all images and iframes, reserve space for dynamic content with min-height, avoid inserting content above existing content',
-      boltPrompt:
-        'Add width and height attributes to all your images. Add a fixed height to any containers that load content dynamically.',
+      plainEnglish: 'Your page layout shifts during load. This makes the page feel unstable and hurts Core Web Vitals.',
+      cursorPrompt: 'Reserve space for images and embeds, avoid injecting content above existing content, and stabilize font/layout loading.',
+      boltPrompt: 'Set explicit dimensions and reserve space for dynamic elements to stop layout jumps.',
       value: lh.cls.toFixed(3),
-    })
+    }, 'lighthouse', [evidence('metric', 'CLS', lh.cls.toFixed(3))]))
   }
 
   if (lh.inp > 200) {
-    perfIssues.push({
+    issues.push(withIssueMeta({
       id: 'inp-slow',
       category: 'performance',
       severity: 'medium',
-      title: 'Slow interaction response',
+      title: 'Interaction response is slow',
       description: `INP is ${lh.inp}ms`,
-      plainEnglish: `Your page takes ${lh.inp}ms to respond to clicks. Target is under 200ms.`,
-      cursorPrompt:
-        'Optimize Interaction to Next Paint: defer non-critical JS, break long tasks with scheduler.yield(), use React.memo for expensive components',
-      boltPrompt:
-        'Move your JavaScript to the bottom of the page and add defer attribute to script tags.',
+      plainEnglish: `Your page takes ${lh.inp}ms to react to interactions. Target is under 200ms.`,
+      cursorPrompt: 'Break up long tasks, defer non-critical work, and reduce main-thread blocking during interaction.',
+      boltPrompt: 'Reduce the JavaScript work that runs during clicks and typing so the page responds faster.',
       value: `${lh.inp}ms`,
-    })
+    }, 'lighthouse', [evidence('metric', 'INP', `${lh.inp}ms`) ]))
   }
 
   if (lh.fcp > 1800) {
-    perfIssues.push({
+    issues.push(withIssueMeta({
       id: 'fcp-slow',
       category: 'performance',
       severity: 'medium',
       title: 'First paint is slow',
       description: `FCP is ${(lh.fcp / 1000).toFixed(1)}s`,
-      plainEnglish: `Your page takes ${(lh.fcp / 1000).toFixed(1)}s to show anything. Users see a blank screen.`,
-      cursorPrompt:
-        'Improve First Contentful Paint: inline critical CSS, preload key fonts, remove render-blocking resources',
-      boltPrompt:
-        'Add <link rel="preload"> tags for your main font and CSS files in the HTML head.',
+      plainEnglish: `Your page takes ${(lh.fcp / 1000).toFixed(1)}s before users see anything. Target is under 1.8s.`,
+      cursorPrompt: 'Reduce render-blocking work, preload critical assets, and improve first response rendering.',
+      boltPrompt: 'Make above-the-fold assets load first and delay non-critical resources so the page paints sooner.',
       value: `${(lh.fcp / 1000).toFixed(1)}s`,
-    })
+    }, 'lighthouse', [evidence('metric', 'FCP', `${(lh.fcp / 1000).toFixed(1)}s`) ]))
   }
 
-  if (lh.performanceScore > 0 && lh.performanceScore < 70) {
-    perfIssues.push({
+  if (lh.performanceScore < 70) {
+    issues.push(withIssueMeta({
       id: 'perf-score-low',
       category: 'performance',
       severity: 'high',
-      title: 'Low performance score',
+      title: 'Low Lighthouse performance score',
       description: `Performance score: ${lh.performanceScore}/100`,
-      plainEnglish: `Google rates your page ${lh.performanceScore}/100 for performance. This directly affects your search ranking.`,
-      cursorPrompt:
-        'Run: npx lighthouse URL --output html --view to see detailed performance recommendations',
-      boltPrompt:
-        'Your overall performance score is low. Focus on reducing page size and eliminating render-blocking resources.',
+      plainEnglish: `Google rates your page ${lh.performanceScore}/100 for performance. This suggests users are paying a noticeable speed penalty.`,
+      cursorPrompt: 'Use the Lighthouse trace to remove top performance bottlenecks and improve the mobile score above 70.',
+      boltPrompt: 'Focus on the biggest Lighthouse opportunities first until the mobile score clears 70.',
       value: lh.performanceScore,
-    })
+    }, 'lighthouse', [evidence('metric', 'Performance score', lh.performanceScore)]))
   }
 
-  if (lh.a11yScore > 0 && lh.a11yScore < 70) {
-    perfIssues.push({
+  if (lh.a11yScore < 70) {
+    issues.push(withIssueMeta({
       id: 'a11y-score-low',
       category: 'performance',
       severity: 'medium',
-      title: 'Accessibility issues',
+      title: 'Accessibility score is low',
       description: `Accessibility score: ${lh.a11yScore}/100`,
-      plainEnglish: `Your site scores ${lh.a11yScore}/100 for accessibility. Many users with disabilities may not be able to use it.`,
-      cursorPrompt:
-        'Fix accessibility: add aria-label to icon buttons, ensure color contrast ratio >= 4.5:1, add alt text to all images, use semantic HTML (nav, main, h1-h6 hierarchy)',
-      boltPrompt:
-        'Add alt="" text to all images. Make sure buttons have descriptive text. Check color contrast with WebAIM Contrast Checker.',
+      plainEnglish: `Your site scores ${lh.a11yScore}/100 for accessibility. This usually means avoidable barriers for users and weaker baseline markup quality.`,
+      cursorPrompt: 'Fix the failing Lighthouse accessibility audits and improve semantic structure, labels, and contrast.',
+      boltPrompt: 'Improve accessibility basics like labels, contrast, alt text, and semantic headings until the score is above 70.',
       value: lh.a11yScore,
-    })
+    }, 'lighthouse', [evidence('metric', 'Accessibility score', lh.a11yScore)]))
   }
 
-  const allSeoIssues = [...seoIssues, ...linkIssues]
+  return issues
+}
 
-  const performance = buildCategoryScore(perfIssues, 'performance')
-  const seo = buildCategoryScore(allSeoIssues, 'seo')
-  const security = buildCategoryScore(secIssues, 'security')
-  const mobile = buildCategoryScore(mobIssues, 'mobile')
-  const ai_visibility = buildCategoryScore(aiVisibilityIssues, 'ai_visibility')
-
-  const totalScore = Math.round(
-    performance.score * 0.25 +
-      seo.score * 0.20 +
-      security.score * 0.25 +
-      mobile.score * 0.10 +
-      ai_visibility.score * 0.20,
-  )
-
-  return {
-    url,
+export function buildScanResult(params: {
+  url: string
+  phase: ScanPhase
+  timings?: ScanTimings
+  performance: CategoryScore
+  seo: CategoryScore
+  security: CategoryScore
+  mobile: CategoryScore
+  ai_visibility: CategoryScore
+  aiSummary?: string
+  topPriorities?: string[]
+  aiTechnicalPrompt?: string
+  aiVibePrompt?: string
+  issuePrompts?: Record<string, { technical: string; vibe: string }>
+  wowInsights?: ScanResult['wowInsights']
+}): ScanResult {
+  const base = {
+    url: params.url,
     scannedAt: new Date().toISOString(),
+    phase: params.phase,
+    timings: params.timings,
+    performance: params.performance,
+    seo: params.seo,
+    security: params.security,
+    mobile: params.mobile,
+    ai_visibility: params.ai_visibility,
+    aiSummary: params.aiSummary,
+    topPriorities: params.topPriorities,
+    aiTechnicalPrompt: params.aiTechnicalPrompt,
+    aiVibePrompt: params.aiVibePrompt,
+    issuePrompts: params.issuePrompts,
+    wowInsights: params.wowInsights,
+  }
+
+  const totalScore = weightedTotal(base)
+  return {
+    ...base,
     totalScore,
-    performance,
-    seo,
-    security,
-    mobile,
-    ai_visibility,
+    confidenceSummary: countConfidence({
+      ...base,
+      totalScore,
+      confidenceSummary: { verified: 0, likely: 0, heuristic: 0 },
+    }),
   }
 }

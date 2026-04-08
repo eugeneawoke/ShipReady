@@ -116,15 +116,15 @@ const T = {
     },
     hero: {
       h1a: 'Your vibe-coded app,',
-      h1b: 'ship-ready in 30 sec',
-      sub: 'Paste your URL. Get a full audit — performance, SEO, security, mobile, AI visibility — with AI fix prompts for Cursor and Bolt.',
+      h1b: 'ship-ready with truthful checks',
+      sub: 'Paste your URL. Get a full audit across performance, SEO, security, mobile, and AI visibility, with evidence-based fix prompts for Cursor and Bolt.',
       noSignup: 'No signup required for first scan',
       worksWith: 'Works with',
     },
     stats: [
       { value: '40+', label: 'automated checks' },
       { value: '5',   label: 'categories covered' },
-      { value: '30s', label: 'average scan time' },
+      { value: 'Fast', label: 'initial findings' },
       { value: 'AI',  label: 'fix prompt per issue' },
     ],
     how: {
@@ -132,7 +132,7 @@ const T = {
       title: 'Three steps to ship-ready',
       steps: [
         { step: '01', emoji: '🔗', title: 'Paste your URL',       desc: 'Drop any live URL — Vercel, Netlify, custom domain. No setup or browser extension needed.' },
-        { step: '02', emoji: '⚙️', title: '40+ checks run',       desc: 'Lighthouse, SEO meta, security headers, SSL, mobile viewport, AI visibility — all in parallel within 30 seconds.' },
+        { step: '02', emoji: '⚙️', title: '40+ checks run',       desc: 'Fast truth checks run first, then deeper analysis follows for performance and noisier heuristics.' },
         { step: '03', emoji: '✨', title: 'Get AI fix prompts',   desc: 'Each issue has a plain-English explanation and a ready-to-paste prompt for Cursor or Bolt.' },
       ],
     },
@@ -195,7 +195,7 @@ const T = {
     },
     cta: {
       title: 'Is your app ship-ready?',
-      sub: 'Run a free scan and find out in 30 seconds.',
+      sub: 'Run a free scan and get initial findings fast.',
     },
     footer: {
       tagline: 'Pre-deploy quality gate for vibe-coded apps.',
@@ -225,15 +225,15 @@ const T = {
     },
     hero: {
       h1a: 'Ваше vibe-coded приложение,',
-      h1b: 'готово к деплою за 30 сек',
-      sub: 'Вставьте URL и получите полный аудит — производительность, SEO, безопасность, мобильный, видимость для ИИ — с AI-промптами для Cursor и Bolt.',
+      h1b: 'готово к деплою с честной проверкой',
+      sub: 'Вставьте URL и получите полный аудит по производительности, SEO, безопасности, мобильности и видимости для ИИ — с evidence-based AI-промптами для Cursor и Bolt.',
       noSignup: 'Первый скан без регистрации',
       worksWith: 'Работает с',
     },
     stats: [
       { value: '40+', label: 'автоматических проверок' },
       { value: '5',   label: 'категорий' },
-      { value: '30с', label: 'среднее время скана' },
+      { value: 'Быстро', label: 'первые выводы' },
       { value: 'AI',  label: 'промпт на каждую проблему' },
     ],
     how: {
