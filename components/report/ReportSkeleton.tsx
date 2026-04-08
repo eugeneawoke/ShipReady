@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { CheckCircle2, Loader2 } from 'lucide-react'
 
 const STEPS = [
@@ -16,16 +16,24 @@ export function ReportSkeleton({ status }: { status: string }) {
   const [doneSteps, setDoneSteps] = useState<Set<number>>(new Set())
   const [barWidth, setBarWidth] = useState(3)
   const [elapsed, setElapsed] = useState(0) // counts 100ms ticks
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
+  // Start timer once on mount
   useEffect(() => {
-    // Only tick during active scanning states
-    if (status === 'error' || status === 'completing') return
+    timerRef.current = setInterval(() => setElapsed(p => p + 1), 100)
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current)
+    }
+  }, [])
 
-    const timerInterval = setInterval(() => {
-      setElapsed(prev => prev + 1)
-    }, 100)
-
-    return () => clearInterval(timerInterval)
+  // Stop timer when scan reaches a terminal state
+  useEffect(() => {
+    if (status === 'error' || status === 'completing') {
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+        timerRef.current = null
+      }
+    }
   }, [status])
 
   useEffect(() => {
