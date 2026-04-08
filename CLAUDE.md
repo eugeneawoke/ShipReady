@@ -143,14 +143,16 @@ CREATE TABLE scans (
              CHECK (status IN ('pending','running','done','error')),
   results    JSONB,
   user_id    UUID REFERENCES auth.users(id),
+  ip_address TEXT,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 ALTER TABLE scans ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "public read by id" ON scans FOR SELECT USING (true);
+CREATE POLICY "read public anonymous or own scans" ON scans
+  FOR SELECT USING (user_id IS NULL OR user_id = auth.uid());
 CREATE POLICY "insert allowed"    ON scans FOR INSERT WITH CHECK (true);
 CREATE POLICY "update own"        ON scans FOR UPDATE
-  USING (user_id = auth.uid() OR user_id IS NULL);
+  USING (user_id IS NOT NULL AND user_id = auth.uid());
 ```
 
 ---

@@ -37,8 +37,10 @@ npm i lucide-react framer-motion next-intl geist
 
 ```
 POST /api/scan { url }
+  → validate URL (scheme + DNS/IP + redirect safety)
   → Supabase insert (status: 'pending') → return { id } немедленно
-  → фоновая задача runAllChecks(url, scanId):
+  → dispatch в Railway scanner (`RAILWAY_SCANNER_URL/api/run-scan`)
+  → Railway /api/run-scan:
       html = await fetch(url) → одна строка для всех checks
       Promise.all([
         runLighthouse(url),        ← отдельный Chrome процесс
@@ -50,6 +52,11 @@ POST /api/scan { url }
       → generateAISummary(results) ← один Claude вызов
       → Supabase update (status: 'done', results: ScanResult)
 ```
+
+Дополнительно:
+- authenticated scans приватны для владельца
+- anonymous scans доступны по report URL
+- badge route читает только anonymous/public scans по текущей RLS модели
 
 ---
 

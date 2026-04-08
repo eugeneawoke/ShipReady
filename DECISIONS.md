@@ -58,14 +58,44 @@
 Решение: GPT генерирует два варианта в одном вызове: `aiTechnicalPrompt` (Cursor, Windsurf, Claude Code — файловые пути, конкретные теги) и `aiVibePrompt` (Bolt, Lovable, v0, Replit — высокоуровнево). UI показывает таббар с иконками инструментов, маппинг: Cursor/Windsurf/Claude → technical, Bolt/Lovable/v0/Replit/OpenAI → vibe.
 Почему: Пересматривает D-03. Один GPT вызов, два поля. Технические и vibe-инструменты реально нуждаются в разном стиле промптов. Per-issue промпты убраны из UI.
 
-### Pending decisions (решить перед реализацией Phase 8)
+### D-13: Scan visibility model
+Решение: анонимные сканы остаются доступными по `report/[id]`, а сканы авторизованных пользователей приватны и доступны только владельцу.
+Почему: это сохраняет текущий frictionless flow для первого скана без аккаунта, но убирает утечку данных между пользователями dashboard/auth flow.
+RLS: `user_id IS NULL OR user_id = auth.uid()` для SELECT на `scans`.
+Последствие: любые публичные sharing features для авторизованных отчётов в будущем должны идти через отдельный `share_token` или явный `is_public`, а не через raw UUID.
 
-- **D-13: PDF generation** — puppeteer screenshot на Railway runner vs react-pdf/jsPDF на клиенте?
+### D-14: Unified scanner dispatch
+Решение: и обычный scan, и weekly rescan диспатчатся в Railway scanner одинаковым способом через `RAILWAY_SCANNER_URL/api/run-scan`.
+Почему: `setTimeout`/fire-and-forget внутри Vercel route handler ненадёжен для продового фонового исполнения. Один dispatch path уменьшает расхождения между flows и упрощает observability.
+Fallback: локально в dev можно продолжать запускать checks напрямую, но production должен считать Railway обязательным scanner runner.
+
+### D-15: SSRF protection — DNS/IP level, не только hostname string
+Решение: URL для сканирования валидируется не только по схеме и hostname pattern, но и по resolved IP + redirect hops.
+Почему: домен может резолвиться во внутренний адрес, и строковой фильтр hostname этого не ловит. Сканер — request-facing fetcher, поэтому его нужно считать SSRF sink.
+Блокируем: loopback, RFC1918, link-local, metadata endpoints и redirects в private network.
+
+### D-16: AI Content Analysis — addon поверх детерминированных проверок
+Решение: AI-проверки реализуются как **отдельный аддон** поверх текущих rule-based checks — не замена.
+Почему: Детерминированные checks (Lighthouse, cheerio, headers) уже хорошо покрывают технические issues. AI даёт ценность только там, где правила не работают: качество контента, ясность value proposition, UX clarity.
+Примеры AI-only checks (невозможны детерминированно):
+- "Лендинг не объясняет что делает продукт за 5 секунд"
+- "CTA неясный или отсутствует"
+- "Контент написан для бота, не для человека"
+- "Tone of voice не соответствует аудитории (indie hackers vs enterprise)"
+Архитектура: отдельная функция `runAIContentChecks(url, html)` → один дополнительный LLM вызов → возвращает `Issue[]` с категорией `content_quality` (новая 6-я категория или расширение SEO).
+Стоимость: +1 LLM вызов/скан (~$0.01–0.03 gpt-4o-mini), +3–8 сек latency.
+Монетизация: Pro-only фича (free tier видит что есть AI checks но результаты заблюрены).
+Статус: **идея на потом** — реализовывать когда основной продукт стабилен и есть платящие пользователи.
+Отклонено: замена детерминированных checks на AI — медленнее, дороже, непоследовательно.
+
+### Pending decisions (решить перед реализацией следующих фаз)
+
+- **D-17: PDF generation** — puppeteer screenshot на Railway runner vs react-pdf/jsPDF на клиенте?
   - Puppeteer: точный pixel-perfect вывод, но нужен Railway round-trip, медленно (~5 сек)
   - react-pdf: быстро, на клиенте, но нужно вёрстать PDF отдельно
   - Рекомендация: react-pdf — у нас уже есть Railway runner, но PDF дёшевле делать клиентом
 
-- **D-14: Monitored domains хранение** — отдельная таблица `monitored_domains` vs флаг в scans?
+- **D-18: Monitored domains хранение** — отдельная таблица `monitored_domains` vs флаг в scans?
   - Отдельная таблица: чище, позволяет хранить email + настройки per domain
   - Флаг в scans: проще, но нет single source of truth для "какие домены мониторим"
   - Рекомендация: отдельная таблица `monitored_domains`
@@ -75,6 +105,6 @@
 ### D-09: Lighthouse runner на Railway, фронт на Vercel
 Решение: Vercel (Hobby) деплоит фронт + все API кроме Lighthouse. Railway (Hobby $5/мес) запускает `/api/run-scan` — тяжёлый Lighthouse scan.
 Почему: Vercel Hobby лимит 1024MB RAM и 10 сек timeout. Lighthouse + Chromium требуют ~2GB и ~40 сек. Railway Hobby даёт до 8GB RAM, без timeout.
-Связь: Vercel вызывает `RAILWAY_SCANNER_URL/api/run-scan` с `Authorization: Bearer SCANNER_SECRET`. Lighthouse обновляет Supabase напрямую.
+Связь: Vercel вызывает `RAILWAY_SCANNER_URL/api/run-scan` с `Authorization: Bearer SCANNER_SECRET`. И обычные сканы, и cron rescans используют один и тот же dispatch path. Lighthouse обновляет Supabase напрямую.
 Fallback: если `RAILWAY_SCANNER_URL` не задан — запуск локально через setTimeout (dev режим).
 Отклонено: Vercel Pro — $20/мес дороже. Отдельный Express сервис — дублирование кода.

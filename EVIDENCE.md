@@ -8,7 +8,10 @@
 
 ## Подтверждённые факты
 
-*(пусто — заполняется по мере разработки)*
+### E-01: Lint и production build проходят после hardening scan pipeline
+Дата: 2026-04-08
+Факт: `npm run lint` и `npm run build` проходят на текущем коде после фиксов scan pipeline, RLS access model и report polling flow.
+Проверено: `npm run lint`, `npm run build`
 
 ---
 

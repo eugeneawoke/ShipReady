@@ -52,7 +52,13 @@ export default function TermsPage() {
 
           <Section title="4. Free plan limits">
             The free plan is limited to 3 scans per calendar month per account.
-            Circumventing this limit (e.g., creating multiple accounts) is not permitted.
+            Anonymous use is also subject to a 3 scans per calendar month limit per IP/device context.
+            Circumventing these limits (for example by creating multiple accounts or evading technical controls) is not permitted.
+          </Section>
+
+          <Section title="4a. Report access">
+            Anonymous report URLs should be treated as shareable links: anyone with the URL may be able to view that anonymous report.
+            Reports created from a signed-in account are intended to be private to that account unless ShipReady explicitly provides a sharing mechanism.
           </Section>
 
           <Section title="5. Paid plans & billing">

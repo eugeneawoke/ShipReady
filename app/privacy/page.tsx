@@ -75,6 +75,12 @@ export default function PrivacyPage() {
             </ul>
           </Section>
 
+          <Section title="6a. Report visibility">
+            Anonymous reports are accessible to anyone who has the report URL.
+            Reports linked to a signed-in account are private to that account unless we add an explicit sharing feature in the future.
+            If you do not want a report to be accessible by URL, run the scan from a signed-in account.
+          </Section>
+
           <Section title="7. Your rights (GDPR)">
             If you are in the European Economic Area, you have the right to:
             <ul>

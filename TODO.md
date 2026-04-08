@@ -93,10 +93,10 @@
   - **или** добавить флаг `monitored: boolean` к scans и хранить per-domain
   - **записать выбор в DECISIONS.md как D-14 перед реализацией**
 - [ ] UI в Dashboard — toggle "Monitor this domain weekly" (Pro only)
-- [ ] `app/api/cron/rescan/route.ts` — уже написан, нужно:
-  - добавить `CRON_SECRET` в env
-  - настроить в `vercel.json`: `"crons": [{"path": "/api/cron/rescan", "schedule": "0 9 * * 1"}]`
-  - после ресcan сравнить с предыдущим — если score упал >10 или новые critical → sendAlert()
+- [ ] `app/api/cron/rescan/route.ts` — dispatch в Railway уже есть, нужно:
+  - убедиться что `CRON_SECRET`, `RAILWAY_SCANNER_URL`, `SCANNER_SECRET` заданы в prod
+  - привязать rescan не ко всем Pro/Agency users вообще, а к `monitored_domains`
+  - после rescan сравнить с предыдущим — если score упал >10 или появились новые critical/high → `sendAlert()`
 - [ ] `lib/email/send-alert.ts` — Resend: письмо с diff score, топ-3 новых issue, ссылка на отчёт
   - нужен `RESEND_API_KEY` в env
   - нужен `from:` домен в Resend (shipready.app)
@@ -139,5 +139,5 @@
 ## Фаза 7 — Запуск
 
 - [ ] Self-audit: scan shipready.app → исправить все Critical/High
-- [ ] `app/api/badge/[domain]/route.ts` — SVG badge со score
+- [ ] `app/api/badge/[domain]/route.ts` — добавить явную публичность badge для auth scans (`share_token` или `is_public`), сейчас route видит только anonymous/public scans
 - [ ] Twitter/X thread + Product Hunt + vc.ru + Show HN
