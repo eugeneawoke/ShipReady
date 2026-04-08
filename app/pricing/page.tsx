@@ -25,7 +25,7 @@ export default async function PricingPage() {
       name: 'Pro',
       price: '$14',
       period: '/mo',
-      features: ['Unlimited scans', 'AI fix prompts (Cursor + Bolt)', 'PDF export', 'Weekly monitoring', 'Email alerts'],
+      features: ['Unlimited scans', 'AI fix prompts (Cursor + Bolt)', 'PDF export', 'Weekly monitoring'],
       cta: 'Get Pro',
       href: proCheckout,
       highlight: true,

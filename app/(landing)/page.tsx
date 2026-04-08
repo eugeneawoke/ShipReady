@@ -186,7 +186,7 @@ const T = {
       sub: 'Start free. Upgrade when you need more.',
       plans: [
         { name: 'Free',   nameKey: 'FREE',   price: '$0',  period: null,  desc: 'Try it out',         features: ['3 scans / month', 'All category scores', 'Issue descriptions', 'AI prompts blurred'],            cta: 'Start free',    highlight: false, coming: false },
-        { name: 'Pro',    nameKey: 'PRO',    price: '$14', period: '/mo', desc: 'For solo founders',  features: ['Unlimited scans', 'All AI fix prompts', 'PDF export', 'Weekly monitoring', 'Email alerts'],       cta: 'Get Pro',       highlight: true,  coming: false },
+        { name: 'Pro',    nameKey: 'PRO',    price: '$14', period: '/mo', desc: 'For solo founders',  features: ['Unlimited scans', 'All AI fix prompts', 'PDF export', 'Weekly monitoring'],                       cta: 'Get Pro',       highlight: true,  coming: false },
         { name: 'Agency', nameKey: 'AGENCY', price: '$39', period: '/mo', desc: 'For teams',          features: ['10 domains', 'White-label PDF', 'All Pro features', 'Priority support', 'API access'],           cta: 'Get Agency',    highlight: false, coming: true  },
       ],
       popular: 'Most popular',

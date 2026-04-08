@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase'
 import { getUserWithPlan } from '@/lib/auth'
 import { SignOutButton } from '@/components/auth/SignOutButton'
 import { ScanForm } from '@/components/landing/ScanForm'
-import { MonitoringManager } from '@/components/dashboard/MonitoringManager'
+import { MonitoringToggle } from '@/components/dashboard/MonitoringToggle'
 import { domainFromUrl } from '@/lib/monitoring/domains'
 
 export default async function DashboardPage() {
@@ -29,33 +29,9 @@ export default async function DashboardPage() {
     (monitoredDomains ?? []).map((item) => [item.domain, item])
   )
 
-  const monitoringCandidates = Array.from(
-    (scans ?? []).reduce((acc, scan) => {
-      const domain = domainFromUrl(scan.url)
-      if (!domain || acc.has(domain)) return acc
-
-      const monitored = monitoringMap.get(domain)
-      acc.set(domain, {
-        domain,
-        latestUrl: scan.url,
-        latestScanAt: scan.created_at,
-        monitored: Boolean(monitored?.active),
-        active: Boolean(monitored?.active),
-        lastAlertedAt: monitored?.last_alerted_at ?? null,
-      })
-      return acc
-    }, new Map<string, {
-      domain: string
-      latestUrl: string
-      latestScanAt: string | null
-      monitored: boolean
-      active: boolean
-      lastAlertedAt: string | null
-    }>()).values()
-  )
-
   const planLabel = user.plan === 'pro' ? 'Pro' : user.plan === 'agency' ? 'Agency' : 'Free'
   const planColor = user.plan === 'free' ? 'text-[#8B8A85]' : 'text-[#3DDC84]'
+  const activeMonitoringCount = (monitoredDomains ?? []).filter((item) => item.active).length
 
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE]">
@@ -90,33 +66,60 @@ export default async function DashboardPage() {
           <ScanForm />
         </div>
 
-        <MonitoringManager plan={user.plan} domains={monitoringCandidates} />
-
         {/* Scans list */}
         {!scans || scans.length === 0 ? (
           <div className="py-16 text-center text-[#5A5955]">
             <p className="text-sm">No scans yet. Run your first scan to see results here.</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div>
+            <div className="mb-4 flex flex-col gap-2 rounded-xl border border-white/[0.06] bg-[#121214] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="text-sm text-[#8B8A85]">
+                {user.plan === 'free'
+                  ? 'Upgrade to monitor domains weekly from your scan list.'
+                  : `${activeMonitoringCount} domain${activeMonitoringCount === 1 ? '' : 's'} monitored · runs every Monday`}
+              </div>
+              {user.plan !== 'free' && activeMonitoringCount > 0 ? (
+                <div className="text-xs font-mono text-[#3DDC84]">Weekly monitoring active</div>
+              ) : null}
+            </div>
+
+            <div className="space-y-2">
             {scans.map((scan) => {
               const score = scan.results?.totalScore ?? null
               const scoreColor = score === null ? '' : score >= 90 ? 'text-[#3DDC84]' : score >= 70 ? 'text-[#7BC67E]' : score >= 50 ? 'text-[#F5C518]' : 'text-[#FF4444]'
               const date = new Date(scan.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })
+              const domain = domainFromUrl(scan.url)
+              const monitored = domain ? Boolean(monitoringMap.get(domain)?.active) : false
 
               return (
-                <Link
+                <div
                   key={scan.id}
-                  href={`/report/${scan.id}`}
-                  className="flex items-center justify-between p-4 rounded-xl bg-[#161618] border border-white/[0.06] hover:border-white/[0.12] transition-colors group"
+                  className="flex items-center gap-4 rounded-xl border border-white/[0.06] bg-[#161618] p-4 transition-colors hover:border-white/[0.12]"
                 >
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium truncate group-hover:text-[#F1F0EE] transition-colors">
+                  <Link href={`/report/${scan.id}`} className="min-w-0 flex-1 group">
+                    <p className="truncate text-sm font-medium transition-colors group-hover:text-[#F1F0EE]">
                       {scan.url}
                     </p>
-                    <p className="text-xs text-[#5A5955] mt-0.5">{date}</p>
-                  </div>
-                  <div className="flex items-center gap-4 ml-4 shrink-0">
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-[#5A5955]">
+                      <span>{date}</span>
+                      {domain ? (
+                        <span className="rounded-full border border-white/[0.08] bg-white/[0.03] px-2 py-0.5 text-[#8B8A85]">
+                          {domain}
+                        </span>
+                      ) : null}
+                    </div>
+                  </Link>
+
+                  {domain ? (
+                    <MonitoringToggle
+                      domain={domain}
+                      enabled={monitored}
+                      canManage={user.plan === 'pro' || user.plan === 'agency'}
+                    />
+                  ) : null}
+
+                  <Link href={`/report/${scan.id}`} className="ml-auto flex items-center gap-4 shrink-0 group">
                     {scan.status === 'done' && score !== null ? (
                       <span className={`text-sm font-semibold font-mono ${scoreColor}`}>{score}</span>
                     ) : ['running', 'running_fast', 'running_deep', 'enriching', 'pending'].includes(scan.status) ? (
@@ -124,13 +127,14 @@ export default async function DashboardPage() {
                     ) : scan.status === 'error' ? (
                       <span className="text-xs text-[#FF6B6B]">error</span>
                     ) : null}
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[#5A5955] group-hover:text-[#8B8A85] transition-colors">
-                      <path d="M5 12h14M12 5l7 7-7 7"/>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[#5A5955] transition-colors group-hover:text-[#8B8A85]">
+                      <path d="M5 12h14M12 5l7 7-7 7" />
                     </svg>
-                  </div>
-                </Link>
+                  </Link>
+                </div>
               )
             })}
+            </div>
           </div>
         )}
 
