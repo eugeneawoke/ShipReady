@@ -19,6 +19,7 @@ export function ReportSkeleton({ status }: { status: string }) {
   const [barWidth, setBarWidth] = useState(3)
   const [elapsed, setElapsed] = useState(0) // counts 100ms ticks
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const didPushStateRef = useRef(false)
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false)
   const router = useRouter()
 
@@ -37,6 +38,7 @@ export function ReportSkeleton({ status }: { status: string }) {
         clearInterval(timerRef.current)
         timerRef.current = null
       }
+      setIsLeaveModalOpen(false)
     }
   }, [status])
 
@@ -45,8 +47,11 @@ export function ReportSkeleton({ status }: { status: string }) {
     if (status === 'error' || status === 'completing') return
 
     // Push a dummy history entry so the browser back button fires popstate
-    // instead of navigating away immediately
-    window.history.pushState(null, '', window.location.href)
+    // instead of navigating away immediately — only once across all re-runs
+    if (!didPushStateRef.current) {
+      window.history.pushState(null, '', window.location.href)
+      didPushStateRef.current = true
+    }
 
     function handlePopState() {
       // Re-push so repeated back presses keep showing the modal
