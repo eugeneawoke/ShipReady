@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getUserWithPlan } from '@/lib/auth'
-import { createClient } from '@/lib/supabase'
+import { createServiceClient } from '@/lib/supabase'
 import { normalizeDomain, domainFromUrl } from '@/lib/monitoring/domains'
 
 async function latestScanIdForDomain(userId: string, domain: string): Promise<string | null> {
-  const supabase = await createClient()
+  const supabase = createServiceClient()
   const { data: scans } = await supabase
     .from('scans')
     .select('id, url')
@@ -13,7 +13,7 @@ async function latestScanIdForDomain(userId: string, domain: string): Promise<st
     .order('created_at', { ascending: false })
     .limit(100)
 
-  const latest = scans?.find((scan) => domainFromUrl(scan.url) === domain)
+  const latest = scans?.find((scan: { id: string; url: string }) => domainFromUrl(scan.url) === domain)
   return latest?.id ?? null
 }
 
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const domain = normalizeDomain(body.domain as string)
     const lastScanId = await latestScanIdForDomain(user.id, domain)
-    const supabase = await createClient()
+    const supabase = createServiceClient()
 
     const { data, error } = await supabase
       .from('monitored_domains')
@@ -42,7 +42,8 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error || !data) {
-      return NextResponse.json({ error: 'Failed to enable monitoring' }, { status: 500 })
+      console.error('[monitor] enable failed:', error)
+      return NextResponse.json({ error: error?.message || 'Failed to enable monitoring' }, { status: 500 })
     }
 
     return NextResponse.json({ monitoredDomain: data })
@@ -61,7 +62,7 @@ export async function DELETE(request: NextRequest) {
   try {
     const body = await request.json()
     const domain = normalizeDomain(body.domain as string)
-    const supabase = await createClient()
+    const supabase = createServiceClient()
 
     const { error } = await supabase
       .from('monitored_domains')
@@ -70,7 +71,8 @@ export async function DELETE(request: NextRequest) {
       .eq('domain', domain)
 
     if (error) {
-      return NextResponse.json({ error: 'Failed to disable monitoring' }, { status: 500 })
+      console.error('[monitor] disable failed:', error)
+      return NextResponse.json({ error: error.message || 'Failed to disable monitoring' }, { status: 500 })
     }
 
     return NextResponse.json({ ok: true })
