@@ -103,13 +103,6 @@ Fallback: локально в dev можно продолжать запуска
 Почему: PSI может дать лучшую latency, но приносит внешние квоты, data drift и меньший контроль над execution profile. Сначала нужен production telemetry baseline по текущему runner.
 Что сравнивать: `p50/p95`, failure rate, metric drift, стоимость, quota stability.
 
-### D-22: Pricing and landing pages must not present unshipped paid features as live
-Решение: платные страницы и pricing copy могут обещать только реально работающий функционал. Незавершённые фичи помечаются как `coming soon`, `planned` или `in progress`.
-Почему: mismatch между marketing copy и реальным продуктом подрывает доверие и делает premium promise misleading.
-Применение на текущем этапе:
-- `PDF export`, `Weekly monitoring`, `Email alerts` не считаются live features
-- Agency-only white-label / support / API claims тоже не продаются как уже доступные, если в коде и ops они не запущены
-
 ### Pending decisions (решить перед реализацией следующих фаз)
 
 - **D-20: PDF generation** — puppeteer screenshot на Railway runner vs react-pdf/jsPDF на клиенте?
