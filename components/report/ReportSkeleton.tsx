@@ -125,7 +125,8 @@ export function ReportSkeleton({ status }: { status: string }) {
             </p>
           )}
           <p className="text-sm text-[#8B8A85]">Something went wrong while analyzing your site.</p>
-          <div className="mt-4 w-full max-w-md mx-auto">
+          {/* max-w-md intentionally narrower than ScanForm's own max-w — keeps it contained in the error card */}
+          <div className="w-full max-w-md mx-auto">
             <ScanForm />
           </div>
         </div>
