@@ -15,6 +15,18 @@ export function ReportSkeleton({ status }: { status: string }) {
   const [activeStep, setActiveStep] = useState(0)
   const [doneSteps, setDoneSteps] = useState<Set<number>>(new Set())
   const [barWidth, setBarWidth] = useState(3)
+  const [elapsed, setElapsed] = useState(0) // counts 100ms ticks
+
+  useEffect(() => {
+    // Only tick during active scanning states
+    if (status === 'error' || status === 'completing') return
+
+    const timerInterval = setInterval(() => {
+      setElapsed(prev => prev + 1)
+    }, 100)
+
+    return () => clearInterval(timerInterval)
+  }, [status])
 
   useEffect(() => {
     if (status === 'error') return
@@ -98,6 +110,11 @@ export function ReportSkeleton({ status }: { status: string }) {
         </a>
         <div className="max-w-md w-full px-6 text-center space-y-3">
           <p className="text-sm font-medium text-[#FF4444]">Scan failed</p>
+          {elapsed > 0 && (
+            <p className="text-xs font-mono" style={{ color: '#FF4444' }}>
+              Failed after {Math.floor(elapsed / 10)}.{elapsed % 10}s
+            </p>
+          )}
           <p className="text-sm text-[#8B8A85]">Something went wrong while analyzing your site.</p>
           <p className="text-xs text-[#5A5955]">
             Try again or contact me:{' '}
@@ -128,7 +145,17 @@ export function ReportSkeleton({ status }: { status: string }) {
       <div className="max-w-sm w-full px-6">
         {/* Header */}
         <div className="mb-8">
-          <p className="text-sm text-[#8B8A85] mb-3">Analyzing your site...</p>
+          <div className="flex items-baseline justify-between mb-3">
+            <p className="text-sm text-[#8B8A85]">Analyzing your site...</p>
+            <p className="font-mono leading-none">
+              <span style={{ fontSize: 22, color: '#6E56CF', fontWeight: 600 }}>
+                {Math.floor(elapsed / 10)}
+              </span>
+              <span style={{ fontSize: 14, color: '#5A5955' }}>
+                .{elapsed % 10}s
+              </span>
+            </p>
+          </div>
 
           {/* Progress bar */}
           <div className="h-[3px] bg-[#1E1E21] rounded-full overflow-hidden">
