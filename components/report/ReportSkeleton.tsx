@@ -20,6 +20,14 @@ export function ReportSkeleton({ status }: { status: string }) {
   const didPushStateRef = useRef(false)
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false)
   const router = useRouter()
+  const statusLabel =
+    status === 'running_fast'
+      ? 'Running fast truth checks...'
+      : status === 'running_deep'
+        ? 'Running deep analysis...'
+        : status === 'enriching'
+          ? 'Writing the final report...'
+          : 'Analyzing your site...'
 
   // Start timer once on mount
   useEffect(() => {
@@ -278,11 +286,3 @@ export function ReportSkeleton({ status }: { status: string }) {
     </div>
   )
 }
-  const statusLabel =
-    status === 'running_fast'
-      ? 'Running fast truth checks...'
-      : status === 'running_deep'
-        ? 'Running deep analysis...'
-        : status === 'enriching'
-          ? 'Writing the final report...'
-          : 'Analyzing your site...'

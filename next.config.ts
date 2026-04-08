@@ -9,6 +9,11 @@ const nextConfig: NextConfig = {
     'ssl-checker',
     'cheerio',
   ],
+  outputFileTracingIncludes: {
+    '/api/report/[id]/pdf': [
+      './node_modules/@sparticuz/chromium/bin/**/*',
+    ],
+  },
 };
 
 export default nextConfig;

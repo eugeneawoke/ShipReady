@@ -1,5 +1,6 @@
 import chromium from '@sparticuz/chromium'
 import puppeteer from 'puppeteer-core'
+import path from 'node:path'
 import type { ScanResult, IssueCategory } from '@/types/scan'
 
 const CATEGORY_LABELS: Record<IssueCategory, string> = {
@@ -136,15 +137,20 @@ export async function generateReportPdf(
   options: { whiteLabel: boolean; domain: string },
 ): Promise<Buffer> {
   const systemChromium = process.env.CHROMIUM_PATH
-  const executablePath = systemChromium ?? await chromium.executablePath()
+  const isLocalChrome = Boolean(systemChromium)
+  const bundledChromiumDir = path.join(process.cwd(), 'node_modules/@sparticuz/chromium/bin')
+  const executablePath = systemChromium
+    ?? await chromium.executablePath(bundledChromiumDir)
+  const headlessMode = isLocalChrome ? true : 'shell'
+  const launchArgs = isLocalChrome
+    ? puppeteer.defaultArgs()
+    : puppeteer.defaultArgs({ args: chromium.args, headless: headlessMode })
 
   const browser = await puppeteer.launch({
-    args: systemChromium
-      ? ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--no-first-run']
-      : chromium.args,
+    args: launchArgs,
     defaultViewport: { width: 1280, height: 720 },
     executablePath,
-    headless: true,
+    headless: headlessMode,
   })
 
   try {
