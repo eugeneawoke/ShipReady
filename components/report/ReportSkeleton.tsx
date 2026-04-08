@@ -265,6 +265,7 @@ export function ReportSkeleton({ status }: { status: string }) {
         <div
           className="fixed inset-0 z-50 flex items-center justify-center"
           style={{ background: 'rgba(14,14,15,0.85)', backdropFilter: 'blur(4px)' }}
+          onKeyDown={(e) => { if (e.key === 'Escape') setIsLeaveModalOpen(false) }}
         >
           <div
             className="w-full max-w-[300px] mx-4 rounded-xl p-6 text-center"
