@@ -63,6 +63,22 @@ Target flow for the next quality pass:
 - Authenticated scans are private to the owner.
 - Badge lookups only expose anonymous/public scan data under the current RLS model.
 
+## Paid feature status
+
+Live today:
+
+- Unlimited scans on paid plans
+- AI fix prompts and evidence-enriched reports
+
+Still in progress:
+
+- PDF export
+- Weekly monitoring
+- Email alerts
+- White-label PDF / Agency automations
+
+Product pages should label these as `coming soon` or `in progress` until the underlying workflow, storage model, and external service setup are actually live.
+
 ## Verification
 
 ```bash
