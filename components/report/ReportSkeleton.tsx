@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { CheckCircle2, Loader2 } from 'lucide-react'
+import { ScanForm } from '@/components/landing/ScanForm'
 
 const STEPS = [
   { label: 'Performance & Core Web Vitals',  ms: 9000  },
@@ -124,15 +125,9 @@ export function ReportSkeleton({ status }: { status: string }) {
             </p>
           )}
           <p className="text-sm text-[#8B8A85]">Something went wrong while analyzing your site.</p>
-          <p className="text-xs text-[#5A5955]">
-            Try again or contact me:{' '}
-            <a href="https://t.me/eugenegusakov" target="_blank" rel="noopener noreferrer" className="text-[#6E56CF] hover:underline">Telegram</a>
-            {' '}·{' '}
-            <a href="mailto:egusakov74@gmail.com" className="text-[#6E56CF] hover:underline">Email</a>
-          </p>
-          <a href="/" className="inline-block mt-2 text-xs px-4 py-2 rounded-lg bg-[#161618] border border-white/6 text-[#8B8A85] hover:text-[#F1F0EE] transition-colors">
-            ← Try another URL
-          </a>
+          <div className="mt-4 w-full max-w-md mx-auto">
+            <ScanForm />
+          </div>
         </div>
       </div>
     )
