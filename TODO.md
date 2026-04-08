@@ -12,7 +12,7 @@
 - [ ] Подключить Vercel к репозиторию (автодеплой из main)
 - [ ] Создать проект Supabase, регион Frankfurt (fra1)
 - [ ] `npx supabase db push` — применить миграции
-- [ ] Добавить env variables в Vercel (APP_URL, SUPABASE_*, OPENAI_API_KEY, LS_*, RESEND_API_KEY)
+- [ ] Добавить env variables в Vercel (APP_URL, SUPABASE_*, OPENAI_API_KEY, LS_*, RESEND_API_KEY, RESEND_FROM_EMAIL, scanner secrets)
 - [ ] Создать `.env.local` локально
 - [ ] Первый живой деплой на кастомном домене
 
@@ -115,26 +115,22 @@
 - [ ] Решение: puppeteer screenshot → PDF (используем уже установленный puppeteer-core + @sparticuz/chromium)
   - альтернатива: `react-pdf` если нет Railway runner
   - **записать выбор в DECISIONS.md как D-13 перед реализацией**
-- [ ] `app/api/report/[id]/pdf/route.ts` — GET → возвращает PDF blob
-- [ ] Кнопка "Download PDF" в хедере отчёта — видна только для Pro/Agency
-- [ ] PDF включает: score, category scores, все issues с plainEnglish, aiSummary
+- [x] `app/api/report/[id]/pdf/route.ts` — GET → возвращает PDF blob
+- [x] Кнопка "Download PDF" в хедере отчёта — видна только для Pro/Agency
+- [x] PDF включает: score, category scores, все issues с plainEnglish, aiSummary
 
 ### 10.3 Weekly monitoring + email alerts
 
 - [ ] Понять концепцию для пользователя:
   - **Monitoring** = система автоматически сканирует сохранённые домены раз в неделю
   - **Email alerts** = если появились новые Critical/High issues или score упал >10 — письмо на email
-- [ ] `supabase/migrations/003_monitoring.sql` — таблица `monitored_domains` (user_id, domain, last_scan_id, notify_email)
-  - **или** добавить флаг `monitored: boolean` к scans и хранить per-domain
-  - **записать выбор в DECISIONS.md как D-14 перед реализацией**
-- [ ] UI в Dashboard — toggle "Monitor this domain weekly" (Pro only)
-- [ ] `app/api/cron/rescan/route.ts` — dispatch в Railway уже есть, нужно:
-  - убедиться что `CRON_SECRET`, `RAILWAY_SCANNER_URL`, `SCANNER_SECRET` заданы в prod
-  - привязать rescan не ко всем Pro/Agency users вообще, а к `monitored_domains`
-  - после rescan сравнить с предыдущим — если score упал >10 или появились новые critical/high → `sendAlert()`
-- [ ] `lib/email/send-alert.ts` — Resend: письмо с diff score, топ-3 новых issue, ссылка на отчёт
-  - нужен `RESEND_API_KEY` в env
-  - нужен `from:` домен в Resend (shipready.app)
+- [x] `supabase/migrations/008_monitoring.sql` — таблица `monitored_domains` + поля baseline/trigger в `scans`
+- [x] UI в Dashboard — toggle "Monitor this domain weekly" (Pro only)
+- [x] `app/api/cron/rescan/route.ts` берёт активные `monitored_domains`, создаёт weekly rescans и пишет `baseline_scan_id`
+- [x] `lib/email/send-alert.ts` — Resend: письмо с diff score, топ-3 новых issue, ссылка на отчёт
+- [ ] Применить migration `008_monitoring.sql` в продовом Supabase
+- [ ] Настроить `CRON_SECRET`, `RAILWAY_SCANNER_URL`, `SCANNER_SECRET`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL` в Vercel
+- [ ] Верифицировать sender domain в Resend
 - [ ] Тест: создать monitored domain → запустить cron вручную → письмо пришло
 
 ---

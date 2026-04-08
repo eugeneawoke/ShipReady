@@ -30,9 +30,15 @@ Core variables:
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `OPENAI_API_KEY`
+- `RESEND_API_KEY`
+- `RESEND_FROM_EMAIL`
 - `CRON_SECRET`
 - `RAILWAY_SCANNER_URL`
 - `SCANNER_SECRET`
+- `LEMON_SQUEEZY_API_KEY`
+- `LEMON_SQUEEZY_WEBHOOK_SECRET`
+- `NEXT_PUBLIC_LS_PRO_URL`
+- `NEXT_PUBLIC_LS_AGENCY_URL`
 
 ## Scan flow
 
@@ -49,6 +55,12 @@ Target flow for the next quality pass:
 2. `Deep Pass` runs Lighthouse and slower/less certain checks without blocking initial truthful feedback.
 3. `AI enrichment` rewrites and prioritizes findings from evidence only; it does not invent score-bearing issues.
 4. Public UX avoids exact timing promises until telemetry is available for real `p50/p95` scan durations.
+
+## Paid features
+
+- `PDF export` is available through `GET /api/report/[id]/pdf` for authenticated `pro` and `agency` users.
+- `Weekly monitoring` is managed from the dashboard. Users can enable monitoring per scanned domain; Vercel cron rescans active monitored domains every Monday at 09:00 UTC.
+- `Email alerts` are sent through Resend when a monitored weekly scan introduces new `critical/high` issues or drops total score by more than 10 points.
 
 ## Quality model
 
@@ -69,3 +81,7 @@ Target flow for the next quality pass:
 npm run lint
 npm run build
 ```
+
+## Production setup
+
+Service-by-service setup is documented in [`docs/setup/paid-features-setup.md`](/Users/eugene.gusakov/Documents/self-projects/ShipReady/docs/setup/paid-features-setup.md).

@@ -24,7 +24,8 @@
 
 ## Продукт
 
-ShipReady — вставляешь URL → отчёт за 30 сек: performance + SEO + security + mobile.
+ShipReady — вставляешь URL → truthful quality report: performance + SEO + security + mobile + AI visibility.
+Платные фичи: PDF export, weekly monitoring, email alerts.
 Каждая проблема = plain-English объяснение + готовый промпт для Cursor/Bolt/Lovable.
 Аудитория: indie hackers, vibe coders, solo founders. Рынки: СНГ + international.
 
@@ -59,7 +60,7 @@ npx supabase db push  # apply migrations
 - HTML fetчится ОДИН раз в оркестраторе → передаётся строкой во все checks
 - Типы только из `types/scan.ts` — никогда inline
 - API логика только в `lib/` или `app/api/` — не в компонентах
-- OpenAI API: один вызов на весь скан, max_tokens 300
+- OpenAI API: evidence-grounded enrichment, не источник технической истины
 - Новый check → сначала запись в `CHECKS.md`, потом код
 - Новое архитектурное решение → сначала запись в `DECISIONS.md`, потом код
 
@@ -214,8 +215,8 @@ Labels: 90–100 excellent · 70–89 good · 50–69 needs-work · 0–49 poor
 
 ```
 Free:   3 скана/мес · scores видны · AI prompts заблюрены
-Pro:    $14/мес · unlimited · prompts открыты · PDF · monitoring
-Agency: $39/мес · 10 доменов · white-label PDF
+Pro:    $14/мес · unlimited · prompts открыты · PDF · weekly monitoring · email alerts
+Agency: $39/мес · 10 доменов · white-label PDF · weekly monitoring · email alerts
 ```
 
 ---
@@ -229,4 +230,8 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY
 SUPABASE_SERVICE_ROLE_KEY
 OPENAI_API_KEY
 RESEND_API_KEY
+RESEND_FROM_EMAIL
+CRON_SECRET
+RAILWAY_SCANNER_URL
+SCANNER_SECRET
 ```

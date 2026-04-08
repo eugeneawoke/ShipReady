@@ -103,14 +103,15 @@ Fallback: локально в dev можно продолжать запуска
 Почему: PSI может дать лучшую latency, но приносит внешние квоты, data drift и меньший контроль над execution profile. Сначала нужен production telemetry baseline по текущему runner.
 Что сравнивать: `p50/p95`, failure rate, metric drift, стоимость, quota stability.
 
-### Pending decisions (решить перед реализацией следующих фаз)
+### D-20: PDF generation — server-side Chromium route
+Решение: PDF генерируется на сервере через `puppeteer-core + @sparticuz/chromium` в `app/api/report/[id]/pdf/route.ts`.
+Почему: нужен один канонический export path для Pro/Agency, одинаковый результат на Vercel, и white-label режим для Agency. `window.print()` не подходит как продуктовая фича, а client-side `react-pdf` потребовал бы отдельную PDF-вёрстку.
+Последствие: route работает только для авторизованных `pro/agency` пользователей и требует node runtime.
 
-- **D-20: PDF generation** — puppeteer screenshot на Railway runner vs react-pdf/jsPDF на клиенте?
-  - Puppeteer: точный pixel-perfect вывод, но нужен Railway round-trip, медленно (~5 сек)
-  - react-pdf: быстро, на клиенте, но нужно вёрстать PDF отдельно
-  - Рекомендация: react-pdf — у нас уже есть Railway runner, но PDF дёшевле делать клиентом
-
-- **D-21: Monitored domains хранение** — отдельная таблица `monitored_domains` vs флаг в scans?
-  - Отдельная таблица: чище, позволяет хранить email + настройки per domain
-  - Флаг в scans: проще, но нет single source of truth для "какие домены мониторим"
-  - Рекомендация: отдельная таблица `monitored_domains`
+### D-21: Weekly monitoring state хранится в `monitored_domains`
+Решение: отдельная таблица `monitored_domains` — single source of truth для weekly monitoring.
+Почему: monitoring — это per-domain настройка, а не свойство отдельного scan. Нужно хранить `notify_email`, `last_scan_id`, `last_alerted_at`, активность и baseline вне scan history.
+Последствие:
+- dashboard управляет monitoring через `POST/DELETE /api/monitor`
+- cron берёт только активные monitored domains
+- weekly rescan пишет `monitored_domain_id`, `baseline_scan_id`, `trigger='cron'` в `scans`
