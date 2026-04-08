@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { CheckCircle2, Loader2 } from 'lucide-react'
 import { ScanForm } from '@/components/landing/ScanForm'
 
@@ -18,6 +19,8 @@ export function ReportSkeleton({ status }: { status: string }) {
   const [barWidth, setBarWidth] = useState(3)
   const [elapsed, setElapsed] = useState(0) // counts 100ms ticks
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false)
+  const router = useRouter()
 
   // Start timer once on mount
   useEffect(() => {
@@ -34,6 +37,34 @@ export function ReportSkeleton({ status }: { status: string }) {
         clearInterval(timerRef.current)
         timerRef.current = null
       }
+    }
+  }, [status])
+
+  useEffect(() => {
+    // Only guard during active scanning states
+    if (status === 'error' || status === 'completing') return
+
+    // Push a dummy history entry so the browser back button fires popstate
+    // instead of navigating away immediately
+    window.history.pushState(null, '', window.location.href)
+
+    function handlePopState() {
+      // Re-push so repeated back presses keep showing the modal
+      window.history.pushState(null, '', window.location.href)
+      setIsLeaveModalOpen(true)
+    }
+
+    function handleBeforeUnload(e: BeforeUnloadEvent) {
+      e.preventDefault()
+      e.returnValue = '' // triggers browser's native "Leave site?" dialog
+    }
+
+    window.addEventListener('popstate', handlePopState)
+    window.addEventListener('beforeunload', handleBeforeUnload)
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState)
+      window.removeEventListener('beforeunload', handleBeforeUnload)
     }
   }, [status])
 
@@ -136,15 +167,15 @@ export function ReportSkeleton({ status }: { status: string }) {
 
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE] flex items-center justify-center">
-      <a
-        href="/"
-        className="fixed top-4 left-4 text-xs text-[#5A5955] hover:text-[#F1F0EE] transition-colors flex items-center gap-1.5"
+      <button
+        onClick={() => setIsLeaveModalOpen(true)}
+        className="fixed top-4 left-4 text-xs text-[#5A5955] hover:text-[#F1F0EE] transition-colors flex items-center gap-1.5 cursor-pointer bg-transparent border-0 p-0"
       >
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M19 12H5M12 5l-7 7 7 7"/>
         </svg>
         Back
-      </a>
+      </button>
 
       <div className="max-w-sm w-full px-6">
         {/* Header */}
@@ -223,6 +254,43 @@ export function ReportSkeleton({ status }: { status: string }) {
           Closing or going back will interrupt the analysis and count against your monthly limit.
         </p>
       </div>
+
+      {isLeaveModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{ background: 'rgba(14,14,15,0.85)', backdropFilter: 'blur(4px)' }}
+        >
+          <div
+            className="w-full max-w-[300px] mx-4 rounded-xl p-6 text-center"
+            style={{ background: '#161618', border: '1px solid rgba(255,255,255,0.08)' }}
+          >
+            <p className="text-sm font-medium text-[#F1F0EE] mb-2">Interrupt scan?</p>
+            <p className="text-xs text-[#8B8A85] leading-relaxed mb-6">
+              This will count as one of your scans for this month, even if the results aren&apos;t ready.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setIsLeaveModalOpen(false)}
+                className="flex-1 py-2 rounded-lg text-xs text-[#8B8A85] hover:text-[#F1F0EE] transition-colors cursor-pointer"
+                style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.08)' }}
+              >
+                Keep scanning
+              </button>
+              <button
+                onClick={() => router.push('/')}
+                className="flex-1 py-2 rounded-lg text-xs cursor-pointer transition-colors"
+                style={{
+                  background: '#2A1A1A',
+                  border: '1px solid rgba(239,68,68,0.2)',
+                  color: '#FF6B6B',
+                }}
+              >
+                Leave anyway
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
