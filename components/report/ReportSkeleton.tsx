@@ -7,17 +7,14 @@ import { CheckCircle2, Loader2 } from 'lucide-react'
 import { ScanForm } from '@/components/landing/ScanForm'
 
 const STEPS = [
-  { label: 'Performance & Core Web Vitals',  ms: 9000  },
-  { label: 'SEO, meta tags & social cards',  ms: 6000  },
-  { label: 'Security headers & SSL',          ms: 5000  },
-  { label: 'Mobile & viewport checks',        ms: 4000  },
-  { label: 'AI visibility & structured data', ms: 6000  },
+  { label: 'Performance & Core Web Vitals'  },
+  { label: 'SEO, meta tags & social cards'  },
+  { label: 'Security headers & SSL'          },
+  { label: 'Mobile & viewport checks'        },
+  { label: 'AI visibility & structured data' },
 ]
 
 export function ReportSkeleton({ status }: { status: string }) {
-  const [activeStep, setActiveStep] = useState(0)
-  const [doneSteps, setDoneSteps] = useState<Set<number>>(new Set())
-  const [barWidth, setBarWidth] = useState(3)
   const [elapsed, setElapsed] = useState(0) // counts 100ms ticks
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const didPushStateRef = useRef(false)
@@ -74,35 +71,11 @@ export function ReportSkeleton({ status }: { status: string }) {
     }
   }, [status])
 
-  useEffect(() => {
-    if (status === 'error') return
-
-    // Smooth progress bar: fast start, slows near 90%
-    const barTimer = setInterval(() => {
-      setBarWidth(prev => {
-        if (prev < 55) return prev + 1.8
-        if (prev < 75) return prev + 0.7
-        if (prev < 87) return prev + 0.2
-        return prev
-      })
-    }, 500)
-
-    // Advance steps sequentially
-    let step = 0
-    function advance() {
-      if (step >= STEPS.length - 1) return
-      setTimeout(() => {
-        const finished = step
-        setDoneSteps(prev => new Set([...prev, finished]))
-        step++
-        setActiveStep(step)
-        advance()
-      }, STEPS[step].ms)
-    }
-    advance()
-
-    return () => clearInterval(barTimer)
-  }, [status])
+  // Progress bar width and active step are derived from elapsed time (real-time, not fake delays)
+  // elapsed is in 100ms ticks: 300 ticks = 30s
+  // bar grows from 3% to 90% over 30s, steps advance every 60 ticks (6s each)
+  const scanBarWidth = Math.min(3 + elapsed * 0.29, 90)
+  const scanCurrentStep = Math.min(Math.floor(elapsed / 60), STEPS.length - 1)
 
   if (status === 'completing') {
     return (
@@ -203,7 +176,7 @@ export function ReportSkeleton({ status }: { status: string }) {
             <div
               className="h-full rounded-full relative overflow-hidden transition-all duration-500 ease-out"
               style={{
-                width: `${barWidth}%`,
+                width: `${scanBarWidth}%`,
                 background: 'linear-gradient(90deg, #6E56CF, #4A9EFF)',
               }}
             >
@@ -228,9 +201,9 @@ export function ReportSkeleton({ status }: { status: string }) {
         {/* Steps */}
         <div className="space-y-2">
           {STEPS.map((step, i) => {
-            const isDone   = doneSteps.has(i)
-            const isActive = activeStep === i && !isDone
-            const isPending = !isDone && !isActive
+            const isDone    = i < scanCurrentStep
+            const isActive  = i === scanCurrentStep
+            const isPending = i > scanCurrentStep
 
             return (
               <div

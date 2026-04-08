@@ -133,7 +133,7 @@ export function buildScanResult(
     })
   }
 
-  if (lh.performanceScore < 70) {
+  if (lh.performanceScore > 0 && lh.performanceScore < 70) {
     perfIssues.push({
       id: 'perf-score-low',
       category: 'performance',
@@ -149,7 +149,7 @@ export function buildScanResult(
     })
   }
 
-  if (lh.a11yScore < 70) {
+  if (lh.a11yScore > 0 && lh.a11yScore < 70) {
     perfIssues.push({
       id: 'a11y-score-low',
       category: 'performance',

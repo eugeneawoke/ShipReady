@@ -63,8 +63,8 @@ export default async function DashboardPage() {
           <div className="space-y-2">
             {scans.map((scan) => {
               const score = scan.results?.totalScore ?? null
-              const scoreColor = score === null ? '' : score >= 90 ? 'text-[#3DDC84]' : score >= 70 ? 'text-[#F5C518]' : 'text-[#FF6B6B]'
-              const date = new Date(scan.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+              const scoreColor = score === null ? '' : score >= 90 ? 'text-[#3DDC84]' : score >= 70 ? 'text-[#7BC67E]' : score >= 50 ? 'text-[#F5C518]' : 'text-[#FF4444]'
+              const date = new Date(scan.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })
 
               return (
                 <Link

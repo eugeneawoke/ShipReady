@@ -175,7 +175,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
       clearInterval(interval)
       setScan(prev => prev ? { ...prev, status: 'error' } : null)
       setInitialLoading(false)
-    }, 45_000)
+    }, 70_000)
 
     async function poll() {
       const res = await fetch(`/api/scan/${id}`)
