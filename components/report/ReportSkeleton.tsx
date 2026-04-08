@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { CheckCircle2, Loader2 } from 'lucide-react'
 import { ScanForm } from '@/components/landing/ScanForm'
@@ -144,7 +145,7 @@ export function ReportSkeleton({ status }: { status: string }) {
   if (status === 'error') {
     return (
       <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE] flex items-center justify-center">
-        <a
+        <Link
           href="/"
           className="fixed top-4 left-4 text-xs text-[#5A5955] hover:text-[#F1F0EE] transition-colors flex items-center gap-1.5"
         >
@@ -152,7 +153,7 @@ export function ReportSkeleton({ status }: { status: string }) {
             <path d="M19 12H5M12 5l-7 7 7 7"/>
           </svg>
           Back
-        </a>
+        </Link>
         <div className="max-w-md w-full px-6 text-center space-y-3">
           <p className="text-sm font-medium text-[#FF4444]">Scan failed</p>
           {elapsed > 0 && (
