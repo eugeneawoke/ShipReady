@@ -32,27 +32,27 @@ const phases: {
   {
     id: '02',
     title: 'Audit Engine',
-    subtitle: 'Core checks are live, deeper accuracy work is ongoing',
-    status: 'in-progress',
+    subtitle: 'Core scan engine is shipped, accuracy hardening continues',
+    status: 'done',
     items: [
       'Performance, SEO, security, mobile, and AI visibility categories',
       'Lighthouse mobile metrics plus deterministic HTML and header checks',
       'Broken link and AI visibility heuristics are already in the report',
-      'Truthful scoring and measurement states are being hardened',
-      'Accessibility, multi-page crawl, and deeper regression checks are still ahead',
+      'Phased scan flow with truthful scoring and measurement states',
+      'Accessibility, multi-page crawl, and deeper regression checks are next',
     ],
   },
   {
     id: '03',
     title: 'Report Experience',
-    subtitle: 'Readable reports are shipped, AI guidance is still evolving',
-    status: 'in-progress',
+    subtitle: 'Report UI, sharing, prompts, and PDF export are shipped',
+    status: 'done',
     items: [
       'Score ring, category breakdowns, and issue evidence in the report UI',
       'Plain-English explanations and AI-generated summary',
       'Prompt surfaces for code-aware and vibe tools',
       'PDF export, share feedback, and download feedback in report header',
-      'Per-issue prompt quality and wow-insight depth still need refinement',
+      'Per-issue prompt quality and wow-insight depth continue to improve',
     ],
   },
   {
@@ -72,7 +72,7 @@ const phases: {
   {
     id: '05',
     title: 'Monitoring & Automation',
-    subtitle: 'Weekly rescans exist, monitoring workflows are still maturing',
+    subtitle: 'Practically ready — final production alert setup and end-to-end testing remain',
     status: 'in-progress',
     items: [
       'Dynamic OG image generation',
@@ -80,18 +80,18 @@ const phases: {
       'Weekly monitoring toggle per domain in the dashboard',
       'Monday cron re-scan for monitored domains',
       'Monitoring baseline and diff logic in the data model',
-      'Email alert pipeline exists, but sender-domain setup is still required',
+      'Email alert pipeline is implemented; sender-domain setup and final live verification remain',
     ],
   },
   {
     id: '06',
     title: 'Launch Readiness',
     subtitle: 'The next milestone is a stable first-user launch',
-    status: 'planned',
+    status: 'in-progress',
     items: [
       'Custom production domain and polished onboarding flow',
       'Runtime monitoring, logs, and production alerts',
-      'Billing activation or a deliberate private-beta access model',
+      'Billing activation or a deliberate private-beta access path',
       'Support and feedback loop for the first users',
       'Tightening the highest-risk report inaccuracies before launch',
     ],
@@ -102,7 +102,6 @@ const phases: {
     subtitle: 'Higher-tier operations after first-user launch',
     status: 'planned',
     items: [
-      'White-label PDF export',
       'Multi-domain dashboard (up to 10)',
       'Team seats and support workflow',
       'API access for programmatic scans',
@@ -161,8 +160,8 @@ export default function RoadmapPage() {
           <p className="text-[11px] text-[#6E56CF] uppercase tracking-[0.15em] mb-3 font-mono">Roadmap</p>
           <h1 className="text-[36px] font-medium tracking-tight mb-3">Where we&apos;re going</h1>
           <p className="text-[#8B8A85] text-sm leading-relaxed max-w-lg">
-            ShipReady is being built in the open. This roadmap reflects the product as it actually exists today:
-            what&apos;s already live, what&apos;s being hardened now, and what comes after the first-user launch.
+            ShipReady is being built in the open. This roadmap shows what is already shipped, what is almost launch-ready,
+            and what comes next after the first users are onboard.
             Have a feature request? <a href="mailto:hi@shipready.app" className="text-[#6E56CF] hover:underline">Email us</a>.
           </p>
         </div>
