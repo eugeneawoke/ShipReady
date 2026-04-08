@@ -17,6 +17,14 @@ export function normalizeDomain(input: string): string {
   }
 }
 
+export function domainFromUrl(input: string): string | null {
+  try {
+    return normalizeDomain(input)
+  } catch {
+    return null
+  }
+}
+
 export function urlsForDomain(domain: string): string[] {
   return [
     `https://${domain}`,

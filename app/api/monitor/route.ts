@@ -1,0 +1,81 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { getUserWithPlan } from '@/lib/auth'
+import { createClient } from '@/lib/supabase'
+import { normalizeDomain, domainFromUrl } from '@/lib/monitoring/domains'
+
+async function latestScanIdForDomain(userId: string, domain: string): Promise<string | null> {
+  const supabase = await createClient()
+  const { data: scans } = await supabase
+    .from('scans')
+    .select('id, url')
+    .eq('user_id', userId)
+    .eq('status', 'done')
+    .order('created_at', { ascending: false })
+    .limit(100)
+
+  const latest = scans?.find((scan) => domainFromUrl(scan.url) === domain)
+  return latest?.id ?? null
+}
+
+export async function POST(request: NextRequest) {
+  const user = await getUserWithPlan()
+  if (!user || (user.plan !== 'pro' && user.plan !== 'agency')) {
+    return NextResponse.json({ error: 'Upgrade required' }, { status: 403 })
+  }
+
+  try {
+    const body = await request.json()
+    const domain = normalizeDomain(body.domain as string)
+    const lastScanId = await latestScanIdForDomain(user.id, domain)
+    const supabase = await createClient()
+
+    const { data, error } = await supabase
+      .from('monitored_domains')
+      .upsert({
+        user_id: user.id,
+        domain,
+        notify_email: user.email,
+        active: true,
+        last_scan_id: lastScanId,
+      }, { onConflict: 'user_id,domain' })
+      .select('id, domain, notify_email, active, last_scan_id, last_alerted_at, created_at, updated_at')
+      .single()
+
+    if (error || !data) {
+      return NextResponse.json({ error: 'Failed to enable monitoring' }, { status: 500 })
+    }
+
+    return NextResponse.json({ monitoredDomain: data })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Bad request'
+    return NextResponse.json({ error: message }, { status: 400 })
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  const user = await getUserWithPlan()
+  if (!user || (user.plan !== 'pro' && user.plan !== 'agency')) {
+    return NextResponse.json({ error: 'Upgrade required' }, { status: 403 })
+  }
+
+  try {
+    const body = await request.json()
+    const domain = normalizeDomain(body.domain as string)
+    const supabase = await createClient()
+
+    const { error } = await supabase
+      .from('monitored_domains')
+      .update({ active: false })
+      .eq('user_id', user.id)
+      .eq('domain', domain)
+
+    if (error) {
+      return NextResponse.json({ error: 'Failed to disable monitoring' }, { status: 500 })
+    }
+
+    return NextResponse.json({ ok: true })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Bad request'
+    return NextResponse.json({ error: message }, { status: 400 })
+  }
+}

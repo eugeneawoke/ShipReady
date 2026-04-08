@@ -65,6 +65,29 @@ async function getPlanForScan(scanId: string): Promise<'free' | 'pro' | 'agency'
   return (profile?.plan ?? 'free') as 'free' | 'pro' | 'agency'
 }
 
+async function finalizeMonitoredDomain(scanId: string): Promise<void> {
+  const supabase = createServiceClient()
+  const { data } = await supabase
+    .from('scans')
+    .select('monitored_domain_id')
+    .eq('id', scanId)
+    .single()
+
+  if (!data?.monitored_domain_id) return
+
+  const { error } = await supabase
+    .from('monitored_domains')
+    .update({
+      last_scan_id: scanId,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', data.monitored_domain_id)
+
+  if (error) {
+    console.error('[checks] Failed to update monitored domain baseline:', error)
+  }
+}
+
 export async function runAllChecks(url: string, scanId: string): Promise<void> {
   const startedAt = Date.now()
   await saveScan(scanId, 'running_fast')
@@ -184,6 +207,7 @@ export async function runAllChecks(url: string, scanId: string): Promise<void> {
     })
 
     await saveScan(scanId, 'done', result)
+    await finalizeMonitoredDomain(scanId)
   } catch (error) {
     console.error('[checks] runAllChecks fatal error:', error)
     await saveScan(scanId, 'error')

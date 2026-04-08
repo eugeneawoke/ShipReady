@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase'
 import { getUserWithPlan } from '@/lib/auth'
 import { SignOutButton } from '@/components/auth/SignOutButton'
 import { ScanForm } from '@/components/landing/ScanForm'
+import { MonitoringManager } from '@/components/dashboard/MonitoringManager'
+import { domainFromUrl } from '@/lib/monitoring/domains'
 
 export default async function DashboardPage() {
   const user = await getUserWithPlan()
@@ -16,7 +18,41 @@ export default async function DashboardPage() {
     .select('id, url, status, results, created_at')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
-    .limit(20)
+    .limit(100)
+
+  const { data: monitoredDomains } = await supabase
+    .from('monitored_domains')
+    .select('domain, active, last_alerted_at')
+    .eq('user_id', user.id)
+
+  const monitoringMap = new Map(
+    (monitoredDomains ?? []).map((item) => [item.domain, item])
+  )
+
+  const monitoringCandidates = Array.from(
+    (scans ?? []).reduce((acc, scan) => {
+      const domain = domainFromUrl(scan.url)
+      if (!domain || acc.has(domain)) return acc
+
+      const monitored = monitoringMap.get(domain)
+      acc.set(domain, {
+        domain,
+        latestUrl: scan.url,
+        latestScanAt: scan.created_at,
+        monitored: Boolean(monitored?.active),
+        active: Boolean(monitored?.active),
+        lastAlertedAt: monitored?.last_alerted_at ?? null,
+      })
+      return acc
+    }, new Map<string, {
+      domain: string
+      latestUrl: string
+      latestScanAt: string | null
+      monitored: boolean
+      active: boolean
+      lastAlertedAt: string | null
+    }>()).values()
+  )
 
   const planLabel = user.plan === 'pro' ? 'Pro' : user.plan === 'agency' ? 'Agency' : 'Free'
   const planColor = user.plan === 'free' ? 'text-[#8B8A85]' : 'text-[#3DDC84]'
@@ -53,6 +89,8 @@ export default async function DashboardPage() {
         <div className="mb-10">
           <ScanForm />
         </div>
+
+        <MonitoringManager plan={user.plan} domains={monitoringCandidates} />
 
         {/* Scans list */}
         {!scans || scans.length === 0 ? (
