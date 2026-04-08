@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ChevronDown, Share2, Check, Copy, Lock, ArrowLeft, FileDown } from 'lucide-react'
+import { ChevronDown, Share2, Check, Copy, Lock, ArrowLeft, FileDown, Loader2 } from 'lucide-react'
 import { ReportSkeleton } from '@/components/report/ReportSkeleton'
 import { ScoreRing } from '@/components/report/ScoreRing'
 import { CategoryCard } from '@/components/report/CategoryCard'
@@ -147,6 +147,8 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
   const [completing, setCompleting] = useState(false)
   const [reportVisible, setReportVisible] = useState(false)
   const [loadFailed, setLoadFailed] = useState(false)
+  const [pdfState, setPdfState] = useState<'idle' | 'preparing' | 'downloading'>('idle')
+  const [pdfError, setPdfError] = useState<string | null>(null)
 
   useEffect(() => {
     params.then(p => setId(p.id))
@@ -264,9 +266,73 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
     setTimeout(() => setShareLabel('Share'), 2000)
   }
 
+  function filenameFromDisposition(header: string | null, fallback: string) {
+    if (!header) return fallback
+    const utf8Match = header.match(/filename\*=UTF-8''([^;]+)/i)
+    if (utf8Match?.[1]) return decodeURIComponent(utf8Match[1])
+    const plainMatch = header.match(/filename="([^"]+)"/i)
+    if (plainMatch?.[1]) return plainMatch[1]
+    return fallback
+  }
+
+  async function handlePdfDownload() {
+    if (!id || pdfState !== 'idle') return
+
+    setPdfError(null)
+    setPdfState('preparing')
+
+    try {
+      const response = await fetch(pdfHref, {
+        method: 'GET',
+        cache: 'no-store',
+      })
+
+      if (!response.ok) {
+        let message = 'PDF export failed'
+        try {
+          const body = await response.json()
+          if (typeof body?.error === 'string') message = body.error
+        } catch {}
+        throw new Error(message)
+      }
+
+      setPdfState('downloading')
+
+      const blob = await response.blob()
+      const downloadUrl = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = downloadUrl
+      link.download = filenameFromDisposition(
+        response.headers.get('Content-Disposition'),
+        `${domain.replace(/[^a-z0-9.-]+/gi, '-')}-shipready-report.pdf`,
+      )
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(downloadUrl)
+
+      window.setTimeout(() => {
+        setPdfState('idle')
+      }, 1200)
+    } catch (error) {
+      setPdfState('idle')
+      setPdfError(error instanceof Error ? error.message : 'PDF export failed')
+      window.setTimeout(() => {
+        setPdfError(current => (current === (error instanceof Error ? error.message : 'PDF export failed') ? null : current))
+      }, 4000)
+    }
+  }
+
   const pdfHref = id
     ? `/api/report/${id}/pdf${plan === 'agency' ? '?whiteLabel=1' : ''}`
     : '#'
+  const pdfBusy = pdfState !== 'idle'
+  const pdfLabel =
+    pdfState === 'preparing'
+      ? 'Preparing PDF'
+      : pdfState === 'downloading'
+        ? 'Downloading'
+        : (plan === 'agency' ? 'White-label PDF' : 'PDF')
 
   return (
     <div
@@ -296,20 +362,59 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
           <span className="text-[#5A5955] text-sm">/</span>
           <span className="text-sm text-[#8B8A85] font-mono truncate flex-1">{domain}</span>
           {isPro && (
-            <a
-              href={pdfHref}
-              className="flex items-center gap-1.5 text-xs text-[#8B8A85] hover:text-[#F1F0EE] bg-[#161618] border border-white/6 px-3 py-1.5 rounded-lg transition-colors shrink-0 cursor-pointer print:hidden"
+            <button
+              type="button"
+              onClick={handlePdfDownload}
+              disabled={pdfBusy}
+              aria-busy={pdfBusy}
+              className={`group relative flex items-center gap-2 text-xs px-3 py-1.5 rounded-lg border transition-all shrink-0 print:hidden ${
+                pdfBusy
+                  ? 'cursor-wait border-[#6E56CF]/35 bg-[#1A1625] text-[#F1F0EE] shadow-[0_0_0_1px_rgba(110,86,207,0.08)]'
+                  : 'cursor-pointer border-white/6 bg-[#161618] text-[#8B8A85] hover:text-[#F1F0EE] hover:border-[#6E56CF]/25 hover:bg-[#19171F]'
+              }`}
             >
-              <FileDown className="w-3.5 h-3.5" />
-              {plan === 'agency' ? 'White-label PDF' : 'PDF'}
-            </a>
+              <span className={`absolute inset-0 rounded-lg transition-opacity ${
+                pdfBusy ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+              }`} style={{ background: 'linear-gradient(90deg, rgba(110,86,207,0.14), rgba(74,158,255,0.08))' }} />
+              <span className="relative flex items-center gap-2">
+                {pdfBusy ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <FileDown className="w-3.5 h-3.5" />
+                )}
+                <span>{pdfLabel}</span>
+                <span className={`rounded-full border px-1.5 py-0.5 text-[10px] uppercase tracking-[0.16em] transition-colors ${
+                  pdfBusy
+                    ? 'border-[#6E56CF]/40 bg-[#231C34] text-[#C7BCFF]'
+                    : 'border-white/8 bg-white/[0.03] text-[#6F6E69]'
+                }`}>
+                  {pdfBusy ? 'Live' : 'Export'}
+                </span>
+              </span>
+            </button>
           )}
           <button
             onClick={handleShare}
-            className="flex items-center gap-1.5 text-xs text-[#8B8A85] hover:text-[#F1F0EE] bg-[#161618] border border-white/6 px-3 py-1.5 rounded-lg transition-colors shrink-0 cursor-pointer print:hidden"
+            className={`relative flex items-center gap-1.5 text-xs border px-3 py-1.5 rounded-lg transition-all shrink-0 cursor-pointer print:hidden ${
+              shareLabel === 'Copied!'
+                ? 'text-[#F1F0EE] bg-[#112419] border-[#3DDC84]/35 shadow-[0_0_0_1px_rgba(61,220,132,0.08)]'
+                : 'text-[#8B8A85] hover:text-[#F1F0EE] bg-[#161618] border-white/6'
+            }`}
           >
-            <Share2 className="w-3.5 h-3.5" />
-            {shareLabel}
+            <span
+              className={`absolute inset-0 rounded-lg transition-opacity ${
+                shareLabel === 'Copied!' ? 'opacity-100' : 'opacity-0'
+              }`}
+              style={{ background: 'linear-gradient(90deg, rgba(61,220,132,0.12), rgba(61,220,132,0.03))' }}
+            />
+            <span className="relative flex items-center gap-1.5">
+              {shareLabel === 'Copied!' ? (
+                <Check className="w-3.5 h-3.5 text-[#3DDC84]" />
+              ) : (
+                <Share2 className="w-3.5 h-3.5" />
+              )}
+              {shareLabel}
+            </span>
           </button>
         </div>
       </header>
@@ -349,6 +454,29 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
             </div>
           )}
         </section>
+
+        {(pdfState !== 'idle' || pdfError) && (
+          <section className={`rounded-xl border px-4 py-3 transition-all ${
+            pdfError
+              ? 'border-[#FF4444]/20 bg-[#FF4444]/5'
+              : 'border-[#6E56CF]/20 bg-[#6E56CF]/6'
+          }`}>
+            <p className={`text-sm ${pdfError ? 'text-[#FF8A8A]' : 'text-[#F1F0EE]'}`}>
+              {pdfError
+                ? 'PDF export failed'
+                : pdfState === 'preparing'
+                  ? 'Building your downloadable report'
+                  : 'PDF is ready and download is starting'}
+            </p>
+            <p className="text-xs text-[#8B8A85] mt-1">
+              {pdfError
+                ? pdfError
+                : pdfState === 'preparing'
+                  ? 'We are rendering the current report into a branded PDF. This usually takes a moment.'
+                  : 'You can keep reading the report. The export button will unlock automatically after the download starts.'}
+            </p>
+          </section>
+        )}
 
         {/* Category tabs — screen only */}
         <section>
