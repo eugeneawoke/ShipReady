@@ -264,6 +264,10 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
     setTimeout(() => setShareLabel('Share'), 2000)
   }
 
+  const pdfHref = id
+    ? `/api/report/${id}/pdf${plan === 'agency' ? '?whiteLabel=1' : ''}`
+    : '#'
+
   return (
     <div
       className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE] transition-opacity duration-500"
@@ -292,13 +296,13 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
           <span className="text-[#5A5955] text-sm">/</span>
           <span className="text-sm text-[#8B8A85] font-mono truncate flex-1">{domain}</span>
           {isPro && (
-            <button
-              onClick={() => window.print()}
+            <a
+              href={pdfHref}
               className="flex items-center gap-1.5 text-xs text-[#8B8A85] hover:text-[#F1F0EE] bg-[#161618] border border-white/6 px-3 py-1.5 rounded-lg transition-colors shrink-0 cursor-pointer print:hidden"
             >
               <FileDown className="w-3.5 h-3.5" />
-              PDF
-            </button>
+              {plan === 'agency' ? 'White-label PDF' : 'PDF'}
+            </a>
           )}
           <button
             onClick={handleShare}
