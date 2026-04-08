@@ -12,6 +12,8 @@ import { fetchPrimaryContext } from '@/lib/checks/fetch-context'
 import { generateEvidenceEnrichment } from '@/lib/ai/generate-evidence-enrichment'
 import { generateWowInsights } from '@/lib/ai/generate-wow-insights'
 import { measurement } from '@/lib/checks/issue-meta'
+import { buildMonitoringAlertDecision } from '@/lib/monitoring/alerts'
+import { sendMonitoringAlert } from '@/lib/email/send-alert'
 
 async function safeTask<T>(
   task: Promise<T>,
@@ -63,6 +65,62 @@ async function getPlanForScan(scanId: string): Promise<'free' | 'pro' | 'agency'
     .single()
 
   return (profile?.plan ?? 'free') as 'free' | 'pro' | 'agency'
+}
+
+async function maybeSendMonitoringAlert(scanId: string, result: ScanResult): Promise<void> {
+  const supabase = createServiceClient()
+  const { data: scan } = await supabase
+    .from('scans')
+    .select('baseline_scan_id, monitored_domain_id, trigger')
+    .eq('id', scanId)
+    .single()
+
+  if (!scan?.monitored_domain_id || scan.trigger !== 'cron') return
+
+  const { data: monitoredDomain } = await supabase
+    .from('monitored_domains')
+    .select('id, domain, notify_email')
+    .eq('id', scan.monitored_domain_id)
+    .single()
+
+  if (!monitoredDomain?.notify_email) return
+
+  let previousResult: ScanResult | null = null
+  if (scan.baseline_scan_id) {
+    const { data: baselineScan } = await supabase
+      .from('scans')
+      .select('results')
+      .eq('id', scan.baseline_scan_id)
+      .single()
+
+    previousResult = (baselineScan?.results as ScanResult | null) ?? null
+  }
+
+  const decision = buildMonitoringAlertDecision(previousResult, result)
+  if (!decision.shouldAlert) return
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || 'http://localhost:3000'
+  await sendMonitoringAlert({
+    email: monitoredDomain.notify_email,
+    domain: monitoredDomain.domain,
+    reportUrl: `${appUrl}/report/${scanId}`,
+    scoreDrop: decision.scoreDrop,
+    previousScore: decision.previousScore,
+    currentScore: decision.currentScore,
+    newSeriousIssues: decision.newSeriousIssues,
+  })
+
+  const { error } = await supabase
+    .from('monitored_domains')
+    .update({
+      last_alerted_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', monitoredDomain.id)
+
+  if (error) {
+    console.error('[checks] Failed to persist monitoring alert timestamp:', error)
+  }
 }
 
 async function finalizeMonitoredDomain(scanId: string): Promise<void> {
@@ -207,6 +265,7 @@ export async function runAllChecks(url: string, scanId: string): Promise<void> {
     })
 
     await saveScan(scanId, 'done', result)
+    await maybeSendMonitoringAlert(scanId, result)
     await finalizeMonitoredDomain(scanId)
   } catch (error) {
     console.error('[checks] runAllChecks fatal error:', error)
