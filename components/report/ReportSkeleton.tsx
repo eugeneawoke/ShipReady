@@ -217,6 +217,11 @@ export function ReportSkeleton({ status }: { status: string }) {
             )
           })}
         </div>
+
+        <p className="mt-6 text-[11px] text-[#5A5955] flex items-start gap-1.5">
+          <span style={{ color: '#E8A83E', fontSize: 13, lineHeight: 1.4 }}>⚠</span>
+          Closing or going back will interrupt the analysis and count against your monthly limit.
+        </p>
       </div>
     </div>
   )
