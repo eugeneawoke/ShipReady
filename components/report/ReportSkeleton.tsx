@@ -217,7 +217,12 @@ export function ReportSkeleton({ status }: { status: string }) {
             </div>
           </div>
 
-          <p className="mt-2 text-xs text-[#5A5955]">Usually takes 20–40 seconds</p>
+          <p className="mt-2 text-xs text-[#5A5955]">
+            {elapsed > 400
+              ? <span style={{ color: '#E8A83E' }}>Taking longer than usual — almost there...</span>
+              : 'Usually 20–40 seconds · depends on site speed'
+            }
+          </p>
         </div>
 
         {/* Steps */}
