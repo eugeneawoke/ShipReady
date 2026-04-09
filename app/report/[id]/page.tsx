@@ -7,7 +7,7 @@ import { ReportSkeleton } from '@/components/report/ReportSkeleton'
 import { ScoreRing } from '@/components/report/ScoreRing'
 import { CategoryCard } from '@/components/report/CategoryCard'
 import { IssueCard } from '@/components/report/IssueCard'
-import type { Scan, Issue, IssueCategory } from '@/types/scan'
+import type { Scan, Issue, IssueCategory, ScanResult } from '@/types/scan'
 import { createBrowserClient } from '@/lib/supabase-browser'
 
 const FIX_TABS = [
@@ -131,6 +131,60 @@ const CATEGORY_LABELS: Record<IssueCategory, string> = {
   security: 'Security',
   mobile: 'Mobile',
   ai_visibility: 'AI Visibility',
+}
+
+function evidenceText(issue: Issue): string {
+  const evidence = issue.evidence?.slice(0, 2)
+  if (!evidence?.length) return ''
+  return ` Evidence: ${evidence.map(item => `${item.label}: ${item.value}`).join('; ')}.`
+}
+
+function buildMeasurementNotes(results: ScanResult): string[] {
+  return CATEGORIES.flatMap(category => {
+    const measurement = results[category].measurement
+    if (!measurement || measurement.status === 'measured') return []
+    return `${CATEGORY_LABELS[category]}: ${measurement.label} is ${measurement.status}${measurement.message ? ` (${measurement.message})` : ''}.`
+  })
+}
+
+function buildDeterministicFixPrompts(results: ScanResult, activeIssues: Issue[]) {
+  const issueLines = activeIssues.map((issue, index) =>
+    `${index + 1}. [${issue.severity.toUpperCase()} · ${issue.confidence ?? 'unknown'}] ${issue.title}. ${issue.plainEnglish || issue.description}${evidenceText(issue)}`
+  )
+  const measurementNotes = buildMeasurementNotes(results)
+
+  const issueBlock = issueLines.length
+    ? issueLines.join('\n')
+    : 'No verified score-bearing issues were found in the completed checks.'
+  const measurementBlock = measurementNotes.length
+    ? `\n\nUnavailable or partial measurements:\n${measurementNotes.map((note, index) => `${index + 1}. ${note}`).join('\n')}`
+    : ''
+
+  return {
+    technical: `Fix the issues found by this ShipReady audit for ${results.url}.
+
+Use the existing codebase and make concrete changes for these findings:
+${issueBlock}${measurementBlock}
+
+Important:
+- Do not treat unavailable measurements as healthy.
+- If Lighthouse/performance is unavailable, run Lighthouse or PageSpeed locally, check whether the page blocks headless Chrome, and fix any performance findings before considering the report complete.
+- After changes, rerun the scan and verify that the listed findings are gone.`,
+    vibe: `Improve ${results.url} based on this ShipReady audit.
+
+Focus on:
+${issueBlock}${measurementBlock}
+
+Do not assume unavailable checks passed. If performance could not be measured, run the scan again after the visible issues are fixed and confirm the performance audit completes.`,
+  }
+}
+
+function isWeakFixPrompt(prompt: string | undefined, activeIssues: Issue[], measurementNotes: string[]) {
+  const text = prompt?.trim() ?? ''
+  if (!text) return true
+  if (text.length < 180) return true
+  if (activeIssues.length > 1 && text.split(/\s+/).length < 45) return true
+  return measurementNotes.length > 0 && !/unavailable|could not|lighthouse|performance|measurement/i.test(text)
 }
 
 export default function ReportPage({ params }: { params: Promise<{ id: string }> }) {
@@ -276,6 +330,14 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
   const activeIssues = allIssues.filter(i => i.severity !== 'pass')
   const passedIssues = allIssues.filter(i => i.severity === 'pass')
   const totalPassed = CATEGORIES.reduce((sum, cat) => sum + results[cat].passedChecks, 0)
+  const deterministicPrompts = buildDeterministicFixPrompts(results, activeIssues)
+  const measurementNotes = buildMeasurementNotes(results)
+  const technicalPrompt = isWeakFixPrompt(results.aiTechnicalPrompt, activeIssues, measurementNotes)
+    ? deterministicPrompts.technical
+    : results.aiTechnicalPrompt
+  const vibePrompt = isWeakFixPrompt(results.aiVibePrompt, activeIssues, measurementNotes)
+    ? deterministicPrompts.vibe
+    : results.aiVibePrompt
 
   let domain = scan.url
   try { domain = new URL(scan.url).hostname } catch { /* use raw url */ }
@@ -545,8 +607,8 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
         <section className="print:hidden">
           <h2 className="text-sm font-medium text-[#F1F0EE] mb-4">Fix everything</h2>
           <FixPromptSection
-            technicalPrompt={results.aiTechnicalPrompt}
-            vibePrompt={results.aiVibePrompt}
+            technicalPrompt={technicalPrompt}
+            vibePrompt={vibePrompt}
             isPro={isPro}
           />
         </section>

@@ -171,11 +171,13 @@ export function CategoryCard({ category, data }: CategoryCardProps) {
           )}
           {data.issues.length === 0 ? (
             <div className="px-4 py-3 flex items-center gap-2">
-              <span className="text-[#3DDC84] text-xs">✓</span>
+              <span className={`text-xs ${data.measurement?.status === 'measured' ? 'text-[#3DDC84]' : 'text-[#E8A83E]'}`}>
+                {data.measurement?.status === 'measured' ? '✓' : '!'}
+              </span>
               <span className="text-sm text-[#8B8A85]">
                 {data.measurement?.status === 'measured'
                   ? `All ${data.totalChecks} checks passed`
-                  : 'No confirmed issues in this category yet'}
+                  : 'This category was not fully measured, so no issues can be confirmed yet'}
               </span>
             </div>
           ) : (
