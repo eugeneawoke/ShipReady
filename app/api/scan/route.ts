@@ -5,6 +5,7 @@ import { createClient, createServiceClient } from '@/lib/supabase'
 import { FREE_SCAN_LIMIT } from '@/lib/auth'
 import { assertSafeScanUrl } from '@/lib/server/url-safety'
 import { dispatchScanToRailway } from '@/lib/server/scanner-dispatch'
+import { requireSameOriginJsonRequest } from '@/lib/server/request-guards'
 
 export const maxDuration = 60
 
@@ -18,20 +19,6 @@ function startOfCurrentMonth(): string {
   return start.toISOString()
 }
 
-function isAllowedOrigin(origin: string, appUrl: string): boolean {
-  try {
-    const normalizedOrigin = new URL(origin).origin
-    const allowedOrigins = new Set([
-      appUrl,
-      'http://localhost:3000',
-      'http://localhost:3001',
-    ])
-    return allowedOrigins.has(normalizedOrigin)
-  } catch {
-    return false
-  }
-}
-
 function getClientIp(request: NextRequest): string {
   return (
     request.headers.get('x-forwarded-for')?.split(',')[0].trim() ??
@@ -41,14 +28,8 @@ function getClientIp(request: NextRequest): string {
 }
 
 export async function POST(request: NextRequest) {
-  // CSRF: only accept requests originating from our own app
-  const origin = request.headers.get('origin')
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '')
-  if (origin && appUrl) {
-    if (!isAllowedOrigin(origin, appUrl)) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-  }
+  const guardResponse = requireSameOriginJsonRequest(request)
+  if (guardResponse) return guardResponse
 
   try {
     const body = await request.json()

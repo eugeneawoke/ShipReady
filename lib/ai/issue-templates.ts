@@ -627,7 +627,7 @@ async headers() {
       value: [
         "default-src 'self'",
         "script-src 'self' 'nonce-{NONCE}'", // use next.js nonce support
-        "style-src 'self' 'unsafe-inline'",
+        "style-src 'self'",
         "img-src 'self' data: https:",
         "font-src 'self'",
         "connect-src 'self'",
@@ -638,7 +638,7 @@ async headers() {
 See Next.js docs for nonce-based CSP with App Router.`,
     boltPrompt: `Add a basic Content Security Policy:
 In your server response headers, add:
-Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https:
+Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: https:; font-src 'self' https:
 
 Start with Content-Security-Policy-Report-Only first to check for breakage, then switch to Content-Security-Policy once confirmed.`,
     docsUrl: 'https://nextjs.org/docs/app/building-your-application/configuring/content-security-policy',

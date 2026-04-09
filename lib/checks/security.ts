@@ -2,7 +2,7 @@ import * as cheerio from 'cheerio'
 import sslChecker from 'ssl-checker'
 import type { Issue } from '@/types/scan'
 import { T } from '@/lib/ai/issue-templates'
-import type { FetchContext } from '@/lib/checks/fetch-context'
+import { fetchSafeResource, type FetchContext } from '@/lib/checks/fetch-context'
 import { evidence, withIssueMeta } from '@/lib/checks/issue-meta'
 
 const SENSITIVE_FILES = ['.env', '.env.local', '.env.production', '.git/config']
@@ -64,7 +64,7 @@ export async function runSecurityChecks(
     const origin = new URL(url).origin
     const probeResults = await Promise.allSettled(
       SENSITIVE_FILES.map(async (file) => {
-        const response = await fetch(`${origin}/${file}`, { signal: AbortSignal.timeout(2500) })
+        const response = await fetchSafeResource(`${origin}/${file}`, { signal: AbortSignal.timeout(2500) })
         if (response.status !== 200) return null
         const text = await response.text()
         return looksLikeEnvFile(text) ? file : null

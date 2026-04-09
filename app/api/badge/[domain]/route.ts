@@ -30,6 +30,7 @@ export async function GET(
       ].join(',')
     )
     .eq('status', 'done')
+    .eq('badge_enabled', true)
     .order('created_at', { ascending: false })
     .limit(1)
     .single()

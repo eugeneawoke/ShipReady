@@ -1,7 +1,7 @@
 import * as cheerio from 'cheerio'
 import type { Issue } from '@/types/scan'
 import { evidence, withIssueMeta } from '@/lib/checks/issue-meta'
-import { fetchWithHeadFallback } from '@/lib/checks/fetch-context'
+import { fetchSafeResource, fetchWithHeadFallback } from '@/lib/checks/fetch-context'
 
 function parseJsonLdTypes(raw: string | null | undefined): string[] {
   if (!raw) return []
@@ -184,7 +184,7 @@ export async function runAIVisibilityChecks(
 
   const aiCrawlers = ['GPTBot', 'ClaudeBot', 'PerplexityBot', 'CCBot', 'anthropic-ai']
   try {
-    const robotsRes = await fetch(`${origin}/robots.txt`, { signal: AbortSignal.timeout(2500) })
+    const robotsRes = await fetchSafeResource(`${origin}/robots.txt`, { signal: AbortSignal.timeout(2500) })
     if (robotsRes.ok) {
       const robotsText = await robotsRes.text()
       const blocked = aiCrawlers.filter(bot => parseRobotsBlock(robotsText, bot))

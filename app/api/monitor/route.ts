@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getUserWithPlan } from '@/lib/auth'
 import { createServiceClient } from '@/lib/supabase'
 import { normalizeDomain, domainFromUrl } from '@/lib/monitoring/domains'
+import { requireSameOriginJsonRequest } from '@/lib/server/request-guards'
 
 async function latestScanIdForDomain(userId: string, domain: string): Promise<string | null> {
   const supabase = createServiceClient()
@@ -18,6 +19,9 @@ async function latestScanIdForDomain(userId: string, domain: string): Promise<st
 }
 
 export async function POST(request: NextRequest) {
+  const guardResponse = requireSameOriginJsonRequest(request)
+  if (guardResponse) return guardResponse
+
   const user = await getUserWithPlan()
   if (!user || (user.plan !== 'pro' && user.plan !== 'agency')) {
     return NextResponse.json({ error: 'Upgrade required' }, { status: 403 })
@@ -54,6 +58,9 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  const guardResponse = requireSameOriginJsonRequest(request)
+  if (guardResponse) return guardResponse
+
   const user = await getUserWithPlan()
   if (!user || (user.plan !== 'pro' && user.plan !== 'agency')) {
     return NextResponse.json({ error: 'Upgrade required' }, { status: 403 })

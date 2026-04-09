@@ -178,7 +178,7 @@ const T = {
       copyBtn: 'Copy prompt',
       copiedBtn: 'Copied!',
       pasteHint: '→ paste into Cursor chat',
-      promptText: "Fix the missing Content-Security-Policy header\nin my Next.js app.\n\nAdd to next.config.ts headers():\n{\n  key: 'Content-Security-Policy',\n  value: [\n    \"default-src 'self'\",\n    \"script-src 'self' 'unsafe-eval'\",\n    \"style-src 'self' 'unsafe-inline'\",\n  ].join('; ')\n}\n\nThis protects against XSS and will score\n100/100 on security headers.",
+      promptText: "Fix the missing Content-Security-Policy header\nin my Next.js app.\n\nStart with Content-Security-Policy-Report-Only:\n{\n  key: 'Content-Security-Policy-Report-Only',\n  value: [\n    \"default-src 'self'\",\n    \"script-src 'self'\",\n    \"object-src 'none'\",\n    \"base-uri 'self'\",\n    \"frame-ancestors 'none'\",\n  ].join('; ')\n}\n\nCheck production reports, add nonces or SRI,\nthen switch to enforcing CSP.",
     },
     pricing: {
       eyebrow: 'Pricing',
@@ -287,7 +287,7 @@ const T = {
       copyBtn: 'Скопировать промпт',
       copiedBtn: 'Скопировано!',
       pasteHint: '→ вставьте в чат Cursor',
-      promptText: "Исправьте отсутствующий заголовок Content-Security-Policy\nв вашем Next.js приложении.\n\nДобавьте в next.config.ts headers():\n{\n  key: 'Content-Security-Policy',\n  value: [\n    \"default-src 'self'\",\n    \"script-src 'self' 'unsafe-eval'\",\n    \"style-src 'self' 'unsafe-inline'\",\n  ].join('; ')\n}\n\nЭто защитит от XSS и даст\n100/100 по заголовкам безопасности.",
+      promptText: "Исправьте отсутствующий заголовок Content-Security-Policy\nв вашем Next.js приложении.\n\nНачните с Content-Security-Policy-Report-Only:\n{\n  key: 'Content-Security-Policy-Report-Only',\n  value: [\n    \"default-src 'self'\",\n    \"script-src 'self'\",\n    \"object-src 'none'\",\n    \"base-uri 'self'\",\n    \"frame-ancestors 'none'\",\n  ].join('; ')\n}\n\nПроверьте production-отчеты, добавьте nonces\nили SRI, затем включите enforcing CSP.",
     },
     pricing: {
       eyebrow: 'Тарифы',
