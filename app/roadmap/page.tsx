@@ -91,6 +91,7 @@ const phases: {
     items: [
       'Custom production domain and polished onboarding flow',
       'Runtime monitoring, logs, and production alerts',
+      'Scanner SSRF protection in code is shipped; outbound firewall/proxy hardening is planned after demand validation',
       'Billing activation or a deliberate private-beta access path',
       'Support and feedback loop for the first users',
       'Tightening the highest-risk report inaccuracies before launch',
