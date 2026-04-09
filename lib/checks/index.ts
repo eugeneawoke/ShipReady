@@ -218,25 +218,25 @@ export async function runAllChecks(url: string, scanId: string): Promise<void> {
     await saveScan(scanId, 'enriching', result)
 
     if (process.env.OPENAI_API_KEY) {
-      const enrichmentStarted = Date.now()
-      try {
-        const enrichment = await generateEvidenceEnrichment(result)
-        timings.aiEnrichmentMs = Date.now() - enrichmentStarted
+      const enrichment = await safeTask(generateEvidenceEnrichment(result), 35_000, 'ai-enrichment')
+      timings.aiEnrichmentMs = enrichment.durationMs
+
+      if (enrichment.ok) {
         result = buildScanResult({
           ...result,
           phase: 'enriching',
           timings,
-          aiSummary: enrichment.summary,
-          topPriorities: enrichment.topPriorities,
-          aiTechnicalPrompt: enrichment.technicalPrompt,
-          aiVibePrompt: enrichment.vibePrompt,
-          issuePrompts: enrichment.issuePrompts,
+          aiSummary: enrichment.value.summary,
+          topPriorities: enrichment.value.topPriorities,
+          aiTechnicalPrompt: enrichment.value.technicalPrompt,
+          aiVibePrompt: enrichment.value.vibePrompt,
+          issuePrompts: enrichment.value.issuePrompts,
         })
 
         const categories = ['performance', 'seo', 'security', 'mobile', 'ai_visibility'] as const
         for (const category of categories) {
           result[category].issues = result[category].issues.map(issue => {
-            const aiPrompt = enrichment.issuePrompts?.[issue.id]
+            const aiPrompt = enrichment.value.issuePrompts?.[issue.id]
             if (!aiPrompt) return issue
             return {
               ...issue,
@@ -248,10 +248,11 @@ export async function runAllChecks(url: string, scanId: string): Promise<void> {
 
         const plan = await getPlanForScan(scanId)
         if (plan === 'pro' || plan === 'agency') {
-          result.wowInsights = await generateWowInsights(result)
+          const wowInsights = await safeTask(generateWowInsights(result), 35_000, 'wow-insights')
+          if (wowInsights.ok) {
+            result.wowInsights = wowInsights.value
+          }
         }
-      } catch (error) {
-        console.error('[checks] AI enrichment failed:', error)
       }
     }
 

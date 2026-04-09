@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { ChevronDown, Share2, Check, Copy, Lock, ArrowLeft, FileDown, Loader2 } from 'lucide-react'
 import { ReportSkeleton } from '@/components/report/ReportSkeleton'
@@ -135,6 +135,8 @@ const CATEGORY_LABELS: Record<IssueCategory, string> = {
 
 export default function ReportPage({ params }: { params: Promise<{ id: string }> }) {
   const [scan, setScan] = useState<Scan | null>(null)
+  const latestScanRef = useRef<Scan | null>(null)
+  const pollFailuresRef = useRef(0)
   const [id, setId] = useState<string>('')
   const [activeCategory, setActiveCategory] = useState<IssueCategory>('performance')
   const [passedOpen, setPassedOpen] = useState(false)
@@ -172,8 +174,14 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
 
   useEffect(() => {
     if (!id) return
+    let isPolling = false
+    latestScanRef.current = null
+    pollFailuresRef.current = 0
 
     async function poll() {
+      if (isPolling) return
+      isPolling = true
+
       try {
         const res = await fetch(`/api/scan/${id}`, {
           cache: 'no-store',
@@ -181,7 +189,8 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
         })
 
         if (!res.ok) {
-          if (res.status === 404 || res.status === 403) {
+          pollFailuresRef.current += 1
+          if ((res.status === 404 || res.status === 403) && !latestScanRef.current && pollFailuresRef.current >= 3) {
             setLoadFailed(true)
             setInitialLoading(false)
             clearInterval(interval)
@@ -190,9 +199,15 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
         }
 
         const data = await res.json()
+        pollFailuresRef.current = 0
+        latestScanRef.current = data
         setLoadFailed(false)
         setScan(data)
         setInitialLoading(false)
+
+        if (data.results && data.status !== 'done') {
+          setReportVisible(true)
+        }
 
         if (data.status === 'done' || data.status === 'error') {
           clearInterval(interval)
@@ -207,9 +222,13 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
           }
         }
       } catch {
-        setLoadFailed(true)
-        setInitialLoading(false)
-        clearInterval(interval)
+        pollFailuresRef.current += 1
+        if (!latestScanRef.current && pollFailuresRef.current >= 3) {
+          setLoadFailed(true)
+          setInitialLoading(false)
+        }
+      } finally {
+        isPolling = false
       }
     }
 
@@ -243,11 +262,12 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
     return <ReportSkeleton status={completing ? 'completing' : (scan?.status ?? 'pending')} />
   }
 
-  if (scan.status === 'error' || !scan.results) {
-    return <ReportSkeleton status="error" />
+  if (!scan.results) {
+    return <ReportSkeleton status="error" processingIssue={scan.processingIssue} />
   }
 
   const { results } = scan
+  const processingIssue = results.processingIssue ?? scan.processingIssue
 
   const allIssues: Issue[] = CATEGORIES.flatMap(cat => results[cat].issues).sort(
     (a, b) => (SEVERITY_ORDER[a.severity] ?? 9) - (SEVERITY_ORDER[b.severity] ?? 9)
@@ -420,11 +440,17 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
       </header>
 
       <main className="max-w-3xl mx-auto px-4 py-10 space-y-10">
-        {(scan.status === 'running_deep' || scan.status === 'enriching') && (
+        {(scan.status === 'running_deep' || scan.status === 'enriching' || scan.status === 'error') && (
           <section className="rounded-xl border border-[#E8A83E]/20 bg-[#E8A83E]/5 px-4 py-3">
-            <p className="text-sm text-[#F1F0EE]">Partial report ready</p>
+            <p className="text-sm text-[#F1F0EE]">
+              {scan.status === 'error' ? 'Partial report saved' : 'Partial report ready'}
+            </p>
             <p className="text-xs text-[#8B8A85] mt-1">
-              Fast truth checks are available now. Deep measurements and AI enrichment are still running, so some categories may remain unavailable for a moment.
+              {scan.status === 'error' && processingIssue
+                ? `${processingIssue.message} ${processingIssue.recommendation}`
+                : scan.status === 'error'
+                  ? 'The scanner stopped before finalizing every step. Available verified results are shown below; unavailable measurements are not counted as healthy.'
+                  : 'Fast truth checks are available now. Deep measurements and AI enrichment are still running, so some categories may remain unavailable for a moment.'}
             </p>
           </section>
         )}

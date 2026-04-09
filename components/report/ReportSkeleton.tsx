@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { CheckCircle2, Loader2 } from 'lucide-react'
 import { ScanForm } from '@/components/landing/ScanForm'
+import type { ScanProcessingIssue } from '@/types/scan'
 
 const STEPS = [
   { label: 'Performance & Core Web Vitals'  },
@@ -14,7 +15,7 @@ const STEPS = [
   { label: 'AI visibility & structured data' },
 ]
 
-export function ReportSkeleton({ status }: { status: string }) {
+export function ReportSkeleton({ status, processingIssue }: { status: string; processingIssue?: ScanProcessingIssue }) {
   const [elapsed, setElapsed] = useState(0) // counts 100ms ticks
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const didPushStateRef = useRef(false)
@@ -142,6 +143,12 @@ export function ReportSkeleton({ status }: { status: string }) {
             </p>
           )}
           <p className="text-sm text-[#8B8A85]">Something went wrong while analyzing your site.</p>
+          {processingIssue && (
+            <div className="rounded-lg border border-[#FF4444]/20 bg-[#FF4444]/5 px-4 py-3 text-left">
+              <p className="text-xs text-[#FF8A8A]">{processingIssue.message}</p>
+              <p className="mt-1 text-xs text-[#8B8A85]">{processingIssue.recommendation}</p>
+            </div>
+          )}
           {/* max-w-md intentionally narrower than ScanForm's own max-w — keeps it contained in the error card */}
           <div className="w-full max-w-md mx-auto">
             <ScanForm />

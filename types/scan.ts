@@ -69,6 +69,14 @@ export interface WowInsight {
   evidenceRefs?: string[]
 }
 
+export interface ScanProcessingIssue {
+  kind: 'timeout'
+  stage: ScanStatus
+  message: string
+  recommendation: string
+  staleAgeSeconds: number
+}
+
 export interface ScanResult {
   url: string
   scannedAt: string
@@ -91,6 +99,7 @@ export interface ScanResult {
   aiVibePrompt?: string
   issuePrompts?: Record<string, { technical: string; vibe: string }>
   wowInsights?: WowInsight[]
+  processingIssue?: ScanProcessingIssue
 }
 
 export interface Scan {
@@ -101,4 +110,5 @@ export interface Scan {
   user_id: string | null
   created_at: string
   updated_at: string
+  processingIssue?: ScanProcessingIssue
 }
