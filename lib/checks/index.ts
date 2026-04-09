@@ -16,16 +16,19 @@ import { buildMonitoringAlertDecision } from '@/lib/monitoring/alerts'
 import { sendMonitoringAlert } from '@/lib/email/send-alert'
 
 async function safeTask<T>(
-  task: Promise<T>,
+  task: Promise<T> | (() => Promise<T>),
   timeoutMs: number,
   label: string,
 ): Promise<{ ok: true; value: T; durationMs: number } | { ok: false; durationMs: number; error: string }> {
   const started = Date.now()
   try {
-    const value = await Promise.race([
-      task,
-      new Promise<never>((_, reject) => setTimeout(() => reject(new Error(`${label} timed out`)), timeoutMs)),
-    ])
+    const runningTask = typeof task === 'function' ? task() : task
+    const value = timeoutMs > 0
+      ? await Promise.race([
+          runningTask,
+          new Promise<never>((_, reject) => setTimeout(() => reject(new Error(`${label} timed out`)), timeoutMs)),
+        ])
+      : await runningTask
     return { ok: true, value, durationMs: Date.now() - started }
   } catch (error) {
     console.error(`[checks] ${label} failed:`, error)
@@ -186,7 +189,7 @@ export async function runAllChecks(url: string, scanId: string): Promise<void> {
     await saveScan(scanId, 'running_deep', fastResult)
 
     const [lighthouseResult, linksResult, seoDeep, aiVisibilityDeep] = await Promise.all([
-      safeTask(runLighthouse(finalUrl), 210_000, 'lighthouse'),
+      safeTask(() => runLighthouse(finalUrl), 0, 'lighthouse'),
       safeTask(runLinksCheck(finalUrl, fetchContext.html), 12_000, 'links'),
       safeTask(runSEOChecks(finalUrl, fetchContext.html), 10_000, 'seo-deep'),
       safeTask(runAIVisibilityChecks(finalUrl, fetchContext.html), 10_000, 'ai-visibility-deep'),

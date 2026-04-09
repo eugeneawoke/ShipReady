@@ -5,16 +5,19 @@ import { measurement } from '@/lib/checks/issue-meta'
 import { buildCategoryScore, buildPerformanceIssues, buildScanResult } from '@/lib/scoring'
 
 async function runWithTimeout<T>(
-  task: Promise<T>,
+  task: Promise<T> | (() => Promise<T>),
   timeoutMs: number,
   label: string,
 ): Promise<{ ok: true; value: T; durationMs: number } | { ok: false; durationMs: number; error: string }> {
   const started = Date.now()
   try {
-    const value = await Promise.race([
-      task,
-      new Promise<never>((_, reject) => setTimeout(() => reject(new Error(`${label} timed out`)), timeoutMs)),
-    ])
+    const runningTask = typeof task === 'function' ? task() : task
+    const value = timeoutMs > 0
+      ? await Promise.race([
+          runningTask,
+          new Promise<never>((_, reject) => setTimeout(() => reject(new Error(`${label} timed out`)), timeoutMs)),
+        ])
+      : await runningTask
     return { ok: true, value, durationMs: Date.now() - started }
   } catch (error) {
     console.error(`[checks] ${label} retry failed:`, error)
@@ -77,7 +80,7 @@ export async function retryLighthouseForScan(scanId: string): Promise<void> {
     return
   }
 
-  const retry = await runWithTimeout(runLighthouse(current.url || data.url), 210_000, 'lighthouse')
+  const retry = await runWithTimeout(() => runLighthouse(current.url || data.url), 0, 'lighthouse')
   const timings: ScanTimings = {
     ...current.timings,
     lighthouseMs: retry.durationMs,

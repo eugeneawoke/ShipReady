@@ -15,6 +15,36 @@ export interface LighthouseMetrics {
   warnings: string[]
 }
 
+interface LighthouseOptions {
+  timeoutMs?: number
+}
+
+const DEFAULT_LIGHTHOUSE_TIMEOUT_MS = 240_000
+
+let lighthouseQueue = Promise.resolve()
+
+async function withLighthouseSlot<T>(task: () => Promise<T>): Promise<T> {
+  const queuedAt = Date.now()
+  const previous = lighthouseQueue.catch(() => undefined)
+  let releaseSlot!: () => void
+
+  lighthouseQueue = new Promise<void>((resolve) => {
+    releaseSlot = resolve
+  })
+
+  await previous
+  const waitMs = Date.now() - queuedAt
+  if (waitMs > 1000) {
+    console.info(`[lighthouse] acquired scanner slot after waitMs=${waitMs}`)
+  }
+
+  try {
+    return await task()
+  } finally {
+    releaseSlot()
+  }
+}
+
 function scoreFromCategory(category: any, label: string): number {
   const score = category?.score
   if (typeof score !== 'number' || !Number.isFinite(score) || score < 0 || score > 1) {
@@ -32,8 +62,13 @@ function optionalMetric(lhr: any, auditId: string): number | null {
   return value
 }
 
-export async function runLighthouse(url: string): Promise<LighthouseMetrics> {
+export async function runLighthouse(url: string, options: LighthouseOptions = {}): Promise<LighthouseMetrics> {
+  return withLighthouseSlot(() => runLighthouseNow(url, options))
+}
+
+async function runLighthouseNow(url: string, options: LighthouseOptions = {}): Promise<LighthouseMetrics> {
   const startedAt = Date.now()
+  const timeoutMs = options.timeoutMs ?? DEFAULT_LIGHTHOUSE_TIMEOUT_MS
   // eval prevents Turbopack from tracing into these packages at build time
   const chromium        = eval("require('@sparticuz/chromium')")  as any
   const lighthouseMod   = eval("require('lighthouse')")           as any
@@ -62,18 +97,29 @@ export async function runLighthouse(url: string): Promise<LighthouseMetrics> {
     defaultViewport: chromium.defaultViewport,
     executablePath,
     headless: true,
-    protocolTimeout: 120_000,
+    protocolTimeout: 180_000,
     timeout: 60_000,
   })
 
+  let timeout: ReturnType<typeof setTimeout> | undefined
+
   try {
-    const { lhr } = await lighthouse(url, {
+    const lighthouseRun = lighthouse(url, {
       port: Number(new URL(browser.wsEndpoint()).port),
       output: 'json',
       onlyCategories: ['performance', 'accessibility', 'seo'],
       formFactor: 'mobile',
-      maxWaitForLoad: 90_000,
+      maxWaitForLoad: 120_000,
     })
+
+    const { lhr } = await Promise.race([
+      lighthouseRun,
+      new Promise<never>((_, reject) => {
+        timeout = setTimeout(() => {
+          reject(new Error(`lighthouse timed out after ${Math.round(timeoutMs / 1000)}s`))
+        }, timeoutMs)
+      }),
+    ])
 
     if (!lhr || lhr.runtimeError) {
       throw new Error(lhr?.runtimeError?.message || 'Lighthouse did not produce a valid report')
@@ -96,6 +142,9 @@ export async function runLighthouse(url: string): Promise<LighthouseMetrics> {
 
     return metrics
   } finally {
-    await browser.close()
+    if (timeout) clearTimeout(timeout)
+    await browser.close().catch((error: unknown) => {
+      console.error('[lighthouse] failed to close browser:', error)
+    })
   }
 }

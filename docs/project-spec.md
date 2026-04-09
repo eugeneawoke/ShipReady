@@ -84,7 +84,7 @@ Practical interpretation: ShipReady is close enough to show to first beta users,
    - optional Pro/Agency wow insights
 6. Results are saved to Supabase.
 7. `/report/[id]` polls `/api/scan/[id]`, shows partial results where possible, and transitions to the final report when complete.
-8. If a scan stalls, polling marks stale active scans after 3 minutes and shows the best available partial report plus a clear processing issue.
+8. If a scan stalls, polling marks stale active scans using stage-specific limits and shows the best available partial report plus a clear processing issue. Fast stages use short limits; deep Lighthouse work gets a longer window because Chromium audits can legitimately take several minutes on the Railway scanner.
 
 ## Quality Model
 
