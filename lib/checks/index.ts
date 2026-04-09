@@ -186,7 +186,7 @@ export async function runAllChecks(url: string, scanId: string): Promise<void> {
     await saveScan(scanId, 'running_deep', fastResult)
 
     const [lighthouseResult, linksResult, seoDeep, aiVisibilityDeep] = await Promise.all([
-      safeTask(runLighthouse(finalUrl), 120_000, 'lighthouse'),
+      safeTask(runLighthouse(finalUrl), 210_000, 'lighthouse'),
       safeTask(runLinksCheck(finalUrl, fetchContext.html), 12_000, 'links'),
       safeTask(runSEOChecks(finalUrl, fetchContext.html), 10_000, 'seo-deep'),
       safeTask(runAIVisibilityChecks(finalUrl, fetchContext.html), 10_000, 'ai-visibility-deep'),

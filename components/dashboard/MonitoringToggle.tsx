@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Loader2, Radar } from 'lucide-react'
 
 interface MonitoringToggleProps {
@@ -10,15 +11,21 @@ interface MonitoringToggleProps {
 }
 
 export function MonitoringToggle({ domain, enabled, canManage }: MonitoringToggleProps) {
+  const router = useRouter()
   const [isEnabled, setIsEnabled] = useState(enabled)
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    setIsEnabled(enabled)
+  }, [enabled])
 
   async function toggle() {
     if (!canManage || pending) return
 
     setPending(true)
     setError(null)
+    const nextEnabled = !isEnabled
     try {
       const res = await fetch('/api/monitor', {
         method: isEnabled ? 'DELETE' : 'POST',
@@ -31,7 +38,8 @@ export function MonitoringToggle({ domain, enabled, canManage }: MonitoringToggl
         throw new Error(data.error || 'Request failed')
       }
 
-      setIsEnabled((current) => !current)
+      setIsEnabled(nextEnabled)
+      router.refresh()
     } catch (error) {
       console.error('[monitoring] toggle failed', error)
       setError(error instanceof Error ? error.message : 'Could not update monitoring')

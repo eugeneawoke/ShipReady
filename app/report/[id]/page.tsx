@@ -197,10 +197,13 @@ function buildScanStages(scan: Scan, results: ScanResult): Array<{ title: string
   ]
 }
 
-function ScanProgressPanel({ scan, results, processingIssue }: {
+function ScanProgressPanel({ scan, results, processingIssue, retryingMeasurement, retryError, onRetryLighthouse }: {
   scan: Scan
   results: ScanResult
   processingIssue?: Scan['processingIssue']
+  retryingMeasurement: boolean
+  retryError: string | null
+  onRetryLighthouse: () => void
 }) {
   const isActive = ACTIVE_SCAN_STATUSES.includes(scan.status)
   const unavailable = hasUnavailableMeasurements(results)
@@ -235,17 +238,37 @@ function ScanProgressPanel({ scan, results, processingIssue }: {
       </div>
 
       <div className="grid gap-2 mt-4">
-        {stages.map(stage => (
+        {stages.map(stage => {
+          const canRetryLighthouse = !isActive && stage.title === 'Lighthouse mobile audit' && stage.state === 'unavailable'
+          return (
           <div key={stage.title} className="flex items-start gap-3 rounded-lg border border-white/[0.04] bg-[#111113] px-3 py-2.5">
             <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-mono uppercase tracking-[0.08em] ${stageTone(stage.state)}`}>
               {stageLabel(stage.state)}
             </span>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="text-xs text-[#F1F0EE]">{stage.title}</p>
               <p className="text-xs text-[#6F6E69] mt-0.5 leading-relaxed">{stage.detail}</p>
+              {canRetryLighthouse && retryError ? (
+                <p className="mt-1 text-[11px] text-[#FF8A8A]">{retryError}</p>
+              ) : null}
             </div>
+            {canRetryLighthouse ? (
+              <button
+                type="button"
+                onClick={onRetryLighthouse}
+                disabled={retryingMeasurement}
+                className={`shrink-0 rounded-lg border px-2.5 py-1.5 text-[11px] transition-colors ${
+                  retryingMeasurement
+                    ? 'cursor-wait border-white/6 bg-white/[0.03] text-[#5A5955]'
+                    : 'cursor-pointer border-[#E8A83E]/25 bg-[#E8A83E]/8 text-[#E8A83E] hover:border-[#E8A83E]/40 hover:bg-[#E8A83E]/12'
+                }`}
+              >
+                {retryingMeasurement ? 'Retrying...' : 'Retry Lighthouse'}
+              </button>
+            ) : null}
           </div>
-        ))}
+          )
+        })}
       </div>
     </section>
   )
@@ -324,11 +347,13 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
   const [pdfState, setPdfState] = useState<'idle' | 'preparing' | 'downloading'>('idle')
   const [pdfError, setPdfError] = useState<string | null>(null)
   const [newScanOpen, setNewScanOpen] = useState(false)
+  const [pollVersion, setPollVersion] = useState(0)
+  const [retryingMeasurement, setRetryingMeasurement] = useState(false)
+  const [retryError, setRetryError] = useState<string | null>(null)
   const {
     loading: rescanLoading,
     error: rescanError,
     launchScan: launchRescan,
-    scanOverlay: rescanOverlay,
   } = useScanLauncher()
 
   useEffect(() => {
@@ -416,7 +441,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
     return () => {
       clearInterval(interval)
     }
-  }, [id])
+  }, [id, pollVersion])
 
   // Minimal spinner while loading existing report
   if (initialLoading) {
@@ -478,6 +503,37 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
   async function handleRescan() {
     if (rescanLoading || isScanActive) return
     await launchRescan(results.url)
+  }
+
+  async function handleRetryLighthouse() {
+    if (!id || retryingMeasurement || isScanActive) return
+
+    setRetryingMeasurement(true)
+    setRetryError(null)
+
+    try {
+      const response = await fetch(`/api/scan/${id}/retry`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ measurement: 'lighthouse' }),
+      })
+
+      const body = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        throw new Error(body.error || 'Could not retry Lighthouse')
+      }
+
+      if (body.scan) {
+        setScan(body.scan)
+        latestScanRef.current = body.scan
+      }
+      setReportVisible(true)
+      setPollVersion(version => version + 1)
+    } catch (error) {
+      setRetryError(error instanceof Error ? error.message : 'Could not retry Lighthouse')
+    } finally {
+      setRetryingMeasurement(false)
+    }
   }
 
   function filenameFromDisposition(header: string | null, fallback: string) {
@@ -553,7 +609,6 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
       className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE] transition-opacity duration-500"
       style={{ opacity: reportVisible ? 1 : 0 }}
     >
-      {rescanOverlay}
       {/* Nav */}
       <header className="sticky top-0 z-10 bg-[#0E0E0F]/90 backdrop-blur-md border-b border-white/6">
         <div className="max-w-3xl mx-auto px-4 h-14 flex items-center gap-3">
@@ -679,7 +734,14 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
             <p className="text-xs text-[#8B8A85] mt-1">{rescanError.msg}</p>
           </section>
         )}
-        <ScanProgressPanel scan={scan} results={results} processingIssue={processingIssue} />
+        <ScanProgressPanel
+          scan={scan}
+          results={results}
+          processingIssue={processingIssue}
+          retryingMeasurement={retryingMeasurement}
+          retryError={retryError}
+          onRetryLighthouse={handleRetryLighthouse}
+        />
 
         {/* Score + Summary */}
         <section className="flex flex-col sm:flex-row items-center sm:items-start gap-8">

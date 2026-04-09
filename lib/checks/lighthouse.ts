@@ -62,8 +62,8 @@ export async function runLighthouse(url: string): Promise<LighthouseMetrics> {
     defaultViewport: chromium.defaultViewport,
     executablePath,
     headless: true,
-    protocolTimeout: 60_000,
-    timeout: 30_000,
+    protocolTimeout: 120_000,
+    timeout: 60_000,
   })
 
   try {
@@ -72,7 +72,7 @@ export async function runLighthouse(url: string): Promise<LighthouseMetrics> {
       output: 'json',
       onlyCategories: ['performance', 'accessibility', 'seo'],
       formFactor: 'mobile',
-      maxWaitForLoad: 45_000,
+      maxWaitForLoad: 90_000,
     })
 
     if (!lhr || lhr.runtimeError) {

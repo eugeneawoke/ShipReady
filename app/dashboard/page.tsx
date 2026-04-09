@@ -31,7 +31,10 @@ export default async function DashboardPage() {
 
   const planLabel = user.plan === 'pro' ? 'Pro' : user.plan === 'agency' ? 'Agency' : 'Free'
   const planColor = user.plan === 'free' ? 'text-[#8B8A85]' : 'text-[#3DDC84]'
-  const activeMonitoringCount = (monitoredDomains ?? []).filter((item) => item.active).length
+  const trackedScanCount = (scans ?? []).filter((scan) => {
+    const domain = domainFromUrl(scan.url)
+    return domain ? Boolean(monitoringMap.get(domain)?.active) : false
+  }).length
 
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE]">
@@ -77,9 +80,9 @@ export default async function DashboardPage() {
               <div className="text-sm text-[#8B8A85]">
                 {user.plan === 'free'
                   ? 'Upgrade to monitor domains weekly from your scan list.'
-                  : `${activeMonitoringCount} domain${activeMonitoringCount === 1 ? '' : 's'} monitored · runs every Monday`}
+                  : `${trackedScanCount} scan${trackedScanCount === 1 ? '' : 's'} tracked · runs every Monday`}
               </div>
-              {user.plan !== 'free' && activeMonitoringCount > 0 ? (
+              {user.plan !== 'free' && trackedScanCount > 0 ? (
                 <div className="text-xs font-mono text-[#3DDC84]">Weekly monitoring active</div>
               ) : null}
             </div>
