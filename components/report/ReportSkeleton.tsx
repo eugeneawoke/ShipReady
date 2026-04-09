@@ -1,10 +1,10 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { CheckCircle2, Loader2 } from 'lucide-react'
 import { ScanForm } from '@/components/landing/ScanForm'
+import { SiteBrandLink } from '@/components/SiteHeader'
 import type { ScanProcessingIssue } from '@/types/scan'
 
 const STEPS = [
@@ -126,15 +126,11 @@ export function ReportSkeleton({ status, processingIssue }: { status: string; pr
   if (status === 'error') {
     return (
       <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE] flex items-center justify-center">
-        <Link
-          href="/"
-          className="fixed top-4 left-4 text-xs text-[#5A5955] hover:text-[#F1F0EE] transition-colors flex items-center gap-1.5"
-        >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 12H5M12 5l-7 7 7 7"/>
-          </svg>
-          Back
-        </Link>
+        <div className="fixed inset-x-0 top-0 border-b border-white/[0.06] bg-[#0E0E0F]/80 backdrop-blur-md">
+          <div className="mx-auto flex h-14 max-w-6xl items-center px-6">
+            <SiteBrandLink />
+          </div>
+        </div>
         <div className="max-w-md w-full px-6 text-center space-y-3">
           <p className="text-sm font-medium text-[#FF4444]">Scan failed</p>
           {elapsed > 0 && (
@@ -160,15 +156,20 @@ export function ReportSkeleton({ status, processingIssue }: { status: string; pr
 
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE] flex items-center justify-center">
-      <button
-        onClick={() => setIsLeaveModalOpen(true)}
-        className="fixed top-4 left-4 text-xs text-[#5A5955] hover:text-[#F1F0EE] transition-colors flex items-center gap-1.5 cursor-pointer bg-transparent border-0 p-0"
-      >
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M19 12H5M12 5l-7 7 7 7"/>
-        </svg>
-        Back
-      </button>
+      <div className="fixed inset-x-0 top-0 border-b border-white/[0.06] bg-[#0E0E0F]/80 backdrop-blur-md">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-6">
+          <SiteBrandLink />
+          <button
+            onClick={() => setIsLeaveModalOpen(true)}
+            className="text-xs text-[#5A5955] hover:text-[#F1F0EE] transition-colors flex items-center gap-1.5 cursor-pointer bg-transparent border-0 p-0"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 5l-7 7 7 7"/>
+            </svg>
+            Leave
+          </button>
+        </div>
+      </div>
 
       <div className="max-w-sm w-full px-6">
         {/* Header */}

@@ -8,35 +8,31 @@ import { ScoreRing } from '@/components/report/ScoreRing'
 import { CategoryCard } from '@/components/report/CategoryCard'
 import { IssueCard } from '@/components/report/IssueCard'
 import { ScanForm, useScanLauncher } from '@/components/landing/ScanForm'
+import { SiteBrandLink } from '@/components/SiteHeader'
 import type { Scan, Issue, IssueCategory, ScanResult, ScanStatus } from '@/types/scan'
 import { createBrowserClient } from '@/lib/supabase-browser'
 
-const FIX_TABS = [
-  {
-    id: 'technical' as const,
-    label: 'Technical',
-    subtitle: 'Cursor · Windsurf · Claude Code · Codex',
-  },
-  {
-    id: 'vibe' as const,
-    label: 'Vibe',
-    subtitle: 'Bolt · Lovable · v0 · Replit · ChatGPT',
-  },
-]
+function JumpingDots() {
+  return (
+    <span className="inline-flex items-end gap-1 text-[#C7BCFF]" aria-hidden="true">
+      {[0, 1, 2].map(index => (
+        <span
+          key={index}
+          className="jumping-dot h-1.5 w-1.5 rounded-full bg-current"
+          style={{ animationDelay: `${index * 0.18}s` }}
+        />
+      ))}
+    </span>
+  )
+}
 
-function FixPromptSection({ technicalPrompt, vibePrompt, isPro }: {
-  technicalPrompt?: string
-  vibePrompt?: string
+function FixPromptSection({ prompt, isPro, isReady }: {
+  prompt?: string
   isPro: boolean
+  isReady: boolean
 }) {
-  const [activeTab, setActiveTab] = useState<'technical' | 'vibe'>('technical')
   const [copied, setCopied] = useState(false)
-
-  const prompt = activeTab === 'technical'
-    ? (technicalPrompt ?? vibePrompt ?? '')
-    : (vibePrompt ?? technicalPrompt ?? '')
-
-  const hasPrompt = !!(technicalPrompt || vibePrompt)
+  const hasPrompt = !!prompt
 
   function copy() {
     if (!prompt) return
@@ -47,32 +43,18 @@ function FixPromptSection({ technicalPrompt, vibePrompt, isPro }: {
 
   return (
     <div className="rounded-xl bg-[#161618] border border-white/6 overflow-hidden">
-      {/* 2 big tabs */}
-      <div className="grid grid-cols-2 border-b border-white/6">
-        {FIX_TABS.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`py-3 px-4 text-left transition-colors cursor-pointer relative ${
-              activeTab === tab.id ? 'bg-[#1A1625]' : 'hover:bg-white/[0.02]'
-            }`}
-          >
-            <span className={`text-sm font-medium block ${
-              activeTab === tab.id ? 'text-[#F1F0EE]' : 'text-[#5A5955]'
-            }`}>
-              {tab.label}
-            </span>
-            <span className="text-[11px] text-[#5A5955] mt-0.5 block">{tab.subtitle}</span>
-            {activeTab === tab.id && (
-              <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#6E56CF]" />
-            )}
-          </button>
-        ))}
-      </div>
-
-      {/* Prompt content */}
       <div className="p-4">
-        {!hasPrompt ? (
+        {!isReady ? (
+          <div className="rounded-lg border border-[#6E56CF]/20 bg-[#1A1625] px-4 py-4">
+            <div className="flex items-center gap-3">
+              <JumpingDots />
+              <p className="text-sm text-[#F1F0EE]">Preparing your fix prompt</p>
+            </div>
+            <p className="mt-2 text-xs text-[#8B8A85] leading-relaxed">
+              The final prompt will appear after Lighthouse and AI enrichment finish.
+            </p>
+          </div>
+        ) : !hasPrompt ? (
           <div className="text-xs text-[#5A5955] bg-[#1E1E21] rounded-lg p-3 text-center">
             AI prompt not available for this scan
           </div>
@@ -304,21 +286,27 @@ function buildDeterministicFixPrompts(results: ScanResult, activeIssues: Issue[]
     : ''
 
   return {
-    technical: `Fix the issues found by this ShipReady audit for ${results.url}.
+    technical: `You are working in the existing codebase for ${results.url}.
 
-Use the existing codebase and make concrete changes for these findings:
+Fix these verified issues directly and keep changes minimal:
 ${issueBlock}${measurementBlock}
 
 Important:
 - Do not treat unavailable measurements as healthy.
-- If Lighthouse/performance is unavailable, run Lighthouse or PageSpeed locally, check whether the page blocks headless Chrome, and fix any performance findings before considering the report complete.
+- Focus only on the listed problems.
+- Use the current stack and patterns already present in the project.
+- If Lighthouse/performance is unavailable, run Lighthouse or PageSpeed locally, check whether the page blocks headless Chrome, and fix any performance findings before considering the work complete.
 - After changes, rerun the scan and verify that the listed findings are gone.`,
-    vibe: `Improve ${results.url} based on this ShipReady audit.
+    vibe: `You are improving the live site at ${results.url} inside its current codebase.
 
-Focus on:
+Fix these issues in the most direct way possible:
 ${issueBlock}${measurementBlock}
 
-Do not assume unavailable checks passed. If performance could not be measured, run the scan again after the visible issues are fixed and confirm the performance audit completes.`,
+Rules:
+- Focus only on the listed problems.
+- Keep the implementation simple and production-ready.
+- Do not assume unavailable checks passed.
+- If performance could not be measured, rerun Lighthouse or PageSpeed after the visible fixes and confirm the audit completes.`,
   }
 }
 
@@ -487,11 +475,10 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
   const isScanActive = ACTIVE_SCAN_STATUSES.includes(scan.status)
   const isFinalReport = scan.status === 'done'
   const hasUnavailable = hasUnavailableMeasurements(results)
-  const technicalPrompt = isWeakFixPrompt(results.aiTechnicalPrompt, activeIssues, measurementNotes)
-    ? deterministicPrompts.technical
-    : results.aiTechnicalPrompt
-  const vibePrompt = isWeakFixPrompt(results.aiVibePrompt, activeIssues, measurementNotes)
-    ? deterministicPrompts.vibe
+  const fixEverythingPrompt = isWeakFixPrompt(results.aiVibePrompt, activeIssues, measurementNotes)
+    ? isWeakFixPrompt(results.aiTechnicalPrompt, activeIssues, measurementNotes)
+      ? deterministicPrompts.vibe
+      : results.aiTechnicalPrompt
     : results.aiVibePrompt
 
   let domain = scan.url
@@ -615,25 +602,18 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
       {/* Nav */}
       <header className="sticky top-0 z-10 bg-[#0E0E0F]/90 backdrop-blur-md border-b border-white/6">
         <div className="max-w-3xl mx-auto px-4 h-14 flex items-center gap-3">
+          <SiteBrandLink className="shrink-0" />
+          <span className="text-[#5A5955] text-sm">/</span>
+          <span className="text-sm text-[#8B8A85] font-mono truncate flex-1">{domain}</span>
           {isLoggedIn ? (
             <Link
               href="/dashboard"
-              className="flex items-center gap-1.5 text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors shrink-0"
+              className="flex items-center gap-1.5 text-xs text-[#8B8A85] hover:text-[#F1F0EE] transition-colors shrink-0 print:hidden"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-3.5 h-3.5" />
               Dashboard
             </Link>
-          ) : (
-            <Link
-              href="/"
-              className="flex items-center gap-1.5 text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors shrink-0"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              ShipReady
-            </Link>
-          )}
-          <span className="text-[#5A5955] text-sm">/</span>
-          <span className="text-sm text-[#8B8A85] font-mono truncate flex-1">{domain}</span>
+          ) : null}
           <button
             type="button"
             onClick={() => setNewScanOpen(open => !open)}
@@ -838,25 +818,16 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
         </section>
 
         {/* Fix everything prompts — hidden in print */}
-        {isFinalReport ? (
         <section className="print:hidden">
           <div className="mb-4">
             <h2 className="text-sm font-medium text-[#F1F0EE]">Fix everything</h2>
           </div>
           <FixPromptSection
-            technicalPrompt={technicalPrompt}
-            vibePrompt={vibePrompt}
+            prompt={fixEverythingPrompt}
             isPro={isPro}
+            isReady={isFinalReport}
           />
         </section>
-        ) : (
-          <section className="rounded-xl border border-white/[0.06] bg-[#121214] px-4 py-3 print:hidden">
-            <p className="text-sm text-[#F1F0EE]">Fix prompt is not ready yet</p>
-            <p className="text-xs text-[#8B8A85] mt-1">
-              Lighthouse and AI enrichment are still running. The final prompt appears when the report is complete.
-            </p>
-          </section>
-        )}
 
         {/* All issues */}
         {activeIssues.length > 0 && (
@@ -864,7 +835,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
             <h2 className="text-sm font-medium text-[#F1F0EE] mb-4">Issues to fix</h2>
             <div className="space-y-2">
               {activeIssues.map(issue => (
-                <IssueCard key={issue.id} issue={issue} isPro={isPro} />
+                <IssueCard key={issue.id} issue={issue} isPro={isPro} promptsReady={isFinalReport} />
               ))}
             </div>
           </section>
@@ -888,7 +859,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
             {passedOpen && passedIssues.length > 0 && (
               <div className="mt-3 space-y-2">
                 {passedIssues.map(issue => (
-                  <IssueCard key={issue.id} issue={issue} isPro={isPro} />
+                  <IssueCard key={issue.id} issue={issue} isPro={isPro} promptsReady={isFinalReport} />
                 ))}
               </div>
             )}

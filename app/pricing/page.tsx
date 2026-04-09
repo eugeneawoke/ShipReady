@@ -1,5 +1,5 @@
-import Link from 'next/link'
 import { getUserWithPlan } from '@/lib/auth'
+import { SiteHeader } from '@/components/SiteHeader'
 
 export default async function PricingPage() {
   const user = await getUserWithPlan()
@@ -19,7 +19,7 @@ export default async function PricingPage() {
       name: 'Pro',
       price: '$14',
       period: '/mo',
-      features: ['Unlimited scans', 'AI fix prompts (Cursor + Bolt)', 'PDF export', 'Weekly monitoring'],
+      features: ['Unlimited scans', 'AI fix prompts for vibe-coding tools', 'PDF export', 'Weekly monitoring'],
       cta: 'Request beta access',
       href: betaAccessHref,
       highlight: true,
@@ -37,17 +37,12 @@ export default async function PricingPage() {
 
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE] px-6 py-24">
-      {/* Nav */}
-      <nav className="fixed top-0 inset-x-0 z-50 border-b border-white/6 bg-[#0E0E0F]/80 backdrop-blur-sm">
-        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center">
-          <Link href="/" className="font-semibold tracking-tight hover:text-[#8B8A85] transition-colors">ShipReady</Link>
-        </div>
-      </nav>
+      <SiteHeader sticky />
 
       <div className="max-w-3xl mx-auto pt-10">
         <div className="text-center mb-12">
           <h1 className="text-3xl font-medium">Simple, transparent pricing</h1>
-          <p className="mt-3 text-[#8B8A85]">Start free. Upgrade when you need the fix prompts.</p>
+          <p className="mt-3 text-[#8B8A85]">Start free. Upgrade when you need the full fix prompts.</p>
           {user?.plan && user.plan !== 'free' && (
             <p className="mt-2 text-sm text-[#3DDC84]">
               You are on the {user.plan.charAt(0).toUpperCase() + user.plan.slice(1)} plan

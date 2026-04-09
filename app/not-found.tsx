@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { SiteHeader } from '@/components/SiteHeader'
 
 export const metadata: Metadata = {
   title: '404 — ShipReady',
@@ -55,14 +56,9 @@ export default function NotFound() {
           404
         </div>
 
-        {/* Nav */}
-        <nav className="absolute top-0 inset-x-0 border-b border-white/[0.06] bg-[#0E0E0F]/80 backdrop-blur-md">
-          <div className="max-w-6xl mx-auto px-6 h-14 flex items-center">
-            <Link href="/" className="text-sm font-semibold tracking-tight hover:text-[#8B8A85] transition-colors">
-              ShipReady
-            </Link>
-          </div>
-        </nav>
+        <div className="absolute top-0 inset-x-0">
+          <SiteHeader />
+        </div>
 
         {/* Content */}
         <div className="relative z-10 flex flex-col items-center text-center px-6 gap-6">

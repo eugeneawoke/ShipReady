@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { SiteHeader } from '@/components/SiteHeader'
 
 // Lazy singleton — only created on first user action, not at module load time
 let _supabase: ReturnType<typeof createBrowserClient> | null = null
@@ -151,15 +152,8 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE] flex flex-col">
-      {/* Nav */}
-      <nav className="border-b border-white/[0.06] bg-[#0E0E0F]/80 backdrop-blur-md">
-        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
-          <Link href="/" className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors flex items-center gap-1.5">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 12H5M12 5l-7 7 7 7"/>
-            </svg>
-            ShipReady
-          </Link>
+      <SiteHeader
+        right={(
           <div className="text-[11px] text-[#5A5955] font-mono">
             {mode === 'signin' ? (
               <span>No account? <button onClick={() => switchMode('signup')} className="text-[#6E56CF] hover:underline">Sign up</button></span>
@@ -169,8 +163,8 @@ export default function LoginPage() {
               <button onClick={() => switchMode('signin')} className="text-[#6E56CF] hover:underline">Back to sign in</button>
             )}
           </div>
-        </div>
-      </nav>
+        )}
+      />
 
       {/* Form */}
       <div className="flex-1 flex items-center justify-center px-6 py-16">

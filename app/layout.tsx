@@ -25,8 +25,8 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: 'ShipReady — Pre-deploy quality gate for vibe-coded apps',
-  description: '40+ automated checks across performance, SEO, security, mobile, and AI visibility. Get evidence-based fix prompts for Cursor and Bolt.',
-  keywords: ['web quality', 'lighthouse', 'SEO checker', 'security audit', 'vibe coding', 'cursor', 'bolt'],
+  description: '40+ automated checks across performance, SEO, security, mobile, and AI visibility. Get evidence-based fix prompts for vibe-coding tools.',
+  keywords: ['web quality', 'lighthouse', 'SEO checker', 'security audit', 'vibe coding', 'cursor', 'windsurf', 'bolt', 'lovable', 'v0', 'replit'],
   openGraph: {
     title: 'ShipReady',
     description: 'Pre-deploy quality gate for vibe-coded apps',

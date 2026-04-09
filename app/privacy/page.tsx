@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { BackButton } from '@/components/BackButton'
+import { SiteHeader } from '@/components/SiteHeader'
 
 export const metadata: Metadata = {
   title: 'Privacy Policy — ShipReady',
@@ -13,13 +13,10 @@ const EMAIL   = 'hi@shipready.app'
 export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE]">
-      {/* nav */}
-      <nav className="border-b border-white/[0.06] bg-[#0E0E0F]/80 backdrop-blur-md">
-        <div className="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between">
-          <BackButton />
-          <span className="text-xs text-[#5A5955]">Last updated: {UPDATED}</span>
-        </div>
-      </nav>
+      <SiteHeader
+        maxWidthClassName="max-w-4xl"
+        right={<span className="text-xs text-[#5A5955]">Last updated: {UPDATED}</span>}
+      />
 
       <main className="max-w-3xl mx-auto px-6 py-16">
         <h1 className="text-3xl font-medium mb-2">Privacy Policy</h1>

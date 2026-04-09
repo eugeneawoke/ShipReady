@@ -180,7 +180,7 @@
 .category-card:nth-child(3) { animation-delay: 160ms; }
 .category-card:nth-child(4) { animation-delay: 240ms; }
 
-/* "Fix with AI" shimmer — triggered on parent card hover, runs once */
+/* Prompt label shimmer — triggered on parent card hover, runs once */
 .fix-ai-text {
   color: #5A5955;
   display: inline-block;
@@ -198,6 +198,15 @@
 @keyframes fix-ai-shimmer {
   from { background-position: 100% center; }
   to   { background-position: 0%   center; }
+}
+
+@keyframes jumping-dot {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.38; }
+  30% { transform: translateY(-5px); opacity: 1; }
+}
+
+.jumping-dot {
+  animation: jumping-dot 0.72s ease-in-out infinite;
 }
 
 /* Issue card prompt expand */

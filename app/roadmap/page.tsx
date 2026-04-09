@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { CheckCircle2, Circle, Clock } from 'lucide-react'
+import { SiteHeader } from '@/components/SiteHeader'
 
 export const metadata: Metadata = {
   title: 'Roadmap — ShipReady',
@@ -136,12 +137,9 @@ const STATUS_META: Record<PhaseStatus, { label: string; color: string; Icon: typ
 export default function RoadmapPage() {
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE]">
-      {/* nav */}
-      <nav className="border-b border-white/[0.06] bg-[#0E0E0F]/80 backdrop-blur-md">
-        <div className="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between">
-          <Link href="/" className="font-semibold tracking-tight hover:text-[#8B8A85] transition-colors">
-            ← ShipReady
-          </Link>
+      <SiteHeader
+        maxWidthClassName="max-w-4xl"
+        right={(
           <div className="flex items-center gap-4 text-xs text-[#5A5955]">
             {(['done', 'in-progress', 'planned'] as PhaseStatus[]).map(s => {
               const { label, color, Icon } = STATUS_META[s]
@@ -153,8 +151,8 @@ export default function RoadmapPage() {
               )
             })}
           </div>
-        </div>
-      </nav>
+        )}
+      />
 
       <main className="max-w-3xl mx-auto px-6 py-16">
         <div className="mb-14">

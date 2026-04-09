@@ -1,12 +1,12 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { getUserWithPlan } from '@/lib/auth'
 import { SignOutButton } from '@/components/auth/SignOutButton'
 import { ScanForm } from '@/components/landing/ScanForm'
 import { MonitoringToggle } from '@/components/dashboard/MonitoringToggle'
 import { domainFromUrl } from '@/lib/monitoring/domains'
+import { SiteHeader } from '@/components/SiteHeader'
 
 export default async function DashboardPage() {
   const user = await getUserWithPlan()
@@ -38,20 +38,17 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE]">
-      {/* Nav */}
-      <nav className="border-b border-white/[0.06] bg-[#0E0E0F]/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-1.5 text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors">
-            <ArrowLeft className="w-4 h-4" />
-            ShipReady
-          </Link>
-          <div className="flex items-center gap-4">
+      <SiteHeader
+        sticky
+        maxWidthClassName="max-w-4xl"
+        right={(
+          <>
             <span className={`text-xs font-mono ${planColor}`}>{planLabel}</span>
             <span className="text-xs text-[#5A5955] hidden sm:block">{user.email}</span>
             <SignOutButton />
-          </div>
-        </div>
-      </nav>
+          </>
+        )}
+      />
 
       <div className="max-w-4xl mx-auto px-6 py-12">
         {/* Header */}

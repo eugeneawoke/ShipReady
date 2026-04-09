@@ -62,8 +62,8 @@ Return EXACTLY this JSON shape:
 {
   "summary": "1-2 sentence summary. Mention if some measurements were unavailable.",
   "topPriorities": ["priority 1", "priority 2", "priority 3"],
-  "technicalPrompt": "One concise prompt for code-aware tools. Use only existing findings.",
-  "vibePrompt": "One concise prompt for no-code builders. Use only existing findings.",
+  "technicalPrompt": "One concise prompt for AI coding tools working in the existing codebase. Optimize for vibe-coding platforms too. Use only existing findings.",
+  "vibePrompt": "One concise primary prompt for Cursor, Windsurf, Bolt, Lovable, v0, Replit, and similar vibe-coding tools. Use only existing findings.",
   "issuePrompts": {
     ${issueIds.map(id => `"${id}": { "technical": "...", "vibe": "..." }`).join(',\n    ')}
   }
@@ -74,7 +74,11 @@ Rules:
 - Never claim a fact that is not present in the findings/evidence
 - If confidence is likely or heuristic, avoid overstating certainty
 - Keep prompts actionable and concise
-- For each prompt, prefer 4-7 short bullets over long prose`,
+- Do not mention ShipReady, audit labels, internal tooling, or any product names except the supported vibe-coding tools above
+- Assume the AI can edit the existing codebase directly
+- Start each global prompt with the goal, then list only the concrete issues to fix, then the expected verification
+- Prefer 4-7 short bullets over long prose
+- For each issue prompt, write one strong recommended fix with enough technical detail to be useful in a vibe-coding tool. No tabs, no alternatives.`,
       },
     ],
   })

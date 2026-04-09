@@ -1,7 +1,5 @@
 'use client'
 
-import Image from 'next/image'
-import Link from 'next/link'
 import { useState, useRef, useEffect } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { motion } from 'framer-motion'
@@ -16,6 +14,7 @@ import { Meteors } from '@/components/ui/meteors'
 import { FlickeringGrid } from '@/components/ui/flickering-grid'
 import { SpotlightCard } from '@/components/ui/spotlight-card'
 import { CinematicFooter } from '@/components/ui/motion-footer'
+import { SiteBrandLink } from '@/components/SiteHeader'
 
 // ─── smooth scroll ────────────────────────────────────────────────────────────
 
@@ -117,7 +116,7 @@ const T = {
     hero: {
       h1a: 'Your vibe-coded app,',
       h1b: 'ship-ready with truthful checks',
-      sub: 'Paste your URL. Get a full audit across performance, SEO, security, mobile, and AI visibility, with evidence-based fix prompts for Cursor and Bolt.',
+      sub: 'Paste your URL. Get a full audit across performance, SEO, security, mobile, and AI visibility, with evidence-based fix prompts for vibe-coding tools.',
       noSignup: 'No signup required for first scan',
       worksWith: 'Works with',
     },
@@ -133,7 +132,7 @@ const T = {
       steps: [
         { step: '01', emoji: '🔗', title: 'Paste your URL',       desc: 'Drop any live URL — Vercel, Netlify, custom domain. No setup or browser extension needed.' },
         { step: '02', emoji: '⚙️', title: '40+ checks run',       desc: 'Fast truth checks run first, then deeper analysis follows for performance and noisier heuristics.' },
-        { step: '03', emoji: '✨', title: 'Get AI fix prompts',   desc: 'Each issue has a plain-English explanation and a ready-to-paste prompt for Cursor or Bolt.' },
+        { step: '03', emoji: '✨', title: 'Get AI fix prompts',   desc: 'Each issue has a plain-English explanation and one ready-to-paste prompt for your vibe-coding tool.' },
       ],
     },
     preview: {
@@ -148,8 +147,8 @@ const T = {
       severity: 'Critical',
       issueTitle: 'Content Security Policy header missing',
       issueDesc: 'Without CSP, your app is open to XSS attacks. An attacker can inject scripts that steal session tokens or user data.',
-      fixCursor: 'Fix with Cursor ↗',
-      fixBolt: 'Fix with Bolt ↗',
+      recommendedFix: 'Recommended fix',
+      copyPrompt: 'Copy prompt',
       prompt: "Add Content-Security-Policy to next.config.ts:\nheaders: [{ key: 'Content-Security-Policy',\n  value: \"default-src 'self'; script-src 'self'\" }]\nThis fixes the critical security issue immediately.",
     },
     features: {
@@ -167,17 +166,17 @@ const T = {
     ai: {
       eyebrow: 'The key difference',
       title: "Not just \"what's wrong\" —\nbut how to fix it",
-      sub: "Every issue comes with a plain-English explanation and a ready-to-paste prompt. Copy it into Cursor or Bolt — it fixes the problem automatically.",
+      sub: "Every issue comes with a plain-English explanation and a ready-to-paste prompt. Paste it into your vibe-coding tool and fix the problem directly in the codebase.",
       bullets: [
         'One prompt per issue — no Stack Overflow hunting',
         'Tailored for Next.js, React, and vibe-coded apps',
-        'Works with Cursor, Bolt, Lovable, v0, Windsurf',
+        'Works with Cursor, Windsurf, Bolt, Lovable, v0, Replit, etc.',
       ],
-      fileLabel: 'cursor_prompt.txt',
+      fileLabel: 'fix_prompt.txt',
       ready: 'ready to paste',
       copyBtn: 'Copy prompt',
       copiedBtn: 'Copied!',
-      pasteHint: '→ paste into Cursor chat',
+      pasteHint: '→ paste into your builder chat',
       promptText: "Fix the missing Content-Security-Policy header\nin my Next.js app.\n\nStart with Content-Security-Policy-Report-Only:\n{\n  key: 'Content-Security-Policy-Report-Only',\n  value: [\n    \"default-src 'self'\",\n    \"script-src 'self'\",\n    \"object-src 'none'\",\n    \"base-uri 'self'\",\n    \"frame-ancestors 'none'\",\n  ].join('; ')\n}\n\nCheck production reports, add nonces or SRI,\nthen switch to enforcing CSP.",
     },
     pricing: {
@@ -226,7 +225,7 @@ const T = {
     hero: {
       h1a: 'Ваше vibe-coded приложение,',
       h1b: 'готово к деплою с честной проверкой',
-      sub: 'Вставьте URL и получите полный аудит по производительности, SEO, безопасности, мобильности и видимости для ИИ — с evidence-based AI-промптами для Cursor и Bolt.',
+      sub: 'Вставьте URL и получите полный аудит по производительности, SEO, безопасности, мобильности и видимости для ИИ — с evidence-based AI-промптами для vibe-coding инструментов.',
       noSignup: 'Первый скан без регистрации',
       worksWith: 'Работает с',
     },
@@ -242,7 +241,7 @@ const T = {
       steps: [
         { step: '01', emoji: '🔗', title: 'Вставьте URL',          desc: 'Любой живой URL — Vercel, Netlify, свой домен. Без настройки и расширений.' },
         { step: '02', emoji: '⚙️', title: 'Запускаем 40+ проверок', desc: 'Lighthouse, SEO-мета, заголовки безопасности, SSL, мобильный вьюпорт, видимость для ИИ — параллельно за 30 секунд.' },
-        { step: '03', emoji: '✨', title: 'Получаете AI-промпты',   desc: 'К каждой проблеме — понятное объяснение и готовый промпт для Cursor или Bolt.' },
+        { step: '03', emoji: '✨', title: 'Получаете AI-промпты',   desc: 'К каждой проблеме — понятное объяснение и один готовый промпт для вашего vibe-coding инструмента.' },
       ],
     },
     preview: {
@@ -257,8 +256,8 @@ const T = {
       severity: 'Критично',
       issueTitle: 'Отсутствует заголовок Content Security Policy',
       issueDesc: 'Без CSP ваше приложение уязвимо для XSS-атак. Злоумышленник может внедрить скрипты, которые украдут токены сессий или данные пользователей.',
-      fixCursor: 'Исправить в Cursor ↗',
-      fixBolt: 'Исправить в Bolt ↗',
+      recommendedFix: 'Recommended fix',
+      copyPrompt: 'Скопировать промпт',
       prompt: "Добавьте Content-Security-Policy в next.config.ts:\nheaders: [{ key: 'Content-Security-Policy',\n  value: \"default-src 'self'; script-src 'self'\" }]\nЭто исправит критическую проблему безопасности.",
     },
     features: {
@@ -276,17 +275,17 @@ const T = {
     ai: {
       eyebrow: 'Ключевое отличие',
       title: 'Не просто «что не так» —\nно как исправить',
-      sub: 'К каждой проблеме — понятное объяснение и готовый промпт. Вставьте в Cursor или Bolt — исправится автоматически.',
+      sub: 'К каждой проблеме — понятное объяснение и готовый промпт. Вставьте его в свой vibe-coding инструмент и внесите исправления прямо в код.',
       bullets: [
         'Один промпт на проблему — без Stack Overflow',
         'Адаптировано для Next.js, React и vibe-coded приложений',
-        'Работает с Cursor, Bolt, Lovable, v0, Windsurf',
+        'Работает с Cursor, Windsurf, Bolt, Lovable, v0, Replit и другими',
       ],
-      fileLabel: 'cursor_prompt.txt',
+      fileLabel: 'fix_prompt.txt',
       ready: 'готов к вставке',
       copyBtn: 'Скопировать промпт',
       copiedBtn: 'Скопировано!',
-      pasteHint: '→ вставьте в чат Cursor',
+      pasteHint: '→ вставьте в чат вашего инструмента',
       promptText: "Исправьте отсутствующий заголовок Content-Security-Policy\nв вашем Next.js приложении.\n\nНачните с Content-Security-Policy-Report-Only:\n{\n  key: 'Content-Security-Policy-Report-Only',\n  value: [\n    \"default-src 'self'\",\n    \"script-src 'self'\",\n    \"object-src 'none'\",\n    \"base-uri 'self'\",\n    \"frame-ancestors 'none'\",\n  ].join('; ')\n}\n\nПроверьте production-отчеты, добавьте nonces\nили SRI, затем включите enforcing CSP.",
     },
     pricing: {
@@ -333,7 +332,7 @@ type Translations = {
   stats: readonly { value: string; label: string }[]
   how: { eyebrow: string; title: string; steps: readonly { step: string; emoji: string; title: string; desc: string }[] }
   preview: { eyebrow: string; title: string; sub: string; upgradeBtn: string }
-  demo: { score: string; grade: string; severity: string; issueTitle: string; issueDesc: string; fixCursor: string; fixBolt: string; prompt: string }
+  demo: { score: string; grade: string; severity: string; issueTitle: string; issueDesc: string; recommendedFix: string; copyPrompt: string; prompt: string }
   features: { eyebrow: string; title: string; sub: string; items: readonly { title: string; desc: string; checks: readonly string[] }[] }
   ai: { eyebrow: string; title: string; sub: string; bullets: readonly string[]; fileLabel: string; ready: string; copyBtn: string; copiedBtn: string; pasteHint: string; promptText: string }
   pricing: { eyebrow: string; title: string; sub: string; popular: string; cancelAnytime: string; comingSoon: string; plans: readonly { name: string; nameKey: string; price: string; period: string | null; desc: string; features: readonly string[]; cta: string; highlight: boolean; coming: boolean }[] }
@@ -418,10 +417,7 @@ function Nav({ t, lang, setLang }: { t: Translations; lang: Lang; setLang: (l: L
       <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
         {/* left */}
         <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight cursor-pointer hover:opacity-80 transition-opacity" style={{ fontFamily: 'var(--font-syne)' }}>
-              <Image src="/logo.svg" alt="ShipReady logo" width={28} height={28} className="w-7 h-7 flex-shrink-0" />
-              ShipReady
-            </Link>
+          <SiteBrandLink />
           <div className="hidden md:flex items-center gap-6">
             <button
               onClick={() => smoothScrollTo('#how-it-works')}
@@ -539,7 +535,7 @@ function HeroSection({ t }: { t: Translations }) {
 
         <div className="hero-4 mt-8 flex flex-wrap items-center justify-center gap-2">
           <span className="text-xs text-[#5A5955] mr-1">{t.hero.worksWith}</span>
-          {['Cursor', 'Bolt', 'Lovable', 'v0', 'Replit', 'Windsurf', 'Claude', 'OpenAI'].map(p => (
+          {['Cursor', 'Windsurf', 'Bolt', 'Lovable', 'v0', 'Replit', 'etc.'].map(p => (
             <div key={p} className="works-chip">
               <span className="works-chip-inner">{p}</span>
             </div>
@@ -719,8 +715,8 @@ function ReportPreviewSection({ t }: { t: Translations }) {
               <div className="px-4 py-4">
                 <p className="text-sm text-[#8B8A85] mb-4 leading-relaxed">{t.demo.issueDesc}</p>
                 <div className="flex gap-2 mb-4">
-                  <button className="text-xs px-3 py-1.5 rounded-lg bg-[#6E56CF] text-white hover:bg-[#7C68D4] transition-colors">{t.demo.fixCursor}</button>
-                  <button className="text-xs px-3 py-1.5 rounded-lg bg-[#1E1E21] border border-white/[0.08] text-[#8B8A85] hover:bg-[#232328] transition-colors">{t.demo.fixBolt}</button>
+                  <button className="text-xs px-3 py-1.5 rounded-lg bg-[#6E56CF] text-white hover:bg-[#7C68D4] transition-colors">{t.demo.recommendedFix}</button>
+                  <button className="text-xs px-3 py-1.5 rounded-lg bg-[#1E1E21] border border-white/[0.08] text-[#8B8A85] hover:bg-[#232328] transition-colors">{t.demo.copyPrompt}</button>
                 </div>
                 <div className="relative rounded-lg bg-[#0E0E0F] border border-white/[0.06] overflow-hidden">
                   <div className="px-4 py-3">

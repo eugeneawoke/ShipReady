@@ -29,20 +29,18 @@ const CONFIDENCE_LABELS: Record<string, string> = {
 interface IssueCardProps {
   issue: Issue
   isPro: boolean
+  promptsReady?: boolean
 }
 
-export function IssueCard({ issue, isPro }: IssueCardProps) {
+export function IssueCard({ issue, isPro, promptsReady = true }: IssueCardProps) {
   const [promptOpen, setPromptOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState<'technical' | 'vibe'>('technical')
   const [copied, setCopied] = useState(false)
 
   const color = SEVERITY_COLORS[issue.severity] || '#8B8A85'
   const bg = SEVERITY_BG[issue.severity] || 'transparent'
 
   const hasPrompts = !!(issue.cursorPrompt || issue.boltPrompt) && issue.severity !== 'pass'
-  const currentPrompt = activeTab === 'technical'
-    ? (issue.cursorPrompt || issue.boltPrompt || '')
-    : (issue.boltPrompt || issue.cursorPrompt || '')
+  const currentPrompt = issue.boltPrompt || issue.cursorPrompt || ''
 
   function copy() {
     if (!currentPrompt) return
@@ -105,14 +103,14 @@ export function IssueCard({ issue, isPro }: IssueCardProps) {
         </a>
       )}
 
-      {/* Fix with AI — collapsible */}
-      {hasPrompts && (
+      {/* Recommended fix — collapsible */}
+      {hasPrompts && promptsReady && (
         <div className="print:hidden">
           <button
             onClick={() => setPromptOpen(o => !o)}
             className="flex items-center gap-1 cursor-pointer mt-1"
           >
-            <span className="fix-ai-text text-xs">Fix with AI</span>
+            <span className="fix-ai-text text-xs">Recommended fix</span>
             <ChevronDown
               className="w-3 h-3 text-[#5A5955] group-hover:text-[#6E56CF] transition-colors duration-500 transition-transform duration-200"
               style={{ transform: promptOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
@@ -121,25 +119,6 @@ export function IssueCard({ issue, isPro }: IssueCardProps) {
 
           <div className={`issue-prompts ${promptOpen ? 'open' : ''}`}>
             <div className="pt-3 space-y-2">
-              {/* Tabs */}
-              <div className="flex border-b border-white/6">
-                {(['technical', 'vibe'] as const).map(tab => (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
-                    className={`px-2.5 py-1.5 text-[11px] transition-colors relative cursor-pointer ${
-                      activeTab === tab ? 'text-[#F1F0EE]' : 'text-[#5A5955] hover:text-[#8B8A85]'
-                    }`}
-                  >
-                    {tab === 'technical' ? 'Technical (Cursor / Claude)' : 'Vibe (Bolt / Lovable)'}
-                    {activeTab === tab && (
-                      <span className="absolute bottom-0 left-0 right-0 h-[1px] bg-[#6E56CF]" />
-                    )}
-                  </button>
-                ))}
-              </div>
-
-              {/* Prompt content */}
               {isPro ? (
                 <div>
                   <pre className="text-xs text-[#E8C77D] bg-[#1E1E21] rounded-lg p-3 overflow-x-auto whitespace-pre-wrap leading-relaxed font-mono max-h-44">
@@ -178,6 +157,12 @@ export function IssueCard({ issue, isPro }: IssueCardProps) {
               )}
             </div>
           </div>
+        </div>
+      )}
+
+      {hasPrompts && !promptsReady && (
+        <div className="print:hidden pt-1">
+          <span className="text-xs text-[#5A5955]">Recommended fix is being prepared...</span>
         </div>
       )}
     </div>
