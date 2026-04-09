@@ -20,8 +20,22 @@ interface LighthouseOptions {
 }
 
 const DEFAULT_LIGHTHOUSE_TIMEOUT_MS = 240_000
+const LIGHTHOUSE_QUEUE_KEY = Symbol.for('shipready.lighthouseQueue')
 
-let lighthouseQueue = Promise.resolve()
+type GlobalWithLighthouseQueue = typeof globalThis & {
+  [LIGHTHOUSE_QUEUE_KEY]?: Promise<void>
+}
+
+function getLighthouseQueue(): Promise<void> {
+  const globalState = globalThis as GlobalWithLighthouseQueue
+  globalState[LIGHTHOUSE_QUEUE_KEY] ??= Promise.resolve()
+  return globalState[LIGHTHOUSE_QUEUE_KEY]
+}
+
+function setLighthouseQueue(queue: Promise<void>) {
+  const globalState = globalThis as GlobalWithLighthouseQueue
+  globalState[LIGHTHOUSE_QUEUE_KEY] = queue
+}
 
 function scannerBuildId(): string {
   return (
@@ -40,12 +54,12 @@ function isStartupProtocolTimeout(error: unknown): boolean {
 
 async function withLighthouseSlot<T>(task: () => Promise<T>): Promise<T> {
   const queuedAt = Date.now()
-  const previous = lighthouseQueue.catch(() => undefined)
+  const previous = getLighthouseQueue().catch(() => undefined)
   let releaseSlot!: () => void
 
-  lighthouseQueue = new Promise<void>((resolve) => {
+  setLighthouseQueue(new Promise<void>((resolve) => {
     releaseSlot = resolve
-  })
+  }))
 
   await previous
   const waitMs = Date.now() - queuedAt
@@ -149,6 +163,7 @@ async function runLighthouseNow(url: string, options: LighthouseOptions = {}, at
 
   let timeout: ReturnType<typeof setTimeout> | undefined
   let timedOut = false
+  let forceKillBrowser = false
 
   try {
     const lighthouseRun = lighthouse(url, {
@@ -189,8 +204,11 @@ async function runLighthouseNow(url: string, options: LighthouseOptions = {}, at
     )
 
     return metrics
+  } catch (error) {
+    forceKillBrowser = timedOut || isStartupProtocolTimeout(error)
+    throw error
   } finally {
     if (timeout) clearTimeout(timeout)
-    await closeBrowser(browser, timedOut)
+    await closeBrowser(browser, forceKillBrowser)
   }
 }
