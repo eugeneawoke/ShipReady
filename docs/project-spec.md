@@ -27,6 +27,7 @@ Practical interpretation: ShipReady is close enough to show to first beta users,
 
 - URL scan from landing page.
 - Report page with partial/progressive scan states.
+- Report page actions for rescan of the current URL and starting a new URL scan.
 - Five categories:
   - Performance
   - SEO

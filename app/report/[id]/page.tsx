@@ -2,11 +2,12 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { ChevronDown, Share2, Check, Copy, Lock, ArrowLeft, FileDown, Loader2 } from 'lucide-react'
+import { ChevronDown, Share2, Check, Copy, Lock, ArrowLeft, FileDown, Loader2, Plus, RefreshCw } from 'lucide-react'
 import { ReportSkeleton } from '@/components/report/ReportSkeleton'
 import { ScoreRing } from '@/components/report/ScoreRing'
 import { CategoryCard } from '@/components/report/CategoryCard'
 import { IssueCard } from '@/components/report/IssueCard'
+import { ScanForm, useScanLauncher } from '@/components/landing/ScanForm'
 import type { Scan, Issue, IssueCategory, ScanResult, ScanStatus } from '@/types/scan'
 import { createBrowserClient } from '@/lib/supabase-browser'
 
@@ -322,6 +323,13 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
   const [loadFailed, setLoadFailed] = useState(false)
   const [pdfState, setPdfState] = useState<'idle' | 'preparing' | 'downloading'>('idle')
   const [pdfError, setPdfError] = useState<string | null>(null)
+  const [newScanOpen, setNewScanOpen] = useState(false)
+  const {
+    loading: rescanLoading,
+    error: rescanError,
+    launchScan: launchRescan,
+    scanOverlay: rescanOverlay,
+  } = useScanLauncher()
 
   useEffect(() => {
     params.then(p => setId(p.id))
@@ -467,6 +475,11 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
     setTimeout(() => setShareLabel('Share'), 2000)
   }
 
+  async function handleRescan() {
+    if (rescanLoading || isScanActive) return
+    await launchRescan(results.url)
+  }
+
   function filenameFromDisposition(header: string | null, fallback: string) {
     if (!header) return fallback
     const utf8Match = header.match(/filename\*=UTF-8''([^;]+)/i)
@@ -540,6 +553,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
       className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE] transition-opacity duration-500"
       style={{ opacity: reportVisible ? 1 : 0 }}
     >
+      {rescanOverlay}
       {/* Nav */}
       <header className="sticky top-0 z-10 bg-[#0E0E0F]/90 backdrop-blur-md border-b border-white/6">
         <div className="max-w-3xl mx-auto px-4 h-14 flex items-center gap-3">
@@ -562,6 +576,37 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
           )}
           <span className="text-[#5A5955] text-sm">/</span>
           <span className="text-sm text-[#8B8A85] font-mono truncate flex-1">{domain}</span>
+          <button
+            type="button"
+            onClick={() => setNewScanOpen(open => !open)}
+            aria-expanded={newScanOpen}
+            className={`relative flex items-center gap-1.5 text-xs border px-3 py-1.5 rounded-lg transition-all shrink-0 cursor-pointer print:hidden ${
+              newScanOpen
+                ? 'text-[#F1F0EE] bg-[#1A1625] border-[#6E56CF]/35'
+                : 'text-[#8B8A85] hover:text-[#F1F0EE] bg-[#161618] border-white/6'
+            }`}
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">New scan</span>
+          </button>
+          <button
+            type="button"
+            onClick={handleRescan}
+            disabled={rescanLoading || isScanActive}
+            aria-busy={rescanLoading}
+            className={`relative flex items-center gap-1.5 text-xs border px-3 py-1.5 rounded-lg transition-all shrink-0 print:hidden ${
+              rescanLoading || isScanActive
+                ? 'cursor-not-allowed border-white/6 bg-[#161618] text-[#5A5955]'
+                : 'cursor-pointer border-white/6 bg-[#161618] text-[#8B8A85] hover:text-[#F1F0EE]'
+            }`}
+          >
+            {rescanLoading ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <RefreshCw className="w-3.5 h-3.5" />
+            )}
+            <span className="hidden sm:inline">{rescanLoading ? 'Scanning' : 'Rescan'}</span>
+          </button>
           {isPro && (
             <button
               type="button"
@@ -618,9 +663,22 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
             </span>
           </button>
         </div>
+        {newScanOpen && (
+          <div className="border-t border-white/6 bg-[#0E0E0F]/95 px-4 py-3 print:hidden">
+            <div className="max-w-3xl mx-auto">
+              <ScanForm compact autoFocus submitLabel="Scan" />
+            </div>
+          </div>
+        )}
       </header>
 
       <main className="max-w-3xl mx-auto px-4 py-10 space-y-10">
+        {rescanError && (
+          <section className="rounded-xl border border-[#FF4444]/20 bg-[#FF4444]/5 px-4 py-3">
+            <p className="text-sm text-[#FF8A8A]">Could not start rescan</p>
+            <p className="text-xs text-[#8B8A85] mt-1">{rescanError.msg}</p>
+          </section>
+        )}
         <ScanProgressPanel scan={scan} results={results} processingIssue={processingIssue} />
 
         {/* Score + Summary */}
