@@ -11,6 +11,8 @@ import {
 
 const ACTIVE_SCAN_STATUSES = ['pending', 'running', 'running_fast', 'running_deep', 'enriching']
 
+export const runtime = 'nodejs'
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

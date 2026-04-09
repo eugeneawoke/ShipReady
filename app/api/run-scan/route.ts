@@ -4,6 +4,7 @@ import { isValidUrl } from '@/lib/utils'
 // This endpoint is deployed on Railway only.
 // Vercel calls it to offload heavy Lighthouse scans.
 export const maxDuration = 300
+export const runtime = 'nodejs'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 

@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation'
 import { ReportSkeleton } from '@/components/report/ReportSkeleton'
 import type { Scan, ScanStatus } from '@/types/scan'
 
-const MIN_SCAN_SCREEN_MS = 8000
-const MAX_SCAN_SCREEN_MS = 60_000
+const MIN_SCAN_SCREEN_MS = 18_000
+const DRAFT_REPORT_AFTER_MS = 35_000
+const MAX_SCAN_SCREEN_MS = 90_000
 const POLL_INTERVAL_MS = 1500
 
 function sleep(ms: number) {
@@ -56,7 +57,9 @@ export function ScanScreen({ id }: { id: string }) {
           setStatus(data.status)
           setProcessingIssue(data.processingIssue ?? data.results?.processingIssue)
 
-          if (data.results || data.status === 'done' || data.status === 'error') {
+          const hasDeepResult = data.results?.phase && data.results.phase !== 'fast'
+          const canShowDraftReport = Boolean(data.results) && elapsedMs() >= DRAFT_REPORT_AFTER_MS
+          if (data.status === 'done' || data.status === 'error' || hasDeepResult || canShowDraftReport) {
             await openReport()
             return
           }

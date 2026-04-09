@@ -114,7 +114,7 @@ export function CategoryCard({ category, data }: CategoryCardProps) {
     unavailable: 'Unavailable',
   }
 
-  const failedIds = new Set(data.issues.map(i => i.id))
+  const failedIds = new Set(data.issues.filter(issue => issue.severity !== 'pass').map(i => i.id))
   const passedChecks = ALL_CHECKS[category].filter(c => !failedIds.has(c.id))
 
   function scrollToIssue(issueId: string) {
@@ -211,36 +211,34 @@ export function CategoryCard({ category, data }: CategoryCardProps) {
                   )}
                 </button>
               ))}
-
-              {/* Passed checks — collapsed by default */}
-              {data.measurement?.status === 'measured' && passedChecks.length > 0 && (
-                <div className="border-t border-white/[0.04]">
-                  <button
-                    onClick={() => setPassedOpen(o => !o)}
-                    className="w-full flex items-center gap-2 px-4 py-2.5 hover:bg-white/[0.02] transition-colors cursor-pointer"
-                  >
-                    <span className="text-[#3DDC84] text-[11px]">✓</span>
-                    <span className="text-xs text-[#5A5955] flex-1 text-left">
-                      {passedChecks.length} checks passed
-                    </span>
-                    <ChevronDown
-                      className="w-3 h-3 text-[#5A5955] transition-transform duration-200"
-                      style={{ transform: passedOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                    />
-                  </button>
-                  {passedOpen && (
-                    <div className="px-4 pb-3 space-y-1.5">
-                      {passedChecks.map(check => (
-                        <div key={check.id} className="flex items-start gap-2">
-                          <span className="text-[#3DDC84] text-[10px] mt-0.5 shrink-0">✓</span>
-                          <span className="text-xs text-[#5A5955]">{check.name}</span>
-                        </div>
-                      ))}
+            </>
+          )}
+          {data.measurement?.status === 'measured' && passedChecks.length > 0 && (
+            <div className="border-t border-white/[0.04]">
+              <button
+                onClick={() => setPassedOpen(o => !o)}
+                className="w-full flex items-center gap-2 px-4 py-2.5 hover:bg-white/[0.02] transition-colors cursor-pointer"
+              >
+                <span className="text-[#3DDC84] text-[11px]">✓</span>
+                <span className="text-xs text-[#5A5955] flex-1 text-left">
+                  {passedChecks.length} checks passed
+                </span>
+                <ChevronDown
+                  className="w-3 h-3 text-[#5A5955] transition-transform duration-200"
+                  style={{ transform: passedOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                />
+              </button>
+              {passedOpen && (
+                <div className="px-4 pb-3 space-y-1.5">
+                  {passedChecks.map(check => (
+                    <div key={check.id} className="flex items-start gap-2">
+                      <span className="text-[#3DDC84] text-[10px] mt-0.5 shrink-0">✓</span>
+                      <span className="text-xs text-[#5A5955]">{check.name}</span>
                     </div>
-                  )}
+                  ))}
                 </div>
               )}
-            </>
+            </div>
           )}
         </div>
       )}

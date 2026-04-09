@@ -3,7 +3,14 @@ import { createClient, createServiceClient } from '@/lib/supabase'
 import type { ScanProcessingIssue, ScanResult, ScanStatus } from '@/types/scan'
 
 const ACTIVE_SCAN_STATUSES = ['pending', 'running', 'running_fast', 'running_deep', 'enriching']
-const STALE_SCAN_MS = 3 * 60 * 1000
+const DEFAULT_STALE_SCAN_MS = 3 * 60 * 1000
+const STALE_SCAN_MS_BY_STATUS: Record<string, number> = {
+  pending: 3 * 60 * 1000,
+  running: 3 * 60 * 1000,
+  running_fast: 3 * 60 * 1000,
+  running_deep: 8 * 60 * 1000,
+  enriching: 4 * 60 * 1000,
+}
 
 const STAGE_LABELS: Record<string, string> = {
   pending: 'queueing the scan',
@@ -15,7 +22,8 @@ const STAGE_LABELS: Record<string, string> = {
 
 function isStaleActiveScan(status: string, updatedAt: string | null): boolean {
   if (!ACTIVE_SCAN_STATUSES.includes(status) || !updatedAt) return false
-  return Date.now() - new Date(updatedAt).getTime() > STALE_SCAN_MS
+  const staleAfterMs = STALE_SCAN_MS_BY_STATUS[status] ?? DEFAULT_STALE_SCAN_MS
+  return Date.now() - new Date(updatedAt).getTime() > staleAfterMs
 }
 
 function buildProcessingIssue(status: string, staleAgeSeconds: number): ScanProcessingIssue {

@@ -159,7 +159,7 @@ function buildScanStages(scan: Scan, results: ScanResult): Array<{ title: string
   const performanceMeasurement = results.performance.measurement
   const isActive = ACTIVE_SCAN_STATUSES.includes(scan.status)
   const deepDone = results.phase === 'deep' || results.phase === 'enriching' || results.phase === 'final'
-  const aiDone = results.phase === 'enriching' || results.phase === 'final' || Boolean(results.aiSummary || results.aiTechnicalPrompt)
+  const aiDone = Boolean(results.aiSummary || results.aiTechnicalPrompt || results.aiVibePrompt)
   const performanceStillRunning = performanceMeasurement?.status === 'unavailable'
     && /still running/i.test(performanceMeasurement.message ?? '')
 
@@ -192,7 +192,9 @@ function buildScanStages(scan: Scan, results: ScanResult): Array<{ title: string
             : 'unavailable',
       detail: aiDone
         ? 'Final summary and fix prompts are available.'
-        : 'The final summary and prompts can update after deep checks finish.',
+        : isActive
+          ? 'Final summary and prompts are not ready until enrichment finishes.'
+          : 'AI enrichment did not produce a final summary for this scan.',
     },
   ]
 }
@@ -483,6 +485,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
   const deterministicPrompts = buildDeterministicFixPrompts(results, activeIssues)
   const measurementNotes = buildMeasurementNotes(results)
   const isScanActive = ACTIVE_SCAN_STATUSES.includes(scan.status)
+  const isFinalReport = scan.status === 'done'
   const hasUnavailable = hasUnavailableMeasurements(results)
   const technicalPrompt = isWeakFixPrompt(results.aiTechnicalPrompt, activeIssues, measurementNotes)
     ? deterministicPrompts.technical
@@ -753,7 +756,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
               </p>
             )}
           </div>
-          {(results.aiSummary || results.topPriorities?.length) && (
+          {isFinalReport && (results.aiSummary || results.topPriorities?.length) && (
             <div className="flex-1 pt-2">
               <p className="text-sm font-medium text-[#F1F0EE] mb-2">Summary</p>
               {results.aiSummary && (
@@ -835,16 +838,10 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
         </section>
 
         {/* Fix everything prompts — hidden in print */}
+        {isFinalReport ? (
         <section className="print:hidden">
           <div className="mb-4">
-            <h2 className="text-sm font-medium text-[#F1F0EE]">
-              {isScanActive ? 'Draft fix prompt' : 'Fix everything'}
-            </h2>
-            {isScanActive && (
-              <p className="text-xs text-[#8B8A85] mt-1">
-                Final prompts can update after Lighthouse and AI enrichment finish.
-              </p>
-            )}
+            <h2 className="text-sm font-medium text-[#F1F0EE]">Fix everything</h2>
           </div>
           <FixPromptSection
             technicalPrompt={technicalPrompt}
@@ -852,6 +849,14 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
             isPro={isPro}
           />
         </section>
+        ) : (
+          <section className="rounded-xl border border-white/[0.06] bg-[#121214] px-4 py-3 print:hidden">
+            <p className="text-sm text-[#F1F0EE]">Fix prompt is not ready yet</p>
+            <p className="text-xs text-[#8B8A85] mt-1">
+              Lighthouse and AI enrichment are still running. The final prompt appears when the report is complete.
+            </p>
+          </section>
+        )}
 
         {/* All issues */}
         {activeIssues.length > 0 && (
