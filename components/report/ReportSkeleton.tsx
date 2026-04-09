@@ -249,7 +249,7 @@ export function ReportSkeleton({ status, processingIssue }: { status: string; pr
 
         <p className="mt-6 text-[11px] text-[#5A5955] flex items-start gap-1.5">
           <span style={{ color: '#E8A83E', fontSize: 13, lineHeight: 1.4 }}>⚠</span>
-          Closing or going back will interrupt the analysis and count against your monthly limit.
+          You can leave this screen, but keep it open if you want the report to open automatically.
         </p>
       </div>
 
@@ -263,9 +263,9 @@ export function ReportSkeleton({ status, processingIssue }: { status: string; pr
             className="w-full max-w-[300px] mx-4 rounded-xl p-6 text-center"
             style={{ background: '#161618', border: '1px solid rgba(255,255,255,0.08)' }}
           >
-            <p className="text-sm font-medium text-[#F1F0EE] mb-2">Interrupt scan?</p>
+            <p className="text-sm font-medium text-[#F1F0EE] mb-2">Leave scan screen?</p>
             <p className="text-xs text-[#8B8A85] leading-relaxed mb-6">
-              This will count as one of your scans for this month, even if the results aren&apos;t ready.
+              The scan can continue in the background, but this screen will stop tracking progress.
             </p>
             <div className="flex gap-3">
               <button
@@ -284,7 +284,7 @@ export function ReportSkeleton({ status, processingIssue }: { status: string; pr
                   color: '#FF6B6B',
                 }}
               >
-                Leave anyway
+                Leave
               </button>
             </div>
           </div>
