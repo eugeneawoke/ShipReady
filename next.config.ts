@@ -31,7 +31,7 @@ const securityHeaders = [
       "style-src 'self'",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
-      "connect-src 'self' https://*.supabase.co https://*.supabase.in https://api.lemonsqueezy.com",
+      "connect-src 'self' https://*.supabase.co https://*.supabase.in",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",

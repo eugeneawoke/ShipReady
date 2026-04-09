@@ -44,7 +44,7 @@
     "getStarted": "Get started",
     "getPro": "Get Pro",
     "getAgency": "Get Agency",
-    "footer": "Payments via Lemon Squeezy · Cancel anytime · No questions asked"
+    "footer": "Paid access is handled manually during beta · Payment provider TBD"
   },
   "errors": {
     "invalidUrl": "Please enter a valid URL",

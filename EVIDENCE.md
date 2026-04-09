@@ -30,7 +30,7 @@
 - [ ] @sparticuz/chromium работает на Vercel с `maxDuration:60, memory:3009`
 - [ ] `ssl-checker` npm корректно возвращает `daysRemaining`
 - [ ] `fetch('/.env')` с `AbortSignal.timeout(3000)` не вешает скан при timeout
-- [ ] Lemon Squeezy webhook передаёт `custom_data.user_id` корректно
+- [ ] Новый billing provider передаёт внутренний `user_id`/customer mapping корректно
 - [ ] Supabase RLS не блокирует анонимные inserts в scans
 - [ ] `og:image` HEAD request с 4s timeout не вешает SEO check
 

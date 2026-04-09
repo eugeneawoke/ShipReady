@@ -37,7 +37,7 @@ export default function PrivacyPage() {
             <ul>
               <li><strong className="text-[#F1F0EE]">URLs you submit</strong> — to run the audit. We do not crawl or store the content of your pages beyond what is needed to generate the report.</li>
               <li><strong className="text-[#F1F0EE]">Account data</strong> — if you sign up: your email address, provided via Supabase Auth (supports magic link and OAuth).</li>
-              <li><strong className="text-[#F1F0EE]">Payment data</strong> — processed by Lemon Squeezy. We never see or store your card details.</li>
+              <li><strong className="text-[#F1F0EE]">Payment data</strong> — processed by the selected payment provider after paid launch. We never see or store your card details.</li>
               <li><strong className="text-[#F1F0EE]">Usage data</strong> — scan history linked to your account (URL, scores, timestamp).</li>
               <li><strong className="text-[#F1F0EE]">Technical data</strong> — standard server logs (IP address, browser, timestamps) retained for up to 30 days.</li>
             </ul>
@@ -56,9 +56,9 @@ export default function PrivacyPage() {
           <Section title="4. Third-party services">
             <ul>
               <li><strong className="text-[#F1F0EE]">Supabase</strong> — database and authentication (EU region). <a href="https://supabase.com/privacy" className="text-[#6E56CF] hover:underline" target="_blank" rel="noopener noreferrer">Privacy policy</a>.</li>
-              <li><strong className="text-[#F1F0EE]">Lemon Squeezy</strong> — payment processing. <a href="https://www.lemonsqueezy.com/privacy" className="text-[#6E56CF] hover:underline" target="_blank" rel="noopener noreferrer">Privacy policy</a>.</li>
+              <li><strong className="text-[#F1F0EE]">Payment provider</strong> — to be selected before paid launch.</li>
               <li><strong className="text-[#F1F0EE]">Vercel</strong> — hosting and edge functions. <a href="https://vercel.com/legal/privacy-policy" className="text-[#6E56CF] hover:underline" target="_blank" rel="noopener noreferrer">Privacy policy</a>.</li>
-              <li><strong className="text-[#F1F0EE]">Anthropic (Claude)</strong> — AI-generated fix prompts. URLs and issue data are sent to generate prompts. <a href="https://www.anthropic.com/legal/privacy" className="text-[#6E56CF] hover:underline" target="_blank" rel="noopener noreferrer">Privacy policy</a>.</li>
+              <li><strong className="text-[#F1F0EE]">OpenAI</strong> — AI-generated report enrichment and fix prompts. URLs and issue data are sent to generate prompts. <a href="https://openai.com/policies/privacy-policy/" className="text-[#6E56CF] hover:underline" target="_blank" rel="noopener noreferrer">Privacy policy</a>.</li>
             </ul>
           </Section>
 

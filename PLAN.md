@@ -22,7 +22,7 @@
 | 3 | Security | 11 security проверок | ✅ готово |
 | 4 | AI Engine | issue templates + OpenAI summary + AI Visibility | ✅ готово (код написан) |
 | 5 | Report UI | ScoreRing + IssueCard + FixPromptSection | ✅ готово (UI есть) |
-| 6 | Монетизация | Auth + Lemon Squeezy webhook + paywall UI | 🔄 в процессе (см. TODO) |
+| 6 | Монетизация | Auth + provider-agnostic billing + paywall UI | 🔄 в процессе (см. TODO) |
 | 7 | Запуск | Product Hunt + vc.ru + HN | ⏳ не начата |
 | 8 | Pro Features | AI промпты работают + PDF + мониторинг + email | 🔄 в процессе |
 | 9 | Quality Overhaul | Confidence/evidence model, phased scan flow, truthful scoring, telemetry | 🔄 стартует |
@@ -36,7 +36,7 @@
 | Фича | Что написано | Почему не работает |
 |------|-------------|-------------------|
 | AI fix prompts | `generate-summary.ts` генерирует `aiTechnicalPrompt` + `aiVibePrompt` | Нужен `OPENAI_API_KEY` в env; без него поля пустые, UI показывает "AI prompt not available" |
-| Lemon Squeezy webhook | `app/api/webhooks/ls/route.ts` обрабатывает события | Продукты не созданы в LS, `LEMON_SQUEEZY_WEBHOOK_SECRET` не настроен |
+| Billing webhook | Legacy Lemon Squeezy route removed | Payment provider TBD; paid access can be manual during beta |
 | Weekly monitoring rescan | `monitored_domains` + dashboard toggle + `app/api/cron/rescan/route.ts` ресканят активные домены | Нужны prod env (`CRON_SECRET`, `RAILWAY_SCANNER_URL`, `SCANNER_SECRET`) и applied migration `008_monitoring.sql` |
 | Rate limiting | Написан в `app/api/scan/route.ts` | Работает только как базовый monthly limit; нет richer abuse controls и observability |
 | PDF export | `GET /api/report/[id]/pdf` генерирует PDF через Chromium | Нужен `pro/agency` user, node runtime и applied deploy |

@@ -9,14 +9,14 @@
 
 | ID | Решение | Почему |
 |----|---------|--------|
-| D-01 | Lemon Squeezy, не Stripe | Stripe требует юр. лицо. LS — merchant of record: налоги сами, карты СНГ, нет требований |
+| D-01 | Payment provider TBD, не Stripe и не Lemon Squeezy | Stripe требует юр. лицо; Lemon Squeezy не подходит для страны основателя. Провайдер будет выбран позже из доступных вариантов |
 | D-02 | @sparticuz/chromium для Lighthouse | Единственный Chrome билд для Vercel serverless (~50MB). Playwright там не работает |
 | D-03 | Статичные issue templates + один AI вызов | AI на каждый issue = 25 вызовов = $0.25+/скан. Один вызов для summary — достаточно |
 | D-04 | Supabase для PostgreSQL + Auth + Storage | Free tier включает всё. @supabase/ssr хорошо интегрируется с Next.js |
 | D-05 | HTML fetчится один раз, передаётся строкой | Несколько fetch = медленнее + риск разных HTML если страница динамическая |
 | D-06 | Vercel region fra1 (Frankfurt) | Ближе к СНГ + Европе. US добавляет 100–200ms на каждый fetch |
 | D-07 | next-intl без /ru/ /en/ URL сегментов | i18n routing усложняет MVP. Переключатель в navbar — достаточно |
-| D-08 | Lemon Squeezy checkout с custom user_id | `?checkout[custom][user_id]={id}` → webhook знает кому обновить план |
+| D-08 | Billing integration должен быть provider-agnostic | Какой бы провайдер ни был выбран, webhook/checkout должен передавать внутренний `user_id`, чтобы обновлять `profiles.plan` |
 | D-09 | Lighthouse runner на Railway, фронт на Vercel | Vercel Hobby не подходит для тяжёлого Chromium scan; Railway держит Lighthouse и пишет результат в Supabase |
 
 ---
@@ -26,6 +26,7 @@
 | Отклонено | Причина |
 |-----------|---------|
 | Stripe | Нет юр. лица для старта |
+| Lemon Squeezy | Не подходит для страны основателя |
 | Playwright | Не работает на Vercel serverless |
 | Browserless | Платный $49/мес — лишние расходы для MVP |
 | Prisma | Supabase JS SDK напрямую проще, меньше слоёв |
@@ -115,3 +116,8 @@ Fallback: локально в dev можно продолжать запуска
 - dashboard управляет monitoring через `POST/DELETE /api/monitor`
 - cron берёт только активные monitored domains
 - weekly rescan пишет `monitored_domain_id`, `baseline_scan_id`, `trigger='cron'` в `scans`
+
+### D-22: Payment provider TBD
+Решение: не фиксировать Lemon Squeezy как платёжный провайдер. На время private beta paid access может включаться вручную, а публичная монетизация должна быть подключена через другого провайдера после выбора доступного варианта.
+Почему: Lemon Squeezy не подходит для страны основателя. Документация, публичные тексты и roadmap не должны обещать или рекомендовать Lemon Squeezy.
+Последствие: billing webhook/checkout код должен быть перепроектирован provider-agnostic, когда будет выбран новый провайдер.

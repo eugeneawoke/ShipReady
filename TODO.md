@@ -12,7 +12,7 @@
 - [ ] Подключить Vercel к репозиторию (автодеплой из main)
 - [ ] Создать проект Supabase, регион Frankfurt (fra1)
 - [ ] `npx supabase db push` — применить миграции
-- [ ] Добавить env variables в Vercel (APP_URL, SUPABASE_*, OPENAI_API_KEY, LS_*, RESEND_API_KEY, RESEND_FROM_EMAIL, scanner secrets)
+- [ ] Добавить env variables в Vercel (APP_URL, SUPABASE_*, OPENAI_API_KEY, RESEND_API_KEY, RESEND_FROM_EMAIL, scanner secrets)
 - [ ] Создать `.env.local` локально
 - [ ] Первый живой деплой на кастомном домене
 
@@ -56,9 +56,9 @@
 - [x] `components/auth/SignOutButton.tsx` — кнопка выхода
 - [x] Nav лендинга — auth state (Dashboard / Sign in)
 - [x] `app/pricing/page.tsx` — три карточки
-- [x] `app/api/webhooks/ls/route.ts` — subscription_created/cancelled → plan='pro'/'free'
-- [ ] Создать продукты в Lemon Squeezy: Pro $14, Agency $39
-- [ ] Добавить env: `LEMON_SQUEEZY_WEBHOOK_SECRET`, `LEMON_SQUEEZY_API_KEY`
+- [ ] Выбрать платёжного провайдера, доступного для страны основателя
+- [ ] Спроектировать provider-agnostic checkout/webhook → `profiles.plan`
+- [ ] На beta включать Pro/Agency вручную при необходимости
 - [ ] Rate limiting: 3 скана/мес для free (по IP + user_id)
 - [ ] Тест: купить план тестовой картой → `profiles.plan = 'pro'` в Supabase
 

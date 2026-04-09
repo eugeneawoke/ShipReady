@@ -64,7 +64,7 @@ const phases: {
       'Free / Pro / Agency plan structure',
       'Email/password auth and Google OAuth via Supabase',
       'Monthly free scan limit and paywalled report actions',
-      'Lemon Squeezy webhook path exists in code',
+      'Payment provider is TBD; paid access can be enabled manually during beta',
       'Billing products, checkout setup, and live payment activation are not finished yet',
       'Manual private-beta access is easier than a full paid launch today',
     ],

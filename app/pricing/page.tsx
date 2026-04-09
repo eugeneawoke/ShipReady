@@ -3,13 +3,7 @@ import { getUserWithPlan } from '@/lib/auth'
 
 export default async function PricingPage() {
   const user = await getUserWithPlan()
-  const userId = user?.id ?? ''
-
-  const PRO_URL = process.env.NEXT_PUBLIC_LS_PRO_URL ?? '#'
-  const AGENCY_URL = process.env.NEXT_PUBLIC_LS_AGENCY_URL ?? '#'
-
-  const proCheckout = userId ? `${PRO_URL}?checkout[custom][user_id]=${userId}` : PRO_URL
-  const agencyCheckout = userId ? `${AGENCY_URL}?checkout[custom][user_id]=${userId}` : AGENCY_URL
+  const betaAccessHref = 'mailto:hi@shipready.app?subject=ShipReady%20beta%20access'
 
   const plans = [
     {
@@ -26,8 +20,8 @@ export default async function PricingPage() {
       price: '$14',
       period: '/mo',
       features: ['Unlimited scans', 'AI fix prompts (Cursor + Bolt)', 'PDF export', 'Weekly monitoring'],
-      cta: 'Get Pro',
-      href: proCheckout,
+      cta: 'Request beta access',
+      href: betaAccessHref,
       highlight: true,
     },
     {
@@ -35,8 +29,8 @@ export default async function PricingPage() {
       price: '$39',
       period: '/mo',
       features: ['10 domains', 'White-label PDF', 'All Pro features', 'Priority support', 'Team seats (soon)'],
-      cta: 'Get Agency',
-      href: agencyCheckout,
+      cta: 'Contact us',
+      href: betaAccessHref,
       highlight: false,
     },
   ]
@@ -104,7 +98,7 @@ export default async function PricingPage() {
         </div>
 
         <p className="text-center mt-8 text-xs text-[#5A5955]">
-          Payments via Lemon Squeezy &middot; Cancel anytime &middot; No questions asked
+          Paid access is handled manually during beta &middot; Payment provider TBD
         </p>
       </div>
     </div>

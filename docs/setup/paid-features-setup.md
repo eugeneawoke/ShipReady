@@ -63,10 +63,6 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 SUPABASE_SERVICE_ROLE_KEY=...
 OPENAI_API_KEY=...
 OPENAI_SCAN_MODEL=gpt-4o-mini
-LEMON_SQUEEZY_API_KEY=...
-LEMON_SQUEEZY_WEBHOOK_SECRET=...
-NEXT_PUBLIC_LS_PRO_URL=...
-NEXT_PUBLIC_LS_AGENCY_URL=...
 RESEND_API_KEY=...
 RESEND_FROM_EMAIL="ShipReady <alerts@shipready.app>"
 CRON_SECRET=...
@@ -97,31 +93,20 @@ SCANNER_SECRET=...
 2. Vercel deployment свежий и содержит этот `vercel.json`.
 3. Route `/api/cron/rescan` отвечает `401`, если вызвать её без правильных cron headers.
 
-## 6. Lemon Squeezy
+## 6. Billing provider
 
-Чтобы feature gating работал на проде:
+Платёжный провайдер ещё не выбран. Lemon Squeezy не использовать.
 
-1. Создать продукты:
+Чтобы feature gating работал на публичном paid launch:
+
+1. Выбрать провайдера, доступного для страны основателя.
+2. Создать продукты:
    - `Pro` — `$14/mo`
    - `Agency` — `$39/mo`
-2. Получить checkout URLs и записать:
-
-```bash
-NEXT_PUBLIC_LS_PRO_URL=...
-NEXT_PUBLIC_LS_AGENCY_URL=...
-```
-
-3. Настроить webhook на:
-
-```text
-https://shipready.app/api/webhooks/ls
-```
-
-4. Записать webhook secret в:
-
-```bash
-LEMON_SQUEEZY_WEBHOOK_SECRET=...
-```
+3. Настроить checkout URLs.
+4. Настроить webhook, который передаёт внутренний `user_id` или stable customer mapping.
+5. Обновлять `profiles.plan` из webhook.
+6. В private beta можно включать `Pro`/`Agency` вручную в Supabase.
 
 ## 7. Manual verification
 

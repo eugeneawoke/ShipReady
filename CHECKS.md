@@ -10,8 +10,8 @@
 ```bash
 npm i @supabase/supabase-js @supabase/ssr
 npm i @sparticuz/chromium lighthouse puppeteer-core
-npm i cheerio ssl-checker @anthropic-ai/sdk
-npm i @lemonsqueezy/lemonsqueezy.js resend zod
+npm i cheerio ssl-checker openai
+npm i resend zod
 npm i lucide-react framer-motion next-intl geist
 ```
 
@@ -345,10 +345,10 @@ export async function runAllChecks(url: string, scanId: string): Promise<void> {
 ## lib/ai/generate-summary.ts
 
 ```typescript
-import Anthropic from '@anthropic-ai/sdk';
+import OpenAI from 'openai';
 
 export async function generateAISummary(result: ScanResult): Promise<string> {
-  const client = new Anthropic();
+  const client = new OpenAI();
   const critical = getAllIssues(result).filter(i => i.severity === 'critical').length;
   const high     = getAllIssues(result).filter(i => i.severity === 'high').length;
   const msg = await client.messages.create({

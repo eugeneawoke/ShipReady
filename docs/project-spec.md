@@ -61,12 +61,11 @@ Practical interpretation: ShipReady is close enough to show to first beta users,
 - Supabase provides PostgreSQL, auth, and report storage.
 - OpenAI provides evidence-grounded report enrichment.
 - Resend sends monitoring alerts.
-- Lemon Squeezy is the intended billing provider.
 
 ### Key decisions
 
 - Supabase is the database and auth provider.
-- Lemon Squeezy is preferred over Stripe for launch.
+- Payment provider is TBD. Lemon Squeezy is explicitly not the selected provider.
 - Railway is used for scanner execution because Vercel Hobby is not a good fit for heavy Chromium scans.
 - AI is one compact enrichment call for normal scans, with Pro/Agency wow insights as a separate add-on.
 - PageSpeed Insights is only a future benchmark, not the default scanner path.
@@ -147,15 +146,14 @@ Current code state:
 - Free / Pro / Agency plan model exists.
 - Free scan limits exist for user/IP.
 - Pricing UI exists.
-- Lemon Squeezy webhook path exists.
 - PDF export exists for Pro/Agency.
 - Weekly monitoring exists for Pro/Agency.
 - Email alert pipeline exists.
 
 Production setup still required before relying on paid features:
 
-- Create Lemon Squeezy products and checkout URLs.
-- Configure Lemon Squeezy webhook secret.
+- Choose a payment provider available to the founder.
+- Implement provider-agnostic checkout/webhook plan updates.
 - Apply Supabase migrations in production.
 - Configure Resend API key and verified sender.
 - Verify the Railway scanner and shared `SCANNER_SECRET`.
@@ -199,7 +197,7 @@ Beta can start after these are true in production:
 
 Not required for beta:
 
-- Full Lemon Squeezy paid launch.
+- Full paid launch.
 - Email alerts, if Resend sender domain is not verified yet.
 - Dedicated egress firewall/proxy.
 - Agency/team workflows.

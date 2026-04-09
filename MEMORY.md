@@ -33,7 +33,7 @@
 - Exposed .env check: проверять что body содержит `KEY=value` И не содержит `<html` — иначе false positive от 404-страниц.
 - API key detection: логировать ТИП ключа (OpenAI key), никогда не сам ключ.
 - HTML fetчится один раз в оркестраторе, передаётся строкой. Функции `runSEOChecks(url, html)` — html второй параметр.
-- Lemon Squeezy: `?checkout[custom][user_id]={id}` в checkout URL → webhook получает user_id.
+- [устарело] Lemon Squeezy не используем: провайдер не подходит для страны основателя. Billing должен быть provider-agnostic, платёжный провайдер будет выбран позже.
 
 ---
 

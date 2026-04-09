@@ -235,7 +235,7 @@ RUN npm install
 
 - `.env*` is ignored in `.gitignore`, and only `.env.example` is tracked.
 - Private authenticated scans are protected in `app/api/scan/[id]/route.ts` by an explicit `user_id` check before returning data.
-- Lemon Squeezy webhook signature verification now rejects wrong-length signatures before calling `timingSafeEqual`.
+- Legacy billing webhook code was removed after the payment provider decision moved back to TBD.
 - URL safety now blocks embedded credentials, non-HTTP(S) protocols, private host strings, private DNS results, and redirect hops before scan dispatch.
 - I did not find attacker-controlled `dangerouslySetInnerHTML` usage. The visible usage in `components/ui/motion-footer.tsx` renders a static style string.
 

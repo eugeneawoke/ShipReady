@@ -35,10 +35,8 @@ Core variables:
 - `CRON_SECRET`
 - `RAILWAY_SCANNER_URL`
 - `SCANNER_SECRET`
-- `LEMON_SQUEEZY_API_KEY`
-- `LEMON_SQUEEZY_WEBHOOK_SECRET`
-- `NEXT_PUBLIC_LS_PRO_URL`
-- `NEXT_PUBLIC_LS_AGENCY_URL`
+
+Payment provider variables are intentionally not listed yet; the provider is TBD.
 
 ## Scan flow
 
