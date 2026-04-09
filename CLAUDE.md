@@ -1,229 +1,170 @@
 # ShipReady — Agent Context
 
-> Claude Code читает этот файл автоматически при каждом запуске.
-> Держать КОРОТКИМ — только rules, стек, команды, compact policy.
-> Всё остальное — в отдельных файлах по ролям.
+> Keep this file short. It is loaded automatically by some agents.
+> Current source of truth for product/spec details: `docs/project-spec.md`.
 
 ---
 
-## Стартовый ритуал (первым делом в каждой сессии)
+## Startup Ritual
 
-```
-1. PLAN.md      → текущая фаза и цель
-2. TODO.md      → активный шаг
-3. DECISIONS.md → что уже решено, что отклонено (не предлагать снова)
-4. EVIDENCE.md  → что реально проверено (не перепроверять)
-5. MEMORY.md    → важное между сессиями, продуктовые решения
+Read these before proposing architecture, features, or status:
 
-После каждого завершённого шага → обновить нужный файл.
-Отвечать только: что сделал / что узнал / что следующее.
-Сырые outputs (логи, test results, curl) → в logs/, не в чат.
-```
+1. `docs/project-spec.md` — current product specification
+2. `PLAN.md` — current phase
+3. `TODO.md` — beta checklist
+4. `DECISIONS.md` — accepted and rejected decisions
+5. `EVIDENCE.md` — verified facts and outdated assumptions
+6. `MEMORY.md` — persistent context
 
----
-
-## Продукт
-
-ShipReady — вставляешь URL → truthful quality report: performance + SEO + security + mobile + AI visibility.
-Платные фичи: PDF export, weekly monitoring, email alerts.
-Каждая проблема = plain-English объяснение + готовый промпт для Cursor/Bolt/Lovable.
-Аудитория: indie hackers, vibe coders, solo founders. Рынки: СНГ + international.
+After a completed change, update the relevant doc instead of leaving stale plans behind.
 
 ---
 
-## Стек (менять только с записью в DECISIONS.md)
+## Product
 
-```
-Next.js 14 App Router · TypeScript strict · Tailwind CSS · shadcn/ui
-Supabase (PostgreSQL + Auth) · OpenAI gpt-4o-mini
-@sparticuz/chromium + lighthouse · cheerio · ssl-checker
-Resend · lucide-react · Vercel (fra1)
-```
+ShipReady is a pre-deploy quality gate for vibe-coded apps.
+
+User flow:
+
+1. User submits a URL.
+2. ShipReady scans performance, SEO, security, mobile readiness, and AI visibility.
+3. Report shows verified facts, likely/heuristic observations, unavailable measurements, and fix prompts for AI coding tools.
+
+Audience: indie hackers, vibe coders, solo founders.
+Current operating phase: **Private Beta Readiness**.
 
 ---
 
-## Команды
+## Stack
+
+Change this only with a `DECISIONS.md` entry.
+
+```text
+Next.js 16 App Router
+React 19
+TypeScript strict
+Tailwind CSS v4
+Supabase PostgreSQL + Auth
+OpenAI evidence-grounded enrichment
+@sparticuz/chromium + Lighthouse on Railway scanner runtime
+cheerio
+ssl-checker
+Resend
+Vercel app runtime
+```
+
+Payment provider is **TBD**. Lemon Squeezy is explicitly not selected.
+
+---
+
+## Commands
 
 ```bash
-npm run dev           # dev server
-npm run build         # production build
-npm run typecheck     # tsc --noEmit
-npm run lint          # ESLint
-npx supabase db push  # apply migrations
+npm run dev
+npm run lint
+npm run build
+npx supabase db push
+```
+
+There is no `npm run typecheck` script right now; `next build` is the practical type/build gate.
+
+---
+
+## Hard Rules
+
+- Read relevant docs before answering project questions.
+- Read relevant Next.js 16 docs under `node_modules/next/dist/docs/` before changing Next.js code.
+- Never hardcode secrets; use `process.env.*`.
+- Do not reintroduce Lemon Squeezy.
+- Technical truth comes from measured evidence, not AI.
+- AI may summarize, prioritize, and improve prompts, but must not invent issue IDs or facts.
+- Types live in `types/scan.ts`; avoid inline duplicate scan types.
+- Scan code belongs in `lib/checks/*`, `lib/ai/*`, or route handlers.
+- New architecture decisions go into `DECISIONS.md`.
+- New verified facts or invalidated assumptions go into `EVIDENCE.md`.
+
+---
+
+## Current Scan Flow
+
+```text
+POST /api/scan
+  -> same-origin JSON guard
+  -> URL safety validation and quota check
+  -> Supabase insert with status pending
+  -> production dispatch to Railway scanner
+
+Railway /api/run-scan
+  -> SCANNER_SECRET auth
+  -> URL safety re-check
+  -> shared safe fetch context
+  -> Fast Truth Pass
+  -> save partial result
+  -> Deep Pass
+  -> AI enrichment
+  -> optional Pro/Agency wow insights
+  -> save done/error result
+
+/report/[id]
+  -> polls /api/scan/[id]
+  -> shows partial/progressive state
+  -> marks active scans stale after 3 minutes
+```
+
+Statuses currently include:
+
+```text
+pending, running, running_fast, running_deep, enriching, done, error
 ```
 
 ---
 
-## Hard rules
+## Quality Contract
 
-- `process.env.*` только — никогда hardcode secrets
-- HTML fetчится ОДИН раз в оркестраторе → передаётся строкой во все checks
-- Типы только из `types/scan.ts` — никогда inline
-- API логика только в `lib/` или `app/api/` — не в компонентах
-- OpenAI API: evidence-grounded enrichment, не источник технической истины
-- Новый check → сначала запись в `CHECKS.md`, потом код
-- Новое архитектурное решение → сначала запись в `DECISIONS.md`, потом код
+- Each issue can have `confidence`, `scoreEligible`, `evidence`, and `source`.
+- Only verified score-eligible issues should affect score.
+- Likely and heuristic issues can be shown, but should not be treated as hard facts.
+- Heavy measurements can be `measured`, `partial`, or `unavailable`.
+- A failed measurement must never appear as a pass.
 
 ---
 
-## Compact policy (что re-inject после /compact)
+## Active File Map
 
-1. Текущая фаза из PLAN.md
-2. Активный шаг из TODO.md
-3. Последние 3 записи DECISIONS.md
-4. Последние 3 записи EVIDENCE.md
-5. Весь MEMORY.md целиком
-
----
-
-## Файловая структура проекта
-
-```
-shipready/
-├── CLAUDE.md           ← этот файл (читается автоматически)
-├── PLAN.md             ← фазы + текущая фаза
-├── TODO.md             ← шаги + статусы
-├── DECISIONS.md        ← решения + rejected paths
-├── EVIDENCE.md         ← подтверждённые факты
-├── MEMORY.md           ← постоянная память между сессиями
-├── CHECKS.md           ← спецификация всех 25 checks с кодом
-├── DESIGN.md           ← дизайн-система (цвета, компоненты)
-├── logs/               ← сырые outputs (никогда не в чат)
-├── app/
-│   ├── (landing)/page.tsx
-│   ├── report/[id]/page.tsx
-│   ├── dashboard/page.tsx
-│   ├── pricing/page.tsx
-│   ├── auth/callback/route.ts
-│   └── api/
-│       ├── scan/route.ts
-│       ├── scan/[id]/route.ts
-│       ├── badge/[domain]/route.ts
-│       ├── cron/rescan/route.ts
-│       └── webhooks/ls/route.ts
-├── lib/
-│   ├── checks/
-│   │   ├── index.ts       ← оркестратор
-│   │   ├── lighthouse.ts
-│   │   ├── seo.ts
-│   │   ├── security.ts
-│   │   ├── mobile.ts
-│   │   └── links.ts
-│   ├── ai/
-│   │   ├── generate-summary.ts
-│   │   └── issue-templates.ts
-│   ├── scoring.ts
-│   ├── auth.ts
-│   ├── supabase.ts
-│   └── utils.ts
-├── components/
-│   ├── report/
-│   │   ├── ScoreRing.tsx
-│   │   ├── CategoryCard.tsx
-│   │   ├── IssueCard.tsx
-│   │   ├── OGPreview.tsx
-│   │   └── ReportSkeleton.tsx
-│   └── landing/
-│       └── ScanForm.tsx
-├── types/scan.ts
-├── messages/en.json
-├── messages/ru.json
-├── supabase/migrations/001_initial.sql
-└── vercel.json
+```text
+app/
+  api/
+    scan/route.ts
+    scan/[id]/route.ts
+    run-scan/route.ts
+    cron/rescan/route.ts
+    badge/[domain]/route.ts
+  report/[id]/page.tsx
+  dashboard/page.tsx
+  pricing/page.tsx
+components/
+  landing/ScanForm.tsx
+  report/ReportSkeleton.tsx
+  report/IssueCard.tsx
+  report/CategoryCard.tsx
+lib/
+  ai/generate-evidence-enrichment.ts
+  ai/generate-wow-insights.ts
+  ai/issue-templates.ts
+  checks/index.ts
+  checks/*.ts
+  scoring.ts
+  security/url-safety.ts
+types/scan.ts
+supabase/migrations/*.sql
+docs/project-spec.md
 ```
 
 ---
 
-## DB schema
+## Environment Variables
 
-```sql
-CREATE TABLE scans (
-  id         UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  url        TEXT NOT NULL,
-  status     TEXT DEFAULT 'pending'
-             CHECK (status IN ('pending','running','done','error')),
-  results    JSONB,
-  user_id    UUID REFERENCES auth.users(id),
-  ip_address TEXT,
-  created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now()
-);
-ALTER TABLE scans ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "read public anonymous or own scans" ON scans
-  FOR SELECT USING (user_id IS NULL OR user_id = auth.uid());
-CREATE POLICY "insert allowed"    ON scans FOR INSERT WITH CHECK (true);
-CREATE POLICY "update own"        ON scans FOR UPDATE
-  USING (user_id IS NOT NULL AND user_id = auth.uid());
-```
-
----
-
-## TypeScript типы (types/scan.ts)
-
-```typescript
-export type ScanStatus    = 'pending' | 'running' | 'done' | 'error';
-export type IssueSeverity = 'critical' | 'high' | 'medium' | 'low' | 'pass';
-export type IssueCategory = 'performance' | 'seo' | 'security' | 'mobile';
-
-export interface Issue {
-  id: string;
-  category: IssueCategory;
-  severity: IssueSeverity;
-  title: string;
-  description: string;
-  plainEnglish: string;
-  cursorPrompt: string;
-  boltPrompt: string;
-  docsUrl?: string;
-  value?: string | number;
-}
-
-export interface CategoryScore {
-  score: number;
-  label: 'excellent' | 'good' | 'needs-work' | 'poor';
-  issues: Issue[];
-  passedChecks: number;
-  totalChecks: number;
-}
-
-export interface ScanResult {
-  url: string;
-  scannedAt: string;
-  totalScore: number;
-  performance: CategoryScore;
-  seo: CategoryScore;
-  security: CategoryScore;
-  mobile: CategoryScore;
-  aiSummary?: string;
-}
-```
-
----
-
-## Scoring алгоритм
-
-```
-Deductions per issue: critical −25 · high −15 · medium −7 · low −3
-categoryScore = max(0, 100 − sum(deductions))
-totalScore = performance×0.30 + seo×0.25 + security×0.30 + mobile×0.15
-Labels: 90–100 excellent · 70–89 good · 50–69 needs-work · 0–49 poor
-```
-
----
-
-## Paywall
-
-```
-Free:   3 скана/мес · scores видны · AI prompts заблюрены
-Pro:    $14/мес · unlimited · prompts открыты · PDF · weekly monitoring · email alerts
-Agency: $39/мес · 10 доменов · white-label PDF · weekly monitoring · email alerts
-```
-
----
-
-## Environment variables
-
-```
+```text
 NEXT_PUBLIC_APP_URL
 NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY

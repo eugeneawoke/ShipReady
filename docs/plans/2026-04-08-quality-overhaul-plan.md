@@ -1,8 +1,10 @@
 # Quality Overhaul Plan
 
 Дата: 2026-04-08
-Статус: approved for implementation
+Статус: core implemented; telemetry follow-up remains
 Основание: внутренний аудит + сравнительный аудит Claude + текущий код `lib/checks/*`, `lib/scoring.ts`, `types/scan.ts`
+
+> Current note, 2026-04-09: confidence/evidence model, phased scan flow, truthful scoring, safe shared fetch context, partial reporting, and bounded AI enrichment are implemented in code. This plan now functions as historical design rationale. The remaining work is production telemetry and beta verification, tracked in `TODO.md` and `docs/project-spec.md`.
 
 ## Goal
 
@@ -238,10 +240,10 @@ PageSpeed Insights API не идёт в immediate implementation.
 
 ### AI layer
 
-- `lib/ai/generate-summary.ts`
-- or split into:
-  - `lib/ai/generate-evidence-enrichment.ts`
-  - `lib/ai/generate-wow-insights.ts`
+- `lib/ai/generate-evidence-enrichment.ts`
+- `lib/ai/generate-wow-insights.ts`
+
+Historical note: older planning docs referenced `lib/ai/generate-summary.ts`; that is no longer the active GPT integration.
 
 ### UI
 

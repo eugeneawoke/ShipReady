@@ -1,7 +1,10 @@
 # AI Prompts V4 + UX Improvements — Design Spec
 
 **Date:** 2026-04-07
-**Status:** Approved
+**Status:** Superseded by current evidence-grounded AI enrichment
+
+> Historical design spec. Do not implement this document as written.
+> Current implementation uses `lib/ai/generate-evidence-enrichment.ts` and `lib/checks/index.ts`, not the older `lib/ai/generate-summary.ts` flow described below.
 
 ---
 

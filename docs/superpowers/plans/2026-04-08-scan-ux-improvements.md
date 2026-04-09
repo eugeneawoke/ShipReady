@@ -1,12 +1,14 @@
 # Scan UX Improvements Implementation Plan
 
+> **Status: implemented / superseded.** The core UX changes from this plan are already present in `components/report/ReportSkeleton.tsx`: elapsed timer, inline retry form, navigation interruption guard, completing state, and stalled-scan messaging. Keep this file for history only; do not implement it task-by-task as written because it references older React/Next.js assumptions.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Add a real-time elapsed timer, inline URL recovery on error, and a navigation interruption guard to the scan waiting screen.
 
 **Architecture:** All changes land in `components/report/ReportSkeleton.tsx`. Two new state variables (`elapsed`, `isLeaveModalOpen`), two new `useEffect` hooks (timer, navigation guard), and adjusted JSX for each render branch. `ScanForm` is imported as-is from `components/landing/ScanForm.tsx` — no changes to that file.
 
-**Tech Stack:** React 18, Next.js 14 App Router (`useRouter`), Tailwind CSS inline styles (matching existing patterns)
+**Original Tech Stack Assumption:** React 18, Next.js 14 App Router (`useRouter`), Tailwind CSS inline styles. Current app uses React 19 and Next.js 16; use live code as source of truth.
 
 ---
 

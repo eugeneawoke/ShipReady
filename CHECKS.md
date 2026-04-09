@@ -1,7 +1,8 @@
 # CHECKS
 
-> Полная спецификация всех 25 проверок с кодом реализации.
-> Читать при работе над lib/checks/ и lib/ai/issue-templates.ts
+> Legacy reference. Этот файл больше не является полным source of truth для текущей реализации.
+> Актуальные источники: `lib/checks/*`, `lib/scoring.ts`, `types/scan.ts`, `lib/ai/generate-evidence-enrichment.ts`, `docs/project-spec.md`.
+> Использовать этот документ только как историческую карту проверок и confidence policy; старые code snippets ниже могут не совпадать с текущим кодом.
 
 ---
 
@@ -342,7 +343,9 @@ export async function runAllChecks(url: string, scanId: string): Promise<void> {
 
 ---
 
-## lib/ai/generate-summary.ts
+## Legacy: lib/ai/generate-summary.ts
+
+Current GPT integration lives in `lib/ai/generate-evidence-enrichment.ts`. The old `generate-summary.ts` snippet below is retained only as historical reference.
 
 ```typescript
 import OpenAI from 'openai';

@@ -42,17 +42,12 @@ Payment provider variables are intentionally not listed yet; the provider is TBD
 
 Current production flow:
 
-1. `POST /api/scan` validates URL safety, applies quota checks, creates a `pending` scan, and dispatches the job to Railway.
+1. `POST /api/scan` enforces same-origin JSON requests, validates URL safety, applies quota checks, creates a `pending` scan, and dispatches the job to Railway.
 2. Railway hits `/api/run-scan` with `Authorization: Bearer ${SCANNER_SECRET}`.
-3. The scanner runs deterministic checks plus optional AI summary generation.
-4. Results are written back to Supabase and polled from `/report/[id]`.
-
-Target flow for the next quality pass:
-
-1. `Fast Truth Pass` runs verified checks from a shared fetch context and saves partial results quickly.
-2. `Deep Pass` runs Lighthouse and slower/less certain checks without blocking initial truthful feedback.
-3. `AI enrichment` rewrites and prioritizes findings from evidence only; it does not invent score-bearing issues.
-4. Public UX avoids exact timing promises until telemetry is available for real `p50/p95` scan durations.
+3. `Fast Truth Pass` runs verified checks from a shared fetch context and saves partial results quickly.
+4. `Deep Pass` runs Lighthouse and slower/less certain checks without blocking initial truthful feedback.
+5. `AI enrichment` rewrites and prioritizes findings from evidence only; it does not invent score-bearing issues.
+6. Results are written back to Supabase and polled from `/report/[id]`.
 
 ## Paid features
 
@@ -62,7 +57,7 @@ Target flow for the next quality pass:
 
 ## Quality model
 
-- Findings are moving to three confidence levels: `verified`, `likely`, `heuristic`.
+- Findings use three confidence levels: `verified`, `likely`, `heuristic`.
 - Only `verified` findings should affect category and total scores.
 - Heavy checks such as Lighthouse must expose a measurement status like `measured` vs `unavailable`; a failed measurement must never silently look healthy.
 - Anonymous scans remain readable by report URL; authenticated scans remain private to the owner.
@@ -71,7 +66,7 @@ Target flow for the next quality pass:
 
 - Anonymous scans are readable by report URL.
 - Authenticated scans are private to the owner.
-- Badge lookups only expose anonymous/public scan data under the current RLS model.
+- Badge lookups require explicit `badge_enabled = true`; the default is private/off.
 
 ## Verification
 

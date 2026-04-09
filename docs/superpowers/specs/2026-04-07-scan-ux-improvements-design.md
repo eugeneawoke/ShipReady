@@ -1,8 +1,10 @@
 # Scan UX Improvements
 
 **Date:** 2026-04-07
-**Status:** Approved
+**Status:** Implemented / superseded
 **Scope:** `components/report/ReportSkeleton.tsx` + `components/landing/ScanForm.tsx` (read-only reuse)
+
+> Historical design spec. The current `ReportSkeleton` implementation already includes the scan timer, inline retry form, navigation guard, completing state, and stalled scan messaging. Keep this file for history; use live code plus `docs/project-spec.md` for current behavior.
 
 ---
 
