@@ -6,7 +6,7 @@
 
 export interface LighthouseMetrics {
   performanceScore: number
-  seoScore: number
+  seoScore: number | null
   a11yScore: number | null
   lcp: number | null
   cls: number | null
@@ -19,8 +19,51 @@ interface LighthouseOptions {
   timeoutMs?: number
 }
 
+interface LighthouseRuntimeError extends Error {
+  code?: string
+}
+
+interface LighthouseRunProfile {
+  config: Record<string, unknown>
+  warnings: string[]
+  label: 'mobile-full' | 'mobile-performance-fallback'
+}
+
 const DEFAULT_LIGHTHOUSE_TIMEOUT_MS = 240_000
 const LIGHTHOUSE_QUEUE_KEY = Symbol.for('shipready.lighthouseQueue')
+
+const LIGHTHOUSE_PRIMARY_PROFILE: LighthouseRunProfile = {
+  label: 'mobile-full',
+  config: {
+    extends: 'lighthouse:default',
+    settings: {
+      onlyCategories: ['performance', 'accessibility'],
+      formFactor: 'mobile',
+      maxWaitForFcp: 15_000,
+      maxWaitForLoad: 35_000,
+      disableFullPageScreenshot: true,
+    },
+  },
+  warnings: [],
+}
+
+const LIGHTHOUSE_FALLBACK_PROFILE: LighthouseRunProfile = {
+  label: 'mobile-performance-fallback',
+  config: {
+    extends: 'lighthouse:default',
+    settings: {
+      onlyCategories: ['performance'],
+      formFactor: 'mobile',
+      maxWaitForFcp: 15_000,
+      maxWaitForLoad: 35_000,
+      disableFullPageScreenshot: true,
+    },
+  },
+  warnings: [
+    'Recovered after a mobile tab crash by rerunning a lighter performance-only Lighthouse profile.',
+    'Accessibility score is unavailable for this run because the fallback profile skipped accessibility audits.',
+  ],
+}
 
 type GlobalWithLighthouseQueue = typeof globalThis & {
   [LIGHTHOUSE_QUEUE_KEY]?: Promise<void>
@@ -103,6 +146,11 @@ function scoreFromCategory(category: any, label: string): number {
   return Math.round(score * 100)
 }
 
+function optionalScoreFromCategory(category: any, label: string): number | null {
+  if (!category) return null
+  return scoreFromCategory(category, label)
+}
+
 function optionalMetric(lhr: any, auditId: string): number | null {
   const value = lhr.audits?.[auditId]?.numericValue
   if (value === undefined || value === null) return null
@@ -112,21 +160,51 @@ function optionalMetric(lhr: any, auditId: string): number | null {
   return value
 }
 
+function isTargetCrashed(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false
+  return (error as LighthouseRuntimeError).code === 'TARGET_CRASHED'
+}
+
+function runtimeErrorFromLhr(lhr: any): LighthouseRuntimeError | null {
+  const runtimeError = lhr?.runtimeError
+  if (!runtimeError) return null
+
+  const message = typeof runtimeError.message === 'string'
+    ? runtimeError.message
+    : 'Lighthouse did not produce a valid report'
+  const error = new Error(message) as LighthouseRuntimeError
+  if (typeof runtimeError.code === 'string') {
+    error.code = runtimeError.code
+  }
+  return error
+}
+
 export async function runLighthouse(url: string, options: LighthouseOptions = {}): Promise<LighthouseMetrics> {
   return withLighthouseSlot(async () => {
     try {
-      return await runLighthouseNow(url, options, 1)
+      return await runLighthouseNow(url, options, 1, LIGHTHOUSE_PRIMARY_PROFILE)
     } catch (error) {
+      if (isTargetCrashed(error)) {
+        console.error('[lighthouse] mobile audit target crashed; retrying once with a lighter mobile profile:', error)
+        await new Promise(resolve => setTimeout(resolve, 3_000))
+        return runLighthouseNow(url, options, 2, LIGHTHOUSE_FALLBACK_PROFILE)
+      }
+
       if (!isStartupProtocolTimeout(error)) throw error
 
       console.error('[lighthouse] startup protocol timeout; retrying once after browser restart:', error)
       await new Promise(resolve => setTimeout(resolve, 3_000))
-      return runLighthouseNow(url, options, 2)
+      return runLighthouseNow(url, options, 2, LIGHTHOUSE_PRIMARY_PROFILE)
     }
   })
 }
 
-async function runLighthouseNow(url: string, options: LighthouseOptions = {}, attempt: number): Promise<LighthouseMetrics> {
+async function runLighthouseNow(
+  url: string,
+  options: LighthouseOptions = {},
+  attempt: number,
+  profile: LighthouseRunProfile,
+): Promise<LighthouseMetrics> {
   const startedAt = Date.now()
   const timeoutMs = options.timeoutMs ?? DEFAULT_LIGHTHOUSE_TIMEOUT_MS
   // eval prevents Turbopack from tracing into these packages at build time
@@ -140,7 +218,7 @@ async function runLighthouseNow(url: string, options: LighthouseOptions = {}, at
   const systemChromium = process.env.CHROMIUM_PATH
   const executablePath = systemChromium ?? await chromium.executablePath()
 
-  console.info(`[lighthouse] starting build=${scannerBuildId()} attempt=${attempt} url=${url} chromium=${executablePath} systemChromium=${Boolean(systemChromium)}`)
+  console.info(`[lighthouse] starting build=${scannerBuildId()} attempt=${attempt} profile=${profile.label} url=${url} chromium=${executablePath} systemChromium=${Boolean(systemChromium)}`)
 
   const browser = await puppeteer.launch({
     args: systemChromium
@@ -169,10 +247,7 @@ async function runLighthouseNow(url: string, options: LighthouseOptions = {}, at
     const lighthouseRun = lighthouse(url, {
       port: Number(new URL(browser.wsEndpoint()).port),
       output: 'json',
-      onlyCategories: ['performance', 'accessibility', 'seo'],
-      formFactor: 'mobile',
-      maxWaitForLoad: 120_000,
-    })
+    }, profile.config)
 
     const { lhr } = await Promise.race([
       lighthouseRun,
@@ -184,28 +259,32 @@ async function runLighthouseNow(url: string, options: LighthouseOptions = {}, at
       }),
     ])
 
-    if (!lhr || lhr.runtimeError) {
-      throw new Error(lhr?.runtimeError?.message || 'Lighthouse did not produce a valid report')
+    const runtimeError = runtimeErrorFromLhr(lhr)
+    if (!lhr || runtimeError) {
+      throw runtimeError ?? new Error('Lighthouse did not produce a valid report')
     }
 
     const metrics = {
       performanceScore: scoreFromCategory(lhr.categories?.performance, 'performance'),
-      seoScore: scoreFromCategory(lhr.categories?.seo, 'seo'),
+      seoScore: optionalScoreFromCategory(lhr.categories?.seo, 'seo'),
       a11yScore: lhr.categories?.accessibility ? scoreFromCategory(lhr.categories.accessibility, 'accessibility') : null,
       lcp: optionalMetric(lhr, 'largest-contentful-paint'),
       cls: optionalMetric(lhr, 'cumulative-layout-shift'),
       inp: optionalMetric(lhr, 'interaction-to-next-paint'),
       fcp: optionalMetric(lhr, 'first-contentful-paint'),
-      warnings: Array.isArray(lhr.runWarnings) ? lhr.runWarnings.filter((warning: unknown) => typeof warning === 'string') : [],
+      warnings: [
+        ...(Array.isArray(lhr.runWarnings) ? lhr.runWarnings.filter((warning: unknown) => typeof warning === 'string') : []),
+        ...profile.warnings,
+      ],
     }
 
     console.info(
-      `[lighthouse] completed build=${scannerBuildId()} attempt=${attempt} url=${url} durationMs=${Date.now() - startedAt} performance=${metrics.performanceScore} seo=${metrics.seoScore} a11y=${metrics.a11yScore ?? 'null'} warnings=${metrics.warnings.length}`,
+      `[lighthouse] completed build=${scannerBuildId()} attempt=${attempt} profile=${profile.label} url=${url} durationMs=${Date.now() - startedAt} performance=${metrics.performanceScore} seo=${metrics.seoScore ?? 'null'} a11y=${metrics.a11yScore ?? 'null'} warnings=${metrics.warnings.length}`,
     )
 
     return metrics
   } catch (error) {
-    forceKillBrowser = timedOut || isStartupProtocolTimeout(error)
+    forceKillBrowser = timedOut || isStartupProtocolTimeout(error) || isTargetCrashed(error)
     throw error
   } finally {
     if (timeout) clearTimeout(timeout)
