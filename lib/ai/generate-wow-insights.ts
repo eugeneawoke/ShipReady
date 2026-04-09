@@ -2,6 +2,8 @@ import OpenAI from 'openai'
 import type { ScanResult, WowInsight } from '@/types/scan'
 import { getAllIssues } from '@/lib/scoring'
 
+const DEFAULT_WOW_MODEL = 'gpt-4.1-nano'
+
 export async function generateWowInsights(result: ScanResult): Promise<WowInsight[]> {
   const client = new OpenAI()
   const verifiedFindings = getAllIssues(result)
@@ -15,8 +17,8 @@ export async function generateWowInsights(result: ScanResult): Promise<WowInsigh
     }))
 
   const completion = await client.chat.completions.create({
-    model: process.env.OPENAI_SCAN_WOW_MODEL || process.env.OPENAI_SCAN_MODEL || 'gpt-4o-mini',
-    max_tokens: 1200,
+    model: process.env.OPENAI_SCAN_WOW_MODEL || process.env.OPENAI_SCAN_MODEL || DEFAULT_WOW_MODEL,
+    max_tokens: 700,
     response_format: { type: 'json_object' },
     messages: [
       {
