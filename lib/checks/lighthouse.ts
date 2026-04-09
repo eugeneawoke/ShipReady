@@ -23,6 +23,21 @@ const DEFAULT_LIGHTHOUSE_TIMEOUT_MS = 240_000
 
 let lighthouseQueue = Promise.resolve()
 
+function scannerBuildId(): string {
+  return (
+    process.env.RAILWAY_GIT_COMMIT_SHA?.slice(0, 7)
+    || process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7)
+    || process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA?.slice(0, 7)
+    || 'local'
+  )
+}
+
+function isStartupProtocolTimeout(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false
+  const candidate = error as { code?: unknown; protocolMethod?: unknown }
+  return candidate.code === 'PROTOCOL_TIMEOUT' && candidate.protocolMethod === 'Page.enable'
+}
+
 async function withLighthouseSlot<T>(task: () => Promise<T>): Promise<T> {
   const queuedAt = Date.now()
   const previous = lighthouseQueue.catch(() => undefined)
@@ -45,6 +60,27 @@ async function withLighthouseSlot<T>(task: () => Promise<T>): Promise<T> {
   }
 }
 
+async function closeBrowser(browser: any, forceKill: boolean) {
+  const processRef = typeof browser.process === 'function' ? browser.process() : null
+  let closeTimeout: ReturnType<typeof setTimeout> | undefined
+
+  try {
+    await Promise.race([
+      browser.close(),
+      new Promise<never>((_, reject) => {
+        closeTimeout = setTimeout(() => reject(new Error('browser close timed out')), 5_000)
+      }),
+    ])
+  } catch (error) {
+    console.error('[lighthouse] failed to close browser:', error)
+  } finally {
+    if (closeTimeout) clearTimeout(closeTimeout)
+    if (forceKill && processRef && !processRef.killed) {
+      processRef.kill('SIGKILL')
+    }
+  }
+}
+
 function scoreFromCategory(category: any, label: string): number {
   const score = category?.score
   if (typeof score !== 'number' || !Number.isFinite(score) || score < 0 || score > 1) {
@@ -63,10 +99,20 @@ function optionalMetric(lhr: any, auditId: string): number | null {
 }
 
 export async function runLighthouse(url: string, options: LighthouseOptions = {}): Promise<LighthouseMetrics> {
-  return withLighthouseSlot(() => runLighthouseNow(url, options))
+  return withLighthouseSlot(async () => {
+    try {
+      return await runLighthouseNow(url, options, 1)
+    } catch (error) {
+      if (!isStartupProtocolTimeout(error)) throw error
+
+      console.error('[lighthouse] startup protocol timeout; retrying once after browser restart:', error)
+      await new Promise(resolve => setTimeout(resolve, 3_000))
+      return runLighthouseNow(url, options, 2)
+    }
+  })
 }
 
-async function runLighthouseNow(url: string, options: LighthouseOptions = {}): Promise<LighthouseMetrics> {
+async function runLighthouseNow(url: string, options: LighthouseOptions = {}, attempt: number): Promise<LighthouseMetrics> {
   const startedAt = Date.now()
   const timeoutMs = options.timeoutMs ?? DEFAULT_LIGHTHOUSE_TIMEOUT_MS
   // eval prevents Turbopack from tracing into these packages at build time
@@ -80,7 +126,7 @@ async function runLighthouseNow(url: string, options: LighthouseOptions = {}): P
   const systemChromium = process.env.CHROMIUM_PATH
   const executablePath = systemChromium ?? await chromium.executablePath()
 
-  console.info(`[lighthouse] starting url=${url} chromium=${executablePath} systemChromium=${Boolean(systemChromium)}`)
+  console.info(`[lighthouse] starting build=${scannerBuildId()} attempt=${attempt} url=${url} chromium=${executablePath} systemChromium=${Boolean(systemChromium)}`)
 
   const browser = await puppeteer.launch({
     args: systemChromium
@@ -102,6 +148,7 @@ async function runLighthouseNow(url: string, options: LighthouseOptions = {}): P
   })
 
   let timeout: ReturnType<typeof setTimeout> | undefined
+  let timedOut = false
 
   try {
     const lighthouseRun = lighthouse(url, {
@@ -116,6 +163,7 @@ async function runLighthouseNow(url: string, options: LighthouseOptions = {}): P
       lighthouseRun,
       new Promise<never>((_, reject) => {
         timeout = setTimeout(() => {
+          timedOut = true
           reject(new Error(`lighthouse timed out after ${Math.round(timeoutMs / 1000)}s`))
         }, timeoutMs)
       }),
@@ -137,14 +185,12 @@ async function runLighthouseNow(url: string, options: LighthouseOptions = {}): P
     }
 
     console.info(
-      `[lighthouse] completed url=${url} durationMs=${Date.now() - startedAt} performance=${metrics.performanceScore} seo=${metrics.seoScore} a11y=${metrics.a11yScore ?? 'null'} warnings=${metrics.warnings.length}`,
+      `[lighthouse] completed build=${scannerBuildId()} attempt=${attempt} url=${url} durationMs=${Date.now() - startedAt} performance=${metrics.performanceScore} seo=${metrics.seoScore} a11y=${metrics.a11yScore ?? 'null'} warnings=${metrics.warnings.length}`,
     )
 
     return metrics
   } finally {
     if (timeout) clearTimeout(timeout)
-    await browser.close().catch((error: unknown) => {
-      console.error('[lighthouse] failed to close browser:', error)
-    })
+    await closeBrowser(browser, timedOut)
   }
 }
