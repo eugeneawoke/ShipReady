@@ -29,7 +29,11 @@ async function safeTask<T>(
     return { ok: true, value, durationMs: Date.now() - started }
   } catch (error) {
     console.error(`[checks] ${label} failed:`, error)
-    return { ok: false, durationMs: Date.now() - started, error: label }
+    return {
+      ok: false,
+      durationMs: Date.now() - started,
+      error: error instanceof Error ? error.message : String(error),
+    }
   }
 }
 
@@ -182,7 +186,7 @@ export async function runAllChecks(url: string, scanId: string): Promise<void> {
     await saveScan(scanId, 'running_deep', fastResult)
 
     const [lighthouseResult, linksResult, seoDeep, aiVisibilityDeep] = await Promise.all([
-      safeTask(runLighthouse(finalUrl), 75_000, 'lighthouse'),
+      safeTask(runLighthouse(finalUrl), 120_000, 'lighthouse'),
       safeTask(runLinksCheck(finalUrl, fetchContext.html), 12_000, 'links'),
       safeTask(runSEOChecks(finalUrl, fetchContext.html), 10_000, 'seo-deep'),
       safeTask(runAIVisibilityChecks(finalUrl, fetchContext.html), 10_000, 'ai-visibility-deep'),
@@ -208,7 +212,7 @@ export async function runAllChecks(url: string, scanId: string): Promise<void> {
               lighthouseResult.value.warnings.length > 0 ? `Measured with warnings: ${lighthouseResult.value.warnings.slice(0, 2).join('; ')}` : undefined,
               lighthouseResult.durationMs,
             )
-          : measurement('Lighthouse mobile audit', 'unavailable', 'Deep performance audit failed', lighthouseResult.durationMs),
+          : measurement('Lighthouse mobile audit', 'unavailable', `Deep performance audit failed: ${lighthouseResult.error}`, lighthouseResult.durationMs),
       }),
       seo: buildCategoryScore(seoIssues, 'seo', {
         measurement: measurement('SEO audit', 'measured', undefined, seoDeep.durationMs),

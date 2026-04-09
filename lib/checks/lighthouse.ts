@@ -33,6 +33,7 @@ function optionalMetric(lhr: any, auditId: string): number | null {
 }
 
 export async function runLighthouse(url: string): Promise<LighthouseMetrics> {
+  const startedAt = Date.now()
   // eval prevents Turbopack from tracing into these packages at build time
   const chromium        = eval("require('@sparticuz/chromium')")  as any
   const lighthouseMod   = eval("require('lighthouse')")           as any
@@ -43,6 +44,8 @@ export async function runLighthouse(url: string): Promise<LighthouseMetrics> {
   // On Railway (Docker) use the system Chromium; elsewhere use @sparticuz/chromium
   const systemChromium = process.env.CHROMIUM_PATH
   const executablePath = systemChromium ?? await chromium.executablePath()
+
+  console.info(`[lighthouse] starting url=${url} chromium=${executablePath} systemChromium=${Boolean(systemChromium)}`)
 
   const browser = await puppeteer.launch({
     args: systemChromium
@@ -76,7 +79,7 @@ export async function runLighthouse(url: string): Promise<LighthouseMetrics> {
       throw new Error(lhr?.runtimeError?.message || 'Lighthouse did not produce a valid report')
     }
 
-    return {
+    const metrics = {
       performanceScore: scoreFromCategory(lhr.categories?.performance, 'performance'),
       seoScore: scoreFromCategory(lhr.categories?.seo, 'seo'),
       a11yScore: lhr.categories?.accessibility ? scoreFromCategory(lhr.categories.accessibility, 'accessibility') : null,
@@ -86,6 +89,12 @@ export async function runLighthouse(url: string): Promise<LighthouseMetrics> {
       fcp: optionalMetric(lhr, 'first-contentful-paint'),
       warnings: Array.isArray(lhr.runWarnings) ? lhr.runWarnings.filter((warning: unknown) => typeof warning === 'string') : [],
     }
+
+    console.info(
+      `[lighthouse] completed url=${url} durationMs=${Date.now() - startedAt} performance=${metrics.performanceScore} seo=${metrics.seoScore} a11y=${metrics.a11yScore ?? 'null'} warnings=${metrics.warnings.length}`,
+    )
+
+    return metrics
   } finally {
     await browser.close()
   }

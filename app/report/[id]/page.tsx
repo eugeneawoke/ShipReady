@@ -7,7 +7,7 @@ import { ReportSkeleton } from '@/components/report/ReportSkeleton'
 import { ScoreRing } from '@/components/report/ScoreRing'
 import { CategoryCard } from '@/components/report/CategoryCard'
 import { IssueCard } from '@/components/report/IssueCard'
-import type { Scan, Issue, IssueCategory, ScanResult } from '@/types/scan'
+import type { Scan, Issue, IssueCategory, ScanResult, ScanStatus } from '@/types/scan'
 import { createBrowserClient } from '@/lib/supabase-browser'
 
 const FIX_TABS = [
@@ -125,12 +125,129 @@ const SEVERITY_ORDER: Record<string, number> = {
 }
 
 const CATEGORIES: IssueCategory[] = ['performance', 'seo', 'security', 'mobile', 'ai_visibility']
+const ACTIVE_SCAN_STATUSES: ScanStatus[] = ['pending', 'running', 'running_fast', 'running_deep', 'enriching']
 const CATEGORY_LABELS: Record<IssueCategory, string> = {
   performance: 'Performance',
   seo: 'SEO',
   security: 'Security',
   mobile: 'Mobile',
   ai_visibility: 'AI Visibility',
+}
+
+type StageState = 'done' | 'running' | 'pending' | 'unavailable'
+
+function stageTone(state: StageState) {
+  if (state === 'done') return 'border-[#3DDC84]/25 bg-[#3DDC84]/8 text-[#3DDC84]'
+  if (state === 'running') return 'border-[#6E56CF]/35 bg-[#6E56CF]/10 text-[#C7BCFF]'
+  if (state === 'unavailable') return 'border-[#E8A83E]/25 bg-[#E8A83E]/8 text-[#E8A83E]'
+  return 'border-white/8 bg-white/[0.03] text-[#6F6E69]'
+}
+
+function stageLabel(state: StageState) {
+  if (state === 'done') return 'Verified'
+  if (state === 'running') return 'Running'
+  if (state === 'unavailable') return 'Needs retry'
+  return 'Queued'
+}
+
+function hasUnavailableMeasurements(results: ScanResult) {
+  return CATEGORIES.some(category => results[category].measurement?.status === 'unavailable')
+}
+
+function buildScanStages(scan: Scan, results: ScanResult): Array<{ title: string; state: StageState; detail: string }> {
+  const performanceMeasurement = results.performance.measurement
+  const isActive = ACTIVE_SCAN_STATUSES.includes(scan.status)
+  const deepDone = results.phase === 'deep' || results.phase === 'enriching' || results.phase === 'final'
+  const aiDone = results.phase === 'enriching' || results.phase === 'final' || Boolean(results.aiSummary || results.aiTechnicalPrompt)
+  const performanceStillRunning = performanceMeasurement?.status === 'unavailable'
+    && /still running/i.test(performanceMeasurement.message ?? '')
+
+  return [
+    {
+      title: 'Fast truth checks',
+      state: results ? 'done' : 'running',
+      detail: 'SEO, security, mobile and AI visibility basics are based on fetched page evidence.',
+    },
+    {
+      title: 'Lighthouse mobile audit',
+      state: performanceMeasurement?.status === 'unavailable'
+        ? (performanceStillRunning ? 'running' : 'unavailable')
+        : deepDone
+          ? 'done'
+          : scan.status === 'running_deep'
+            ? 'running'
+            : 'pending',
+      detail: performanceMeasurement?.message
+        ?? (deepDone ? 'Performance data was measured by Lighthouse.' : 'Core Web Vitals are still being measured. Unavailable data is not treated as a pass.'),
+    },
+    {
+      title: 'AI enrichment',
+      state: aiDone
+        ? 'done'
+        : scan.status === 'enriching'
+          ? 'running'
+          : isActive
+            ? 'pending'
+            : 'unavailable',
+      detail: aiDone
+        ? 'Final summary and fix prompts are available.'
+        : 'The final summary and prompts can update after deep checks finish.',
+    },
+  ]
+}
+
+function ScanProgressPanel({ scan, results, processingIssue }: {
+  scan: Scan
+  results: ScanResult
+  processingIssue?: Scan['processingIssue']
+}) {
+  const isActive = ACTIVE_SCAN_STATUSES.includes(scan.status)
+  const unavailable = hasUnavailableMeasurements(results)
+  const stages = buildScanStages(scan, results)
+
+  if (!isActive && scan.status !== 'error' && !unavailable) return null
+
+  return (
+    <section className={`rounded-xl border px-4 py-4 ${
+      scan.status === 'error' || unavailable
+        ? 'border-[#E8A83E]/20 bg-[#E8A83E]/5'
+        : 'border-[#6E56CF]/25 bg-[#6E56CF]/7'
+    }`}>
+      <div className="flex items-start gap-3">
+        {isActive ? (
+          <Loader2 className="w-4 h-4 text-[#C7BCFF] animate-spin mt-0.5 shrink-0" />
+        ) : (
+          <span className="text-[#E8A83E] text-sm mt-0.5 shrink-0">!</span>
+        )}
+        <div className="min-w-0 flex-1">
+          <p className="text-sm text-[#F1F0EE]">
+            {isActive ? 'Scan is still running' : 'Report has unavailable measurements'}
+          </p>
+          <p className="text-xs text-[#8B8A85] mt-1 leading-relaxed">
+            {scan.status === 'error' && processingIssue
+              ? `${processingIssue.message} ${processingIssue.recommendation}`
+              : isActive
+                ? 'This is a draft report from completed checks. It refreshes automatically, and unavailable measurements are not counted as healthy.'
+                : 'Available verified results are shown below. Retry the scan to complete unavailable measurements before treating this as final.'}
+          </p>
+        </div>
+      </div>
+
+      <div className="grid gap-2 mt-4">
+        {stages.map(stage => (
+          <div key={stage.title} className="flex items-start gap-3 rounded-lg border border-white/[0.04] bg-[#111113] px-3 py-2.5">
+            <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-mono uppercase tracking-[0.08em] ${stageTone(stage.state)}`}>
+              {stageLabel(stage.state)}
+            </span>
+            <div className="min-w-0">
+              <p className="text-xs text-[#F1F0EE]">{stage.title}</p>
+              <p className="text-xs text-[#6F6E69] mt-0.5 leading-relaxed">{stage.detail}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
 }
 
 function evidenceText(issue: Issue): string {
@@ -332,6 +449,8 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
   const totalPassed = CATEGORIES.reduce((sum, cat) => sum + results[cat].passedChecks, 0)
   const deterministicPrompts = buildDeterministicFixPrompts(results, activeIssues)
   const measurementNotes = buildMeasurementNotes(results)
+  const isScanActive = ACTIVE_SCAN_STATUSES.includes(scan.status)
+  const hasUnavailable = hasUnavailableMeasurements(results)
   const technicalPrompt = isWeakFixPrompt(results.aiTechnicalPrompt, activeIssues, measurementNotes)
     ? deterministicPrompts.technical
     : results.aiTechnicalPrompt
@@ -502,25 +621,17 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
       </header>
 
       <main className="max-w-3xl mx-auto px-4 py-10 space-y-10">
-        {(scan.status === 'running_deep' || scan.status === 'enriching' || scan.status === 'error') && (
-          <section className="rounded-xl border border-[#E8A83E]/20 bg-[#E8A83E]/5 px-4 py-3">
-            <p className="text-sm text-[#F1F0EE]">
-              {scan.status === 'error' ? 'Partial report saved' : 'Partial report ready'}
-            </p>
-            <p className="text-xs text-[#8B8A85] mt-1">
-              {scan.status === 'error' && processingIssue
-                ? `${processingIssue.message} ${processingIssue.recommendation}`
-                : scan.status === 'error'
-                  ? 'The scanner stopped before finalizing every step. Available verified results are shown below; unavailable measurements are not counted as healthy.'
-                  : 'Fast truth checks are available now. Deep measurements and AI enrichment are still running, so some categories may remain unavailable for a moment.'}
-            </p>
-          </section>
-        )}
+        <ScanProgressPanel scan={scan} results={results} processingIssue={processingIssue} />
 
         {/* Score + Summary */}
         <section className="flex flex-col sm:flex-row items-center sm:items-start gap-8">
           <div className="shrink-0">
             <ScoreRing score={results.totalScore} />
+            {(isScanActive || hasUnavailable) && (
+              <p className="text-center text-xs text-[#8B8A85] mt-3">
+                {isScanActive ? 'Draft score' : 'Unavailable checks excluded'}
+              </p>
+            )}
           </div>
           {(results.aiSummary || results.topPriorities?.length) && (
             <div className="flex-1 pt-2">
@@ -605,7 +716,16 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
 
         {/* Fix everything prompts — hidden in print */}
         <section className="print:hidden">
-          <h2 className="text-sm font-medium text-[#F1F0EE] mb-4">Fix everything</h2>
+          <div className="mb-4">
+            <h2 className="text-sm font-medium text-[#F1F0EE]">
+              {isScanActive ? 'Draft fix prompt' : 'Fix everything'}
+            </h2>
+            {isScanActive && (
+              <p className="text-xs text-[#8B8A85] mt-1">
+                Final prompts can update after Lighthouse and AI enrichment finish.
+              </p>
+            )}
+          </div>
           <FixPromptSection
             technicalPrompt={technicalPrompt}
             vibePrompt={vibePrompt}
