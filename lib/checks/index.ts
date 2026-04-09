@@ -182,7 +182,7 @@ export async function runAllChecks(url: string, scanId: string): Promise<void> {
     await saveScan(scanId, 'running_deep', fastResult)
 
     const [lighthouseResult, linksResult, seoDeep, aiVisibilityDeep] = await Promise.all([
-      safeTask(runLighthouse(finalUrl), 45_000, 'lighthouse'),
+      safeTask(runLighthouse(finalUrl), 75_000, 'lighthouse'),
       safeTask(runLinksCheck(finalUrl, fetchContext.html), 12_000, 'links'),
       safeTask(runSEOChecks(finalUrl, fetchContext.html), 10_000, 'seo-deep'),
       safeTask(runAIVisibilityChecks(finalUrl, fetchContext.html), 10_000, 'ai-visibility-deep'),
@@ -202,7 +202,12 @@ export async function runAllChecks(url: string, scanId: string): Promise<void> {
       timings,
       performance: buildCategoryScore(performanceIssues, 'performance', {
         measurement: lighthouseResult.ok
-          ? measurement('Lighthouse mobile audit', 'measured', undefined, lighthouseResult.durationMs)
+          ? measurement(
+              'Lighthouse mobile audit',
+              lighthouseResult.value.warnings.length > 0 ? 'partial' : 'measured',
+              lighthouseResult.value.warnings.length > 0 ? `Measured with warnings: ${lighthouseResult.value.warnings.slice(0, 2).join('; ')}` : undefined,
+              lighthouseResult.durationMs,
+            )
           : measurement('Lighthouse mobile audit', 'unavailable', 'Deep performance audit failed', lighthouseResult.durationMs),
       }),
       seo: buildCategoryScore(seoIssues, 'seo', {

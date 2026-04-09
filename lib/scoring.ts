@@ -8,6 +8,7 @@ import type {
   ScanTimings,
 } from '@/types/scan'
 import { measurement, withIssueMeta, evidence } from '@/lib/checks/issue-meta'
+import type { LighthouseMetrics } from '@/lib/checks/lighthouse'
 
 const DEDUCTIONS: Record<IssueSeverity, number> = {
   critical: 25,
@@ -103,17 +104,10 @@ function weightedTotal(result: Omit<ScanResult, 'totalScore' | 'confidenceSummar
   return Math.round(score)
 }
 
-export function buildPerformanceIssues(lh: {
-  performanceScore: number
-  a11yScore: number
-  lcp: number
-  cls: number
-  inp: number
-  fcp: number
-}): Issue[] {
+export function buildPerformanceIssues(lh: LighthouseMetrics): Issue[] {
   const issues: Issue[] = []
 
-  if (lh.lcp > 2500) {
+  if (lh.lcp !== null && lh.lcp > 2500) {
     issues.push(withIssueMeta({
       id: 'lcp-slow',
       category: 'performance',
@@ -127,7 +121,7 @@ export function buildPerformanceIssues(lh: {
     }, 'lighthouse', [evidence('metric', 'LCP', `${(lh.lcp / 1000).toFixed(1)}s`) ]))
   }
 
-  if (lh.cls > 0.1) {
+  if (lh.cls !== null && lh.cls > 0.1) {
     issues.push(withIssueMeta({
       id: 'cls-high',
       category: 'performance',
@@ -141,7 +135,7 @@ export function buildPerformanceIssues(lh: {
     }, 'lighthouse', [evidence('metric', 'CLS', lh.cls.toFixed(3))]))
   }
 
-  if (lh.inp > 200) {
+  if (lh.inp !== null && lh.inp > 200) {
     issues.push(withIssueMeta({
       id: 'inp-slow',
       category: 'performance',
@@ -155,7 +149,7 @@ export function buildPerformanceIssues(lh: {
     }, 'lighthouse', [evidence('metric', 'INP', `${lh.inp}ms`) ]))
   }
 
-  if (lh.fcp > 1800) {
+  if (lh.fcp !== null && lh.fcp > 1800) {
     issues.push(withIssueMeta({
       id: 'fcp-slow',
       category: 'performance',
@@ -183,7 +177,7 @@ export function buildPerformanceIssues(lh: {
     }, 'lighthouse', [evidence('metric', 'Performance score', lh.performanceScore)]))
   }
 
-  if (lh.a11yScore < 70) {
+  if (lh.a11yScore !== null && lh.a11yScore < 70) {
     issues.push(withIssueMeta({
       id: 'a11y-score-low',
       category: 'performance',

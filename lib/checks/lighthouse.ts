@@ -4,7 +4,35 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-export async function runLighthouse(url: string) {
+export interface LighthouseMetrics {
+  performanceScore: number
+  seoScore: number
+  a11yScore: number | null
+  lcp: number | null
+  cls: number | null
+  inp: number | null
+  fcp: number | null
+  warnings: string[]
+}
+
+function scoreFromCategory(category: any, label: string): number {
+  const score = category?.score
+  if (typeof score !== 'number' || !Number.isFinite(score) || score < 0 || score > 1) {
+    throw new Error(`Lighthouse returned invalid ${label} score`)
+  }
+  return Math.round(score * 100)
+}
+
+function optionalMetric(lhr: any, auditId: string): number | null {
+  const value = lhr.audits?.[auditId]?.numericValue
+  if (value === undefined || value === null) return null
+  if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) {
+    throw new Error(`Lighthouse returned invalid ${auditId} metric`)
+  }
+  return value
+}
+
+export async function runLighthouse(url: string): Promise<LighthouseMetrics> {
   // eval prevents Turbopack from tracing into these packages at build time
   const chromium        = eval("require('@sparticuz/chromium')")  as any
   const lighthouseMod   = eval("require('lighthouse')")           as any
@@ -23,30 +51,40 @@ export async function runLighthouse(url: string) {
           '--disable-setuid-sandbox',
           '--disable-dev-shm-usage',
           '--disable-gpu',
+          '--disable-extensions',
+          '--disable-background-networking',
           '--no-first-run',
         ]
       : chromium.args,
     defaultViewport: chromium.defaultViewport,
     executablePath,
     headless: true,
+    protocolTimeout: 60_000,
+    timeout: 30_000,
   })
 
   try {
     const { lhr } = await lighthouse(url, {
-      port: new URL(browser.wsEndpoint()).port,
+      port: Number(new URL(browser.wsEndpoint()).port),
       output: 'json',
       onlyCategories: ['performance', 'accessibility', 'seo'],
       formFactor: 'mobile',
+      maxWaitForLoad: 45_000,
     })
 
+    if (!lhr || lhr.runtimeError) {
+      throw new Error(lhr?.runtimeError?.message || 'Lighthouse did not produce a valid report')
+    }
+
     return {
-      performanceScore: Math.round((lhr.categories.performance?.score ?? 0) * 100),
-      seoScore:         Math.round((lhr.categories.seo?.score ?? 0) * 100),
-      a11yScore:        Math.round((lhr.categories.accessibility?.score ?? 0) * 100),
-      lcp: lhr.audits['largest-contentful-paint']?.numericValue ?? 0,
-      cls: lhr.audits['cumulative-layout-shift']?.numericValue ?? 0,
-      inp: lhr.audits['interaction-to-next-paint']?.numericValue ?? 0,
-      fcp: lhr.audits['first-contentful-paint']?.numericValue ?? 0,
+      performanceScore: scoreFromCategory(lhr.categories?.performance, 'performance'),
+      seoScore: scoreFromCategory(lhr.categories?.seo, 'seo'),
+      a11yScore: lhr.categories?.accessibility ? scoreFromCategory(lhr.categories.accessibility, 'accessibility') : null,
+      lcp: optionalMetric(lhr, 'largest-contentful-paint'),
+      cls: optionalMetric(lhr, 'cumulative-layout-shift'),
+      inp: optionalMetric(lhr, 'interaction-to-next-paint'),
+      fcp: optionalMetric(lhr, 'first-contentful-paint'),
+      warnings: Array.isArray(lhr.runWarnings) ? lhr.runWarnings.filter((warning: unknown) => typeof warning === 'string') : [],
     }
   } finally {
     await browser.close()
