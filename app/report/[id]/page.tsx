@@ -291,28 +291,20 @@ function buildDeterministicFixPrompts(results: ScanResult, activeIssues: Issue[]
     ? `\n\nUnavailable or partial measurements:\n${measurementNotes.map((note, index) => `${index + 1}. ${note}`).join('\n')}`
     : ''
 
-  return {
-    technical: `You are working in the existing codebase for ${results.url}.
+  const prompt = `You are a senior engineer performing a targeted fix pass. These are verified production issues found by an automated audit — apply each fix directly in the existing codebase, no refactoring, no scope creep.
 
-Fix these verified issues directly and keep changes minimal:
-${issueBlock}${measurementBlock}
-
-Important:
-- Do not treat unavailable measurements as healthy.
-- Focus only on the listed problems.
-- Use the current stack and patterns already present in the project.
-- If Lighthouse/performance is unavailable, run Lighthouse or PageSpeed locally, check whether the page blocks headless Chrome, and fix any performance findings before considering the work complete.
-- After changes, rerun the scan and verify that the listed findings are gone.`,
-    vibe: `You are improving the live site at ${results.url} inside its current codebase.
-
-Fix these issues in the most direct way possible:
 ${issueBlock}${measurementBlock}
 
 Rules:
-- Focus only on the listed problems.
-- Keep the implementation simple and production-ready.
-- Do not assume unavailable checks passed.
-- If performance could not be measured, rerun Lighthouse or PageSpeed after the visible fixes and confirm the audit completes.`,
+- Address only the listed issues.
+- Use the stack and patterns already present in the project.
+- Do not treat unavailable measurements as healthy — absence of data is not a pass.
+- If Lighthouse/performance could not be measured, run Lighthouse or PageSpeed locally after fixes and confirm the audit completes.
+- After all changes, rerun the scan and verify the listed findings are gone.`
+
+  return {
+    technical: prompt,
+    vibe: prompt,
   }
 }
 
