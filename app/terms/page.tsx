@@ -1,6 +1,7 @@
+import Link from 'next/link'
 import type { Metadata } from 'next'
+import { ArrowLeft } from 'lucide-react'
 import { getLocale, getTranslations } from 'next-intl/server'
-import { BackButton } from '@/components/BackButton'
 import { SiteMicroFooter } from '@/components/SiteMicroFooter'
 import { SiteHeader } from '@/components/SiteHeader'
 
@@ -29,7 +30,10 @@ export default async function TermsPage() {
 
       <main className="max-w-3xl mx-auto px-6 py-16">
         <div className="mb-8">
-          <BackButton className="text-sm text-[#8B8A85] hover:text-[#F1F0EE]" />
+          <Link href="/" className="flex items-center gap-1.5 text-sm text-[#8B8A85] transition-colors hover:text-[#F1F0EE]">
+            <ArrowLeft className="h-4 w-4" />
+            <span>{isRu ? 'Назад' : 'Back'}</span>
+          </Link>
         </div>
         <h1 className="text-3xl font-medium mb-2">{isRu ? 'Условия использования' : 'Terms of Service'}</h1>
         <p className="text-[#8B8A85] mb-12 text-sm">{isRu ? `Дата вступления в силу: ${UPDATED}` : `Effective date: ${UPDATED}`}</p>

@@ -57,12 +57,15 @@ export function ContactPopover({ label = 'Contact', className = '' }: { label?: 
         {label}
       </span>
 
-      {/* Icons row — fades in on hover */}
+      {/* Icons row — fades in on hover, absolute when hidden so it takes no space */}
       <span
         className="flex items-center justify-center gap-3 transition-all duration-200"
         style={{
           opacity: hovered ? 1 : 0,
           transform: hovered ? 'scale(1)' : 'scale(0.8)',
+          position: hovered ? 'relative' : 'absolute',
+          inset: 0,
+          pointerEvents: hovered ? 'auto' : 'none',
         }}
       >
         {CONTACTS.map((c) => (

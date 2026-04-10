@@ -1,7 +1,7 @@
+import Link from 'next/link'
 import type { Metadata } from 'next'
-import { getMessages, getTranslations } from 'next-intl/server'
-import { CheckCircle2, Circle, Clock } from 'lucide-react'
-import { BackButton } from '@/components/BackButton'
+import { getLocale, getMessages, getTranslations } from 'next-intl/server'
+import { ArrowLeft, CheckCircle2, Circle, Clock } from 'lucide-react'
 import { SiteHeader } from '@/components/SiteHeader'
 import { CinematicFooter } from '@/components/ui/motion-footer'
 import type { AppMessages } from '@/messages/en'
@@ -17,6 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
 type PhaseStatus = 'done' | 'in-progress' | 'planned'
 
 export default async function RoadmapPage() {
+  const locale = await getLocale()
   const messages = await getMessages() as AppMessages
   const t = messages.Roadmap
   const phases = t.phases as Array<{
@@ -53,7 +54,10 @@ export default async function RoadmapPage() {
 
       <main className="max-w-3xl mx-auto px-6 py-16">
         <div className="mb-8">
-          <BackButton className="text-sm text-[#8B8A85] hover:text-[#F1F0EE]" />
+          <Link href="/" className="flex items-center gap-1.5 text-sm text-[#8B8A85] transition-colors hover:text-[#F1F0EE]">
+            <ArrowLeft className="h-4 w-4" />
+            <span>{locale === 'ru' ? 'Назад' : 'Back'}</span>
+          </Link>
         </div>
         <div className="mb-14">
           <p className="text-[11px] text-[#6E56CF] uppercase tracking-[0.15em] mb-3 font-mono">{t.title}</p>
