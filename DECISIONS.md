@@ -56,9 +56,10 @@
 Почему: Аудитория — indie hackers которые хотят попасть в ChatGPT/Perplexity/Google SGE. Ни один конкурент (Cheeeck, Lighthouse, VibeEval) это не проверяет — это наш дифференциатор.
 Веса scoring обновлены: performance×0.25 + seo×0.20 + security×0.25 + mobile×0.10 + ai_visibility×0.20 = 1.0.
 
-### D-12: Два AI промпта на весь скан + UI-селектор инструмента
-Решение: GPT генерирует два варианта в одном вызове: `aiTechnicalPrompt` (Cursor, Windsurf, Claude Code — файловые пути, конкретные теги) и `aiVibePrompt` (Bolt, Lovable, v0, Replit — высокоуровнево). UI показывает таббар с иконками инструментов, маппинг: Cursor/Windsurf/Claude → technical, Bolt/Lovable/v0/Replit/OpenAI → vibe.
-Почему: Пересматривает D-03. Один GPT вызов, два поля. Технические и vibe-инструменты реально нуждаются в разном стиле промптов. Per-issue промпты убраны из UI.
+### D-12: Один AI промпт в UI — vibePrompt предпочтительный
+Решение: GPT генерирует два варианта в одном вызове — `aiTechnicalPrompt` (Cursor, Windsurf, Claude Code — файловые пути, конкретные теги) и `aiVibePrompt` (Bolt, Lovable, v0, Replit — высокоуровнево). UI показывает **один** блок "Fix everything" с единственным промптом. Логика выбора: `aiVibePrompt` → `aiTechnicalPrompt` (fallback если vibePrompt слабый) → deterministic fallback. Таббар/инструментный селектор не реализован.
+Почему: Пересматривает D-03. Один GPT вызов, два поля внутри, но пользователь видит один лучший вариант без необходимости выбирать. Per-issue промпты убраны из UI (используются только для обогащения `cursorPrompt`/`boltPrompt` на issue-уровне внутри).
+Реализация: `app/report/[id]/page.tsx` строки 481–485, `lib/ai/generate-evidence-enrichment.ts`.
 
 ### D-13: Scan visibility model
 Решение: анонимные сканы остаются доступными по `report/[id]`, а сканы авторизованных пользователей приватны и доступны только владельцу.

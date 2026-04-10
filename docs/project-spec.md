@@ -112,13 +112,15 @@ Current active implementation:
 - `lib/ai/generate-evidence-enrichment.ts`
 - called from `lib/checks/index.ts`
 
-AI receives compact evidence and existing findings. It returns:
+AI receives compact evidence and existing findings. It generates in one call:
 
 - `summary`
 - `topPriorities`
-- `technicalPrompt`
-- `vibePrompt`
-- `issuePrompts`
+- `technicalPrompt` — code-file level detail, for Cursor / Windsurf / Claude Code
+- `vibePrompt` — higher-level, for Bolt / Lovable / v0 / Replit
+- `issuePrompts` — per-issue `{ technical, vibe }` used to populate individual `cursorPrompt`/`boltPrompt` fields internally (not shown as separate block in UI)
+
+**UI "Fix everything" block shows one prompt.** Selection logic: `aiVibePrompt` preferred → `aiTechnicalPrompt` fallback if vibePrompt is weak → deterministic fallback if both are weak. No tool selector or tab bar.
 
 Rules:
 
