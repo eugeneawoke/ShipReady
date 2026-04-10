@@ -19,11 +19,11 @@ const DEDUCTIONS: Record<IssueSeverity, number> = {
 }
 
 const TOTAL_CHECKS = {
-  performance: 6,
-  seo: 12,
-  security: 11,
-  mobile: 4,
-  ai_visibility: 8,
+  performance: 6,  // lcp, cls, inp, fcp, perf-score, a11y-score
+  seo: 10,         // title, description, h1, canonical, og:title, og:description, og:image, twitter:card, placeholder, broken-links
+  security: 10,    // https, hsts, x-frame, xcto, referrer-policy, csp, ssl, exposed-env, api-key, mixed-content
+  mobile: 3,       // viewport, favicon, apple-touch-icon
+  ai_visibility: 8, // schema-org, faq-schema, heading-hierarchy, thin-content, llms-txt, ai-crawlers, sitemap, author-entity
 }
 
 const CATEGORY_WEIGHTS = {
