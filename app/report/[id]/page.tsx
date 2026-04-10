@@ -298,24 +298,12 @@ ${issueBlock}${measurementBlock}
 THE GOLDEN RULE:
 Every fix must be real and independently verifiable. A scanner fetching the live page must confirm it — not by reading source code, but by observing the actual HTTP response and rendered content. Never add hidden metadata, schema, or tags to pass a check while the underlying problem remains. Fix the real problem.
 
-HOW TO VERIFY YOUR FIXES:
-
-Performance — optimize actual assets and rendering paths. Never lazy-load the primary hero image or above-fold content — that worsens LCP. Reduce bundle size, defer non-critical scripts.
-
-SEO — metadata must be in server-rendered <head>, not injected client-side only. Title, description, and canonical must be present in the HTML the server returns before JavaScript runs.
-
-Security — headers must be in the framework config that generates HTTP response headers. A header that only exists in a comment or disabled config block is not a fix.
-
-Mobile — referenced files (apple-touch-icon, favicon) must be real files in the public directory served at the declared path.
-
-AI Visibility — every addition must match what is actually on the page: structured data must describe content that exists in the rendered HTML; llms.txt, sitemap.xml, and robots.txt must be real files at their expected paths; heading order must be corrected in actual rendered content; readable text must be visible to users.
-
-Rules:
+HOW TO VERIFY YOUR FIXES Rules:
 - Address only the listed issues.
 - Use the stack and patterns already present in the project.
 - Do not treat unavailable measurements as healthy — absence of data is not a pass.
 - If Lighthouse/performance could not be measured, run Lighthouse or PageSpeed locally after fixes and confirm the audit completes.
-- After all fixes: rerun the scan and verify each listed issue is gone.`
+- After all fixes: rerun local scan — performance, SEO, security, mobile, and AI visibility — and confirm each listed issue is gone.`
 
   return {
     technical: prompt,
