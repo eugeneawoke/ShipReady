@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useState, useRef, useEffect, useTransition } from 'react'
 import dynamic from 'next/dynamic'
 import { createBrowserClient } from '@supabase/ssr'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useLocale, useMessages } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { ScanForm } from '@/components/landing/ScanForm'
@@ -100,6 +100,12 @@ const IconBot = () => (
   </svg>
 )
 
+const IconChevron = ({ size = 16 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m6 9 6 6 6-6"/>
+  </svg>
+)
+
 const IconArrow = ({ size = 12 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M5 12h14"/>
@@ -171,6 +177,7 @@ export default function LandingPage() {
       <FeaturesSection t={t} />
       <AIPromptsSection t={t} />
       <PricingSection t={t} />
+      <FAQSection t={t} />
       <BottomCTA t={t} />
       <CinematicFooter />
     </div>
@@ -793,6 +800,72 @@ function PricingSection({ t }: { t: Translations }) {
             </motion.div>
           ))}
         </div>
+      </div>
+    </section>
+  )
+}
+
+// ─── FAQ ──────────────────────────────────────────────────────────────────────
+
+function FAQSection({ t }: { t: Translations }) {
+  const [openIndex, setOpenIndex] = useState<number | null>(null)
+
+  return (
+    <section id="faq" className="py-24 px-6">
+      <div className="max-w-2xl mx-auto">
+        <motion.div {...fadeUp()} className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 mb-3">
+            <AnimatedShinyText
+              shimmerWidth={120}
+              className="text-[11px] text-[#6E56CF] uppercase tracking-[0.15em] font-mono"
+            >
+              {t.faq.eyebrow}
+            </AnimatedShinyText>
+          </div>
+          <h2 className="text-[32px] font-semibold tracking-[-0.03em]">{t.faq.title}</h2>
+        </motion.div>
+
+        <motion.div {...fadeUp(0.08)} className="rounded-2xl border border-white/[0.06] bg-[#161618] overflow-hidden">
+          {t.faq.items.map((item, i) => {
+            const isOpen = openIndex === i
+            return (
+              <div key={i} className={i > 0 ? 'border-t border-white/[0.06]' : ''}>
+                <button
+                  onClick={() => setOpenIndex(isOpen ? null : i)}
+                  className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left cursor-pointer group"
+                  aria-expanded={isOpen}
+                >
+                  <span className="text-sm font-medium text-[#F1F0EE] group-hover:text-white transition-colors leading-snug">
+                    {item.q}
+                  </span>
+                  <span
+                    className="shrink-0 text-[#5A5955] group-hover:text-[#8B8A85] transition-all duration-300"
+                    style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                  >
+                    <IconChevron size={15} />
+                  </span>
+                </button>
+
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.div
+                      key="answer"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                      style={{ overflow: 'hidden' }}
+                    >
+                      <p className="px-6 pb-5 text-sm text-[#8B8A85] leading-relaxed">
+                        {item.a}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )
+          })}
+        </motion.div>
       </div>
     </section>
   )

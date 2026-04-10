@@ -90,26 +90,44 @@ export async function runAIVisibilityChecks(
     }, 'ai-visibility', [evidence('selector', 'Schema.org markup', 'missing')]))
   }
 
-  const hasFAQContent =
-    bodyText.includes('frequently asked') ||
-    /\bfaq\b/i.test(bodyText) ||
-    $('[id*="faq" i], [class*="faq" i]').length > 0
+  // Require actual Q&A structure — not just the word "FAQ" appearing anywhere in copy
+  const hasFAQSection = $('[id="faq"], [id="faqs"], [id="faq-section"]').length > 0
+  const hasAccordion = $('details').length >= 2
+  const hasFAQHeading = $('h1,h2,h3,h4,h5,h6').toArray().some(el => {
+    const text = $(el).text().toLowerCase().trim()
+    return text === 'faq' || text === 'faqs' || text.startsWith('frequently asked')
+  })
+  const hasFAQContent = hasFAQSection || hasAccordion || hasFAQHeading
 
-  if (includeLikely && hasFAQContent) {
-    const hasFAQSchema = jsonLdScripts.some((el) => parseJsonLdTypes($(el).html()).includes('FAQPage'))
-    if (!hasFAQSchema) {
-      issues.push(withIssueMeta({
-        id: 'missing-faq-schema',
-        category: 'ai_visibility',
-        severity: 'medium',
-        title: 'FAQ content without FAQ schema',
-        description: 'FAQ-like content detected but FAQPage schema was not found.',
-        plainEnglish: 'You appear to have FAQ content, but it is not marked up for machines. This reduces the chance of reuse in search and AI answers.',
-        cursorPrompt: 'If the page has a real FAQ section, add FAQPage schema to match the visible questions and answers.',
-        boltPrompt: 'If this page has an FAQ section, add matching FAQ schema so machines can reuse it correctly.',
-        docsUrl: 'https://developers.google.com/search/docs/appearance/structured-data/faqpage',
-      }, 'ai-visibility', [evidence('text', 'FAQ-like content detected', 'true')]))
-    }
+  const hasFAQSchema = jsonLdScripts.some((el) => parseJsonLdTypes($(el).html()).includes('FAQPage'))
+
+  // Ghost schema: FAQPage in markup but no real visible Q&A content
+  if (hasFAQSchema && !hasFAQContent) {
+    issues.push(withIssueMeta({
+      id: 'ghost-faq-schema',
+      category: 'ai_visibility',
+      severity: 'medium',
+      title: 'FAQ schema present but no visible FAQ section',
+      description: 'FAQPage structured data found in the page, but no matching visible Q&A content was detected.',
+      plainEnglish: 'Your page has FAQ structured data but no actual FAQ accordion or Q&A section. Google may penalise this as misleading markup.',
+      cursorPrompt: 'Either add a real visible FAQ accordion to the page that matches the schema, or remove the FAQPage schema from the head.',
+      boltPrompt: 'Add a visible FAQ section matching the FAQPage schema, or remove the schema if there is no real FAQ content.',
+      docsUrl: 'https://developers.google.com/search/docs/appearance/structured-data/faqpage',
+    }, 'ai-visibility', [evidence('selector', 'FAQPage schema', 'present without visible Q&A content')]))
+  }
+
+  if (includeLikely && hasFAQContent && !hasFAQSchema) {
+    issues.push(withIssueMeta({
+      id: 'missing-faq-schema',
+      category: 'ai_visibility',
+      severity: 'medium',
+      title: 'FAQ section found but no FAQ schema',
+      description: 'A FAQ section was detected but FAQPage structured data was not found.',
+      plainEnglish: 'You have a real FAQ section, but it is not marked up for machines. Adding FAQPage schema increases the chance of reuse in search and AI answers.',
+      cursorPrompt: 'Add FAQPage schema to match the visible questions and answers in your FAQ section.',
+      boltPrompt: 'Add matching FAQ schema so machines can reuse your FAQ content correctly.',
+      docsUrl: 'https://developers.google.com/search/docs/appearance/structured-data/faqpage',
+    }, 'ai-visibility', [evidence('selector', 'FAQ section', 'found without schema')]))
   }
 
   let prevLevel = 0

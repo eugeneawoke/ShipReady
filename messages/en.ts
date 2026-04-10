@@ -546,6 +546,32 @@ const en = {
       cancelAnytime: 'Cancel anytime',
       comingSoon: 'Coming soon',
     },
+    faq: {
+      eyebrow: 'FAQ',
+      title: 'Common questions',
+      items: [
+        {
+          q: 'What is ShipReady?',
+          a: 'ShipReady is a pre-deploy quality gate for vibe-coded apps. Submit your URL and get a scan report covering performance, SEO, security, mobile readiness, and AI visibility — with fix prompts ready to paste into your AI coding tool.',
+        },
+        {
+          q: 'How does the scan work?',
+          a: 'ShipReady fetches your page, runs a real Lighthouse mobile audit, checks HTTP security headers, inspects HTML metadata, and verifies structured data. Results are labeled as verified, likely, or heuristic so you know exactly how confident each finding is.',
+        },
+        {
+          q: 'Is ShipReady free?',
+          a: 'Yes. The core scan is free — 3 scans per month, all category scores, and issue descriptions. Upgrade to Pro for unlimited scans, full AI fix prompts, PDF export, and weekly monitoring.',
+        },
+        {
+          q: 'Does ShipReady work with Cursor, Bolt, Lovable, and other AI tools?',
+          a: 'Yes. Every issue in your report includes a ready-to-paste fix prompt tailored for Cursor, Windsurf, Bolt, Lovable, v0, Replit, and other AI coding tools. Just copy and paste to fix.',
+        },
+        {
+          q: 'How accurate are the results?',
+          a: 'Every finding is labeled by confidence level. Verified issues are measured facts. Likely issues are strong heuristics. Lighthouse performance scores are real measured data. ShipReady never marks a check as passed if the measurement could not be completed.',
+        },
+      ],
+    },
     cta: {
       title: 'Is your app ship-ready?',
       sub: 'Run a free scan and get initial findings fast.',
