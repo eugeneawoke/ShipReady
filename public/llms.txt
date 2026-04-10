@@ -1,0 +1,25 @@
+# ShipReady
+
+> Pre-deploy quality gate for vibe-coded apps.
+
+ShipReady scans any live URL and produces an evidence-based report across five categories: Performance, SEO, Security, Mobile Readiness, and AI Visibility. Each finding is classified as verified, likely, or heuristic so developers know exactly how confident the result is. Every issue includes a ready-to-paste fix prompt for AI coding tools like Cursor, Windsurf, Bolt, Lovable, v0, and Replit.
+
+## Key pages
+
+- Homepage / scanner: https://shipready.app/
+- Pricing: https://shipready.app/pricing
+- Roadmap: https://shipready.app/roadmap
+- Privacy policy: https://shipready.app/privacy
+- Terms of service: https://shipready.app/terms
+
+## What ShipReady checks
+
+- **Performance** — Lighthouse mobile audit, LCP, CLS, INP, FCP, accessibility score
+- **SEO** — title, description, Open Graph, canonical, broken links, Twitter card
+- **Security** — HTTPS, HSTS, CSP, X-Frame-Options, X-Content-Type-Options, exposed secrets, SSL expiry
+- **Mobile** — viewport, favicon, Apple touch icon
+- **AI Visibility** — Schema.org JSON-LD, llms.txt, sitemap, robots.txt AI crawler access, author entity signals, FAQ schema
+
+## Audience
+
+Indie hackers, vibe coders, and solo founders who build with AI coding tools and want to ship quality products.

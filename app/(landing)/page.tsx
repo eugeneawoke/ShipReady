@@ -2,24 +2,32 @@
 
 import Link from 'next/link'
 import { useState, useRef, useEffect, useTransition } from 'react'
+import dynamic from 'next/dynamic'
 import { createBrowserClient } from '@supabase/ssr'
 import { motion } from 'framer-motion'
 import { useLocale, useMessages } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { ScanForm } from '@/components/landing/ScanForm'
-import { Particles } from '@/components/ui/particles'
-import { HeroNoise } from '@/components/ui/hero-noise'
 import { AnimatedGradientText } from '@/components/ui/animated-gradient-text'
 import { NumberTicker } from '@/components/ui/number-ticker'
 import { AnimatedShinyText } from '@/components/ui/animated-shiny-text'
 import { DotPattern } from '@/components/ui/dot-pattern'
-import { Meteors } from '@/components/ui/meteors'
-import { FlickeringGrid } from '@/components/ui/flickering-grid'
 import { SpotlightCard } from '@/components/ui/spotlight-card'
 import { CinematicFooter } from '@/components/ui/motion-footer'
+import Script from 'next/script'
 import { SiteBrandLink } from '@/components/SiteHeader'
 import { localeCookieName } from '@/lib/i18n'
 import type { AppMessages } from '@/messages/en'
+
+// Heavy decorative components — lazy-loaded so they don't block initial hydration / LCP
+// Components return JSX.Element (not ReactNode) — cast required for next/dynamic with React 19 strict types
+import type { ComponentType } from 'react'
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyComponent = ComponentType<any>
+const Particles = dynamic(async () => { const m = await import('@/components/ui/particles'); return m.Particles as AnyComponent }, { ssr: false })
+const HeroNoise = dynamic(async () => { const m = await import('@/components/ui/hero-noise'); return m.HeroNoise as AnyComponent }, { ssr: false })
+const FlickeringGrid = dynamic(async () => { const m = await import('@/components/ui/flickering-grid'); return m.FlickeringGrid as AnyComponent }, { ssr: false })
+const Meteors = dynamic(async () => { const m = await import('@/components/ui/meteors'); return m.Meteors as AnyComponent }, { ssr: false })
 
 // ─── smooth scroll ────────────────────────────────────────────────────────────
 
@@ -154,8 +162,50 @@ export default function LandingPage() {
     })
   }
 
+  const faqSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: [
+      {
+        '@type': 'Question',
+        name: 'What is ShipReady?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'ShipReady is a pre-deploy quality gate for vibe-coded apps. Submit your URL and get a report covering performance, SEO, security, mobile readiness, and AI visibility — with fix prompts ready to paste into your AI coding tool.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'How does the scan work?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'ShipReady fetches your page, runs a real Lighthouse mobile audit, checks HTTP security headers, inspects HTML metadata, and verifies structured data. Results are classified as verified, likely, or heuristic so you know exactly how confident each finding is.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'Is ShipReady free?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Yes, the core scan is free. Pro and Agency plans add PDF export, weekly monitoring, and deeper insights.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'Does ShipReady work with AI coding tools like Cursor, Bolt, or Lovable?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Yes. Each issue in your report includes a ready-to-paste fix prompt for AI coding tools like Cursor, Windsurf, Bolt, Lovable, v0, and Replit.',
+        },
+      },
+    ],
+  }
+
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE] overflow-x-hidden">
+      <Script id="faq-schema" type="application/ld+json">
+        {JSON.stringify(faqSchema)}
+      </Script>
       <Nav t={t} lang={lang} setLang={handleSetLang} switching={isPending} languageAriaLabel={languageAriaLabel} roadmapLabel={roadmapLabel} />
       <HeroSection t={t} />
       <StatsBar t={t} />

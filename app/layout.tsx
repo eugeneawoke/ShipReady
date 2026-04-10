@@ -27,11 +27,15 @@ const jetbrainsMono = JetBrains_Mono({
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('Metadata')
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://shipready.app'
 
   return {
     title: t('layoutTitle'),
     description: t('layoutDescription'),
     keywords: ['web quality', 'lighthouse', 'SEO checker', 'security audit', 'vibe coding', 'cursor', 'windsurf', 'bolt', 'lovable', 'v0', 'replit'],
+    alternates: {
+      canonical: appUrl,
+    },
     openGraph: {
       title: t('appTitle'),
       description: t('appDescription'),
@@ -43,8 +47,34 @@ export async function generateMetadata(): Promise<Metadata> {
       title: t('appTitle'),
       description: t('appDescription'),
     },
-    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://shipready.app'),
+    icons: {
+      apple: '/logo.svg',
+    },
+    metadataBase: new URL(appUrl),
   }
+}
+
+const organizationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'ShipReady',
+  url: process.env.NEXT_PUBLIC_APP_URL || 'https://shipready.app',
+  logo: `${process.env.NEXT_PUBLIC_APP_URL || 'https://shipready.app'}/logo.svg`,
+  description: 'Pre-deploy quality gate for vibe-coded apps. Scans performance, SEO, security, mobile readiness, and AI visibility.',
+}
+
+const webApplicationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'ShipReady',
+  url: process.env.NEXT_PUBLIC_APP_URL || 'https://shipready.app',
+  applicationCategory: 'DeveloperApplication',
+  description: 'Pre-deploy quality gate for vibe-coded apps. Scans performance, SEO, security, mobile readiness, and AI visibility.',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
 }
 
 export default async function RootLayout({
@@ -58,6 +88,16 @@ export default async function RootLayout({
       lang={locale}
       className={`${syne.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} dark h-full`}
     >
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(webApplicationSchema) }}
+        />
+      </head>
       <body className="min-h-full flex flex-col bg-[#0E0E0F] text-[#F1F0EE] antialiased">
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}

@@ -25,13 +25,15 @@ const securityHeaders = [
     ].join(', '),
   },
   {
-    key: 'Content-Security-Policy-Report-Only',
+    key: 'Content-Security-Policy',
     value: [
       "default-src 'self'",
-      "script-src 'self'",
-      "style-src 'self'",
+      // Next.js App Router requires unsafe-inline for hydration scripts and inline styles
+      "script-src 'self' 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
-      "font-src 'self' data:",
+      // next/font self-hosts font files; allow data: for inline font-face
+      "font-src 'self' data: https://fonts.gstatic.com",
       "connect-src 'self' https://*.supabase.co https://*.supabase.in",
       "object-src 'none'",
       "base-uri 'self'",
