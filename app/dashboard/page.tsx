@@ -1,10 +1,10 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { ArrowLeft } from 'lucide-react'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase'
 import { getUserWithPlan } from '@/lib/auth'
 import { SignOutButton } from '@/components/auth/SignOutButton'
-import { BackButton } from '@/components/BackButton'
 import { ScanForm } from '@/components/landing/ScanForm'
 import { MonitoringToggle } from '@/components/dashboard/MonitoringToggle'
 import { domainFromUrl } from '@/lib/monitoring/domains'
@@ -12,6 +12,7 @@ import { SiteHeader } from '@/components/SiteHeader'
 
 export default async function DashboardPage() {
   const t = await getTranslations('Dashboard')
+  const tCommon = await getTranslations('Common')
   const locale = await getLocale()
   const user = await getUserWithPlan()
   if (!user) redirect('/auth/login')
@@ -55,7 +56,10 @@ export default async function DashboardPage() {
 
       <div className="max-w-4xl mx-auto px-6 py-12">
         <div className="mb-8">
-          <BackButton className="text-sm text-[#8B8A85] hover:text-[#F1F0EE]" />
+          <Link href="/" className="flex items-center gap-1.5 text-sm text-[#8B8A85] transition-colors hover:text-[#F1F0EE]">
+            <ArrowLeft className="h-4 w-4" />
+            <span>{tCommon('back')}</span>
+          </Link>
         </div>
         {/* Header */}
         <div className="mb-10">

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { CheckCircle2, Loader2 } from 'lucide-react'
+import { CheckCircle2, Loader2, ArrowLeft } from 'lucide-react'
 import { BackButton } from '@/components/BackButton'
 import { ScanForm } from '@/components/landing/ScanForm'
 import { SiteBrandLink } from '@/components/SiteHeader'
@@ -160,19 +160,25 @@ export function ReportSkeleton({ status, processingIssue }: { status: string; pr
   }
 
   return (
-    <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE] flex items-center justify-center">
+    <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE] flex flex-col">
       <div className="fixed inset-x-0 top-0 border-b border-white/[0.06] bg-[#0E0E0F]/80 backdrop-blur-md">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-6">
+        <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-6">
           <SiteBrandLink />
-          <BackButton
-            label="Back"
-            className="text-xs text-[#5A5955] hover:text-[#F1F0EE]"
-            onClick={() => setIsLeaveModalOpen(true)}
-          />
         </div>
       </div>
 
-      <div className="max-w-sm w-full px-6">
+      <div className="flex flex-1 flex-col items-center justify-center pt-14">
+        <div className="max-w-sm w-full px-6">
+          <div className="mb-6">
+            <button
+              type="button"
+              onClick={() => setIsLeaveModalOpen(true)}
+              className="flex items-center gap-1.5 text-sm text-[#8B8A85] transition-colors hover:text-[#F1F0EE]"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>{t('leave')}</span>
+            </button>
+          </div>
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-baseline justify-between mb-3">
@@ -253,6 +259,7 @@ export function ReportSkeleton({ status, processingIssue }: { status: string; pr
           <span style={{ color: '#E8A83E', fontSize: 13, lineHeight: 1.4 }}>⚠</span>
           {t('leaveHint')}
         </p>
+      </div>
       </div>
 
       {isLeaveModalOpen && (
