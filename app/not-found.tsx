@@ -2,6 +2,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import { SiteHeader } from '@/components/SiteHeader'
+import { ContactPopover } from '@/components/ContactPopover'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('Metadata')
@@ -90,14 +91,10 @@ export default async function NotFound() {
             >
               {t('home')}
             </Link>
-            <a
-              href="https://t.me/eugenegusakov"
-              target="_blank"
-              rel="noopener noreferrer"
+            <ContactPopover
+              label={t('contact')}
               className="px-6 py-3 rounded-full bg-white/[0.06] border border-white/[0.08] text-[#8B8A85] text-sm font-medium hover:text-[#F1F0EE] hover:bg-white/[0.10] transition-colors"
-            >
-              {t('contact')}
-            </a>
+            />
           </div>
         </div>
 

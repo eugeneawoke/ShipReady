@@ -15,10 +15,10 @@ export async function SiteMicroFooter({ currentPage }: SiteMicroFooterProps) {
         <p>
           {t('contact')}:{' '}
           <a
-            href="mailto:hi@shipready.app"
+            href="mailto:egusakov74@gmail.com"
             className="transition-colors hover:text-[#8B8A85]"
           >
-            hi@shipready.app
+            egusakov74@gmail.com
           </a>
           {' · '}{t('craftedWithLoveBy')}{' '}
           <a

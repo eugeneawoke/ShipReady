@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const UPDATED = 'April 5, 2025'
-const EMAIL = 'hi@shipready.app'
+const EMAIL = 'egusakov74@gmail.com'
 
 export default async function PrivacyPage() {
   const locale = await getLocale()
@@ -23,6 +23,7 @@ export default async function PrivacyPage() {
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE]">
       <SiteHeader
+        sticky
         right={<span className="text-xs text-[#5A5955]">{isRu ? `Обновлено: ${UPDATED}` : `Last updated: ${UPDATED}`}</span>}
       />
 

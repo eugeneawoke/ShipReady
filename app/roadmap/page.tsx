@@ -35,6 +35,7 @@ export default async function RoadmapPage() {
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE]">
       <SiteHeader
+        sticky
         right={(
           <div className="flex items-center gap-4 text-xs text-[#5A5955]">
             {(['done', 'in-progress', 'planned'] as PhaseStatus[]).map(s => {
@@ -60,7 +61,7 @@ export default async function RoadmapPage() {
           <p className="text-[#8B8A85] text-sm leading-relaxed max-w-lg">
             {t.intro}{' '}
             {t.featureRequest}{' '}
-            <a href="mailto:hi@shipready.app" className="text-[#6E56CF] hover:underline">{t.emailUs}</a>.
+            <a href="mailto:egusakov74@gmail.com" className="text-[#6E56CF] hover:underline">{t.emailUs}</a>.
           </p>
         </div>
 
@@ -122,7 +123,7 @@ export default async function RoadmapPage() {
             {t.ctaBody}
           </p>
           <a
-            href="mailto:hi@shipready.app"
+            href="mailto:egusakov74@gmail.com"
             className="inline-flex items-center gap-2 text-sm px-5 py-2.5 rounded-xl bg-[#6E56CF] text-white hover:bg-[#7C68D4] transition-colors font-medium"
           >
             {t.cta}
