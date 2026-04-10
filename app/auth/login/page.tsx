@@ -320,7 +320,7 @@ export default function LoginPage() {
               <p className="text-[10px] text-[#5A5955] text-center leading-relaxed">
                 {t('footer.legalPrefix')}{' '}
                 <Link href="/terms" className="hover:text-[#8B8A85] transition-colors">{t('footer.terms')}</Link>
-                {' '}and{' '}
+                {' '}{t('footer.and')}{' '}
                 <Link href="/privacy" className="hover:text-[#8B8A85] transition-colors">{t('footer.privacy')}</Link>.
               </p>
             </div>

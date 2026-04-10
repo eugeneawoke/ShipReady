@@ -444,6 +444,13 @@ const en = {
     termsLink: 'Terms of Service',
     privacyLink: 'Privacy Policy',
   },
+  SiteMicroFooter: {
+    contact: 'Contact',
+    craftedWithLoveBy: 'Crafted with love by',
+    allRightsReserved: 'All rights reserved.',
+    privacy: 'Privacy',
+    terms: 'Terms',
+  },
   NotFound: {
     eyebrow: 'Page not found',
     title: 'Nothing to ship here.',

@@ -1,9 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useTransition } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { motion } from 'framer-motion'
+import { useLocale, useMessages } from 'next-intl'
+import { useRouter } from 'next/navigation'
 import { ScanForm } from '@/components/landing/ScanForm'
 import { Particles } from '@/components/ui/particles'
 import { HeroNoise } from '@/components/ui/hero-noise'
@@ -17,6 +19,7 @@ import { SpotlightCard } from '@/components/ui/spotlight-card'
 import { CinematicFooter } from '@/components/ui/motion-footer'
 import { SiteBrandLink } from '@/components/SiteHeader'
 import { localeCookieName } from '@/lib/i18n'
+import type { AppMessages } from '@/messages/en'
 
 // ─── smooth scroll ────────────────────────────────────────────────────────────
 
@@ -105,244 +108,8 @@ const IconGlobe = () => (
   </svg>
 )
 
-// ─── translations ─────────────────────────────────────────────────────────────
-
-const T = {
-  EN: {
-    nav: {
-      howItWorks: 'How it works',
-      pricing: 'Pricing',
-      roadmap: 'Roadmap',
-      signIn: 'Sign in',
-      getStarted: 'Get started',
-    },
-    hero: {
-      h1a: 'Your vibe-coded app,',
-      h1b: 'ship-ready with truthful checks',
-      sub: 'Paste your URL. Get a full audit across performance, SEO, security, mobile, and AI visibility, with evidence-based fix prompts for vibe-coding tools.',
-      noSignup: 'No signup required for first scan',
-      worksWith: 'Works with',
-    },
-    stats: [
-      { value: '40+', label: 'automated checks' },
-      { value: '5',   label: 'categories covered' },
-      { value: 'Fast', label: 'initial findings' },
-      { value: 'AI',  label: 'fix prompt per issue' },
-    ],
-    how: {
-      eyebrow: 'How it works',
-      title: 'Three steps to ship-ready',
-      steps: [
-        { step: '01', emoji: '🔗', title: 'Paste your URL',       desc: 'Drop any live URL — Vercel, Netlify, custom domain. No setup or browser extension needed.' },
-        { step: '02', emoji: '⚙️', title: '40+ checks run',       desc: 'Fast truth checks run first, then deeper analysis follows for performance and noisier heuristics.' },
-        { step: '03', emoji: '✨', title: 'Get AI fix prompts',   desc: 'Each issue has a plain-English explanation and one ready-to-paste prompt for your vibe-coding tool.' },
-      ],
-    },
-    preview: {
-      eyebrow: 'The report',
-      title: 'Not just scores — actionable fixes',
-      sub: 'A complete breakdown of every issue with context, severity, and ready-to-use AI prompts.',
-      upgradeBtn: 'Upgrade to see AI fix',
-    },
-    demo: {
-      score: 'SCORE',
-      grade: 'Good',
-      severity: 'Critical',
-      issueTitle: 'Content Security Policy header missing',
-      issueDesc: 'Without CSP, your app is open to XSS attacks. An attacker can inject scripts that steal session tokens or user data.',
-      recommendedFix: 'Recommended fix',
-      copyPrompt: 'Copy prompt',
-      prompt: "Add Content-Security-Policy to next.config.ts:\nheaders: [{ key: 'Content-Security-Policy',\n  value: \"default-src 'self'; script-src 'self'\" }]\nThis fixes the critical security issue immediately.",
-    },
-    features: {
-      eyebrow: 'What we check',
-      title: '40+ checks across 5 categories',
-      sub: 'Every check that matters before your app goes live.',
-      items: [
-        { title: 'Performance',    desc: 'Real Lighthouse run in a headless browser. Core Web Vitals, LCP, CLS, INP, FCP, Speed Index.',       checks: ['LCP < 2.5s', 'CLS < 0.1', 'INP < 200ms', 'FCP < 1.8s', 'Speed Index'] },
-        { title: 'SEO & Social',   desc: 'Complete meta audit. OG tags, Twitter cards, canonical, robots.txt, sitemap, structured data.',    checks: ['Title & description', 'OG image & tags', 'Canonical URL', 'Sitemap.xml', 'Twitter card'] },
-        { title: 'Security',       desc: '11 security checks: HTTP headers, SSL cert validity, exposed .env files, API key detection.',        checks: ['CSP header', 'HSTS', 'X-Frame-Options', 'SSL/TLS cert', 'Exposed .env'] },
-        { title: 'Mobile',         desc: 'Viewport meta, touch target sizes, font readability, horizontal overflow, tap target spacing.',    checks: ['Viewport meta', 'Touch 44px+', 'Font size ≥ 16px', 'No horiz. scroll', 'Tap spacing'] },
-        { title: 'AI Visibility',  desc: 'AEO + GEO checks: Schema.org, FAQ schema, llms.txt, AI crawler access, sitemap, author entity.',  checks: ['Schema.org JSON-LD', 'llms.txt', 'AI crawlers', 'Sitemap.xml', 'FAQ schema'] },
-      ],
-    },
-    ai: {
-      eyebrow: 'The key difference',
-      title: "Not just \"what's wrong\" —\nbut how to fix it",
-      sub: "Every issue comes with a plain-English explanation and a ready-to-paste prompt. Paste it into your vibe-coding tool and fix the problem directly in the codebase.",
-      bullets: [
-        'One prompt per issue — no Stack Overflow hunting',
-        'Tailored for Next.js, React, and vibe-coded apps',
-        'Works with Cursor, Windsurf, Bolt, Lovable, v0, Replit, etc.',
-      ],
-      fileLabel: 'fix_prompt.txt',
-      ready: 'ready to paste',
-      copyBtn: 'Copy prompt',
-      copiedBtn: 'Copied!',
-      pasteHint: '→ paste into your builder chat',
-      promptText: "Fix the missing Content-Security-Policy header\nin my Next.js app.\n\nStart with Content-Security-Policy-Report-Only:\n{\n  key: 'Content-Security-Policy-Report-Only',\n  value: [\n    \"default-src 'self'\",\n    \"script-src 'self'\",\n    \"object-src 'none'\",\n    \"base-uri 'self'\",\n    \"frame-ancestors 'none'\",\n  ].join('; ')\n}\n\nCheck production reports, add nonces or SRI,\nthen switch to enforcing CSP.",
-    },
-    pricing: {
-      eyebrow: 'Pricing',
-      title: 'Simple, transparent',
-      sub: 'Start free. Upgrade when you need more.',
-      plans: [
-        { name: 'Free',   nameKey: 'FREE',   price: '$0',  period: null,  desc: 'Try it out',         features: ['3 scans / month', 'All category scores', 'Issue descriptions', 'AI prompts blurred'],            cta: 'Start free',    highlight: false, coming: false },
-        { name: 'Pro',    nameKey: 'PRO',    price: '$14', period: '/mo', desc: 'For solo founders',  features: ['Unlimited scans', 'All AI fix prompts', 'PDF export', 'Weekly monitoring'],                       cta: 'Get Pro',       highlight: true,  coming: false },
-        { name: 'Agency', nameKey: 'AGENCY', price: '$39', period: '/mo', desc: 'For teams',          features: ['10 domains', 'White-label PDF', 'All Pro features', 'Priority support', 'API access'],           cta: 'Get Agency',    highlight: false, coming: true  },
-      ],
-      popular: 'Most popular',
-      cancelAnytime: 'Cancel anytime',
-      comingSoon: 'Coming soon',
-    },
-    cta: {
-      title: 'Is your app ship-ready?',
-      sub: 'Run a free scan and get initial findings fast.',
-    },
-    footer: {
-      tagline: 'Pre-deploy quality gate for vibe-coded apps.',
-      madeBy: 'Made with ♥ by',
-      colProduct: 'Product',
-      colSupport: 'Support',
-      colLegal: 'Legal',
-      howItWorks: 'How it works',
-      pricing: 'Pricing',
-      roadmap: 'Roadmap',
-      exampleReport: 'Example report',
-      emailLabel: 'Email support',
-      xLabel: 'X (Twitter)',
-      tgLabel: 'Telegram',
-      privacy: 'Privacy Policy',
-      terms: 'Terms of Service',
-      copy: '© 2025 ShipReady · Handcrafted for indie builders & vibe coders',
-    },
-  },
-
-  RU: {
-    nav: {
-      howItWorks: 'Как это работает',
-      pricing: 'Тарифы',
-      roadmap: 'Роадмэп',
-      signIn: 'Войти',
-      getStarted: 'Начать',
-    },
-    hero: {
-      h1a: 'Ваше vibe-coded приложение,',
-      h1b: 'готово к деплою с честной проверкой',
-      sub: 'Вставьте URL и получите полный аудит по производительности, SEO, безопасности, мобильности и видимости для ИИ — с evidence-based AI-промптами для vibe-coding инструментов.',
-      noSignup: 'Первый скан без регистрации',
-      worksWith: 'Работает с',
-    },
-    stats: [
-      { value: '40+', label: 'автоматических проверок' },
-      { value: '5',   label: 'категорий' },
-      { value: 'Быстро', label: 'первые выводы' },
-      { value: 'AI',  label: 'промпт на каждую проблему' },
-    ],
-    how: {
-      eyebrow: 'Как это работает',
-      title: 'Три шага до готовности',
-      steps: [
-        { step: '01', emoji: '🔗', title: 'Вставьте URL',          desc: 'Любой живой URL — Vercel, Netlify, свой домен. Без настройки и расширений.' },
-        { step: '02', emoji: '⚙️', title: 'Запускаем 40+ проверок', desc: 'Lighthouse, SEO-мета, заголовки безопасности, SSL, мобильный вьюпорт, видимость для ИИ — параллельно за 30 секунд.' },
-        { step: '03', emoji: '✨', title: 'Получаете AI-промпты',   desc: 'К каждой проблеме — понятное объяснение и один готовый промпт для вашего vibe-coding инструмента.' },
-      ],
-    },
-    preview: {
-      eyebrow: 'Отчёт',
-      title: 'Не просто оценки — конкретные исправления',
-      sub: 'Полный разбор каждой проблемы с контекстом, серьёзностью и готовыми AI-промптами.',
-      upgradeBtn: 'Обновитесь чтобы увидеть исправление',
-    },
-    demo: {
-      score: 'ОЦЕНКА',
-      grade: 'Хорошо',
-      severity: 'Критично',
-      issueTitle: 'Отсутствует заголовок Content Security Policy',
-      issueDesc: 'Без CSP ваше приложение уязвимо для XSS-атак. Злоумышленник может внедрить скрипты, которые украдут токены сессий или данные пользователей.',
-      recommendedFix: 'Recommended fix',
-      copyPrompt: 'Скопировать промпт',
-      prompt: "Add Content-Security-Policy to next.config.ts:\nheaders: [{ key: 'Content-Security-Policy',\n  value: \"default-src 'self'; script-src 'self'\" }]\nThis fixes the critical security issue immediately.",
-    },
-    features: {
-      eyebrow: 'Что проверяем',
-      title: '40+ проверок по 5 категориям',
-      sub: 'Всё что важно до деплоя вашего приложения.',
-      items: [
-        { title: 'Производительность',  desc: 'Реальный Lighthouse в headless-браузере. Core Web Vitals, LCP, CLS, INP, FCP, Speed Index.',  checks: ['LCP < 2.5с', 'CLS < 0.1', 'INP < 200мс', 'FCP < 1.8с', 'Speed Index'] },
-        { title: 'SEO и соцсети',       desc: 'Полный аудит мета-тегов. OG, Twitter cards, canonical, robots.txt, sitemap.',               checks: ['Title & description', 'OG изображение', 'Canonical URL', 'Sitemap.xml', 'Twitter card'] },
-        { title: 'Безопасность',        desc: '11 проверок: HTTP-заголовки, SSL, открытые .env файлы, обнаружение API-ключей.',             checks: ['CSP заголовок', 'HSTS', 'X-Frame-Options', 'SSL/TLS', 'Открытый .env'] },
-        { title: 'Мобильный',           desc: 'Viewport meta, размеры кнопок, читаемость шрифтов, горизонтальный скролл.',                 checks: ['Viewport meta', 'Тач 44px+', 'Шрифт ≥ 16px', 'Без гор. скролла', 'Отступы'] },
-        { title: 'Видимость для ИИ',    desc: 'AEO + GEO: Schema.org, FAQ-разметка, llms.txt, доступ ИИ-краулеров, sitemap, автор.',       checks: ['Schema.org JSON-LD', 'llms.txt', 'ИИ-краулеры', 'Sitemap.xml', 'FAQ schema'] },
-      ],
-    },
-    ai: {
-      eyebrow: 'Ключевое отличие',
-      title: 'Не просто «что не так» —\nно как исправить',
-      sub: 'К каждой проблеме — понятное объяснение и готовый промпт. Вставьте его в свой vibe-coding инструмент и внесите исправления прямо в код.',
-      bullets: [
-        'Один промпт на проблему — без Stack Overflow',
-        'Адаптировано для Next.js, React и vibe-coded приложений',
-        'Работает с Cursor, Windsurf, Bolt, Lovable, v0, Replit и другими',
-      ],
-      fileLabel: 'fix_prompt.txt',
-      ready: 'готов к вставке',
-      copyBtn: 'Скопировать промпт',
-      copiedBtn: 'Скопировано!',
-      pasteHint: '→ вставьте в чат вашего инструмента',
-      promptText: "Fix the missing Content-Security-Policy header\nin my Next.js app.\n\nStart with Content-Security-Policy-Report-Only:\n{\n  key: 'Content-Security-Policy-Report-Only',\n  value: [\n    \"default-src 'self'\",\n    \"script-src 'self'\",\n    \"object-src 'none'\",\n    \"base-uri 'self'\",\n    \"frame-ancestors 'none'\",\n  ].join('; ')\n}\n\nCheck production reports, add nonces or SRI,\nthen switch to enforcing CSP.",
-    },
-    pricing: {
-      eyebrow: 'Тарифы',
-      title: 'Просто и прозрачно',
-      sub: 'Начните бесплатно. Обновитесь когда нужно.',
-      plans: [
-        { name: 'Бесплатно', nameKey: 'FREE',   price: '$0',  period: null,   desc: 'Попробуйте',         features: ['3 скана / месяц', 'Все категориальные оценки', 'Описания проблем', 'AI-промпты размыты'],                      cta: 'Начать бесплатно', highlight: false, coming: false },
-        { name: 'Pro',       nameKey: 'PRO',    price: '$14', period: '/мес', desc: 'Для соло-фаундеров', features: ['Безлимитные сканы', 'Все AI-промпты', 'Экспорт PDF', 'Еженедельный мониторинг', 'Email-уведомления'],         cta: 'Получить Pro',     highlight: true,  coming: false },
-        { name: 'Агентство', nameKey: 'AGENCY', price: '$39', period: '/мес', desc: 'Для команд',         features: ['10 доменов', 'PDF с белым лейблом', 'Всё из Pro', 'Приоритетная поддержка', 'Доступ к API'],                  cta: 'Для агентств',     highlight: false, coming: true  },
-      ],
-      popular: 'Популярный',
-      cancelAnytime: 'Отмена в любой момент',
-      comingSoon: 'Скоро',
-    },
-    cta: {
-      title: 'Ваше приложение готово к деплою?',
-      sub: 'Запустите бесплатный скан за 30 секунд.',
-    },
-    footer: {
-      tagline: 'Аудит качества перед деплоем для vibe-coded приложений.',
-      madeBy: 'Сделано с ♥',
-      colProduct: 'Продукт',
-      colSupport: 'Поддержка',
-      colLegal: 'Документы',
-      howItWorks: 'Как это работает',
-      pricing: 'Тарифы',
-      roadmap: 'Роадмэп',
-      exampleReport: 'Пример отчёта',
-      emailLabel: 'Email',
-      xLabel: 'X (Twitter)',
-      tgLabel: 'Telegram',
-      privacy: 'Политика конфиденциальности',
-      terms: 'Условия использования',
-      copy: '© 2025 ShipReady · Сделано для инди-разработчиков с заботой',
-    },
-  },
-} as const
-
-type Lang = keyof typeof T
-type Translations = {
-  nav: { howItWorks: string; pricing: string; roadmap: string; signIn: string; getStarted: string }
-  hero: { h1a: string; h1b: string; sub: string; noSignup: string; worksWith: string }
-  stats: readonly { value: string; label: string }[]
-  how: { eyebrow: string; title: string; steps: readonly { step: string; emoji: string; title: string; desc: string }[] }
-  preview: { eyebrow: string; title: string; sub: string; upgradeBtn: string }
-  demo: { score: string; grade: string; severity: string; issueTitle: string; issueDesc: string; recommendedFix: string; copyPrompt: string; prompt: string }
-  features: { eyebrow: string; title: string; sub: string; items: readonly { title: string; desc: string; checks: readonly string[] }[] }
-  ai: { eyebrow: string; title: string; sub: string; bullets: readonly string[]; fileLabel: string; ready: string; copyBtn: string; copiedBtn: string; pasteHint: string; promptText: string }
-  pricing: { eyebrow: string; title: string; sub: string; popular: string; cancelAnytime: string; comingSoon: string; plans: readonly { name: string; nameKey: string; price: string; period: string | null; desc: string; features: readonly string[]; cta: string; highlight: boolean; coming: boolean }[] }
-  cta: { title: string; sub: string }
-  footer: { tagline: string; madeBy: string; colProduct: string; colSupport: string; colLegal: string; howItWorks: string; pricing: string; roadmap: string; exampleReport: string; emailLabel: string; xLabel: string; tgLabel: string; privacy: string; terms: string; copy: string }
-}
+type Lang = 'EN' | 'RU'
+type Translations = AppMessages['Landing']
 
 // ─── animation helpers ────────────────────────────────────────────────────────
 
@@ -366,36 +133,30 @@ const FEATURE_META = [
 // ─── page ─────────────────────────────────────────────────────────────────────
 
 export default function LandingPage() {
-  const [lang, setLang] = useState<Lang>(() => {
-    if (typeof document === 'undefined' || typeof navigator === 'undefined') return 'EN'
-
-    const cookieLocale = document.cookie
-      .split('; ')
-      .find((item) => item.startsWith(`${localeCookieName}=`))
-      ?.split('=')[1]
-
-    if (cookieLocale === 'ru') return 'RU'
-
-    const preferredLanguage = navigator.languages.length > 0
-      ? navigator.languages[0]
-      : navigator.language
-
-    if (preferredLanguage.toLowerCase().startsWith('ru')) return 'RU'
-    if (document.documentElement.lang === 'ru') return 'RU'
-
-    return 'EN'
-  })
-  const t = T[lang] as unknown as Translations
+  const router = useRouter()
+  const locale = useLocale()
+  const messages = useMessages() as AppMessages
+  const t = messages.Landing as Translations
+  const languageAriaLabel = messages.LanguageSwitcher.ariaLabel
+  const roadmapLabel = messages.Roadmap.title
+  const [isPending, startTransition] = useTransition()
+  const lang: Lang = locale === 'ru' ? 'RU' : 'EN'
 
   function handleSetLang(nextLang: Lang) {
-    document.cookie = `${localeCookieName}=${nextLang.toLowerCase()}; path=/; max-age=31536000; samesite=lax`
-    document.documentElement.lang = nextLang.toLowerCase()
-    setLang(nextLang)
+    const nextLocale = nextLang.toLowerCase()
+    document.cookie = `${localeCookieName}=${nextLocale}; path=/; max-age=31536000; samesite=lax`
+    document.documentElement.lang = nextLocale
+
+    if (nextLocale === locale) return
+
+    startTransition(() => {
+      router.refresh()
+    })
   }
 
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE] overflow-x-hidden">
-      <Nav t={t} lang={lang} setLang={handleSetLang} />
+      <Nav t={t} lang={lang} setLang={handleSetLang} switching={isPending} languageAriaLabel={languageAriaLabel} roadmapLabel={roadmapLabel} />
       <HeroSection t={t} />
       <StatsBar t={t} />
       <HowItWorksSection t={t} />
@@ -411,7 +172,7 @@ export default function LandingPage() {
 
 // ─── Nav ──────────────────────────────────────────────────────────────────────
 
-function Nav({ t, lang, setLang }: { t: Translations; lang: Lang; setLang: (l: Lang) => void }) {
+function Nav({ t, lang, setLang, switching, languageAriaLabel, roadmapLabel }: { t: Translations; lang: Lang; setLang: (l: Lang) => void; switching: boolean; languageAriaLabel: string; roadmapLabel: string }) {
   const [langOpen, setLangOpen] = useState(false)
   const langRef = useRef<HTMLDivElement>(null)
   const [userEmail, setUserEmail] = useState<string | null>(null)
@@ -463,7 +224,7 @@ function Nav({ t, lang, setLang }: { t: Translations; lang: Lang; setLang: (l: L
               href="/roadmap"
               className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors whitespace-nowrap"
             >
-              {t.nav.roadmap}
+              {roadmapLabel}
             </Link>
           </div>
         </div>
@@ -475,7 +236,8 @@ function Nav({ t, lang, setLang }: { t: Translations; lang: Lang; setLang: (l: L
             <button
               onClick={() => setLangOpen(v => !v)}
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[#8B8A85] hover:text-[#F1F0EE] hover:bg-white/[0.04] transition-colors"
-              aria-label="Switch language"
+              aria-label={languageAriaLabel}
+              aria-busy={switching}
             >
               <IconGlobe />
               <span className="text-xs font-mono">{lang}</span>
@@ -486,6 +248,7 @@ function Nav({ t, lang, setLang }: { t: Translations; lang: Lang; setLang: (l: L
                   <button
                     key={l}
                     onClick={() => { setLang(l); setLangOpen(false) }}
+                    disabled={switching}
                     className={`w-full flex items-center gap-2 px-3 py-2 text-left text-xs font-mono transition-colors ${
                       lang === l ? 'text-[#F1F0EE] bg-white/[0.05]' : 'text-[#8B8A85] hover:text-[#F1F0EE] hover:bg-white/[0.03]'
                     }`}
@@ -503,7 +266,7 @@ function Nav({ t, lang, setLang }: { t: Translations; lang: Lang; setLang: (l: L
               href="/dashboard"
               className="text-sm px-4 py-1.5 rounded-lg bg-[#6E56CF] text-white hover:bg-[#7C68D4] transition-colors font-medium whitespace-nowrap"
             >
-              Dashboard
+              {t.nav.dashboard}
             </a>
           ) : (
             <>
@@ -670,6 +433,14 @@ function HowItWorksSection({ t }: { t: Translations }) {
 // ─── Report preview ───────────────────────────────────────────────────────────
 
 function ReportPreviewSection({ t }: { t: Translations }) {
+  const previewCategories = [
+    { name: t.features.items[0].title, score: 72, color: '#F5C518', icon: '⚡' },
+    { name: t.features.items[1].title, score: 85, color: '#4A9EFF', icon: '🔍' },
+    { name: t.features.items[2].title, score: 61, color: '#FF4444', icon: '🛡️' },
+    { name: t.features.items[3].title, score: 93, color: '#3DDC84', icon: '📱' },
+    { name: t.features.items[4].title, score: 48, color: '#A78BFA', icon: '🤖' },
+  ] as const
+
   return (
     <section id="preview" className="py-8 px-6 overflow-hidden">
       <div className="max-w-5xl mx-auto">
@@ -718,13 +489,7 @@ function ReportPreviewSection({ t }: { t: Translations }) {
               </div>
 
               <div className="flex-1 grid grid-cols-2 gap-3 w-full">
-                {[
-                  { name: 'Performance', score: 72, color: '#F5C518', icon: '⚡' },
-                  { name: 'SEO',         score: 85, color: '#4A9EFF', icon: '🔍' },
-                  { name: 'Security',    score: 61, color: '#FF4444', icon: '🛡️' },
-                  { name: 'Mobile',      score: 93, color: '#3DDC84', icon: '📱' },
-                  { name: 'AI Visibility', score: 48, color: '#A78BFA', icon: '🤖' },
-                ].map(cat => (
+                {previewCategories.map(cat => (
                   <div key={cat.name} className="p-3 rounded-xl bg-[#1E1E21] border border-white/[0.05]">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xs text-[#8B8A85] flex items-center gap-1.5">
@@ -932,7 +697,7 @@ function AIPromptsSection({ t }: { t: Translations }) {
 
 function PricingSection({ t }: { t: Translations }) {
   return (
-    <section id="pricing" className="py-24 px-6">
+    <section id="pricing" className="scroll-mt-24 py-24 px-6">
       <div className="max-w-4xl mx-auto">
         <motion.div {...fadeUp()} className="text-center mb-12">
           <div className="inline-flex items-center gap-2 mb-3">
@@ -1030,7 +795,7 @@ function PricingSection({ t }: { t: Translations }) {
 
 function BottomCTA({ t }: { t: Translations }) {
   return (
-    <section id="cta" className="py-24 px-6 relative overflow-hidden">
+    <section id="cta" className="scroll-mt-24 py-24 px-6 relative overflow-hidden">
       <DotPattern
         className="z-0 opacity-[0.04] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,black,transparent)]"
         width={20}

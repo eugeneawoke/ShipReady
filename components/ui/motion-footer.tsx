@@ -2,9 +2,11 @@
 
 import * as React from 'react'
 import { useEffect, useRef, useState } from 'react'
+import { useMessages } from 'next-intl'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { cn } from '@/lib/utils'
+import type { AppMessages } from '@/messages/en'
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger)
@@ -183,17 +185,18 @@ MagneticButton.displayName = 'MagneticButton'
 
 // ─── Marquee ──────────────────────────────────────────────────────────────────
 
-const MarqueeItem = () => (
-  <div className="flex items-center space-x-12 px-6 font-semibold tracking-[0.25em] uppercase text-xs">
-    <span>Performance Audits</span><span className="opacity-40">✦</span>
-    <span>Security Headers</span><span className="opacity-40">✦</span>
-    <span>SEO Analysis</span><span className="opacity-40">✦</span>
-    <span>Mobile Checks</span><span className="opacity-40">✦</span>
-    <span>AI Fix Prompts</span><span className="opacity-40">✦</span>
-    <span>30-Second Scans</span><span className="opacity-40">✦</span>
-    <span>Ship with Confidence</span><span className="opacity-40">✦</span>
-  </div>
-)
+function MarqueeItem({ items }: { items: string[] }) {
+  return (
+    <div className="flex items-center space-x-12 px-6 font-semibold tracking-[0.25em] uppercase text-xs">
+      {items.map((item) => (
+        <React.Fragment key={item}>
+          <span>{item}</span>
+          <span className="opacity-40">✦</span>
+        </React.Fragment>
+      ))}
+    </div>
+  )
+}
 
 // ─── ContactButton ────────────────────────────────────────────────────────────
 
@@ -219,7 +222,7 @@ const IconTelegram = () => (
   </svg>
 )
 
-function ContactButton() {
+function ContactButton({ label }: { label: string }) {
   const [hovered, setHovered] = useState(false)
 
   const contacts = [
@@ -236,7 +239,6 @@ function ContactButton() {
       className="sr-glass-pill px-6 py-3 rounded-full text-[#8B8A85] font-medium text-xs md:text-sm hover:text-[#F1F0EE] overflow-hidden"
       style={{ minWidth: '80px' }}
     >
-      {/* "Contact" label */}
       <span
         className="flex items-center justify-center transition-all duration-200"
         style={{
@@ -246,7 +248,7 @@ function ContactButton() {
           pointerEvents: 'none',
         }}
       >
-        Contact
+        {label}
       </span>
 
       {/* Icons row */}
@@ -278,7 +280,26 @@ function ContactButton() {
 
 // ─── CinematicFooter ──────────────────────────────────────────────────────────
 
-export function CinematicFooter() {
+interface CinematicFooterProps {
+  scanHref?: string
+  pricingHref?: string
+}
+
+function navigateToTarget(target: string) {
+  if (target.startsWith('#')) {
+    smoothScrollTo(target)
+    return
+  }
+
+  window.location.href = target
+}
+
+export function CinematicFooter({
+  scanHref = '#cta',
+  pricingHref = '#pricing',
+}: CinematicFooterProps) {
+  const messages = useMessages() as AppMessages
+  const t = messages.Landing.footer.cinematic
   const wrapperRef    = useRef<HTMLDivElement>(null)
   const giantTextRef  = useRef<HTMLDivElement>(null)
   const headingRef    = useRef<HTMLHeadingElement>(null)
@@ -337,14 +358,19 @@ export function CinematicFooter() {
           {/* Marquee */}
           <div className="absolute top-12 left-0 w-full overflow-hidden border-y border-white/[0.06] bg-[#0E0E0F]/60 backdrop-blur-md py-4 z-10 -rotate-2 scale-110 shadow-2xl text-[#8B8A85]">
             <div className="flex w-max sr-footer-marquee">
-              <MarqueeItem /><MarqueeItem />
+              <MarqueeItem items={t.marquee} /><MarqueeItem items={t.marquee} />
             </div>
           </div>
 
           {/* Center content */}
           <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 mt-20 w-full max-w-5xl mx-auto">
             <h2 ref={headingRef} className="text-5xl md:text-8xl font-black sr-text-glow tracking-tighter mb-12 text-center" style={{ fontFamily: 'var(--font-heading)' }}>
-              Is your app<br/>ship-ready?
+              {t.heading.split('\n').map((line, index) => (
+                <React.Fragment key={line}>
+                  {index > 0 ? <br/> : null}
+                  {line}
+                </React.Fragment>
+              ))}
             </h2>
 
             <div ref={linksRef} className="flex flex-col items-center gap-6 w-full">
@@ -352,28 +378,28 @@ export function CinematicFooter() {
               <div className="flex flex-wrap justify-center gap-4 w-full">
                 <MagneticButton
                   as="button"
-                  onClick={() => smoothScrollTo('#cta')}
+                  onClick={() => navigateToTarget(scanHref)}
                   className="sr-glass-pill px-10 py-5 rounded-full text-[#F1F0EE] font-bold text-sm md:text-base flex items-center gap-3 group"
                 >
                   <span className="text-[#6E56CF] group-hover:text-[#a78bfa] transition-colors text-lg">⬡</span>
-                  Free scan — fast initial findings
+                  {t.primaryCta}
                 </MagneticButton>
 
                 <MagneticButton
                   as="button"
-                  onClick={() => smoothScrollTo('#pricing')}
+                  onClick={() => navigateToTarget(pricingHref)}
                   className="sr-glass-pill px-10 py-5 rounded-full text-[#8B8A85] font-bold text-sm md:text-base flex items-center gap-3 group"
                 >
                   <span className="text-[#6E56CF] group-hover:text-[#a78bfa] transition-colors">$</span>
-                  View pricing
+                  {t.secondaryCta}
                 </MagneticButton>
               </div>
 
               {/* Secondary links */}
               <div className="flex flex-wrap justify-center gap-3 md:gap-4 w-full mt-2">
-                <MagneticButton as="a" href="/privacy"           className="sr-glass-pill px-6 py-3 rounded-full text-[#8B8A85] font-medium text-xs md:text-sm hover:text-[#F1F0EE]">Privacy Policy</MagneticButton>
-                <MagneticButton as="a" href="/terms"             className="sr-glass-pill px-6 py-3 rounded-full text-[#8B8A85] font-medium text-xs md:text-sm hover:text-[#F1F0EE]">Terms of Service</MagneticButton>
-                <ContactButton />
+                <MagneticButton as="a" href="/privacy" className="sr-glass-pill px-6 py-3 rounded-full text-[#8B8A85] font-medium text-xs md:text-sm hover:text-[#F1F0EE]">{messages.Landing.footer.privacy}</MagneticButton>
+                <MagneticButton as="a" href="/terms" className="sr-glass-pill px-6 py-3 rounded-full text-[#8B8A85] font-medium text-xs md:text-sm hover:text-[#F1F0EE]">{messages.Landing.footer.terms}</MagneticButton>
+                <ContactButton label={t.contact} />
               </div>
             </div>
           </div>
@@ -382,13 +408,13 @@ export function CinematicFooter() {
           <div className="relative z-20 w-full pb-8 px-6 md:px-12 flex flex-col md:flex-row items-center justify-between gap-6">
 
             <div className="text-[#5A5955] text-[10px] md:text-xs font-semibold tracking-widest uppercase order-2 md:order-1">
-              © {new Date().getFullYear()} ShipReady · All rights reserved.
+              © {new Date().getFullYear()} ShipReady · {t.allRightsReserved}
             </div>
 
             <div className="sr-glass-pill px-6 py-3 rounded-full flex items-center gap-2 order-1 md:order-2 cursor-default">
-              <span className="text-[#5A5955] text-[10px] md:text-xs font-bold uppercase tracking-widest">Crafted with</span>
+              <span className="text-[#5A5955] text-[10px] md:text-xs font-bold uppercase tracking-widest">{t.craftedWith}</span>
               <span className="sr-footer-heartbeat text-sm md:text-base text-[#FF4444]">❤</span>
-              <span className="text-[#5A5955] text-[10px] md:text-xs font-bold uppercase tracking-widest">by</span>
+              <span className="text-[#5A5955] text-[10px] md:text-xs font-bold uppercase tracking-widest">{t.by}</span>
               <a
                 href="https://www.linkedin.com/in/eugene-gusakov/"
                 target="_blank"

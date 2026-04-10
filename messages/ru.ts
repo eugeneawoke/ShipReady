@@ -446,6 +446,13 @@ const ru: AppMessages = {
     termsLink: 'Условия использования',
     privacyLink: 'Политика конфиденциальности',
   },
+  SiteMicroFooter: {
+    contact: 'Контакт',
+    craftedWithLoveBy: 'Сделано с любовью',
+    allRightsReserved: 'Все права защищены.',
+    privacy: 'Конфиденциальность',
+    terms: 'Условия',
+  },
   NotFound: {
     eyebrow: 'Страница не найдена',
     title: 'Здесь нечего деплоить.',

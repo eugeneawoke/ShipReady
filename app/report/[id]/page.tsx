@@ -1,13 +1,13 @@
 'use client'
 
+import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { ChevronDown, Share2, Check, Copy, Lock, FileDown, Loader2, Plus, RefreshCw } from 'lucide-react'
+import { ChevronDown, Share2, Check, Copy, Lock, FileDown, Loader2, Plus, RefreshCw, ArrowLeft } from 'lucide-react'
 import { ReportSkeleton } from '@/components/report/ReportSkeleton'
 import { ScoreRing } from '@/components/report/ScoreRing'
 import { CategoryCard } from '@/components/report/CategoryCard'
 import { IssueCard } from '@/components/report/IssueCard'
-import { BackButton } from '@/components/BackButton'
 import { ScanForm, useScanLauncher } from '@/components/landing/ScanForm'
 import { SiteBrandLink } from '@/components/SiteHeader'
 import type { Scan, Issue, IssueCategory, ScanResult, ScanStatus } from '@/types/scan'
@@ -86,12 +86,12 @@ function FixPromptSection({ prompt, isPro, isReady }: {
             <div className="absolute inset-0 flex items-center justify-center bg-[#0E0E0F]/60 rounded-lg backdrop-blur-[2px]">
               <div className="flex flex-col items-center gap-2">
                 <Lock className="w-4 h-4 text-[#8B8A85]" />
-                <a
-                  href="/pricing"
+                <Link
+                  href="/#pricing"
                   className="text-xs text-white bg-[#6E56CF] hover:bg-[#7C68D4] px-3 py-1.5 rounded-md transition-colors"
                 >
                   {t('upgrade')}
-                </a>
+                </Link>
               </div>
             </div>
           </div>
@@ -139,7 +139,7 @@ function hasUnavailableMeasurements(results: ScanResult) {
   return CATEGORIES.some(category => results[category].measurement?.status === 'unavailable')
 }
 
-function buildScanStages(scan: Scan, results: ScanResult, t: ReturnType<typeof useTranslations<'Report.progress'>>): Array<{ title: string; state: StageState; detail: string }> {
+function buildScanStages(scan: Scan, results: ScanResult, t: ReturnType<typeof useTranslations<'Report.progress'>>): Array<{ id: string; title: string; state: StageState; detail: string }> {
   const performanceMeasurement = results.performance.measurement
   const isActive = ACTIVE_SCAN_STATUSES.includes(scan.status)
   const deepDone = results.phase === 'deep' || results.phase === 'enriching' || results.phase === 'final'
@@ -149,11 +149,13 @@ function buildScanStages(scan: Scan, results: ScanResult, t: ReturnType<typeof u
 
   return [
     {
+      id: 'fast',
       title: t('stages.fastTitle'),
       state: results ? 'done' : 'running',
       detail: t('stages.fastDetail'),
     },
     {
+      id: 'lighthouse',
       title: t('stages.lighthouseTitle'),
       state: performanceMeasurement?.status === 'unavailable'
         ? (performanceStillRunning ? 'running' : 'unavailable')
@@ -166,6 +168,7 @@ function buildScanStages(scan: Scan, results: ScanResult, t: ReturnType<typeof u
         ?? (deepDone ? t('stages.lighthouseDone') : t('stages.lighthousePending')),
     },
     {
+      id: 'ai',
       title: t('stages.aiTitle'),
       state: aiDone
         ? 'done'
@@ -226,9 +229,9 @@ function ScanProgressPanel({ scan, results, processingIssue, retryingMeasurement
 
       <div className="grid gap-2 mt-4">
         {stages.map(stage => {
-          const canRetryLighthouse = !isActive && stage.title === 'Lighthouse mobile audit' && stage.state === 'unavailable'
+          const canRetryLighthouse = !isActive && stage.id === 'lighthouse' && stage.state === 'unavailable'
           return (
-          <div key={stage.title} className="flex items-start gap-3 rounded-lg border border-white/[0.04] bg-[#111113] px-3 py-2.5">
+          <div key={stage.id} className="flex items-start gap-3 rounded-lg border border-white/[0.04] bg-[#111113] px-3 py-2.5">
             <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-mono uppercase tracking-[0.08em] ${stageTone(stage.state)}`}>
               {stageLabel(stage.state, t)}
             </span>
@@ -610,7 +613,6 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
       {/* Nav */}
       <header className="sticky top-0 z-10 bg-[#0E0E0F]/90 backdrop-blur-md border-b border-white/6">
         <div className="max-w-3xl mx-auto px-4 h-14 flex items-center gap-3">
-          <BackButton fallbackHref={isLoggedIn ? '/dashboard' : '/'} className="shrink-0 text-xs" />
           <SiteBrandLink className="shrink-0" />
           <span className="text-[#5A5955] text-sm">/</span>
           <span className="text-sm text-[#8B8A85] font-mono truncate flex-1">{domain}</span>
@@ -680,19 +682,19 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
           <button
             onClick={handleShare}
             className={`relative flex items-center gap-1.5 text-xs border px-3 py-1.5 rounded-lg transition-all shrink-0 cursor-pointer print:hidden ${
-              shareLabel === 'Copied!'
+              shareLabel === t('copied')
                 ? 'text-[#F1F0EE] bg-[#112419] border-[#3DDC84]/35 shadow-[0_0_0_1px_rgba(61,220,132,0.08)]'
                 : 'text-[#8B8A85] hover:text-[#F1F0EE] bg-[#161618] border-white/6'
             }`}
           >
             <span
               className={`absolute inset-0 rounded-lg transition-opacity ${
-                shareLabel === 'Copied!' ? 'opacity-100' : 'opacity-0'
+                shareLabel === t('copied') ? 'opacity-100' : 'opacity-0'
               }`}
               style={{ background: 'linear-gradient(90deg, rgba(61,220,132,0.12), rgba(61,220,132,0.03))' }}
             />
             <span className="relative flex items-center gap-1.5">
-              {shareLabel === 'Copied!' ? (
+              {shareLabel === t('copied') ? (
                 <Check className="w-3.5 h-3.5 text-[#3DDC84]" />
               ) : (
                 <Share2 className="w-3.5 h-3.5" />
@@ -711,6 +713,15 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
       </header>
 
       <main className="max-w-3xl mx-auto px-4 py-10 space-y-10">
+        <div>
+          <Link
+            href={isLoggedIn ? '/dashboard' : '/'}
+            className="flex items-center gap-1.5 text-sm text-[#8B8A85] transition-colors hover:text-[#F1F0EE]"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            {isLoggedIn ? 'Dashboard' : 'ShipReady'}
+          </Link>
+        </div>
         {rescanError && (
           <section className="rounded-xl border border-[#FF4444]/20 bg-[#FF4444]/5 px-4 py-3">
             <p className="text-sm text-[#FF8A8A]">{t('rescanFailed')}</p>

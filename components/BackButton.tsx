@@ -1,5 +1,6 @@
 'use client'
 
+import { ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import type { MouseEvent } from 'react'
@@ -37,9 +38,9 @@ export function BackButton({
     <button
       type="button"
       onClick={handleBack}
-      className={`flex items-center gap-1.5 font-semibold tracking-tight text-[#F1F0EE] transition-colors hover:text-[#8B8A85] ${className}`.trim()}
+      className={`flex items-center gap-1.5 text-sm text-[#8B8A85] transition-colors hover:text-[#F1F0EE] ${className}`.trim()}
     >
-      <span aria-hidden="true">←</span>
+      <ArrowLeft className="h-4 w-4" aria-hidden="true" />
       <span>{label ?? t('back')}</span>
     </button>
   )

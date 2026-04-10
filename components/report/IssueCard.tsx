@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Check, Copy, ChevronDown, Lock } from 'lucide-react'
@@ -141,12 +142,12 @@ export function IssueCard({ issue, isPro, promptsReady = true }: IssueCardProps)
                   <div className="absolute inset-0 flex items-center justify-center bg-[#0E0E0F]/60 rounded-lg backdrop-blur-[2px]">
                     <div className="flex flex-col items-center gap-2">
                       <Lock className="w-4 h-4 text-[#8B8A85]" />
-                      <a
-                        href="/pricing"
+                      <Link
+                        href="/#pricing"
                         className="text-xs text-white bg-[#6E56CF] hover:bg-[#7C68D4] px-3 py-1.5 rounded-md transition-colors"
                       >
                         {t('upgrade')}
-                      </a>
+                      </Link>
                     </div>
                   </div>
                 </div>

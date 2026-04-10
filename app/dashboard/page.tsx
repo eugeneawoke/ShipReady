@@ -153,7 +153,7 @@ export default async function DashboardPage() {
               <p className="text-xs text-[#8B8A85] mt-0.5">{t('upgradeSubtitle')}</p>
             </div>
             <Link
-              href="/pricing"
+              href="/#pricing"
               className="shrink-0 px-4 py-2 rounded-lg bg-[#6E56CF] text-white text-sm font-medium hover:bg-[#7C68D4] transition-colors"
             >
               {t('upgradeCta')}

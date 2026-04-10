@@ -1,9 +1,9 @@
-import Link from 'next/link'
 import type { Metadata } from 'next'
 import { getMessages, getTranslations } from 'next-intl/server'
 import { CheckCircle2, Circle, Clock } from 'lucide-react'
 import { BackButton } from '@/components/BackButton'
 import { SiteHeader } from '@/components/SiteHeader'
+import { CinematicFooter } from '@/components/ui/motion-footer'
 import type { AppMessages } from '@/messages/en'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -131,14 +131,7 @@ export default async function RoadmapPage() {
         </div>
       </main>
 
-      <footer className="border-t border-white/[0.06] py-6 px-6 text-center">
-        <p className="text-xs text-[#5A5955]">
-          © 2025 ShipReady ·{' '}
-          <Link href="/privacy" className="hover:text-[#8B8A85] transition-colors">{t.footerPrivacy}</Link>
-          {' · '}
-          <Link href="/terms" className="hover:text-[#8B8A85] transition-colors">{t.footerTerms}</Link>
-        </p>
-      </footer>
+      <CinematicFooter scanHref="/#cta" pricingHref="/#pricing" />
     </div>
   )
 }

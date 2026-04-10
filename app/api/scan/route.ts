@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
 
           if ((count ?? 0) >= FREE_SCAN_LIMIT) {
             return NextResponse.json(
-              { error: 'Free limit reached', upgradeUrl: '/pricing' },
+              { error: 'Free limit reached', upgradeUrl: '/#pricing' },
               { status: 429 }
             )
           }
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
 
       if ((count ?? 0) >= ANON_MONTHLY_LIMIT) {
         return NextResponse.json(
-          { error: 'Free limit reached. Sign in to continue.', upgradeUrl: '/pricing' },
+          { error: 'Free limit reached. Sign in to continue.', upgradeUrl: '/#pricing' },
           { status: 429 }
         )
       }

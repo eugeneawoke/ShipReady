@@ -1,7 +1,7 @@
-import Link from 'next/link'
 import type { Metadata } from 'next'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { BackButton } from '@/components/BackButton'
+import { SiteMicroFooter } from '@/components/SiteMicroFooter'
 import { SiteHeader } from '@/components/SiteHeader'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -88,8 +88,8 @@ export default async function TermsPage() {
 
           <Section title={isRu ? '7. Отказ от гарантий' : '7. Disclaimer of warranties'}>
             {isRu
-              ? <>Сервис предоставляется <strong className="text-[#F1F0EE]">"как есть"</strong>, без каких-либо гарантий. Мы не гарантируем полноту или абсолютную точность аудита, а также то, что применение исправлений решит все проблемы. Оценки считаются эвристически и могут отличаться от других инструментов.</>
-              : <>The Service is provided <strong className="text-[#F1F0EE]">"as is"</strong> without warranties of any kind. We do not guarantee that audit results are complete, accurate, or that applying fixes will resolve all issues. Scores are computed heuristically and may differ from other tools.</>}
+              ? <>Сервис предоставляется <strong className="text-[#F1F0EE]">&quot;как есть&quot;</strong>, без каких-либо гарантий. Мы не гарантируем полноту или абсолютную точность аудита, а также то, что применение исправлений решит все проблемы. Оценки считаются эвристически и могут отличаться от других инструментов.</>
+              : <>The Service is provided <strong className="text-[#F1F0EE]">&quot;as is&quot;</strong> without warranties of any kind. We do not guarantee that audit results are complete, accurate, or that applying fixes will resolve all issues. Scores are computed heuristically and may differ from other tools.</>}
           </Section>
 
           <Section title={isRu ? '8. Ограничение ответственности' : '8. Limitation of liability'}>
@@ -128,12 +128,7 @@ export default async function TermsPage() {
         </div>
       </main>
 
-      <footer className="border-t border-white/[0.06] py-6 px-6 text-center">
-        <p className="text-xs text-[#5A5955]">
-          © 2025 ShipReady ·{' '}
-          <Link href="/privacy" className="hover:text-[#8B8A85] transition-colors">{isRu ? 'Политика конфиденциальности' : 'Privacy Policy'}</Link>
-        </p>
-      </footer>
+      <SiteMicroFooter currentPage="terms" />
     </div>
   )
 }
