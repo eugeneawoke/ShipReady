@@ -2,9 +2,11 @@
 
 import { createBrowserClient } from '@supabase/ssr'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 
 export function SignOutButton() {
   const router = useRouter()
+  const t = useTranslations('Dashboard')
 
   async function signOut() {
     const supabase = createBrowserClient(
@@ -21,7 +23,7 @@ export function SignOutButton() {
       onClick={signOut}
       className="text-xs text-[#5A5955] hover:text-[#F1F0EE] transition-colors cursor-pointer"
     >
-      Sign out
+      {t('signOut')}
     </button>
   )
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { useTranslations } from 'next-intl'
 
 interface ScoreRingProps {
   score: number | null
@@ -16,6 +17,7 @@ function getScoreColor(score: number | null): string {
 }
 
 export function ScoreRing({ score, size = 180 }: ScoreRingProps) {
+  const t = useTranslations('ScoreRing')
   const circleRef = useRef<SVGCircleElement>(null)
   const strokeWidth = 8
   const radius = (size - strokeWidth) / 2
@@ -71,7 +73,7 @@ export function ScoreRing({ score, size = 180 }: ScoreRingProps) {
           {score ?? '—'}
         </span>
         <span className="text-[11px] text-[#5A5955] uppercase tracking-[0.08em] mt-1">
-          {score === null ? 'PENDING' : 'SCORE'}
+          {score === null ? t('pending') : t('score')}
         </span>
       </div>
     </div>

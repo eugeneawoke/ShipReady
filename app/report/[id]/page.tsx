@@ -149,7 +149,6 @@ function buildScanStages(scan: Scan, results: ScanResult, t: ReturnType<typeof u
 
   return [
     {
-      title: 'Fast truth checks',
       title: t('stages.fastTitle'),
       state: results ? 'done' : 'running',
       detail: t('stages.fastDetail'),
@@ -871,7 +870,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
                   results[cat].passedChecks > 0 ? (
                     <p key={cat} className="text-xs text-[#5A5955]">
                       <span className="text-[#3DDC84]">✓</span>{' '}
-                      {results[cat].passedChecks} {t(`categories.${cat}`)} {t('checksPassed', { count: 0 }).replace('0 ', '')}
+                      {t('categoryChecksPassed', { count: results[cat].passedChecks, category: t(`categories.${cat}`) })}
                     </p>
                   ) : null
                 )}

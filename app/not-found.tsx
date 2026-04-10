@@ -1,12 +1,19 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
 import { SiteHeader } from '@/components/SiteHeader'
 
-export const metadata: Metadata = {
-  title: '404 — ShipReady',
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('Metadata')
+
+  return {
+    title: t('notFoundTitle'),
+  }
 }
 
-export default function NotFound() {
+export default async function NotFound() {
+  const t = await getTranslations('NotFound')
+
   return (
     <>
       <style>{`
@@ -65,15 +72,15 @@ export default function NotFound() {
           <div
             className="text-[11px] font-mono uppercase tracking-[0.2em] text-[#6E56CF]"
           >
-            Page not found
+            {t('eyebrow')}
           </div>
 
           <h1 className="text-4xl md:text-6xl font-black tracking-tighter">
-            Nothing to ship here.
+            {t('title')}
           </h1>
 
           <p className="text-[#8B8A85] max-w-sm text-sm leading-relaxed">
-            The page you&apos;re looking for doesn&apos;t exist or has been moved.
+            {t('body')}
           </p>
 
           <div className="flex flex-wrap justify-center gap-3 mt-2">
@@ -81,7 +88,7 @@ export default function NotFound() {
               href="/"
               className="px-6 py-3 rounded-full bg-[#6E56CF] text-white text-sm font-medium hover:bg-[#7C68D4] transition-colors"
             >
-              ← Back to home
+              {t('home')}
             </Link>
             <a
               href="https://t.me/eugenegusakov"
@@ -89,7 +96,7 @@ export default function NotFound() {
               rel="noopener noreferrer"
               className="px-6 py-3 rounded-full bg-white/[0.06] border border-white/[0.08] text-[#8B8A85] text-sm font-medium hover:text-[#F1F0EE] hover:bg-white/[0.10] transition-colors"
             >
-              Contact me
+              {t('contact')}
             </a>
           </div>
         </div>

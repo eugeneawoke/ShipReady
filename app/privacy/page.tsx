@@ -1,122 +1,136 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { getLocale, getTranslations } from 'next-intl/server'
 import { BackButton } from '@/components/BackButton'
+import { SiteMicroFooter } from '@/components/SiteMicroFooter'
 import { SiteHeader } from '@/components/SiteHeader'
 
-export const metadata: Metadata = {
-  title: 'Privacy Policy — ShipReady',
-  description: 'How ShipReady collects, uses, and protects your data.',
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('Metadata')
+
+  return {
+    title: t('privacyTitle'),
+    description: t('privacyDescription'),
+  }
 }
 
 const UPDATED = 'April 5, 2025'
-const EMAIL   = 'hi@shipready.app'
+const EMAIL = 'hi@shipready.app'
 
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
+  const locale = await getLocale()
+  const isRu = locale === 'ru'
+
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE]">
       <SiteHeader
         maxWidthClassName="max-w-4xl"
-        right={<span className="text-xs text-[#5A5955]">Last updated: {UPDATED}</span>}
+        right={<span className="text-xs text-[#5A5955]">{isRu ? `Обновлено: ${UPDATED}` : `Last updated: ${UPDATED}`}</span>}
       />
 
       <main className="max-w-3xl mx-auto px-6 py-16">
         <div className="mb-8">
           <BackButton className="text-sm text-[#8B8A85] hover:text-[#F1F0EE]" />
         </div>
-        <h1 className="text-3xl font-medium mb-2">Privacy Policy</h1>
-        <p className="text-[#8B8A85] mb-12 text-sm">Effective date: {UPDATED}</p>
+        <h1 className="text-3xl font-medium mb-2">{isRu ? 'Политика конфиденциальности' : 'Privacy Policy'}</h1>
+        <p className="text-[#8B8A85] mb-12 text-sm">{isRu ? `Дата вступления в силу: ${UPDATED}` : `Effective date: ${UPDATED}`}</p>
 
         <div className="prose-custom space-y-10 text-[#8B8A85] text-sm leading-relaxed">
-
-          <Section title="1. Who we are">
-            ShipReady is a web quality audit tool built and operated by Eugene Gusakov.
-            You can reach us at <a href={`mailto:${EMAIL}`} className="text-[#6E56CF] hover:underline">{EMAIL}</a>.
+          <Section title={isRu ? '1. Кто мы' : '1. Who we are'}>
+            {isRu ? (
+              <>
+                ShipReady — это инструмент аудита качества веб-приложений, который создаёт и поддерживает Eugene Gusakov.
+                Связаться с нами можно по адресу <a href={`mailto:${EMAIL}`} className="text-[#6E56CF] hover:underline">{EMAIL}</a>.
+              </>
+            ) : (
+              <>
+                ShipReady is a web quality audit tool built and operated by Eugene Gusakov.
+                You can reach us at <a href={`mailto:${EMAIL}`} className="text-[#6E56CF] hover:underline">{EMAIL}</a>.
+              </>
+            )}
           </Section>
 
-          <Section title="2. What data we collect">
-            <p>We collect only what is necessary to provide the service:</p>
+          <Section title={isRu ? '2. Какие данные мы собираем' : '2. What data we collect'}>
+            {isRu ? <p>Мы собираем только те данные, которые действительно нужны для работы сервиса:</p> : <p>We collect only what is necessary to provide the service:</p>}
             <ul>
-              <li><strong className="text-[#F1F0EE]">URLs you submit</strong> — to run the audit. We do not crawl or store the content of your pages beyond what is needed to generate the report.</li>
-              <li><strong className="text-[#F1F0EE]">Account data</strong> — if you sign up: your email address, provided via Supabase Auth (supports magic link and OAuth).</li>
-              <li><strong className="text-[#F1F0EE]">Payment data</strong> — processed by the selected payment provider after paid launch. We never see or store your card details.</li>
-              <li><strong className="text-[#F1F0EE]">Usage data</strong> — scan history linked to your account (URL, scores, timestamp).</li>
-              <li><strong className="text-[#F1F0EE]">Technical data</strong> — standard server logs (IP address, browser, timestamps) retained for up to 30 days.</li>
+              <li><strong className="text-[#F1F0EE]">{isRu ? 'URL, которые вы отправляете' : 'URLs you submit'}</strong> {isRu ? '— чтобы запускать аудит. Мы не краулим и не храним содержимое ваших страниц сверх того, что необходимо для генерации отчёта.' : '— to run the audit. We do not crawl or store the content of your pages beyond what is needed to generate the report.'}</li>
+              <li><strong className="text-[#F1F0EE]">{isRu ? 'Данные аккаунта' : 'Account data'}</strong> {isRu ? '— если вы регистрируетесь: ваш email, который обрабатывается через Supabase Auth (magic link и OAuth).' : '— if you sign up: your email address, provided via Supabase Auth (supports magic link and OAuth).'}</li>
+              <li><strong className="text-[#F1F0EE]">{isRu ? 'Платёжные данные' : 'Payment data'}</strong> {isRu ? '— будут обрабатываться выбранным платёжным провайдером после запуска платного тарифа. Мы не видим и не храним данные вашей карты.' : '— processed by the selected payment provider after paid launch. We never see or store your card details.'}</li>
+              <li><strong className="text-[#F1F0EE]">{isRu ? 'Данные использования' : 'Usage data'}</strong> {isRu ? '— история сканов, связанная с аккаунтом: URL, оценки и время запуска.' : '— scan history linked to your account (URL, scores, timestamp).'}</li>
+              <li><strong className="text-[#F1F0EE]">{isRu ? 'Технические данные' : 'Technical data'}</strong> {isRu ? '— стандартные серверные логи: IP-адрес, браузер, временные метки. Они хранятся до 30 дней.' : '— standard server logs (IP address, browser, timestamps) retained for up to 30 days.'}</li>
             </ul>
           </Section>
 
-          <Section title="3. How we use your data">
+          <Section title={isRu ? '3. Как мы используем ваши данные' : '3. How we use your data'}>
             <ul>
-              <li>To run scans and generate reports for you.</li>
-              <li>To manage your account and subscription.</li>
-              <li>To send transactional emails (scan complete, billing receipts). We do not send marketing emails without your consent.</li>
-              <li>To detect abuse and protect the service.</li>
+              <li>{isRu ? 'Чтобы запускать сканы и формировать отчёты для вас.' : 'To run scans and generate reports for you.'}</li>
+              <li>{isRu ? 'Чтобы управлять вашим аккаунтом и подпиской.' : 'To manage your account and subscription.'}</li>
+              <li>{isRu ? 'Чтобы отправлять транзакционные письма: завершение скана, квитанции об оплате. Маркетинговые письма без вашего согласия не отправляются.' : 'To send transactional emails (scan complete, billing receipts). We do not send marketing emails without your consent.'}</li>
+              <li>{isRu ? 'Чтобы выявлять злоупотребления и защищать сервис.' : 'To detect abuse and protect the service.'}</li>
             </ul>
-            We do not sell your data. We do not use it for advertising.
+            {isRu ? 'Мы не продаём ваши данные и не используем их для рекламы.' : 'We do not sell your data. We do not use it for advertising.'}
           </Section>
 
-          <Section title="4. Third-party services">
+          <Section title={isRu ? '4. Сторонние сервисы' : '4. Third-party services'}>
             <ul>
-              <li><strong className="text-[#F1F0EE]">Supabase</strong> — database and authentication (EU region). <a href="https://supabase.com/privacy" className="text-[#6E56CF] hover:underline" target="_blank" rel="noopener noreferrer">Privacy policy</a>.</li>
-              <li><strong className="text-[#F1F0EE]">Payment provider</strong> — to be selected before paid launch.</li>
-              <li><strong className="text-[#F1F0EE]">Vercel</strong> — hosting and edge functions. <a href="https://vercel.com/legal/privacy-policy" className="text-[#6E56CF] hover:underline" target="_blank" rel="noopener noreferrer">Privacy policy</a>.</li>
-              <li><strong className="text-[#F1F0EE]">OpenAI</strong> — AI-generated report enrichment and fix prompts. URLs and issue data are sent to generate prompts. <a href="https://openai.com/policies/privacy-policy/" className="text-[#6E56CF] hover:underline" target="_blank" rel="noopener noreferrer">Privacy policy</a>.</li>
-            </ul>
-          </Section>
-
-          <Section title="5. Cookies">
-            We use only essential cookies required for session management and authentication.
-            We do not use tracking or advertising cookies.
-          </Section>
-
-          <Section title="6. Data retention">
-            <ul>
-              <li>Scan results are retained as long as your account is active.</li>
-              <li>Anonymous scans (no account) may be deleted after 30 days.</li>
-              <li>You can request deletion of your data at any time by emailing us.</li>
+              <li><strong className="text-[#F1F0EE]">Supabase</strong> {isRu ? '— база данных и аутентификация (EU region).' : '— database and authentication (EU region).'} <a href="https://supabase.com/privacy" className="text-[#6E56CF] hover:underline" target="_blank" rel="noopener noreferrer">{isRu ? 'Политика конфиденциальности' : 'Privacy policy'}</a>.</li>
+              <li><strong className="text-[#F1F0EE]">{isRu ? 'Платёжный провайдер' : 'Payment provider'}</strong> {isRu ? '— будет выбран до запуска платных тарифов.' : '— to be selected before paid launch.'}</li>
+              <li><strong className="text-[#F1F0EE]">Vercel</strong> {isRu ? '— хостинг и edge functions.' : '— hosting and edge functions.'} <a href="https://vercel.com/legal/privacy-policy" className="text-[#6E56CF] hover:underline" target="_blank" rel="noopener noreferrer">{isRu ? 'Политика конфиденциальности' : 'Privacy policy'}</a>.</li>
+              <li><strong className="text-[#F1F0EE]">OpenAI</strong> {isRu ? '— AI-enrichment отчётов и промпты для исправлений. URL и данные по issue могут отправляться для генерации промптов.' : '— AI-generated report enrichment and fix prompts. URLs and issue data are sent to generate prompts.'} <a href="https://openai.com/policies/privacy-policy/" className="text-[#6E56CF] hover:underline" target="_blank" rel="noopener noreferrer">{isRu ? 'Политика конфиденциальности' : 'Privacy policy'}</a>.</li>
             </ul>
           </Section>
 
-          <Section title="6a. Report visibility">
-            Anonymous reports are accessible to anyone who has the report URL.
-            Reports linked to a signed-in account are private to that account unless we add an explicit sharing feature in the future.
-            If you do not want a report to be accessible by URL, run the scan from a signed-in account.
+          <Section title={isRu ? '5. Cookies' : '5. Cookies'}>
+            {isRu
+              ? 'Мы используем только обязательные cookies для управления сессией, аутентификации и выбора языка интерфейса. Трекинговые и рекламные cookies не используются.'
+              : 'We use only essential cookies required for session management, authentication, and interface language selection. We do not use tracking or advertising cookies.'}
           </Section>
 
-          <Section title="7. Your rights (GDPR)">
-            If you are in the European Economic Area, you have the right to:
+          <Section title={isRu ? '6. Срок хранения данных' : '6. Data retention'}>
             <ul>
-              <li>Access the personal data we hold about you.</li>
-              <li>Correct inaccurate data.</li>
-              <li>Request deletion of your data (&quot;right to be forgotten&quot;).</li>
-              <li>Object to or restrict processing.</li>
-              <li>Data portability.</li>
+              <li>{isRu ? 'Результаты сканов хранятся, пока ваш аккаунт активен.' : 'Scan results are retained as long as your account is active.'}</li>
+              <li>{isRu ? 'Анонимные сканы (без аккаунта) могут быть удалены через 30 дней.' : 'Anonymous scans (no account) may be deleted after 30 days.'}</li>
+              <li>{isRu ? 'Вы можете запросить удаление своих данных в любой момент, написав нам на email.' : 'You can request deletion of your data at any time by emailing us.'}</li>
             </ul>
-            To exercise any of these rights, email <a href={`mailto:${EMAIL}`} className="text-[#6E56CF] hover:underline">{EMAIL}</a>.
           </Section>
 
-          <Section title="8. Security">
-            All data is transmitted over HTTPS. Database access is protected by row-level security (Supabase RLS).
-            We do not store passwords — authentication is handled via magic links and OAuth.
+          <Section title={isRu ? '6a. Видимость отчётов' : '6a. Report visibility'}>
+            {isRu
+              ? 'Анонимные отчёты доступны каждому, у кого есть ссылка на отчёт. Отчёты, связанные с авторизованным аккаунтом, остаются приватными для владельца, пока мы явно не добавим механизм шаринга. Если вы не хотите, чтобы отчёт открывался по URL, запускайте скан из авторизованного аккаунта.'
+              : 'Anonymous reports are accessible to anyone who has the report URL. Reports linked to a signed-in account are private to that account unless we add an explicit sharing feature in the future. If you do not want a report to be accessible by URL, run the scan from a signed-in account.'}
           </Section>
 
-          <Section title="9. Changes to this policy">
-            We may update this policy. We will notify you by posting the new policy on this page and updating the effective date.
-            Material changes will be communicated by email if you have an account.
+          <Section title={isRu ? '7. Ваши права (GDPR)' : '7. Your rights (GDPR)'}>
+            {isRu ? 'Если вы находитесь в Европейской экономической зоне, у вас есть право:' : 'If you are in the European Economic Area, you have the right to:'}
+            <ul>
+              <li>{isRu ? 'Получить доступ к персональным данным, которые мы храним.' : 'Access the personal data we hold about you.'}</li>
+              <li>{isRu ? 'Исправить неточные данные.' : 'Correct inaccurate data.'}</li>
+              <li>{isRu ? 'Запросить удаление данных ("право быть забытым").' : 'Request deletion of your data ("right to be forgotten").'}</li>
+              <li>{isRu ? 'Возразить против обработки или ограничить её.' : 'Object to or restrict processing.'}</li>
+              <li>{isRu ? 'Запросить переносимость данных.' : 'Data portability.'}</li>
+            </ul>
+            {isRu ? <>Чтобы воспользоваться этими правами, напишите на <a href={`mailto:${EMAIL}`} className="text-[#6E56CF] hover:underline">{EMAIL}</a>.</> : <>To exercise any of these rights, email <a href={`mailto:${EMAIL}`} className="text-[#6E56CF] hover:underline">{EMAIL}</a>.</>}
           </Section>
 
-          <Section title="10. Contact">
-            Questions about this policy? Email us at{' '}
-            <a href={`mailto:${EMAIL}`} className="text-[#6E56CF] hover:underline">{EMAIL}</a>.
+          <Section title={isRu ? '8. Безопасность' : '8. Security'}>
+            {isRu
+              ? 'Все данные передаются по HTTPS. Доступ к базе данных защищён row-level security (Supabase RLS). Пароли мы не храним: аутентификация работает через magic links и OAuth.'
+              : 'All data is transmitted over HTTPS. Database access is protected by row-level security (Supabase RLS). We do not store passwords — authentication is handled via magic links and OAuth.'}
+          </Section>
+
+          <Section title={isRu ? '9. Изменения в политике' : '9. Changes to this policy'}>
+            {isRu
+              ? 'Мы можем обновлять эту политику. Об изменениях мы сообщаем публикацией новой версии на этой странице и обновлением даты вступления в силу. Существенные изменения будем дополнительно отправлять на email, если у вас есть аккаунт.'
+              : 'We may update this policy. We will notify you by posting the new policy on this page and updating the effective date. Material changes will be communicated by email if you have an account.'}
+          </Section>
+
+          <Section title={isRu ? '10. Контакты' : '10. Contact'}>
+            {isRu ? <>Есть вопросы по этой политике? Напишите нам на <a href={`mailto:${EMAIL}`} className="text-[#6E56CF] hover:underline">{EMAIL}</a>.</> : <>Questions about this policy? Email us at <a href={`mailto:${EMAIL}`} className="text-[#6E56CF] hover:underline">{EMAIL}</a>.</>}
           </Section>
         </div>
       </main>
 
-      <footer className="border-t border-white/[0.06] py-6 px-6 text-center">
-        <p className="text-xs text-[#5A5955]">
-          © 2025 ShipReady ·{' '}
-          <Link href="/terms" className="hover:text-[#8B8A85] transition-colors">Terms of Service</Link>
-        </p>
-      </footer>
+      <SiteMicroFooter currentPage="privacy" />
     </div>
   )
 }

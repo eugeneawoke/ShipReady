@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Check, Copy, ChevronDown, Lock } from 'lucide-react'
 import type { Issue } from '@/types/scan'
 
@@ -20,12 +21,6 @@ const SEVERITY_BG: Record<string, string> = {
   pass: 'rgba(61,220,132,0.08)',
 }
 
-const CONFIDENCE_LABELS: Record<string, string> = {
-  verified: 'Verified',
-  likely: 'Likely',
-  heuristic: 'Heuristic',
-}
-
 interface IssueCardProps {
   issue: Issue
   isPro: boolean
@@ -33,6 +28,7 @@ interface IssueCardProps {
 }
 
 export function IssueCard({ issue, isPro, promptsReady = true }: IssueCardProps) {
+  const t = useTranslations('IssueCard')
   const [promptOpen, setPromptOpen] = useState(false)
   const [copied, setCopied] = useState(false)
 
@@ -66,7 +62,7 @@ export function IssueCard({ issue, isPro, promptsReady = true }: IssueCardProps)
             </span>
             {issue.confidence && (
               <span className="text-[10px] font-mono text-[#5A5955] uppercase tracking-[0.08em]">
-                · {CONFIDENCE_LABELS[issue.confidence]}
+                · {t(`confidence.${issue.confidence}`)}
               </span>
             )}
             {issue.value !== undefined && (
@@ -99,7 +95,7 @@ export function IssueCard({ issue, isPro, promptsReady = true }: IssueCardProps)
           rel="noopener noreferrer"
           className="inline-block text-[11px] text-[#8B8A85] hover:text-[#6E56CF] transition-colors"
         >
-          Docs →
+          {t('docs')}
         </a>
       )}
 
@@ -110,7 +106,7 @@ export function IssueCard({ issue, isPro, promptsReady = true }: IssueCardProps)
             onClick={() => setPromptOpen(o => !o)}
             className="flex items-center gap-1 cursor-pointer mt-1"
           >
-            <span className="fix-ai-text text-xs">Recommended fix</span>
+            <span className="fix-ai-text text-xs">{t('recommendedFix')}</span>
             <ChevronDown
               className="w-3 h-3 text-[#5A5955] group-hover:text-[#6E56CF] transition-colors duration-500 transition-transform duration-200"
               style={{ transform: promptOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
@@ -129,8 +125,8 @@ export function IssueCard({ issue, isPro, promptsReady = true }: IssueCardProps)
                     className="flex items-center gap-1.5 text-xs text-[#8B8A85] hover:text-[#F1F0EE] transition-colors mt-2 cursor-pointer"
                   >
                     {copied
-                      ? <><Check className="w-3 h-3 text-[#3DDC84]" /><span className="text-[#3DDC84]">Copied</span></>
-                      : <><Copy className="w-3 h-3" />Copy</>
+                      ? <><Check className="w-3 h-3 text-[#3DDC84]" /><span className="text-[#3DDC84]">{t('copied')}</span></>
+                      : <><Copy className="w-3 h-3" />{t('copy')}</>
                     }
                   </button>
                 </div>
@@ -149,7 +145,7 @@ export function IssueCard({ issue, isPro, promptsReady = true }: IssueCardProps)
                         href="/pricing"
                         className="text-xs text-white bg-[#6E56CF] hover:bg-[#7C68D4] px-3 py-1.5 rounded-md transition-colors"
                       >
-                        Upgrade to Pro →
+                        {t('upgrade')}
                       </a>
                     </div>
                   </div>
@@ -162,7 +158,7 @@ export function IssueCard({ issue, isPro, promptsReady = true }: IssueCardProps)
 
       {hasPrompts && !promptsReady && (
         <div className="print:hidden pt-1">
-          <span className="text-xs text-[#5A5955]">Recommended fix is being prepared...</span>
+          <span className="text-xs text-[#5A5955]">{t('preparing')}</span>
         </div>
       )}
     </div>

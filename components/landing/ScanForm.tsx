@@ -2,21 +2,24 @@
 
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { Loader2 } from 'lucide-react'
 
 const FRIENDLY_ERRORS: Record<string, string> = {
-  'Forbidden':             'Something went wrong on our end.',
-  'Failed to create scan': 'Could not start the scan. Please try again.',
-  'Invalid URL':           'Please enter a valid URL (e.g. https://yoursite.com)',
-  'Rate limit exceeded. Sign in for more scans.': 'Hourly limit reached. Sign in for more scans.',
-  'Free limit reached':    "You've used all 3 free scans this month.",
+  Forbidden: 'friendlyErrors.forbidden',
+  'Failed to create scan': 'friendlyErrors.failedToCreateScan',
+  'Invalid URL': 'friendlyErrors.invalidUrl',
+  'Rate limit exceeded. Sign in for more scans.': 'friendlyErrors.rateLimitExceeded',
+  'Free limit reached': 'friendlyErrors.freeLimitReached',
 }
 
-function friendlyMessage(raw: string): string {
-  return FRIENDLY_ERRORS[raw] ?? raw
+function friendlyMessage(raw: string, t: ReturnType<typeof useTranslations<'ScanForm'>>): string {
+  const key = FRIENDLY_ERRORS[raw]
+  return key ? t(key) : raw
 }
 
 export function useScanLauncher() {
+  const t = useTranslations('ScanForm')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<{ msg: string; showContact: boolean } | null>(null)
   const loadingRef = useRef(false)
@@ -36,7 +39,7 @@ export function useScanLauncher() {
       const data = await res.json()
       if (!res.ok) {
         const raw = data.error || 'Something went wrong'
-        const msg = friendlyMessage(raw)
+        const msg = friendlyMessage(raw, t)
         // Show contact for unexpected server errors (5xx or unknown)
         const showContact = res.status >= 500 || raw === 'Forbidden' || raw === 'Failed to create scan'
         setError({ msg, showContact })
@@ -46,7 +49,7 @@ export function useScanLauncher() {
       }
       router.push(`/scan/${data.id}`)
     } catch {
-      setError({ msg: 'Could not reach the server. Please check your connection.', showContact: true })
+      setError({ msg: t('friendlyErrors.network'), showContact: true })
       setLoading(false)
       loadingRef.current = false
     }
@@ -62,7 +65,7 @@ export function useScanLauncher() {
 
 export function ScanForm({
   initialUrl = '',
-  submitLabel = 'Scan →',
+  submitLabel,
   compact = false,
   autoFocus = false,
   className = '',
@@ -73,6 +76,7 @@ export function ScanForm({
   autoFocus?: boolean
   className?: string
 }) {
+  const t = useTranslations('ScanForm')
   const [url, setUrl] = useState(initialUrl)
   const { loading, error, launchScan } = useScanLauncher()
 
@@ -88,7 +92,7 @@ export function ScanForm({
           type="text"
           value={url}
           onChange={e => setUrl(e.target.value)}
-          placeholder="https://yoursite.com"
+          placeholder={t('placeholder')}
           disabled={loading}
           autoFocus={autoFocus}
           className={`flex-1 h-full rounded-lg font-mono bg-[#161618] border border-white/10 text-[#F1F0EE] placeholder:text-[#5A5955] focus:outline-none focus:border-white/20 disabled:opacity-50 transition-colors ${
@@ -101,21 +105,21 @@ export function ScanForm({
           className={`${compact ? 'px-4' : 'px-6'} h-full rounded-lg bg-[#6E56CF] text-white text-sm font-medium hover:bg-[#7C68D4] disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-2 shrink-0`}
         >
           {loading ? (
-            <><Loader2 className="w-4 h-4 animate-spin" />Scanning...</>
+            <><Loader2 className="w-4 h-4 animate-spin" />{t('scanning')}</>
           ) : (
-            submitLabel
+            submitLabel ?? t('defaultSubmit')
           )}
         </button>
       </div>
       {error && (
         <div className="mt-2 text-sm text-[#FF4444] space-y-0.5">
-          <p>{error.msg}</p>
+            <p>{error.msg}</p>
           {error.showContact && (
             <p className="text-[#8B8A85] text-xs">
-              If the problem persists, contact me:{' '}
-              <a href="https://t.me/eugenegusakov" target="_blank" rel="noopener noreferrer" className="text-[#6E56CF] hover:underline">Telegram</a>
+              {t('contactPrefix')}{' '}
+              <a href="https://t.me/eugenegusakov" target="_blank" rel="noopener noreferrer" className="text-[#6E56CF] hover:underline">{t('contactTelegram')}</a>
               {' '}or{' '}
-              <a href="mailto:egusakov74@gmail.com" className="text-[#6E56CF] hover:underline">Email</a>
+              <a href="mailto:egusakov74@gmail.com" className="text-[#6E56CF] hover:underline">{t('contactEmail')}</a>
             </p>
           )}
         </div>

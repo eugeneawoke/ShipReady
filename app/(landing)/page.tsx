@@ -262,7 +262,7 @@ const T = {
       issueDesc: 'Без CSP ваше приложение уязвимо для XSS-атак. Злоумышленник может внедрить скрипты, которые украдут токены сессий или данные пользователей.',
       recommendedFix: 'Recommended fix',
       copyPrompt: 'Скопировать промпт',
-      prompt: "Добавьте Content-Security-Policy в next.config.ts:\nheaders: [{ key: 'Content-Security-Policy',\n  value: \"default-src 'self'; script-src 'self'\" }]\nЭто исправит критическую проблему безопасности.",
+      prompt: "Add Content-Security-Policy to next.config.ts:\nheaders: [{ key: 'Content-Security-Policy',\n  value: \"default-src 'self'; script-src 'self'\" }]\nThis fixes the critical security issue immediately.",
     },
     features: {
       eyebrow: 'Что проверяем',
@@ -290,7 +290,7 @@ const T = {
       copyBtn: 'Скопировать промпт',
       copiedBtn: 'Скопировано!',
       pasteHint: '→ вставьте в чат вашего инструмента',
-      promptText: "Исправьте отсутствующий заголовок Content-Security-Policy\nв вашем Next.js приложении.\n\nНачните с Content-Security-Policy-Report-Only:\n{\n  key: 'Content-Security-Policy-Report-Only',\n  value: [\n    \"default-src 'self'\",\n    \"script-src 'self'\",\n    \"object-src 'none'\",\n    \"base-uri 'self'\",\n    \"frame-ancestors 'none'\",\n  ].join('; ')\n}\n\nПроверьте production-отчеты, добавьте nonces\nили SRI, затем включите enforcing CSP.",
+      promptText: "Fix the missing Content-Security-Policy header\nin my Next.js app.\n\nStart with Content-Security-Policy-Report-Only:\n{\n  key: 'Content-Security-Policy-Report-Only',\n  value: [\n    \"default-src 'self'\",\n    \"script-src 'self'\",\n    \"object-src 'none'\",\n    \"base-uri 'self'\",\n    \"frame-ancestors 'none'\",\n  ].join('; ')\n}\n\nCheck production reports, add nonces or SRI,\nthen switch to enforcing CSP.",
     },
     pricing: {
       eyebrow: 'Тарифы',

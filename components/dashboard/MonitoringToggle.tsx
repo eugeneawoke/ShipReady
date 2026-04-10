@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { Loader2, Radar } from 'lucide-react'
 
 interface MonitoringToggleProps {
@@ -12,6 +13,7 @@ interface MonitoringToggleProps {
 
 export function MonitoringToggle({ domain, enabled, canManage }: MonitoringToggleProps) {
   const router = useRouter()
+  const t = useTranslations('Monitoring')
   const [isEnabled, setIsEnabled] = useState(enabled)
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -42,7 +44,7 @@ export function MonitoringToggle({ domain, enabled, canManage }: MonitoringToggl
       router.refresh()
     } catch (error) {
       console.error('[monitoring] toggle failed', error)
-      setError(error instanceof Error ? error.message : 'Could not update monitoring')
+      setError(error instanceof Error ? error.message : t('error'))
     } finally {
       setPending(false)
     }
@@ -61,7 +63,7 @@ export function MonitoringToggle({ domain, enabled, canManage }: MonitoringToggl
             ? 'border-[#3DDC84]/25 bg-[#3DDC84]/10 shadow-[0_0_0_1px_rgba(61,220,132,0.05)]'
             : 'border-white/[0.08] bg-white/[0.03] hover:border-white/[0.14] hover:bg-white/[0.05]'
         }`}
-        aria-label={isEnabled ? `Disable weekly monitoring for ${domain}` : `Enable weekly monitoring for ${domain}`}
+        aria-label={isEnabled ? t('ariaDisable', { domain }) : t('ariaEnable', { domain })}
       >
         <div className={`flex h-7 w-12 items-center rounded-full px-1 transition-colors ${
           isEnabled ? 'bg-[#3DDC84]/90' : 'bg-white/[0.10]'
@@ -74,10 +76,10 @@ export function MonitoringToggle({ domain, enabled, canManage }: MonitoringToggl
         <div className="min-w-0">
           <div className="flex items-center gap-1.5">
             <Radar className={`h-3.5 w-3.5 ${isEnabled ? 'text-[#3DDC84]' : 'text-[#8B8A85]'}`} />
-            <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8B8A85]">Monitor</span>
+            <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8B8A85]">{t('monitor')}</span>
           </div>
           <div className={`mt-0.5 text-xs font-medium ${isEnabled ? 'text-[#E9FFF1]' : 'text-[#C7C5C0]'}`}>
-            {pending ? 'Updating…' : isEnabled ? 'Tracking weekly' : 'Not tracking'}
+            {pending ? t('updating') : isEnabled ? t('trackingWeekly') : t('notTracking')}
           </div>
         </div>
 
@@ -90,7 +92,7 @@ export function MonitoringToggle({ domain, enabled, canManage }: MonitoringToggl
                 ? 'bg-[#3DDC84]/15 text-[#B8F5CD]'
                 : 'bg-white/[0.06] text-[#8B8A85]'
             }`}>
-              {isEnabled ? 'On' : 'Off'}
+              {isEnabled ? t('on') : t('off')}
             </span>
           )}
         </div>

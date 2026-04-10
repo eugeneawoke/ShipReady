@@ -1,5 +1,8 @@
 import type { Metadata } from 'next'
 import { Syne, Space_Grotesk, JetBrains_Mono } from 'next/font/google'
+import { NextIntlClientProvider } from 'next-intl'
+import { getLocale, getMessages, getTranslations } from 'next-intl/server'
+import { LanguageSync } from '@/components/i18n/LanguageSync'
 import './globals.css'
 
 const syne = Syne({
@@ -23,34 +26,44 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ['400', '500'],
 })
 
-export const metadata: Metadata = {
-  title: 'ShipReady — Pre-deploy quality gate for vibe-coded apps',
-  description: '40+ automated checks across performance, SEO, security, mobile, and AI visibility. Get evidence-based fix prompts for vibe-coding tools.',
-  keywords: ['web quality', 'lighthouse', 'SEO checker', 'security audit', 'vibe coding', 'cursor', 'windsurf', 'bolt', 'lovable', 'v0', 'replit'],
-  openGraph: {
-    title: 'ShipReady',
-    description: 'Pre-deploy quality gate for vibe-coded apps',
-    siteName: 'ShipReady',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'ShipReady',
-    description: 'Pre-deploy quality gate for vibe-coded apps',
-  },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://shipready.app'),
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('Metadata')
+
+  return {
+    title: t('layoutTitle'),
+    description: t('layoutDescription'),
+    keywords: ['web quality', 'lighthouse', 'SEO checker', 'security audit', 'vibe coding', 'cursor', 'windsurf', 'bolt', 'lovable', 'v0', 'replit'],
+    openGraph: {
+      title: t('appTitle'),
+      description: t('appDescription'),
+      siteName: t('appTitle'),
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: t('appTitle'),
+      description: t('appDescription'),
+    },
+    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://shipready.app'),
+  }
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const locale = await getLocale()
+  const messages = await getMessages()
+
   return (
     <html
-      lang="en"
+      lang={locale}
       className={`${syne.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} dark h-full`}
     >
       <body className="min-h-full flex flex-col bg-[#0E0E0F] text-[#F1F0EE] antialiased">
-        {children}
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <LanguageSync />
+          {children}
+        </NextIntlClientProvider>
       </body>
     </html>
   )

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import React from 'react'
+import { useTranslations } from 'next-intl'
 import { Zap, Search, Shield, Smartphone, Bot, ChevronDown } from 'lucide-react'
 import type { CategoryScore, IssueCategory } from '@/types/scan'
 
@@ -11,22 +12,6 @@ const ICONS: Record<IssueCategory, React.ComponentType<{ className?: string }>> 
   security: Shield,
   mobile: Smartphone,
   ai_visibility: Bot,
-}
-
-const LABELS: Record<IssueCategory, string> = {
-  performance: 'Performance',
-  seo: 'SEO & Social',
-  security: 'Security',
-  mobile: 'Mobile',
-  ai_visibility: 'AI Visibility',
-}
-
-const DESCRIPTIONS: Record<IssueCategory, string> = {
-  performance: 'Page speed, Core Web Vitals, and accessibility — measured by Lighthouse',
-  seo: 'Search discoverability, meta tags, and how your links look when shared',
-  security: 'HTTPS config, HTTP security headers, SSL certificate, and exposed credentials',
-  mobile: 'Mobile viewport, favicon, and home screen icon',
-  ai_visibility: 'Findability in ChatGPT, Perplexity, and Google AI Overview',
 }
 
 const ALL_CHECKS: Record<IssueCategory, { id: string; name: string }[]> = {
@@ -96,6 +81,7 @@ interface CategoryCardProps {
 }
 
 export function CategoryCard({ category, data }: CategoryCardProps) {
+  const t = useTranslations('CategoryCard')
   const [expanded, setExpanded] = useState(true)
   const [passedOpen, setPassedOpen] = useState(false)
   const Icon = ICONS[category]
@@ -107,11 +93,11 @@ export function CategoryCard({ category, data }: CategoryCardProps) {
     : '#FF4444'
 
   const labelMap: Record<string, string> = {
-    excellent: 'Excellent',
-    good: 'Good',
-    'needs-work': 'Needs work',
-    poor: 'Poor',
-    unavailable: 'Unavailable',
+    excellent: t('scoreLabels.excellent'),
+    good: t('scoreLabels.good'),
+    'needs-work': t('scoreLabels.needsWork'),
+    poor: t('scoreLabels.poor'),
+    unavailable: t('scoreLabels.unavailable'),
   }
 
   const failedIds = new Set(data.issues.filter(issue => issue.severity !== 'pass').map(i => i.id))
@@ -135,8 +121,8 @@ export function CategoryCard({ category, data }: CategoryCardProps) {
       >
         <Icon className="w-4 h-4 text-[#8B8A85] shrink-0 mt-0.5" />
         <div className="flex-1 text-left min-w-0">
-          <span className="text-sm font-medium block">{LABELS[category]}</span>
-          <span className="text-xs text-[#5A5955] leading-snug">{DESCRIPTIONS[category]}</span>
+          <span className="text-sm font-medium block">{t(`labels.${category}`)}</span>
+          <span className="text-xs text-[#5A5955] leading-snug">{t(`descriptions.${category}`)}</span>
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <div className="hidden sm:block w-24 h-1.5 bg-white/6 rounded-full overflow-hidden">
@@ -165,7 +151,7 @@ export function CategoryCard({ category, data }: CategoryCardProps) {
           {data.measurement && data.measurement.status !== 'measured' && (
             <div className="px-4 py-3 border-b border-white/[0.04] bg-white/[0.02]">
               <p className="text-xs text-[#E8A83E]">
-                {data.measurement.label}: {data.measurement.message || 'Could not verify yet'}
+                {data.measurement.label}: {data.measurement.message || t('measurementFallback')}
               </p>
             </div>
           )}
@@ -176,8 +162,8 @@ export function CategoryCard({ category, data }: CategoryCardProps) {
               </span>
               <span className="text-sm text-[#8B8A85]">
                 {data.measurement?.status === 'measured'
-                  ? `All ${data.totalChecks} checks passed`
-                  : 'This category was not fully measured, so no issues can be confirmed yet'}
+                  ? t('allPassed', { count: data.totalChecks })
+                  : t('notMeasured')}
               </span>
             </div>
           ) : (
@@ -221,7 +207,7 @@ export function CategoryCard({ category, data }: CategoryCardProps) {
               >
                 <span className="text-[#3DDC84] text-[11px]">✓</span>
                 <span className="text-xs text-[#5A5955] flex-1 text-left">
-                  {passedChecks.length} checks passed
+                  {t('passed', { count: passedChecks.length })}
                 </span>
                 <ChevronDown
                   className="w-3 h-3 text-[#5A5955] transition-transform duration-200"
