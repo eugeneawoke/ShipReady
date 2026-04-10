@@ -612,7 +612,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
     >
       {/* Nav */}
       <header className="sticky top-0 z-10 bg-[#0E0E0F]/90 backdrop-blur-md border-b border-white/6">
-        <div className="max-w-3xl mx-auto px-4 h-14 flex items-center gap-3">
+        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center gap-3">
           <SiteBrandLink className="shrink-0" />
           <span className="text-[#5A5955] text-sm">/</span>
           <span className="text-sm text-[#8B8A85] font-mono truncate flex-1">{domain}</span>
@@ -705,21 +705,21 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
         </div>
         {newScanOpen && (
           <div className="border-t border-white/6 bg-[#0E0E0F]/95 px-4 py-3 print:hidden">
-            <div className="max-w-3xl mx-auto">
+            <div className="max-w-4xl mx-auto">
               <ScanForm compact autoFocus submitLabel={t('rescan')} />
             </div>
           </div>
         )}
       </header>
 
-      <main className="max-w-3xl mx-auto px-4 py-10 space-y-10">
+      <main className="max-w-4xl mx-auto px-6 py-10 space-y-10">
         <div>
           <Link
             href={isLoggedIn ? '/dashboard' : '/'}
             className="flex items-center gap-1.5 text-sm text-[#8B8A85] transition-colors hover:text-[#F1F0EE]"
           >
             <ArrowLeft className="h-4 w-4" />
-            {isLoggedIn ? 'Dashboard' : 'ShipReady'}
+            {isLoggedIn ? t('dashboard') : 'ShipReady'}
           </Link>
         </div>
         {rescanError && (

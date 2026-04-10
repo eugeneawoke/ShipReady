@@ -35,7 +35,6 @@ export default async function RoadmapPage() {
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE]">
       <SiteHeader
-        maxWidthClassName="max-w-4xl"
         right={(
           <div className="flex items-center gap-4 text-xs text-[#5A5955]">
             {(['done', 'in-progress', 'planned'] as PhaseStatus[]).map(s => {
