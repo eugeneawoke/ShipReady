@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import { Syne, Space_Grotesk, JetBrains_Mono } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages, getTranslations } from 'next-intl/server'
-import { LanguageSync } from '@/components/i18n/LanguageSync'
 import './globals.css'
 
 const syne = Syne({
@@ -61,7 +60,6 @@ export default async function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-[#0E0E0F] text-[#F1F0EE] antialiased">
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <LanguageSync />
           {children}
         </NextIntlClientProvider>
       </body>

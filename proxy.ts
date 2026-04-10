@@ -35,5 +35,5 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   // Run on all page routes; skip API routes, Next.js internals, and static files
-  matcher: ['/((?!api|_next|_vercel|.*\\..*).*) '],
+  matcher: ['/((?!api|_next|_vercel|.*\\..*).*)',],
 }
