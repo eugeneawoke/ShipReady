@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useState, useRef, useEffect } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { motion } from 'framer-motion'
@@ -15,6 +16,7 @@ import { FlickeringGrid } from '@/components/ui/flickering-grid'
 import { SpotlightCard } from '@/components/ui/spotlight-card'
 import { CinematicFooter } from '@/components/ui/motion-footer'
 import { SiteBrandLink } from '@/components/SiteHeader'
+import { localeCookieName } from '@/lib/i18n'
 
 // ─── smooth scroll ────────────────────────────────────────────────────────────
 
@@ -110,6 +112,7 @@ const T = {
     nav: {
       howItWorks: 'How it works',
       pricing: 'Pricing',
+      roadmap: 'Roadmap',
       signIn: 'Sign in',
       getStarted: 'Get started',
     },
@@ -219,6 +222,7 @@ const T = {
     nav: {
       howItWorks: 'Как это работает',
       pricing: 'Тарифы',
+      roadmap: 'Роадмэп',
       signIn: 'Войти',
       getStarted: 'Начать',
     },
@@ -327,7 +331,7 @@ const T = {
 
 type Lang = keyof typeof T
 type Translations = {
-  nav: { howItWorks: string; pricing: string; signIn: string; getStarted: string }
+  nav: { howItWorks: string; pricing: string; roadmap: string; signIn: string; getStarted: string }
   hero: { h1a: string; h1b: string; sub: string; noSignup: string; worksWith: string }
   stats: readonly { value: string; label: string }[]
   how: { eyebrow: string; title: string; steps: readonly { step: string; emoji: string; title: string; desc: string }[] }
@@ -362,12 +366,36 @@ const FEATURE_META = [
 // ─── page ─────────────────────────────────────────────────────────────────────
 
 export default function LandingPage() {
-  const [lang, setLang] = useState<Lang>('EN')
+  const [lang, setLang] = useState<Lang>(() => {
+    if (typeof document === 'undefined' || typeof navigator === 'undefined') return 'EN'
+
+    const cookieLocale = document.cookie
+      .split('; ')
+      .find((item) => item.startsWith(`${localeCookieName}=`))
+      ?.split('=')[1]
+
+    if (cookieLocale === 'ru') return 'RU'
+
+    const preferredLanguage = navigator.languages.length > 0
+      ? navigator.languages[0]
+      : navigator.language
+
+    if (preferredLanguage.toLowerCase().startsWith('ru')) return 'RU'
+    if (document.documentElement.lang === 'ru') return 'RU'
+
+    return 'EN'
+  })
   const t = T[lang] as unknown as Translations
+
+  function handleSetLang(nextLang: Lang) {
+    document.cookie = `${localeCookieName}=${nextLang.toLowerCase()}; path=/; max-age=31536000; samesite=lax`
+    document.documentElement.lang = nextLang.toLowerCase()
+    setLang(nextLang)
+  }
 
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE] overflow-x-hidden">
-      <Nav t={t} lang={lang} setLang={setLang} />
+      <Nav t={t} lang={lang} setLang={handleSetLang} />
       <HeroSection t={t} />
       <StatsBar t={t} />
       <HowItWorksSection t={t} />
@@ -431,6 +459,12 @@ function Nav({ t, lang, setLang }: { t: Translations; lang: Lang; setLang: (l: L
             >
               {t.nav.pricing}
             </button>
+            <Link
+              href="/roadmap"
+              className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors whitespace-nowrap"
+            >
+              {t.nav.roadmap}
+            </Link>
           </div>
         </div>
 

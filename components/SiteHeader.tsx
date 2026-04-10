@@ -2,7 +2,9 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
+import { LanguageSwitcher } from '@/components/i18n/LanguageSwitcher'
 
 interface SiteHeaderProps {
   right?: ReactNode
@@ -13,12 +15,14 @@ interface SiteHeaderProps {
 }
 
 export function SiteBrandLink({ className = '' }: { className?: string }) {
+  const t = useTranslations('SiteHeader')
+
   return (
     <Link
       href="/"
       className={`flex items-center gap-2 text-sm font-semibold tracking-tight text-[#F1F0EE] transition-opacity hover:opacity-80 ${className}`.trim()}
     >
-      <Image src="/logo.svg" alt="ShipReady logo" width={28} height={28} className="h-7 w-7 shrink-0" />
+      <Image src="/logo.svg" alt={t('brandAlt')} width={28} height={28} className="h-7 w-7 shrink-0" />
       <span>ShipReady</span>
     </Link>
   )
@@ -38,7 +42,10 @@ export function SiteHeader({
           <SiteBrandLink />
           {children}
         </div>
-        {right ? <div className="flex items-center gap-4">{right}</div> : <div />}
+        <div className="flex items-center gap-4">
+          <LanguageSwitcher />
+          {right}
+        </div>
       </div>
     </header>
   )

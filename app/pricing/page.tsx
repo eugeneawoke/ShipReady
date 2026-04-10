@@ -1,51 +1,46 @@
+import type { Metadata } from 'next'
+import { getMessages, getTranslations } from 'next-intl/server'
 import { getUserWithPlan } from '@/lib/auth'
+import { BackButton } from '@/components/BackButton'
 import { SiteHeader } from '@/components/SiteHeader'
+import type { AppMessages } from '@/messages/en'
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('Metadata')
+
+  return {
+    title: t('pricingTitle'),
+    description: t('pricingDescription'),
+  }
+}
 
 export default async function PricingPage() {
+  const t = await getTranslations('Pricing')
+  const messages = await getMessages() as AppMessages
   const user = await getUserWithPlan()
   const betaAccessHref = 'mailto:hi@shipready.app?subject=ShipReady%20beta%20access'
 
-  const plans = [
-    {
-      name: 'Free',
-      price: '$0',
-      period: null,
-      features: ['3 scans / month', 'All scores visible', 'AI fix prompts blurred'],
-      cta: 'Get started',
-      href: '/',
-      highlight: false,
-    },
-    {
-      name: 'Pro',
-      price: '$14',
-      period: '/mo',
-      features: ['Unlimited scans', 'AI fix prompts for vibe-coding tools', 'PDF export', 'Weekly monitoring'],
-      cta: 'Request beta access',
-      href: betaAccessHref,
-      highlight: true,
-    },
-    {
-      name: 'Agency',
-      price: '$39',
-      period: '/mo',
-      features: ['10 domains', 'White-label PDF', 'All Pro features', 'Priority support', 'Team seats (soon)'],
-      cta: 'Contact us',
-      href: betaAccessHref,
-      highlight: false,
-    },
-  ]
+  const plans = messages.Pricing.plans.map((plan, index) => ({
+    ...plan,
+    href: index === 0 ? '/' : betaAccessHref,
+  }))
 
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE] px-6 py-24">
       <SiteHeader sticky />
 
       <div className="max-w-3xl mx-auto pt-10">
+        <div className="mb-8">
+          <BackButton className="text-sm text-[#8B8A85] hover:text-[#F1F0EE]" />
+        </div>
         <div className="text-center mb-12">
-          <h1 className="text-3xl font-medium">Simple, transparent pricing</h1>
-          <p className="mt-3 text-[#8B8A85]">Start free. Upgrade when you need the full fix prompts.</p>
+          <h1 className="text-3xl font-medium">{t('title')}</h1>
+          <p className="mt-3 text-[#8B8A85]">{t('subtitle')}</p>
           {user?.plan && user.plan !== 'free' && (
             <p className="mt-2 text-sm text-[#3DDC84]">
-              You are on the {user.plan.charAt(0).toUpperCase() + user.plan.slice(1)} plan
+              {t('currentPlan', {
+                plan: user.plan === 'pro' ? 'Pro' : 'Agency',
+              })}
             </p>
           )}
         </div>
@@ -62,7 +57,7 @@ export default async function PricingPage() {
             >
               {plan.highlight && (
                 <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] bg-[#6E56CF] text-white px-3 py-1 rounded-full uppercase tracking-widest whitespace-nowrap">
-                  Most popular
+                  {t('popular')}
                 </span>
               )}
               <p className="text-sm text-[#8B8A85]">{plan.name}</p>
@@ -93,7 +88,7 @@ export default async function PricingPage() {
         </div>
 
         <p className="text-center mt-8 text-xs text-[#5A5955]">
-          Paid access is handled manually during beta &middot; Payment provider TBD
+          {t('betaNote')}
         </p>
       </div>
     </div>

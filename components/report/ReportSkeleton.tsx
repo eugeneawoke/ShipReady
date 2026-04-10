@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { CheckCircle2, Loader2 } from 'lucide-react'
+import { BackButton } from '@/components/BackButton'
 import { ScanForm } from '@/components/landing/ScanForm'
 import { SiteBrandLink } from '@/components/SiteHeader'
 import type { ScanProcessingIssue } from '@/types/scan'
@@ -16,19 +18,21 @@ const STEPS = [
 ]
 
 export function ReportSkeleton({ status, processingIssue }: { status: string; processingIssue?: ScanProcessingIssue }) {
+  const router = useRouter()
+  const t = useTranslations('ReportSkeleton')
   const [elapsed, setElapsed] = useState(0) // counts 100ms ticks
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const didPushStateRef = useRef(false)
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false)
-  const router = useRouter()
+  const steps = t.raw('steps') as string[]
   const statusLabel =
     status === 'running_fast'
-      ? 'Running fast truth checks...'
+      ? t('status.runningFast')
       : status === 'running_deep'
-        ? 'Running deep analysis...'
+        ? t('status.runningDeep')
         : status === 'enriching'
-          ? 'Writing the final report...'
-          : 'Analyzing your site...'
+          ? t('status.enriching')
+          : t('status.default')
 
   // Start timer once on mount
   useEffect(() => {
@@ -90,7 +94,7 @@ export function ReportSkeleton({ status, processingIssue }: { status: string; pr
       <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE] flex items-center justify-center transition-opacity duration-500">
         <div className="max-w-sm w-full px-6">
           <div className="mb-8">
-            <p className="text-sm text-[#3DDC84] mb-3">✓ Scan complete!</p>
+            <p className="text-sm text-[#3DDC84] mb-3">✓ {t('complete')}</p>
             <div className="h-[3px] bg-[#1E1E21] rounded-full overflow-hidden">
               <div
                 className="h-full rounded-full"
@@ -101,10 +105,10 @@ export function ReportSkeleton({ status, processingIssue }: { status: string; pr
                 }}
               />
             </div>
-            <p className="mt-2 text-xs text-[#5A5955]">Loading your report…</p>
+            <p className="mt-2 text-xs text-[#5A5955]">{t('loadingReport')}</p>
           </div>
           <div className="space-y-2">
-            {STEPS.map((step, i) => (
+            {steps.map((step, i) => (
               <div
                 key={i}
                 className="flex items-center gap-3 px-3 py-2.5 rounded-lg border"
@@ -114,7 +118,7 @@ export function ReportSkeleton({ status, processingIssue }: { status: string; pr
                 }}
               >
                 <CheckCircle2 className="w-4 h-4 shrink-0 text-[#3DDC84]" />
-                <span className="text-sm text-[#5A5955]">{step.label}</span>
+                <span className="text-sm text-[#5A5955]">{step}</span>
               </div>
             ))}
           </div>
@@ -127,18 +131,19 @@ export function ReportSkeleton({ status, processingIssue }: { status: string; pr
     return (
       <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE] flex items-center justify-center">
         <div className="fixed inset-x-0 top-0 border-b border-white/[0.06] bg-[#0E0E0F]/80 backdrop-blur-md">
-          <div className="mx-auto flex h-14 max-w-6xl items-center px-6">
+          <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-6">
+            <BackButton className="text-xs" />
             <SiteBrandLink />
           </div>
         </div>
         <div className="max-w-md w-full px-6 text-center space-y-3">
-          <p className="text-sm font-medium text-[#FF4444]">Scan failed</p>
+          <p className="text-sm font-medium text-[#FF4444]">{t('failed')}</p>
           {elapsed > 0 && (
             <p className="text-xs font-mono" style={{ color: '#FF4444' }}>
-              Failed after {Math.floor(elapsed / 10)}.{elapsed % 10}s
+              {t('failedAfter', { seconds: `${Math.floor(elapsed / 10)}.${elapsed % 10}` })}
             </p>
           )}
-          <p className="text-sm text-[#8B8A85]">Something went wrong while analyzing your site.</p>
+          <p className="text-sm text-[#8B8A85]">{t('failedBody')}</p>
           {processingIssue && (
             <div className="rounded-lg border border-[#FF4444]/20 bg-[#FF4444]/5 px-4 py-3 text-left">
               <p className="text-xs text-[#FF8A8A]">{processingIssue.message}</p>
@@ -159,15 +164,11 @@ export function ReportSkeleton({ status, processingIssue }: { status: string; pr
       <div className="fixed inset-x-0 top-0 border-b border-white/[0.06] bg-[#0E0E0F]/80 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-6">
           <SiteBrandLink />
-          <button
+          <BackButton
+            label="Back"
+            className="text-xs text-[#5A5955] hover:text-[#F1F0EE]"
             onClick={() => setIsLeaveModalOpen(true)}
-            className="text-xs text-[#5A5955] hover:text-[#F1F0EE] transition-colors flex items-center gap-1.5 cursor-pointer bg-transparent border-0 p-0"
-          >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 12H5M12 5l-7 7 7 7"/>
-            </svg>
-            Leave
-          </button>
+          />
         </div>
       </div>
 
@@ -207,15 +208,15 @@ export function ReportSkeleton({ status, processingIssue }: { status: string; pr
 
           <p className="mt-2 text-xs text-[#5A5955]">
             {elapsed > 400
-              ? <span style={{ color: '#E8A83E' }}>Taking longer than usual. Fast checks finish first; deep checks can take longer on complex sites.</span>
-              : 'Running fast checks first, then deep analysis. Complex sites may take longer.'
+              ? <span style={{ color: '#E8A83E' }}>{t('longer')}</span>
+              : t('normal')
             }
           </p>
         </div>
 
         {/* Steps */}
         <div className="space-y-2">
-          {STEPS.map((step, i) => {
+          {steps.map((step, i) => {
             const isDone    = i < scanCurrentStep
             const isActive  = i === scanCurrentStep
             const isPending = i > scanCurrentStep
@@ -241,7 +242,7 @@ export function ReportSkeleton({ status, processingIssue }: { status: string; pr
                   className="text-sm transition-colors duration-300"
                   style={{ color: isDone ? '#5A5955' : isActive ? '#F1F0EE' : '#5A5955' }}
                 >
-                  {step.label}
+                  {step}
                 </span>
               </div>
             )
@@ -250,7 +251,7 @@ export function ReportSkeleton({ status, processingIssue }: { status: string; pr
 
         <p className="mt-6 text-[11px] text-[#5A5955] flex items-start gap-1.5">
           <span style={{ color: '#E8A83E', fontSize: 13, lineHeight: 1.4 }}>⚠</span>
-          You can leave this screen, but keep it open if you want the report to open automatically.
+          {t('leaveHint')}
         </p>
       </div>
 
@@ -264,9 +265,9 @@ export function ReportSkeleton({ status, processingIssue }: { status: string; pr
             className="w-full max-w-[300px] mx-4 rounded-xl p-6 text-center"
             style={{ background: '#161618', border: '1px solid rgba(255,255,255,0.08)' }}
           >
-            <p className="text-sm font-medium text-[#F1F0EE] mb-2">Leave scan screen?</p>
+            <p className="text-sm font-medium text-[#F1F0EE] mb-2">{t('modal.title')}</p>
             <p className="text-xs text-[#8B8A85] leading-relaxed mb-6">
-              The scan can continue in the background, but this screen will stop tracking progress.
+              {t('modal.body')}
             </p>
             <div className="flex gap-3">
               <button
@@ -274,7 +275,7 @@ export function ReportSkeleton({ status, processingIssue }: { status: string; pr
                 className="flex-1 py-2 rounded-lg text-xs text-[#8B8A85] hover:text-[#F1F0EE] transition-colors cursor-pointer"
                 style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.08)' }}
               >
-                Keep scanning
+                {t('modal.stay')}
               </button>
               <button
                 onClick={() => router.push('/')}
@@ -285,7 +286,7 @@ export function ReportSkeleton({ status, processingIssue }: { status: string; pr
                   color: '#FF6B6B',
                 }}
               >
-                Leave
+                {t('modal.leave')}
               </button>
             </div>
           </div>

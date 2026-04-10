@@ -5,6 +5,8 @@ import { useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
+import { BackButton } from '@/components/BackButton'
 import { SiteHeader } from '@/components/SiteHeader'
 
 // Lazy singleton — only created on first user action, not at module load time
@@ -55,6 +57,7 @@ function IconCheck() {
 
 export default function LoginPage() {
   const router = useRouter()
+  const t = useTranslations('Auth')
   const [mode, setMode] = useState<Mode>(() => {
     if (typeof window === 'undefined') return 'signin'
     const candidate = new URLSearchParams(window.location.search).get('mode')
@@ -102,12 +105,12 @@ export default function LoginPage() {
 
     if (mode === 'signup') {
       if (password.length < 8) {
-        setError('Password must be at least 8 characters')
+        setError(t('errors.passwordTooShort'))
         setLoading(false)
         return
       }
       if (password !== confirmPassword) {
-        setError('Passwords do not match')
+        setError(t('errors.passwordMismatch'))
         setLoading(false)
         return
       }
@@ -125,7 +128,7 @@ export default function LoginPage() {
     } else if (mode === 'signin') {
       const { error } = await getSupabase().auth.signInWithPassword({ email, password })
       setLoading(false)
-      if (error) { setError('Incorrect email or password'); return }
+      if (error) { setError(t('errors.incorrectCredentials')); return }
       router.push('/dashboard')
 
     } else if (mode === 'reset') {
@@ -138,29 +141,17 @@ export default function LoginPage() {
     }
   }
 
-  const titles: Record<Mode, string> = {
-    signin: 'Welcome back',
-    signup: 'Create your account',
-    reset:  'Reset your password',
-  }
-
-  const subs: Record<Mode, string> = {
-    signin: 'Sign in to access your scans and reports',
-    signup: 'Get started — first 3 scans are free',
-    reset:  "We'll send a reset link to your email",
-  }
-
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE] flex flex-col">
       <SiteHeader
         right={(
           <div className="text-[11px] text-[#5A5955] font-mono">
             {mode === 'signin' ? (
-              <span>No account? <button onClick={() => switchMode('signup')} className="text-[#6E56CF] hover:underline">Sign up</button></span>
+              <span>{t('switcher.noAccount')} <button onClick={() => switchMode('signup')} className="text-[#6E56CF] hover:underline">{t('switcher.signUp')}</button></span>
             ) : mode === 'signup' ? (
-              <span>Have an account? <button onClick={() => switchMode('signin')} className="text-[#6E56CF] hover:underline">Sign in</button></span>
+              <span>{t('switcher.haveAccount')} <button onClick={() => switchMode('signin')} className="text-[#6E56CF] hover:underline">{t('switcher.signIn')}</button></span>
             ) : (
-              <button onClick={() => switchMode('signin')} className="text-[#6E56CF] hover:underline">Back to sign in</button>
+              <button onClick={() => switchMode('signin')} className="text-[#6E56CF] hover:underline">{t('switcher.backToSignIn')}</button>
             )}
           </div>
         )}
@@ -169,13 +160,16 @@ export default function LoginPage() {
       {/* Form */}
       <div className="flex-1 flex items-center justify-center px-6 py-16">
         <div className="w-full max-w-sm">
+          <div className="mb-8">
+            <BackButton className="text-sm text-[#8B8A85] hover:text-[#F1F0EE]" />
+          </div>
           {/* Header */}
           <div className="text-center mb-8">
             <div className="inline-flex w-12 h-12 rounded-2xl bg-[#6E56CF]/10 border border-[#6E56CF]/25 items-center justify-center mb-5 p-2">
-              <Image src="/logo.svg" alt="ShipReady" width={32} height={32} className="w-full h-full" />
+              <Image src="/logo.svg" alt={t('altBrand')} width={32} height={32} className="w-full h-full" />
             </div>
-            <h1 className="text-xl font-semibold tracking-tight mb-1.5">{titles[mode]}</h1>
-            <p className="text-sm text-[#5A5955]">{subs[mode]}</p>
+            <h1 className="text-xl font-semibold tracking-tight mb-1.5">{t(`modes.${mode}.title`)}</h1>
+            <p className="text-sm text-[#5A5955]">{t(`modes.${mode}.subtitle`)}</p>
           </div>
 
           {/* Done state */}
@@ -186,16 +180,16 @@ export default function LoginPage() {
               </div>
               {mode === 'signup' ? (
                 <>
-                  <p className="font-medium">Check your email</p>
+                  <p className="font-medium">{t('done.checkEmail')}</p>
                   <p className="text-sm text-[#8B8A85]">
-                    We sent a confirmation link to <span className="text-[#F1F0EE]">{email}</span>. Click it to activate your account.
+                    {t.rich('done.signupBody', { email: () => <span className="text-[#F1F0EE]">{email}</span> })}
                   </p>
                 </>
               ) : (
                 <>
-                  <p className="font-medium">Reset link sent</p>
+                  <p className="font-medium">{t('done.resetTitle')}</p>
                   <p className="text-sm text-[#8B8A85]">
-                    Check <span className="text-[#F1F0EE]">{email}</span> for a link to reset your password.
+                    {t.rich('done.resetBody', { email: () => <span className="text-[#F1F0EE]">{email}</span> })}
                   </p>
                 </>
               )}
@@ -203,7 +197,7 @@ export default function LoginPage() {
                 onClick={() => switchMode('signin')}
                 className="text-xs text-[#5A5955] hover:text-[#8B8A85] transition-colors"
               >
-                Back to sign in
+                {t('done.backToSignIn')}
               </button>
             </div>
           ) : (
@@ -221,12 +215,12 @@ export default function LoginPage() {
                       <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
                       <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                     </svg>
-                    Continue with Google
+                    {t('google')}
                   </button>
 
                   <div className="flex items-center gap-3">
                     <div className="flex-1 h-px bg-white/[0.06]"/>
-                    <span className="text-[11px] text-[#5A5955] font-mono">or</span>
+                    <span className="text-[11px] text-[#5A5955] font-mono">{t('or')}</span>
                     <div className="flex-1 h-px bg-white/[0.06]"/>
                   </div>
                 </>
@@ -238,7 +232,7 @@ export default function LoginPage() {
                 <input
                   type="email"
                   required
-                  placeholder="you@example.com"
+                  placeholder={t('emailPlaceholder')}
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   className="w-full px-4 py-3 rounded-xl bg-[#161618] border border-white/[0.08] text-base sm:text-sm text-[#F1F0EE] placeholder-[#5A5955] focus:outline-none focus:border-[#6E56CF]/60 transition-colors"
@@ -250,7 +244,7 @@ export default function LoginPage() {
                     <input
                       type={showPassword ? 'text' : 'password'}
                       required
-                      placeholder={mode === 'signup' ? 'Choose a password (8+ chars)' : 'Password'}
+                      placeholder={mode === 'signup' ? t('signupPasswordPlaceholder') : t('passwordPlaceholder')}
                       value={password}
                       onChange={e => setPassword(e.target.value)}
                       className="w-full px-4 py-3 pr-10 rounded-xl bg-[#161618] border border-white/[0.08] text-base sm:text-sm text-[#F1F0EE] placeholder-[#5A5955] focus:outline-none focus:border-[#6E56CF]/60 transition-colors"
@@ -271,7 +265,7 @@ export default function LoginPage() {
                     <input
                       type={showPassword ? 'text' : 'password'}
                       required
-                      placeholder="Confirm password"
+                      placeholder={t('confirmPasswordPlaceholder')}
                       value={confirmPassword}
                       onChange={e => setConfirmPassword(e.target.value)}
                       className="w-full px-4 py-3 pr-10 rounded-xl bg-[#161618] border border-white/[0.08] text-base sm:text-sm text-[#F1F0EE] placeholder-[#5A5955] focus:outline-none focus:border-[#6E56CF]/60 transition-colors"
@@ -287,7 +281,7 @@ export default function LoginPage() {
                       onClick={() => switchMode('reset')}
                       className="text-[11px] text-[#5A5955] hover:text-[#8B8A85] transition-colors"
                     >
-                      Forgot password?
+                      {t('forgotPassword')}
                     </button>
                   </div>
                 )}
@@ -299,12 +293,12 @@ export default function LoginPage() {
                   className="w-full py-3 px-4 rounded-xl bg-[#6E56CF] text-white text-sm font-medium hover:bg-[#7C68D4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading
-                    ? '...'
+                    ? t('submit.loading')
                     : mode === 'signin'
-                    ? 'Sign in'
+                    ? t('submit.signin')
                     : mode === 'signup'
-                    ? 'Create account'
-                    : 'Send reset link'}
+                    ? t('submit.signup')
+                    : t('submit.reset')}
                 </button>
               </form>
 
@@ -316,18 +310,18 @@ export default function LoginPage() {
               {/* Toggle */}
               <p className="text-[11px] text-[#5A5955] text-center pt-1">
                 {mode === 'signin' ? (
-                  <>New here?{' '}<button onClick={() => switchMode('signup')} className="text-[#8B8A85] hover:text-[#F1F0EE] transition-colors">Create a free account</button></>
+                  <>{t('footer.newHere')}{' '}<button onClick={() => switchMode('signup')} className="text-[#8B8A85] hover:text-[#F1F0EE] transition-colors">{t('footer.createFreeAccount')}</button></>
                 ) : mode === 'signup' ? (
-                  <>Already have an account?{' '}<button onClick={() => switchMode('signin')} className="text-[#8B8A85] hover:text-[#F1F0EE] transition-colors">Sign in</button></>
+                  <>{t('footer.alreadyHaveAccount')}{' '}<button onClick={() => switchMode('signin')} className="text-[#8B8A85] hover:text-[#F1F0EE] transition-colors">{t('switcher.signIn')}</button></>
                 ) : null}
               </p>
 
               {/* Legal */}
               <p className="text-[10px] text-[#5A5955] text-center leading-relaxed">
-                By continuing you agree to our{' '}
-                <Link href="/terms" className="hover:text-[#8B8A85] transition-colors">Terms</Link>
+                {t('footer.legalPrefix')}{' '}
+                <Link href="/terms" className="hover:text-[#8B8A85] transition-colors">{t('footer.terms')}</Link>
                 {' '}and{' '}
-                <Link href="/privacy" className="hover:text-[#8B8A85] transition-colors">Privacy Policy</Link>.
+                <Link href="/privacy" className="hover:text-[#8B8A85] transition-colors">{t('footer.privacy')}</Link>.
               </p>
             </div>
           )}
