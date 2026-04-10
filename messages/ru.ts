@@ -5,7 +5,7 @@ const ru: AppMessages = {
     appTitle: 'ShipReady',
     appDescription: 'Проверка качества перед деплоем для vibe-coded приложений',
     layoutTitle: 'ShipReady - Проверка качества перед деплоем для vibe-coded приложений',
-    layoutDescription: '37 автоматических проверок по производительности, SEO, безопасности, мобильности и AI visibility. Получайте evidence-based промпты для исправлений.',
+    layoutDescription: '35+ автоматических проверок по производительности, SEO, безопасности, мобильности и AI visibility. Получайте evidence-based промпты для исправлений.',
     pricingTitle: 'Тарифы - ShipReady',
     pricingDescription: 'Простые и прозрачные тарифы ShipReady для соло-фаундеров и команд.',
     roadmapTitle: 'Роадмэп - ShipReady',
@@ -477,7 +477,7 @@ const ru: AppMessages = {
       worksWith: 'Работает с',
     },
     stats: [
-      { value: '37', label: 'автоматических проверок' },
+      { value: '35+', label: 'автоматических проверок' },
       { value: '5', label: 'категорий' },
       { value: 'Быстро', label: 'первые выводы' },
       { value: 'AI', label: 'промпт на каждую проблему' },
@@ -487,7 +487,7 @@ const ru: AppMessages = {
       title: 'Три шага до готовности к релизу',
       steps: [
         { step: '01', emoji: '1', title: 'Вставьте URL', desc: 'Любой live URL. Vercel, Netlify или свой домен. Никакой настройки и расширений не нужно.' },
-        { step: '02', emoji: '2', title: '37 проверок', desc: 'Сначала идут быстрые truth-checks, затем подключается более глубокий анализ производительности и шумных эвристик.' },
+        { step: '02', emoji: '2', title: '35+ проверок', desc: 'Сначала идут быстрые truth-checks, затем подключается более глубокий анализ производительности и шумных эвристик.' },
         { step: '03', emoji: '3', title: 'Получите AI-промпты', desc: 'У каждой проблемы есть понятное объяснение и готовый промпт для вашего vibe-coding инструмента.' },
       ],
     },
@@ -509,7 +509,7 @@ const ru: AppMessages = {
     },
     features: {
       eyebrow: 'Что проверяем',
-      title: '37 проверок по 5 категориям',
+      title: '35+ проверок по 5 категориям',
       sub: 'Всё, что действительно важно перед выходом в прод.',
       items: [
         { title: 'Производительность', desc: 'Реальный Lighthouse mobile в headless-браузере. Core Web Vitals, суммарный балл производительности и accessibility score.', checks: ['LCP < 2.5с', 'CLS < 0.1', 'INP < 200мс', 'FCP < 1.8с', 'Performance score', 'Accessibility score'] },

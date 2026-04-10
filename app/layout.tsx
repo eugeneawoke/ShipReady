@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Syne, Space_Grotesk, JetBrains_Mono } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages, getTranslations } from 'next-intl/server'
+import { headers } from 'next/headers'
 import './globals.css'
 
 const syne = Syne({
@@ -82,6 +83,7 @@ export default async function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   const locale = await getLocale()
   const messages = await getMessages()
+  const nonce = (await headers()).get('x-nonce') ?? undefined
 
   return (
     <html
@@ -90,10 +92,12 @@ export default async function RootLayout({
     >
       <head>
         <script
+          nonce={nonce}
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
         <script
+          nonce={nonce}
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(webApplicationSchema) }}
         />

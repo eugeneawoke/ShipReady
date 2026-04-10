@@ -14,7 +14,6 @@ import { AnimatedShinyText } from '@/components/ui/animated-shiny-text'
 import { DotPattern } from '@/components/ui/dot-pattern'
 import { SpotlightCard } from '@/components/ui/spotlight-card'
 import { CinematicFooter } from '@/components/ui/motion-footer'
-import Script from 'next/script'
 import { SiteBrandLink } from '@/components/SiteHeader'
 import { localeCookieName } from '@/lib/i18n'
 import type { AppMessages } from '@/messages/en'
@@ -162,50 +161,8 @@ export default function LandingPage() {
     })
   }
 
-  const faqSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: [
-      {
-        '@type': 'Question',
-        name: 'What is ShipReady?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: 'ShipReady is a pre-deploy quality gate for vibe-coded apps. Submit your URL and get a report covering performance, SEO, security, mobile readiness, and AI visibility — with fix prompts ready to paste into your AI coding tool.',
-        },
-      },
-      {
-        '@type': 'Question',
-        name: 'How does the scan work?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: 'ShipReady fetches your page, runs a real Lighthouse mobile audit, checks HTTP security headers, inspects HTML metadata, and verifies structured data. Results are classified as verified, likely, or heuristic so you know exactly how confident each finding is.',
-        },
-      },
-      {
-        '@type': 'Question',
-        name: 'Is ShipReady free?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: 'Yes, the core scan is free. Pro and Agency plans add PDF export, weekly monitoring, and deeper insights.',
-        },
-      },
-      {
-        '@type': 'Question',
-        name: 'Does ShipReady work with AI coding tools like Cursor, Bolt, or Lovable?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: 'Yes. Each issue in your report includes a ready-to-paste fix prompt for AI coding tools like Cursor, Windsurf, Bolt, Lovable, v0, and Replit.',
-        },
-      },
-    ],
-  }
-
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE] overflow-x-hidden">
-      <Script id="faq-schema" type="application/ld+json">
-        {JSON.stringify(faqSchema)}
-      </Script>
       <Nav t={t} lang={lang} setLang={handleSetLang} switching={isPending} languageAriaLabel={languageAriaLabel} roadmapLabel={roadmapLabel} />
       <HeroSection t={t} />
       <StatsBar t={t} />

@@ -43,8 +43,24 @@ export async function runSecurityChecks(
     const csp = headers.get('content-security-policy')
     if (!csp) {
       issues.push(withIssueMeta({ ...T['missing-csp'] }, 'http', [evidence('header', 'Content-Security-Policy', 'missing')]))
-    } else if (csp.includes("'unsafe-inline'") || csp.includes("'unsafe-eval'")) {
-      issues.push(withIssueMeta({ ...T['unsafe-csp'] }, 'http', [evidence('header', 'Content-Security-Policy', csp)]))
+    } else {
+      // Only flag unsafe-inline/eval in script-src (or default-src fallback).
+      // style-src 'unsafe-inline' is a separate, lower-risk concern (blocks CSS injection, not JS execution).
+      const directives = Object.fromEntries(
+        csp.split(';')
+          .map(d => d.trim())
+          .filter(Boolean)
+          .map(d => {
+            const spaceIdx = d.indexOf(' ')
+            return spaceIdx === -1
+              ? [d.toLowerCase(), '']
+              : [d.slice(0, spaceIdx).toLowerCase(), d.slice(spaceIdx + 1)]
+          }),
+      )
+      const effectiveScriptPolicy = directives['script-src'] ?? directives['default-src'] ?? ''
+      if (effectiveScriptPolicy.includes("'unsafe-inline'") || effectiveScriptPolicy.includes("'unsafe-eval'")) {
+        issues.push(withIssueMeta({ ...T['unsafe-csp'] }, 'http', [evidence('header', 'Content-Security-Policy', csp)]))
+      }
     }
 
     const domain = new URL(url).hostname

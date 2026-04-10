@@ -34,9 +34,12 @@ const CATEGORY_WEIGHTS = {
   ai_visibility: 0.20,
 } as const
 
-function scoreLabel(score: number | null): CategoryScore['label'] {
+// "Excellent" requires both a high numeric score AND no visible issues of any kind.
+// A category with even one likely/heuristic issue is at most "Good" — showing
+// "Excellent" alongside a visible warning is misleading.
+function scoreLabel(score: number | null, hasAnyIssues: boolean): CategoryScore['label'] {
   if (score === null) return 'unavailable'
-  if (score >= 90) return 'excellent'
+  if (score >= 90 && !hasAnyIssues) return 'excellent'
   if (score >= 70) return 'good'
   if (score >= 50) return 'needs-work'
   return 'poor'
@@ -55,7 +58,7 @@ export function buildCategoryScore(
 
   return {
     score,
-    label: scoreLabel(score),
+    label: scoreLabel(score, issues.length > 0),
     issues,
     passedChecks: measurementState.status === 'unavailable' ? 0 : Math.max(0, totalChecks - issues.length),
     totalChecks,

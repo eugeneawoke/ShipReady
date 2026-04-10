@@ -24,24 +24,7 @@ const securityHeaders = [
       'usb=()',
     ].join(', '),
   },
-  {
-    key: 'Content-Security-Policy',
-    value: [
-      "default-src 'self'",
-      // Next.js App Router requires unsafe-inline for hydration scripts and inline styles
-      "script-src 'self' 'unsafe-inline'",
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https:",
-      // next/font self-hosts font files; allow data: for inline font-face
-      "font-src 'self' data: https://fonts.gstatic.com",
-      "connect-src 'self' https://*.supabase.co https://*.supabase.in",
-      "object-src 'none'",
-      "base-uri 'self'",
-      "form-action 'self'",
-      "frame-ancestors 'none'",
-      'upgrade-insecure-requests',
-    ].join('; '),
-  },
+  // CSP is set per-request in middleware.ts with a nonce (no unsafe-inline in script-src)
 ]
 
 const nextConfig: NextConfig = {

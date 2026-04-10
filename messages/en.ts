@@ -3,7 +3,7 @@ const en = {
     appTitle: 'ShipReady',
     appDescription: 'Pre-deploy quality gate for vibe-coded apps',
     layoutTitle: 'ShipReady - Pre-deploy quality gate for vibe-coded apps',
-    layoutDescription: '37 automated checks across performance, SEO, security, mobile, and AI visibility. Get evidence-based fix prompts for vibe-coding tools.',
+    layoutDescription: '35+ automated checks across performance, SEO, security, mobile, and AI visibility. Get evidence-based fix prompts for vibe-coding tools.',
     pricingTitle: 'Pricing - ShipReady',
     pricingDescription: 'Simple and transparent ShipReady pricing for solo founders and teams.',
     roadmapTitle: 'Roadmap - ShipReady',
@@ -475,7 +475,7 @@ const en = {
       worksWith: 'Works with',
     },
     stats: [
-      { value: '37', label: 'automated checks' },
+      { value: '35+', label: 'automated checks' },
       { value: '5', label: 'categories covered' },
       { value: 'Fast', label: 'initial findings' },
       { value: 'AI', label: 'fix prompt per issue' },
@@ -485,7 +485,7 @@ const en = {
       title: 'Three steps to ship-ready',
       steps: [
         { step: '01', emoji: '1', title: 'Paste your URL', desc: 'Drop any live URL. Vercel, Netlify, or a custom domain. No setup or browser extension needed.' },
-        { step: '02', emoji: '2', title: '37 checks run', desc: 'Fast truth checks run first, then deeper analysis follows for performance and noisier heuristics.' },
+        { step: '02', emoji: '2', title: '35+ checks run', desc: 'Fast truth checks run first, then deeper analysis follows for performance and noisier heuristics.' },
         { step: '03', emoji: '3', title: 'Get AI fix prompts', desc: 'Each issue has a plain-English explanation and one ready-to-paste prompt for your vibe-coding tool.' },
       ],
     },
@@ -507,7 +507,7 @@ const en = {
     },
     features: {
       eyebrow: 'What we check',
-      title: '37 checks across 5 categories',
+      title: '35+ checks across 5 categories',
       sub: 'Every check that matters before your app goes live.',
       items: [
         { title: 'Performance', desc: 'Real Lighthouse mobile run in a headless browser. Core Web Vitals, composite performance score, and accessibility score.', checks: ['LCP < 2.5s', 'CLS < 0.1', 'INP < 200ms', 'FCP < 1.8s', 'Performance score', 'Accessibility score'] },
