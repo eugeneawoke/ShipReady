@@ -107,7 +107,6 @@ export async function retryLighthouseForScan(scanId: string): Promise<void> {
     aiSummary: retry.ok ? undefined : current.aiSummary,
     topPriorities: retry.ok ? undefined : current.topPriorities,
     aiTechnicalPrompt: retry.ok ? undefined : current.aiTechnicalPrompt,
-    aiVibePrompt: retry.ok ? undefined : current.aiVibePrompt,
     issuePrompts: retry.ok ? undefined : current.issuePrompts,
     wowInsights: retry.ok ? undefined : current.wowInsights,
   })
