@@ -26,7 +26,7 @@ type AnyComponent = ComponentType<any>
 const Particles = dynamic(async () => { const m = await import('@/components/ui/particles'); return m.Particles as AnyComponent }, { ssr: false })
 const HeroNoise = dynamic(async () => { const m = await import('@/components/ui/hero-noise'); return m.HeroNoise as AnyComponent }, { ssr: false })
 const FlickeringGrid = dynamic(async () => { const m = await import('@/components/ui/flickering-grid'); return m.FlickeringGrid as AnyComponent }, { ssr: false })
-const Meteors = dynamic(async () => { const m = await import('@/components/ui/meteors'); return m.Meteors as AnyComponent }, { ssr: false })
+
 const CinematicFooter = dynamic(async () => { const m = await import('@/components/ui/motion-footer'); return m.CinematicFooter as AnyComponent }, { ssr: false })
 
 // ─── smooth scroll ────────────────────────────────────────────────────────────
@@ -703,104 +703,6 @@ function AIPromptsSection({ t }: { t: Translations }) {
             <span className="text-xs text-[#5A5955]">{t.ai.pasteHint}</span>
           </div>
         </motion.div>
-      </div>
-    </section>
-  )
-}
-
-// ─── Pricing ──────────────────────────────────────────────────────────────────
-
-function PricingSection({ t }: { t: Translations }) {
-  return (
-    <section id="pricing" className="scroll-mt-24 py-24 px-6">
-      <div className="max-w-4xl mx-auto">
-        <motion.div {...fadeUp()} className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 mb-3">
-            <AnimatedShinyText
-              shimmerWidth={120}
-              className="text-[11px] text-[#6E56CF] uppercase tracking-[0.15em] font-mono"
-            >
-              {t.pricing.eyebrow}
-            </AnimatedShinyText>
-          </div>
-          <h2 className="text-[32px] font-semibold tracking-[-0.03em]">{t.pricing.title}</h2>
-          <p className="mt-3 text-[#8B8A85] text-sm">{t.pricing.sub}</p>
-        </motion.div>
-
-        <div className="grid md:grid-cols-3 gap-4">
-          {t.pricing.plans.map((plan, i) => (
-            <motion.div
-              key={plan.nameKey}
-              {...fadeUp(i * 0.1)}
-              className={`relative p-6 rounded-2xl border ${
-                plan.coming
-                  ? 'bg-[#161618] border-white/[0.04] opacity-70'
-                  : plan.highlight
-                  ? 'bg-[#6E56CF]/[0.05] border-[#6E56CF] shadow-[0_0_60px_rgba(110,86,207,0.15)]'
-                  : 'bg-[#161618] border-white/[0.06]'
-              }`}
-            >
-              {/* Meteors for Pro card */}
-              {plan.highlight && !plan.coming && (
-                <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
-                  <Meteors number={10} minDuration={6} maxDuration={14} className="text-[#a78bfa]/70" />
-                </div>
-              )}
-              {plan.highlight && !plan.coming && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] bg-[#6E56CF] text-white px-3 py-1 rounded-full uppercase tracking-[0.1em] whitespace-nowrap font-medium">
-                  {t.pricing.popular}
-                </div>
-              )}
-              {plan.coming && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] bg-[#232328] text-[#8B8A85] border border-white/[0.10] px-3 py-1 rounded-full uppercase tracking-[0.1em] whitespace-nowrap font-medium">
-                  {t.pricing.comingSoon}
-                </div>
-              )}
-              <div className="mb-5">
-                <p className="text-[10px] text-[#5A5955] uppercase tracking-[0.15em] font-mono mb-1">{plan.nameKey}</p>
-                <p className="text-sm text-[#8B8A85] mb-4">{plan.desc}</p>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-[38px] font-mono font-medium leading-none">{plan.price}</span>
-                  {plan.period && <span className="text-[#8B8A85] text-sm">{plan.period}</span>}
-                </div>
-              </div>
-              <ul className="space-y-2.5 mb-6">
-                {plan.features.map((f, fi) => (
-                  <li key={fi} className={`text-sm flex items-center gap-2 ${plan.coming ? 'text-[#5A5955]' : plan.highlight ? 'text-[#F1F0EE]' : 'text-[#8B8A85]'}`}>
-                    <span className="shrink-0">
-                      <IconCheckCircle size={13} color={plan.coming ? '#3A3A3A' : '#3DDC84'} />
-                    </span>
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              {plan.coming ? (
-                <a
-                  href="/roadmap"
-                  className="block w-full py-2.5 rounded-xl text-sm font-medium text-center bg-[#1E1E21] border border-white/[0.06] text-[#5A5955] hover:text-[#8B8A85] hover:border-white/[0.10] transition-colors"
-                >
-                  {t.pricing.comingSoon} →
-                </a>
-              ) : (
-                <button
-                  onClick={() => { if (!plan.highlight) smoothScrollTo('#cta') }}
-                  className={`w-full py-2.5 rounded-xl text-sm font-medium transition-colors cursor-pointer ${
-                    plan.highlight
-                      ? 'bg-[#6E56CF] text-white hover:bg-[#7C68D4]'
-                      : 'bg-[#1E1E21] border border-white/[0.08] text-[#F1F0EE] hover:bg-[#232328]'
-                  }`}
-                >
-                  {plan.cta}
-                </button>
-              )}
-              {!plan.coming && plan.period && (
-                <p className="mt-2.5 text-center text-[11px] text-[#5A5955]">
-                  {t.pricing.cancelAnytime}
-                </p>
-              )}
-            </motion.div>
-          ))}
-        </div>
       </div>
     </section>
   )
