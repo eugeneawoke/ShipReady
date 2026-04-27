@@ -36,8 +36,8 @@ export function IssueCard({ issue, isPro, promptsReady = true }: IssueCardProps)
   const color = SEVERITY_COLORS[issue.severity] || '#8B8A85'
   const bg = SEVERITY_BG[issue.severity] || 'transparent'
 
-  const hasPrompts = !!(issue.cursorPrompt || issue.boltPrompt) && issue.severity !== 'pass'
-  const currentPrompt = issue.boltPrompt || issue.cursorPrompt || ''
+  const hasPrompts = !!issue.cursorPrompt && issue.severity !== 'pass'
+  const currentPrompt = issue.cursorPrompt || ''
 
   function copy() {
     if (!currentPrompt) return
