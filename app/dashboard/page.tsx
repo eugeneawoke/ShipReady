@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import type { Metadata } from 'next'
 import { ArrowLeft } from 'lucide-react'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase'
@@ -9,6 +10,8 @@ import { ScanForm } from '@/components/landing/ScanForm'
 import { MonitoringToggle } from '@/components/dashboard/MonitoringToggle'
 import { domainFromUrl } from '@/lib/monitoring/domains'
 import { SiteHeader } from '@/components/SiteHeader'
+
+export const metadata: Metadata = { robots: { index: false, follow: false } }
 
 export default async function DashboardPage() {
   const t = await getTranslations('Dashboard')

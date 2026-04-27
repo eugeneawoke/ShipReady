@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-const UPDATED = 'April 5, 2025'
+const UPDATED = 'April 27, 2026'
 const EMAIL = 'egusakov74@gmail.com'
 
 export default async function TermsPage() {

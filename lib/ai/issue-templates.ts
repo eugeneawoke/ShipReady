@@ -346,6 +346,94 @@ export const metadata: Metadata = {
 4. If using CMS data, ensure all content fields are populated in production`,
   },
 
+  'desc-length': {
+    id: 'desc-length',
+    category: 'seo',
+    severity: 'low',
+    confidence: 'heuristic',
+    scoreEligible: false,
+    title: 'Meta description length is not optimal',
+    plainEnglish: 'Your meta description is either too short (under 100 chars) or too long (over 165 chars). Google typically shows 100–165 characters. Too short leaves value on the table; too long gets cut off with "…".',
+    cursorPrompt: 'Update the meta description to be between 120–160 characters. In Next.js, update the `description` field in `generateMetadata()`. Aim for: keyword-rich first 120 characters, compelling CTA in the last 30.',
+  },
+
+  'missing-twitter-image': {
+    id: 'missing-twitter-image',
+    category: 'seo',
+    severity: 'medium',
+    confidence: 'verified',
+    scoreEligible: true,
+    title: 'Twitter/X card declares summary_large_image but no twitter:image is set',
+    plainEnglish: 'Your page uses `twitter:card = summary_large_image` but provides no `twitter:image` URL. Twitter/X will show a blank card. Set the image or downgrade the card type.',
+    cursorPrompt: 'In Next.js `generateMetadata()`, add `twitter: { card: "summary_large_image", images: ["/og.png"] }`. Create a 1200×630 PNG at `public/og.png` as the default OG image.',
+  },
+
+  'canonical-mismatch': {
+    id: 'canonical-mismatch',
+    category: 'seo',
+    severity: 'high',
+    confidence: 'verified',
+    scoreEligible: true,
+    title: 'Canonical URL points to a different domain',
+    plainEnglish: 'The canonical tag says this page belongs to a different domain than the one you\'re actually on. Google will index the canonical domain\'s version and ignore this one, potentially splitting ranking signals.',
+    cursorPrompt: 'In Next.js, set `alternates: { canonical: process.env.NEXT_PUBLIC_APP_URL }` in `generateMetadata()`. Ensure `NEXT_PUBLIC_APP_URL` matches your actual production domain (no trailing slash).',
+  },
+
+  'missing-structured-data': {
+    id: 'missing-structured-data',
+    category: 'seo',
+    severity: 'medium',
+    confidence: 'likely',
+    scoreEligible: true,
+    title: 'No structured data (JSON-LD) found',
+    plainEnglish: 'No Schema.org JSON-LD blocks were found on this page. Structured data helps Google understand your content and display rich results. It also improves AI search visibility.',
+    cursorPrompt: 'Add at minimum an Organization or WebApplication schema in a `<script type="application/ld+json">` tag in your page `<head>`. In Next.js, inject it server-side in the root layout.',
+  },
+
+  'missing-operating-system': {
+    id: 'missing-operating-system',
+    category: 'seo',
+    severity: 'medium',
+    confidence: 'likely',
+    scoreEligible: true,
+    title: 'WebApplication schema is missing operatingSystem',
+    plainEnglish: 'Your WebApplication or SoftwareApplication structured data is missing the `operatingSystem` field. Google requires this for Software rich results in search.',
+    cursorPrompt: 'Add `operatingSystem: "Web"` to your WebApplication JSON-LD schema. In Next.js, update the schema object in `app/layout.tsx` that contains `"@type": "WebApplication"`.',
+  },
+
+  'sitemap-double-slash': {
+    id: 'sitemap-double-slash',
+    category: 'seo',
+    severity: 'high',
+    confidence: 'verified',
+    scoreEligible: true,
+    title: 'Sitemap URL in robots.txt has a double-slash',
+    plainEnglish: 'The Sitemap: line in your robots.txt contains a malformed URL with a double-slash (e.g. `//sitemap.xml`). Googlebot cannot process this URL, so your sitemap is effectively invisible.',
+    cursorPrompt: 'The root cause is `NEXT_PUBLIC_APP_URL` ending with a trailing slash. Fix: (1) Remove the trailing slash from `NEXT_PUBLIC_APP_URL` in your Vercel environment variables, (2) Add `.replace(/\\/$/, "")` when using this env var to build URLs in `app/robots.ts` and `app/sitemap.ts`.',
+  },
+
+  'thin-llms-txt': {
+    id: 'thin-llms-txt',
+    category: 'ai_visibility',
+    severity: 'medium',
+    confidence: 'heuristic',
+    scoreEligible: false,
+    title: 'llms.txt file is too short',
+    plainEnglish: 'Your llms.txt exists but has very few words. AI systems (Perplexity, ChatGPT, Claude) use this file to understand your product. A thin file means generic or wrong AI-generated summaries about your site.',
+    cursorPrompt: 'Expand llms.txt to at least 150 words. Include: a 1-paragraph product description, target audience, key features, a FAQ section (5+ Q&A pairs), and author/organization info. Save to `public/llms.txt`.',
+  },
+
+  'no-explicit-ai-crawlers': {
+    id: 'no-explicit-ai-crawlers',
+    category: 'ai_visibility',
+    severity: 'low',
+    confidence: 'heuristic',
+    scoreEligible: false,
+    title: 'No explicit AI crawler rules in robots.txt',
+    plainEnglish: 'Your robots.txt has no explicit rules for AI crawlers (GPTBot, ClaudeBot, PerplexityBot). While a wildcard `Allow: /` covers them, naming them explicitly signals AI-indexing intent and is best practice for AI search visibility.',
+    cursorPrompt: 'In `app/robots.ts`, add explicit Allow rules: `{ userAgent: "GPTBot", allow: "/" }`, `{ userAgent: "ClaudeBot", allow: "/" }`, `{ userAgent: "PerplexityBot", allow: "/" }`, `{ userAgent: "OAI-SearchBot", allow: "/" }`.',
+  },
+
   // ─────────────────────────────────────────
   // SECURITY (11)
   // ─────────────────────────────────────────

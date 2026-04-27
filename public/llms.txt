@@ -1,25 +1,71 @@
 # ShipReady
 
-> Pre-deploy quality gate for vibe-coded apps.
+> ShipReady is a pre-deploy site audit tool for web agencies and developers.
+> Scan any URL to get evidence-backed findings across performance, SEO, security,
+> mobile readiness, and AI visibility — with actionable fix prompts for Cursor,
+> Claude Code, and Windsurf.
 
-ShipReady scans any live URL and produces an evidence-based report across five categories: Performance, SEO, Security, Mobile Readiness, and AI Visibility. Each finding is classified as verified, likely, or heuristic so developers know exactly how confident the result is. Every issue includes a ready-to-paste fix prompt for AI coding tools like Cursor, Windsurf, Bolt, Lovable, v0, and Replit.
+## Description
 
-## Key pages
+ShipReady runs 35+ automated checks across five audit categories and produces
+a structured report with evidence-grounded confidence ratings: verified
+(deterministic from HTTP/HTML signals), likely (AI inference from clear signals),
+and heuristic (AI inference from ambiguous signals). Every finding includes the
+specific signal that triggered it, eliminating guesswork.
 
-- Homepage / scanner: https://shipready.app/
-- Pricing: https://shipready.app/pricing
-- Roadmap: https://shipready.app/roadmap
-- Privacy policy: https://shipready.app/privacy
-- Terms of service: https://shipready.app/terms
+The scan runs in two phases: a Fast Truth Pass (under 30 seconds) covering
+security headers, meta tags, robots.txt, and sitemap validity, followed by a
+Deep Pass using Lighthouse and AI enrichment to generate business-context-aware
+recommendations. Fix prompts are specific to the detected tech stack — a
+Shopify store gets Liquid file references; a Next.js app gets component-level
+instructions.
 
-## What ShipReady checks
+Primary audience: small web/dev agencies (1–15 people) who audit client sites
+before delivery. Secondary audience: SEO and marketing agencies adding AI
+visibility audits to their service offering.
 
-- **Performance** — Lighthouse mobile audit, LCP, CLS, INP, FCP, accessibility score
-- **SEO** — title, description, Open Graph, canonical, broken links, Twitter card
-- **Security** — HTTPS, HSTS, CSP, X-Frame-Options, X-Content-Type-Options, exposed secrets, SSL expiry
-- **Mobile** — viewport, favicon, Apple touch icon
-- **AI Visibility** — Schema.org JSON-LD, llms.txt, sitemap, robots.txt AI crawler access, author entity signals, FAQ schema
+## Author
 
-## Audience
+ShipReady — https://ship-ready.vercel.app
 
-Indie hackers, vibe coders, and solo founders who build with AI coding tools and want to ship quality products.
+## Key concepts
+
+- Verified / likely / heuristic confidence model
+- Fast Truth Pass (under 30s) + Deep Pass (Lighthouse + AI enrichment)
+- Business Context Engine — auto-detects stack, business type, primary CTA
+- Evidence-backed findings with source attribution (no invented issues)
+- Fix prompts scoped to detected tech stack (Next.js, Shopify, WordPress, etc.)
+
+## FAQ
+
+Q: What does ShipReady check?
+A: Performance (Lighthouse LCP, CLS, INP, FCP), SEO (titles, meta descriptions,
+canonicals, sitemap, robots.txt, structured data), security (HTTP headers: HSTS,
+CSP, X-Frame-Options, Referrer-Policy, Permissions-Policy), mobile readiness
+(viewport, tap targets, font sizes, responsive layout), and AI visibility
+(llms.txt, AI crawler access, FAQ schema, author entity, structured data quality).
+
+Q: How long does a scan take?
+A: Initial findings appear in under 30 seconds (Fast Truth Pass). The full
+report with Lighthouse scores and AI fix prompts takes 1–3 minutes.
+
+Q: What are verified, likely, and heuristic findings?
+A: Verified findings are extracted directly from HTTP responses or HTML without
+inference and always affect the score. Likely findings use AI with clear
+supporting signals. Heuristic findings are AI inference from ambiguous signals.
+Only verified and score-eligible findings affect the overall score.
+
+Q: Who is ShipReady for?
+A: Web and dev agencies auditing client sites before delivery, freelance
+developers doing pre-launch quality checks, and SEO agencies adding AI
+visibility auditing to their service offering.
+
+Q: What AI tools are the fix prompts designed for?
+A: Cursor, Claude Code, and Windsurf. Prompts reference specific files and
+configuration paths for the detected tech stack.
+
+## Pages
+
+- https://ship-ready.vercel.app/ — Homepage, run a free scan
+- https://ship-ready.vercel.app/pricing — Pricing plans
+- https://ship-ready.vercel.app/roadmap — Product roadmap

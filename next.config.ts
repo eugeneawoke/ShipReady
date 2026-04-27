@@ -28,6 +28,7 @@ const securityHeaders = [
 ]
 
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
   serverExternalPackages: [
     'lighthouse',
     'puppeteer-core',
@@ -46,6 +47,14 @@ const nextConfig: NextConfig = {
       {
         source: '/:path*',
         headers: securityHeaders,
+      },
+      {
+        source: '/report/:path*',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+      {
+        source: '/dashboard/:path*',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
       },
     ]
   },

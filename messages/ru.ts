@@ -593,7 +593,7 @@ const ru: AppMessages = {
       tgLabel: 'Telegram',
       privacy: 'Политика конфиденциальности',
       terms: 'Условия использования',
-      copy: '© 2025 ShipReady · Создано для веб-агентств и разработчиков',
+      copy: '© 2026 ShipReady · Создано для веб-агентств и разработчиков',
       cinematic: {
         marquee: [
           'Аудит производительности',

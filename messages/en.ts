@@ -592,7 +592,7 @@ const en = {
       tgLabel: 'Telegram',
       privacy: 'Privacy Policy',
       terms: 'Terms of Service',
-      copy: '© 2025 ShipReady · Built for web agencies and developers',
+      copy: '© 2026 ShipReady · Built for web agencies and developers',
       cinematic: {
         marquee: [
           'Performance Audits',

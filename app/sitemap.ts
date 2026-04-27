@@ -1,11 +1,12 @@
 import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = process.env.NEXT_PUBLIC_APP_URL || 'https://shipready.app'
+  const base = (process.env.NEXT_PUBLIC_APP_URL || 'https://shipready.app').replace(/\/$/, '')
   return [
-    { url: base, lastModified: new Date(), changeFrequency: 'weekly', priority: 1 },
-    { url: `${base}/roadmap`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${base}/privacy`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.2 },
-    { url: `${base}/terms`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.2 },
+    { url: `${base}/`, lastModified: new Date('2026-04-27') },
+    { url: `${base}/pricing`, lastModified: new Date('2026-04-27') },
+    { url: `${base}/roadmap`, lastModified: new Date('2026-04-27') },
+    { url: `${base}/privacy`, lastModified: new Date('2026-04-20') },
+    { url: `${base}/terms`, lastModified: new Date('2026-04-20') },
   ]
 }

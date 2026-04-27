@@ -3,7 +3,7 @@ import type { Issue } from '@/types/scan'
 import { T } from '@/lib/ai/issue-templates'
 import { isValidUrl } from '@/lib/utils'
 import { evidence, withIssueMeta } from '@/lib/checks/issue-meta'
-import { fetchWithHeadFallback } from '@/lib/checks/fetch-context'
+import { fetchSafeResource, fetchWithHeadFallback } from '@/lib/checks/fetch-context'
 
 export async function runSEOChecks(
   url: string,
@@ -31,6 +31,14 @@ export async function runSEOChecks(
     issues.push(withIssueMeta({ ...T['missing-description'] }, 'dom', [evidence('selector', 'meta[name=description]', 'missing')]))
   }
 
+  if (desc && includeHeuristics && (desc.length < 100 || desc.length > 165)) {
+    issues.push(withIssueMeta(
+      { ...T['desc-length'], value: `${desc.length} chars` },
+      'dom',
+      [evidence('text', 'Meta description', desc.slice(0, 80) + (desc.length > 80 ? '…' : '')), evidence('count', 'Length', desc.length)],
+    ))
+  }
+
   const h1s = $('h1')
   if (h1s.length !== 1) {
     issues.push(withIssueMeta(
@@ -43,6 +51,20 @@ export async function runSEOChecks(
   const canonical = $('link[rel="canonical"]').attr('href')
   if (!canonical) {
     issues.push(withIssueMeta({ ...T['missing-canonical'] }, 'dom', [evidence('selector', 'link[rel=canonical]', 'missing')]))
+  }
+
+  if (canonical) {
+    try {
+      const canonicalHostname = new URL(canonical).hostname
+      const pageHostname = new URL(url).hostname
+      if (canonicalHostname !== pageHostname) {
+        issues.push(withIssueMeta(
+          { ...T['canonical-mismatch'], value: canonicalHostname },
+          'dom',
+          [evidence('text', 'Canonical domain', canonicalHostname), evidence('text', 'Page domain', pageHostname)],
+        ))
+      }
+    } catch { /* invalid URL — ignore */ }
   }
 
   const ogTitle = $('meta[property="og:title"]').attr('content')
