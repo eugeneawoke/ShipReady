@@ -33,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t('layoutTitle'),
     description: t('layoutDescription'),
-    keywords: ['web quality', 'lighthouse', 'SEO checker', 'security audit', 'vibe coding', 'cursor', 'windsurf', 'bolt', 'lovable', 'v0', 'replit'],
+    keywords: ['web quality', 'lighthouse', 'SEO checker', 'security audit', 'site audit', 'agency', 'cursor', 'windsurf', 'claude code'],
     alternates: {
       canonical: appUrl,
     },
@@ -61,7 +61,7 @@ const organizationSchema = {
   name: 'ShipReady',
   url: process.env.NEXT_PUBLIC_APP_URL || 'https://shipready.app',
   logo: `${process.env.NEXT_PUBLIC_APP_URL || 'https://shipready.app'}/logo.svg`,
-  description: 'Pre-deploy quality gate for vibe-coded apps. Scans performance, SEO, security, mobile readiness, and AI visibility.',
+  description: 'Site audits that understand your client\'s business. Scans performance, SEO, security, mobile readiness, and AI visibility.',
 }
 
 const webApplicationSchema = {
@@ -70,7 +70,7 @@ const webApplicationSchema = {
   name: 'ShipReady',
   url: process.env.NEXT_PUBLIC_APP_URL || 'https://shipready.app',
   applicationCategory: 'DeveloperApplication',
-  description: 'Pre-deploy quality gate for vibe-coded apps. Scans performance, SEO, security, mobile readiness, and AI visibility.',
+  description: 'Site audits that understand your client\'s business. Scans performance, SEO, security, mobile readiness, and AI visibility.',
   offers: {
     '@type': 'Offer',
     price: '0',

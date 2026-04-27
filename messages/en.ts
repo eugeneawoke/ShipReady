@@ -1,9 +1,9 @@
 const en = {
   Metadata: {
     appTitle: 'ShipReady',
-    appDescription: 'Pre-deploy quality gate for vibe-coded apps',
-    layoutTitle: 'ShipReady - Pre-deploy quality gate for vibe-coded apps',
-    layoutDescription: '35+ automated checks across performance, SEO, security, mobile, and AI visibility. Get evidence-based fix prompts for vibe-coding tools.',
+    appDescription: 'Site audits that understand your client\'s business.',
+    layoutTitle: 'ShipReady - Site audits that understand your client\'s business.',
+    layoutDescription: '35+ automated checks across performance, SEO, security, mobile, and AI visibility. Get evidence-based fix prompts for Cursor and Claude Code.',
     pricingTitle: 'Pricing - ShipReady',
     pricingDescription: 'Simple and transparent ShipReady pricing for solo founders and teams.',
     roadmapTitle: 'Roadmap - ShipReady',
@@ -151,7 +151,7 @@ const en = {
         name: 'Pro',
         price: '$14',
         period: '/mo',
-        features: ['Unlimited scans', 'AI fix prompts for vibe-coding tools', 'PDF export', 'Weekly monitoring'],
+        features: ['Unlimited scans', 'AI fix prompts for Cursor · Claude Code · Windsurf', 'PDF export', 'Weekly monitoring'],
         cta: 'Request beta access',
         highlight: true,
       },
@@ -162,6 +162,7 @@ const en = {
         features: ['10 domains', 'White-label PDF', 'All Pro features', 'Priority support', 'Team seats (soon)'],
         cta: 'Contact us',
         highlight: false,
+        desc: 'For teams auditing client sites',
       },
     ],
   },
@@ -361,7 +362,7 @@ const en = {
         items: [
           'Score ring, category breakdowns, and issue evidence in the report UI',
           'Plain-English explanations and AI-generated summary',
-          'Prompt surfaces for code-aware and vibe tools',
+          'Prompt surfaces for code-aware tools: Cursor, Claude Code, Windsurf',
           'PDF export, share feedback, and download feedback in report header',
           'Per-issue prompt quality and wow-insight depth continue to improve',
         ],
@@ -468,9 +469,9 @@ const en = {
       dashboard: 'Dashboard',
     },
     hero: {
-      h1a: 'Your vibe-coded app,',
-      h1b: 'ship-ready with truthful checks',
-      sub: 'Paste your URL. Get a full audit across performance, SEO, security, mobile, and AI visibility, with evidence-based fix prompts for vibe-coding tools.',
+      h1a: 'Site audits that understand',
+      h1b: 'your client\'s business.',
+      sub: 'Scan any URL in minutes. Evidence-backed performance, SEO, security, and AI visibility — with fix prompts for Cursor and Claude Code.',
       noSignup: 'No signup required for first scan',
       worksWith: 'Works with',
     },
@@ -486,7 +487,7 @@ const en = {
       steps: [
         { step: '01', emoji: '1', title: 'Paste your URL', desc: 'Drop any live URL. Vercel, Netlify, or a custom domain. No setup or browser extension needed.' },
         { step: '02', emoji: '2', title: '35+ checks run', desc: 'Fast truth checks run first, then deeper analysis follows for performance and noisier heuristics.' },
-        { step: '03', emoji: '3', title: 'Get AI fix prompts', desc: 'Each issue has a plain-English explanation and one ready-to-paste prompt for your vibe-coding tool.' },
+        { step: '03', emoji: '3', title: 'Get AI fix prompts', desc: 'Each issue has a plain-English explanation and one ready-to-paste prompt for Cursor, Claude Code, or Windsurf.' },
       ],
     },
     preview: {
@@ -520,11 +521,11 @@ const en = {
     ai: {
       eyebrow: 'The key difference',
       title: 'Not just what is wrong,\nbut how to fix it',
-      sub: 'Every issue comes with a plain-English explanation and a ready-to-paste prompt. Paste it into your vibe-coding tool and fix the problem directly in the codebase.',
+      sub: 'Every issue comes with a plain-English explanation and a ready-to-paste prompt. Paste it into Cursor, Claude Code, or Windsurf and fix the problem directly in the codebase.',
       bullets: [
         'One prompt per issue. No Stack Overflow hunting',
-        'Tailored for Next.js, React, and vibe-coded apps',
-        'Works with Cursor, Windsurf, Bolt, Lovable, v0, Replit, and more',
+        'Tailored for Next.js, React, and modern web apps',
+        'Works with Cursor · Claude Code · Windsurf',
       ],
       fileLabel: 'fix_prompt.txt',
       ready: 'ready to paste',
@@ -540,7 +541,7 @@ const en = {
       plans: [
         { name: 'Free', nameKey: 'FREE', price: '$0', period: null, desc: 'Try it out', features: ['3 scans / month', 'All category scores', 'Issue descriptions', 'AI prompts blurred'], cta: 'Start free', highlight: false, coming: false },
         { name: 'Pro', nameKey: 'PRO', price: '$14', period: '/mo', desc: 'For solo founders', features: ['Unlimited scans', 'All AI fix prompts', 'PDF export', 'Weekly monitoring'], cta: 'Get Pro', highlight: true, coming: false },
-        { name: 'Agency', nameKey: 'AGENCY', price: '$39', period: '/mo', desc: 'For teams', features: ['10 domains', 'White-label PDF', 'All Pro features', 'Priority support', 'API access'], cta: 'Get Agency', highlight: false, coming: true },
+        { name: 'Agency', nameKey: 'AGENCY', price: '$39', period: '/mo', desc: 'For teams auditing client sites', features: ['10 domains', 'White-label PDF', 'All Pro features', 'Priority support', 'API access'], cta: 'Get Agency', highlight: false, coming: true },
       ],
       popular: 'Most popular',
       cancelAnytime: 'Cancel anytime',
@@ -552,7 +553,7 @@ const en = {
       items: [
         {
           q: 'What is ShipReady?',
-          a: 'ShipReady is a pre-deploy quality gate for vibe-coded apps. Submit your URL and get a scan report covering performance, SEO, security, mobile readiness, and AI visibility — with fix prompts ready to paste into your AI coding tool.',
+          a: 'ShipReady is a site audit tool for web agencies and developers. Submit your URL and get a scan report covering performance, SEO, security, mobile readiness, and AI visibility — with fix prompts ready to paste into Cursor, Claude Code, or Windsurf.',
         },
         {
           q: 'How does the scan work?',
@@ -563,8 +564,8 @@ const en = {
           a: 'Yes. The core scan is free — 3 scans per month, all category scores, and issue descriptions. Upgrade to Pro for unlimited scans, full AI fix prompts, PDF export, and weekly monitoring.',
         },
         {
-          q: 'Does ShipReady work with Cursor, Bolt, Lovable, and other AI tools?',
-          a: 'Yes. Every issue in your report includes a ready-to-paste fix prompt tailored for Cursor, Windsurf, Bolt, Lovable, v0, Replit, and other AI coding tools. Just copy and paste to fix.',
+          q: 'Does ShipReady work with Cursor, Claude Code, and Windsurf?',
+          a: 'Yes. Every issue in your report includes a ready-to-paste fix prompt tailored for Cursor, Claude Code, Windsurf, and other AI coding tools. Just copy and paste to fix.',
         },
         {
           q: 'How accurate are the results?',
@@ -577,7 +578,7 @@ const en = {
       sub: 'Run a free scan and get initial findings fast.',
     },
     footer: {
-      tagline: 'Pre-deploy quality gate for vibe-coded apps.',
+      tagline: 'Site audits that understand your client\'s business.',
       madeBy: 'Made with love by',
       colProduct: 'Product',
       colSupport: 'Support',
@@ -591,7 +592,7 @@ const en = {
       tgLabel: 'Telegram',
       privacy: 'Privacy Policy',
       terms: 'Terms of Service',
-      copy: '© 2025 ShipReady · Handcrafted for indie builders and vibe coders',
+      copy: '© 2025 ShipReady · Built for web agencies and developers',
       cinematic: {
         marquee: [
           'Performance Audits',

@@ -346,7 +346,7 @@ function HeroSection({ t }: { t: Translations }) {
 
         <div className="hero-4 mt-8 flex flex-wrap items-center justify-center gap-2">
           <span className="text-xs text-[#5A5955] mr-1">{t.hero.worksWith}</span>
-          {['Cursor', 'Windsurf', 'Bolt', 'Lovable', 'v0', 'Replit', 'etc.'].map(p => (
+          {['Cursor', 'Claude Code', 'Windsurf'].map(p => (
             <div key={p} className="works-chip">
               <span className="works-chip-inner">{p}</span>
             </div>

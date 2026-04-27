@@ -4,13 +4,11 @@ import { getAllIssues } from '@/lib/scoring'
 
 interface IssuePrompt {
   technical: string
-  vibe: string
 }
 
 interface AIOutput {
   summary: string
   technicalPrompt: string
-  vibePrompt: string
   issuePrompts: Record<string, IssuePrompt>
 }
 
@@ -36,7 +34,7 @@ export async function generateAISummary(result: ScanResult): Promise<AIOutput> {
     messages: [
       {
         role: 'user',
-        content: `You are a web quality expert helping indie hackers fix their sites. Analyze this audit and return a JSON object.
+        content: `You are a web quality expert helping agencies and developers fix client sites. Analyze this audit and return a JSON object.
 
 URL: ${result.url}
 Score: ${result.totalScore}/100
@@ -48,17 +46,15 @@ ${issueList || 'No issues — site looks great!'}
 
 Return EXACTLY this JSON (no extra fields):
 {
-  "summary": "2-3 sentence plain-English summary for a non-technical indie hacker. No jargon. Direct, not scary. If score > 70, end with encouragement.",
+  "summary": "2-3 sentence plain-English summary for an agency or developer. No jargon. Direct, not scary. If score > 70, end with encouragement.",
   "technicalPrompt": "A ready-to-paste prompt for code-aware AI tools (Cursor, Windsurf, Claude Code, Codex). Must reference URL ${result.url}. Include specific file paths (app/layout.tsx, next.config.js, etc), exact HTTP headers to add, meta tags to insert. Step-by-step instructions for an AI that has full codebase access. Cover ALL issues found.",
-  "vibePrompt": "A ready-to-paste prompt for no-code AI builders (Bolt, Lovable, v0, Replit, ChatGPT). Must reference URL ${result.url}. High-level and outcome-focused. No file paths. Plain language. Cover ALL issues found.",
   "issuePrompts": {
-    ${issueIds.map(id => `"${id}": { "technical": "...", "vibe": "..." }`).join(',\n    ')}
+    ${issueIds.map(id => `"${id}": { "technical": "..." }`).join(',\n    ')}
   }
 }
 
 For each issuePrompts entry:
-- "technical": 2-5 step fix for this SPECIFIC issue for Cursor/Windsurf/Claude Code/Codex. Reference exact file paths and code. Be direct and actionable.
-- "vibe": 1-3 sentence plain-language fix for this SPECIFIC issue for Bolt/Lovable/v0. No file paths. Focus on what to add/change and why.`,
+- "technical": 2-5 step fix for this SPECIFIC issue for Cursor/Windsurf/Claude Code. Reference exact file paths and code. Be direct and actionable.`,
       },
     ],
   })
@@ -69,10 +65,9 @@ For each issuePrompts entry:
     return {
       summary: parsed.summary ?? '',
       technicalPrompt: parsed.technicalPrompt ?? '',
-      vibePrompt: parsed.vibePrompt ?? '',
       issuePrompts: parsed.issuePrompts ?? {},
     }
   } catch {
-    return { summary: raw, technicalPrompt: '', vibePrompt: '', issuePrompts: {} }
+    return { summary: raw, technicalPrompt: '', issuePrompts: {} }
   }
 }

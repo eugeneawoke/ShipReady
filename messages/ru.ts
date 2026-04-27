@@ -3,8 +3,8 @@ import type { AppMessages } from './en'
 const ru: AppMessages = {
   Metadata: {
     appTitle: 'ShipReady',
-    appDescription: 'Проверка качества перед деплоем для vibe-coded приложений',
-    layoutTitle: 'ShipReady - Проверка качества перед деплоем для vibe-coded приложений',
+    appDescription: 'Аудит сайтов, который понимает бизнес вашего клиента.',
+    layoutTitle: 'ShipReady - Аудит сайтов, который понимает бизнес вашего клиента.',
     layoutDescription: '35+ автоматических проверок по производительности, SEO, безопасности, мобильности и AI visibility. Получайте evidence-based промпты для исправлений.',
     pricingTitle: 'Тарифы - ShipReady',
     pricingDescription: 'Простые и прозрачные тарифы ShipReady для соло-фаундеров и команд.',
@@ -153,7 +153,7 @@ const ru: AppMessages = {
         name: 'Pro',
         price: '$14',
         period: '/мес',
-        features: ['Безлимитные сканы', 'AI-промпты для vibe-coding инструментов', 'Экспорт PDF', 'Еженедельный мониторинг'],
+        features: ['Безлимитные сканы', 'AI-промпты для Cursor · Claude Code · Windsurf', 'Экспорт PDF', 'Еженедельный мониторинг'],
         cta: 'Запросить beta-доступ',
         highlight: true,
       },
@@ -363,7 +363,7 @@ const ru: AppMessages = {
         items: [
           'Score ring, category breakdowns и issue evidence в UI отчёта',
           'Понятные plain-English explanations и AI summary',
-          'Поверхности prompt-ов для code-aware и vibe tools',
+          'Поверхности prompt-ов для code-aware инструментов: Cursor, Claude Code, Windsurf',
           'PDF export, share feedback и download feedback в шапке отчёта',
           'Качество per-issue prompt-ов и wow-insights продолжает улучшаться',
         ],
@@ -470,9 +470,9 @@ const ru: AppMessages = {
       dashboard: 'Дашборд',
     },
     hero: {
-      h1a: 'Ваше vibe-coded приложение,',
-      h1b: 'готово к деплою с честной проверкой',
-      sub: 'Вставьте URL. Получите полный аудит по производительности, SEO, безопасности, мобильности и AI visibility с evidence-based промптами для исправлений.',
+      h1a: 'Аудит сайтов, который понимает',
+      h1b: 'бизнес вашего клиента.',
+      sub: 'Отсканируйте любой URL за минуты. Evidence-based проверки производительности, SEO, безопасности и AI visibility — с промптами для Cursor и Claude Code.',
       noSignup: 'Первый скан без регистрации',
       worksWith: 'Работает с',
     },
@@ -488,7 +488,7 @@ const ru: AppMessages = {
       steps: [
         { step: '01', emoji: '1', title: 'Вставьте URL', desc: 'Любой live URL. Vercel, Netlify или свой домен. Никакой настройки и расширений не нужно.' },
         { step: '02', emoji: '2', title: '35+ проверок', desc: 'Сначала идут быстрые truth-checks, затем подключается более глубокий анализ производительности и шумных эвристик.' },
-        { step: '03', emoji: '3', title: 'Получите AI-промпты', desc: 'У каждой проблемы есть понятное объяснение и готовый промпт для вашего vibe-coding инструмента.' },
+        { step: '03', emoji: '3', title: 'Получите AI-промпты', desc: 'У каждой проблемы есть понятное объяснение и готовый промпт для Cursor, Claude Code или Windsurf.' },
       ],
     },
     preview: {
@@ -522,11 +522,11 @@ const ru: AppMessages = {
     ai: {
       eyebrow: 'Ключевое отличие',
       title: 'Не просто что сломано,\nа как это исправить',
-      sub: 'У каждой проблемы есть понятное объяснение и готовый промпт. Вставьте его в свой vibe-coding инструмент и внесите изменения прямо в кодовую базу.',
+      sub: 'У каждой проблемы есть понятное объяснение и готовый промпт. Вставьте его в Cursor, Claude Code или Windsurf и внесите изменения прямо в кодовую базу.',
       bullets: [
         'Один промпт на проблему. Без походов по Stack Overflow',
-        'Адаптировано под Next.js, React и vibe-coded приложения',
-        'Работает с Cursor, Windsurf, Bolt, Lovable, v0, Replit и другими',
+        'Адаптировано под Next.js, React и современные веб-приложения',
+        'Работает с Cursor · Claude Code · Windsurf',
       ],
       fileLabel: 'fix_prompt.txt',
       ready: 'готов к вставке',
@@ -542,7 +542,7 @@ const ru: AppMessages = {
       plans: [
         { name: 'Бесплатно', nameKey: 'FREE', price: '$0', period: null, desc: 'Попробовать', features: ['3 скана / месяц', 'Все категориальные оценки', 'Описания проблем', 'AI-промпты размыты'], cta: 'Начать бесплатно', highlight: false, coming: false },
         { name: 'Pro', nameKey: 'PRO', price: '$14', period: '/мес', desc: 'Для соло-фаундеров', features: ['Безлимитные сканы', 'Все AI-промпты для исправлений', 'Экспорт PDF', 'Еженедельный мониторинг'], cta: 'Получить Pro', highlight: true, coming: false },
-        { name: 'Agency', nameKey: 'AGENCY', price: '$39', period: '/мес', desc: 'Для команд', features: ['10 доменов', 'White-label PDF', 'Все возможности Pro', 'Приоритетная поддержка', 'API access'], cta: 'Для агентств', highlight: false, coming: true },
+        { name: 'Agency', nameKey: 'AGENCY', price: '$39', period: '/мес', desc: 'Для команд, которые делают аудиты клиентских сайтов', features: ['10 доменов', 'White-label PDF', 'Все возможности Pro', 'Приоритетная поддержка', 'API access'], cta: 'Для агентств', highlight: false, coming: true },
       ],
       popular: 'Популярный',
       cancelAnytime: 'Отмена в любой момент',
@@ -554,7 +554,7 @@ const ru: AppMessages = {
       items: [
         {
           q: 'Что такое ShipReady?',
-          a: 'ShipReady — это проверка качества перед деплоем для vibe-coded приложений. Введите URL и получите отчёт по производительности, SEO, безопасности, мобильности и видимости для ИИ — с готовыми промптами для исправлений.',
+          a: 'ShipReady — это инструмент аудита сайтов для веб-агентств и разработчиков. Введите URL и получите отчёт по производительности, SEO, безопасности, мобильности и AI visibility — с готовыми промптами для Cursor, Claude Code или Windsurf.',
         },
         {
           q: 'Как работает скан?',
@@ -565,8 +565,8 @@ const ru: AppMessages = {
           a: 'Да. Базовый скан бесплатный — 3 скана в месяц, все категориальные оценки и описания проблем. Обновитесь до Pro для безлимитных сканов, полных AI-промптов, экспорта PDF и еженедельного мониторинга.',
         },
         {
-          q: 'Работает ли ShipReady с Cursor, Bolt, Lovable и другими AI-инструментами?',
-          a: 'Да. Каждая проблема в отчёте включает готовый промпт для Cursor, Windsurf, Bolt, Lovable, v0, Replit и других AI-инструментов. Просто скопируйте и вставьте.',
+          q: 'Работает ли ShipReady с Cursor, Claude Code и Windsurf?',
+          a: 'Да. Каждая проблема в отчёте включает готовый промпт для Cursor, Claude Code, Windsurf и других AI-инструментов. Просто скопируйте и вставьте.',
         },
         {
           q: 'Насколько точны результаты?',
@@ -579,7 +579,7 @@ const ru: AppMessages = {
       sub: 'Запустите бесплатный скан и быстро получите первые выводы.',
     },
     footer: {
-      tagline: 'Проверка качества перед деплоем для vibe-coded приложений.',
+      tagline: 'Аудит сайтов, который понимает бизнес вашего клиента.',
       madeBy: 'Сделано с любовью',
       colProduct: 'Продукт',
       colSupport: 'Поддержка',
@@ -593,7 +593,7 @@ const ru: AppMessages = {
       tgLabel: 'Telegram',
       privacy: 'Политика конфиденциальности',
       terms: 'Условия использования',
-      copy: '© 2025 ShipReady · Сделано для indie builders и vibe coders',
+      copy: '© 2025 ShipReady · Создано для веб-агентств и разработчиков',
       cinematic: {
         marquee: [
           'Аудит производительности',

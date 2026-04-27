@@ -47,8 +47,8 @@ export default async function TermsPage() {
 
           <Section title={isRu ? '2. Описание сервиса' : '2. Description of service'}>
             {isRu
-              ? 'ShipReady — это автоматизированный инструмент аудита качества веб-приложений. Он сканирует публично доступные URL и формирует отчёты по производительности, SEO, безопасности и мобильной готовности. В отчёты также входят AI-промпты для исправлений в vibe-coding инструментах.'
-              : 'ShipReady is an automated web quality audit tool. It scans publicly accessible URLs and generates reports covering performance, SEO, security, and mobile readiness. Reports include AI-generated fix prompts for use with vibe-coding tools.'}
+              ? 'ShipReady — это автоматизированный инструмент аудита сайтов для веб-агентств и разработчиков. Он сканирует публично доступные URL и формирует отчёты по производительности, SEO, безопасности и мобильной готовности. В отчёты также входят AI-промпты для Cursor, Claude Code и Windsurf.'
+              : 'ShipReady is an automated site audit tool for web agencies and developers. It scans publicly accessible URLs and generates reports covering performance, SEO, security, and mobile readiness. Reports include AI-generated fix prompts for use with Cursor, Claude Code, and Windsurf.'}
           </Section>
 
           <Section title={isRu ? '3. Допустимое использование' : '3. Acceptable use'}>

@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'
-export const alt = 'ShipReady — Pre-deploy quality gate for vibe-coded apps'
+export const alt = 'ShipReady — Site audits that understand your client\'s business'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -51,7 +51,7 @@ export default function OGImage() {
             ShipReady
           </span>
           <span style={{ color: '#8B8A85', fontSize: '28px', fontWeight: 400 }}>
-            Pre-deploy quality gate for vibe-coded apps
+            Site audits that understand your client's business
           </span>
           <span style={{ color: '#5A5955', fontSize: '20px', marginTop: '8px' }}>
             40+ checks · fast truth pass · AI fix prompts

@@ -9,7 +9,7 @@ const faqSchema = {
       name: 'What is ShipReady?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'ShipReady is a pre-deploy quality gate for vibe-coded apps. Submit your URL and get a scan report covering performance, SEO, security, mobile readiness, and AI visibility — with fix prompts ready to paste into your AI coding tool.',
+        text: 'ShipReady is a site audit tool for web agencies and developers. Submit your URL and get a scan report covering performance, SEO, security, mobile readiness, and AI visibility — with fix prompts ready to paste into Cursor, Claude Code, or Windsurf.',
       },
     },
     {
@@ -30,10 +30,10 @@ const faqSchema = {
     },
     {
       '@type': 'Question',
-      name: 'Does ShipReady work with Cursor, Bolt, Lovable, and other AI tools?',
+      name: 'Does ShipReady work with Cursor, Claude Code, and Windsurf?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes. Every issue in your report includes a ready-to-paste fix prompt tailored for Cursor, Windsurf, Bolt, Lovable, v0, Replit, and other AI coding tools. Just copy and paste to fix.',
+        text: 'Yes. Every issue in your report includes a ready-to-paste fix prompt tailored for Cursor, Claude Code, Windsurf, and other AI coding tools. Just copy and paste to fix.',
       },
     },
     {
