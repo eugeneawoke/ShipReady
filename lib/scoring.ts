@@ -1,8 +1,10 @@
 import type {
+  BusinessContext,
   CategoryScore,
   Issue,
   IssueSeverity,
   MeasurementState,
+  ScanGoal,
   ScanPhase,
   ScanResult,
   ScanTimings,
@@ -209,9 +211,10 @@ export function buildScanResult(params: {
   aiSummary?: string
   topPriorities?: string[]
   aiTechnicalPrompt?: string
-  aiVibePrompt?: string
-  issuePrompts?: Record<string, { technical: string; vibe: string }>
+  issuePrompts?: Record<string, { technical: string }>
   wowInsights?: ScanResult['wowInsights']
+  businessContext?: BusinessContext | null
+  scanGoal?: ScanGoal
 }): ScanResult {
   const base = {
     url: params.url,
@@ -226,9 +229,10 @@ export function buildScanResult(params: {
     aiSummary: params.aiSummary,
     topPriorities: params.topPriorities,
     aiTechnicalPrompt: params.aiTechnicalPrompt,
-    aiVibePrompt: params.aiVibePrompt,
     issuePrompts: params.issuePrompts,
     wowInsights: params.wowInsights,
+    businessContext: params.businessContext,
+    scanGoal: params.scanGoal,
   }
 
   const totalScore = weightedTotal(base)

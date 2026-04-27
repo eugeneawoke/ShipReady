@@ -15,6 +15,17 @@ export type IssueSource = 'lighthouse' | 'http' | 'dom' | 'ssl' | 'link-check' |
 export type EvidenceKind = 'metric' | 'header' | 'selector' | 'response' | 'text' | 'count' | 'status'
 export type MeasurementStatus = 'measured' | 'partial' | 'unavailable'
 
+export type ScanGoal = 'sales' | 'leads' | 'traffic' | 'visibility' | 'general'
+
+export interface BusinessContext {
+  businessType: 'ecommerce' | 'saas' | 'local_business' | 'portfolio' | 'blog' | 'agency' | 'other'
+  techStack: string[]
+  mainCTA: string | null
+  detectedService: string | null
+  targetAudience: string | null
+  businessProfile: string | null
+}
+
 export interface IssueEvidence {
   kind: EvidenceKind
   label: string
@@ -29,7 +40,6 @@ export interface Issue {
   description: string
   plainEnglish: string
   cursorPrompt: string
-  boltPrompt: string
   docsUrl?: string
   value?: string | number
   confidence?: IssueConfidence
@@ -96,9 +106,10 @@ export interface ScanResult {
   aiSummary?: string
   topPriorities?: string[]
   aiTechnicalPrompt?: string
-  aiVibePrompt?: string
-  issuePrompts?: Record<string, { technical: string; vibe: string }>
+  issuePrompts?: Record<string, { technical: string }>
   wowInsights?: WowInsight[]
+  businessContext?: BusinessContext | null
+  scanGoal?: ScanGoal
   processingIssue?: ScanProcessingIssue
 }
 
