@@ -2,9 +2,8 @@
 
 import dynamic from 'next/dynamic'
 import { motion } from 'framer-motion'
-import { useMessages } from 'next-intl'
+import { useTranslations } from 'next-intl'
 import { AnimatedShinyText } from '@/components/ui/animated-shiny-text'
-import type { AppMessages } from '@/messages/en'
 import type { ComponentType } from 'react'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -51,9 +50,21 @@ function smoothScrollTo(selector: string) {
 
 // ─── component ────────────────────────────────────────────────────────────────
 
+type Plan = {
+  name: string
+  nameKey: string
+  price: string
+  period: string | null
+  desc: string
+  features: string[]
+  cta: string
+  highlight: boolean
+  coming: boolean
+}
+
 export function PricingSection() {
-  const messages = useMessages() as AppMessages
-  const t = messages.Landing.pricing
+  const t = useTranslations('Landing.pricing')
+  const plans = t.raw('plans') as Plan[]
 
   return (
     <section id="pricing" className="scroll-mt-24 py-24 px-6 bg-[#0E0E0F] text-[#F1F0EE]">
@@ -64,15 +75,15 @@ export function PricingSection() {
               shimmerWidth={120}
               className="text-[11px] text-[#6E56CF] uppercase tracking-[0.15em] font-mono"
             >
-              {t.eyebrow}
+              {t('eyebrow')}
             </AnimatedShinyText>
           </div>
-          <h2 className="text-[32px] font-semibold tracking-[-0.03em]">{t.title}</h2>
-          <p className="mt-3 text-[#8B8A85] text-sm">{t.sub}</p>
+          <h2 className="text-[32px] font-semibold tracking-[-0.03em]">{t('title')}</h2>
+          <p className="mt-3 text-[#8B8A85] text-sm">{t('sub')}</p>
         </motion.div>
 
         <div className="grid md:grid-cols-3 gap-4">
-          {t.plans.map((plan, i) => (
+          {plans.map((plan, i) => (
             <motion.div
               key={plan.nameKey}
               {...fadeUp(i * 0.1)}
@@ -92,12 +103,12 @@ export function PricingSection() {
               )}
               {plan.highlight && !plan.coming && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] bg-[#6E56CF] text-white px-3 py-1 rounded-full uppercase tracking-[0.1em] whitespace-nowrap font-medium">
-                  {t.popular}
+                  {t('popular')}
                 </div>
               )}
               {plan.coming && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] bg-[#232328] text-[#8B8A85] border border-white/[0.10] px-3 py-1 rounded-full uppercase tracking-[0.1em] whitespace-nowrap font-medium">
-                  {t.comingSoon}
+                  {t('comingSoon')}
                 </div>
               )}
               <div className="mb-5">
@@ -123,7 +134,7 @@ export function PricingSection() {
                   href="/roadmap"
                   className="block w-full py-2.5 rounded-xl text-sm font-medium text-center bg-[#1E1E21] border border-white/[0.06] text-[#5A5955] hover:text-[#8B8A85] hover:border-white/[0.10] transition-colors"
                 >
-                  {t.comingSoon} →
+                  {t('comingSoon')} →
                 </a>
               ) : (
                 <button
@@ -139,7 +150,7 @@ export function PricingSection() {
               )}
               {!plan.coming && plan.period && (
                 <p className="mt-2.5 text-center text-[11px] text-[#5A5955]">
-                  {t.cancelAnytime}
+                  {t('cancelAnytime')}
                 </p>
               )}
             </motion.div>
