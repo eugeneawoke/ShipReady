@@ -25,16 +25,20 @@ export function useScanLauncher() {
   const loadingRef = useRef(false)
   const router = useRouter()
 
-  async function launchScan(rawUrl: string) {
+  async function launchScan(rawUrl: string, scanGoal?: string) {
     if (loadingRef.current || !rawUrl.trim()) return
     loadingRef.current = true
     setLoading(true)
     setError(null)
     try {
+      const body: { url: string; scanGoal?: string } = { url: rawUrl }
+      if (scanGoal) {
+        body.scanGoal = scanGoal
+      }
       const res = await fetch('/api/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: rawUrl }),
+        body: JSON.stringify(body),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -63,6 +67,14 @@ export function useScanLauncher() {
   }
 }
 
+const SCAN_GOALS = [
+  { value: 'sales', label: 'More sales' },
+  { value: 'leads', label: 'More leads' },
+  { value: 'traffic', label: 'More traffic' },
+  { value: 'visibility', label: 'AI visibility' },
+  { value: 'general', label: 'General' },
+] as const
+
 export function ScanForm({
   initialUrl = '',
   submitLabel,
@@ -78,11 +90,12 @@ export function ScanForm({
 }) {
   const t = useTranslations('ScanForm')
   const [url, setUrl] = useState(initialUrl)
+  const [scanGoal, setScanGoal] = useState<string>('')
   const { loading, error, launchScan } = useScanLauncher()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    await launchScan(url)
+    await launchScan(url, scanGoal || undefined)
   }
 
   return (
@@ -111,6 +124,30 @@ export function ScanForm({
           )}
         </button>
       </div>
+
+      {!compact && (
+        <div className="mt-4 space-y-2">
+          <label className="text-xs text-[#8B8A85]">What's your main goal? (optional)</label>
+          <div className="flex flex-wrap gap-2">
+            {SCAN_GOALS.map(goal => (
+              <button
+                key={goal.value}
+                type="button"
+                onClick={() => setScanGoal(scanGoal === goal.value ? '' : goal.value)}
+                disabled={loading}
+                className={`px-3 py-1.5 text-sm rounded-full font-medium transition-all ${
+                  scanGoal === goal.value
+                    ? 'bg-[#6E56CF] text-white border-transparent'
+                    : 'border border-white/10 text-[#8B8A85] hover:border-white/20 disabled:opacity-50'
+                }`}
+              >
+                {goal.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {error && (
         <div className="mt-2 text-sm text-[#FF4444] space-y-0.5">
             <p>{error.msg}</p>
