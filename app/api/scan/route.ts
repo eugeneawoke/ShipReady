@@ -6,6 +6,7 @@ import { FREE_SCAN_LIMIT } from '@/lib/auth'
 import { assertSafeScanUrl } from '@/lib/server/url-safety'
 import { dispatchScanToRailway } from '@/lib/server/scanner-dispatch'
 import { requireSameOriginJsonRequest } from '@/lib/server/request-guards'
+import type { ScanGoal } from '@/types/scan'
 
 export const maxDuration = 60
 
@@ -35,7 +36,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const raw = body.url as string
     const scanGoal = (['sales', 'leads', 'traffic', 'visibility', 'general'] as const)
-      .includes(body.scanGoal) ? body.scanGoal as string : null
+      .includes(body.scanGoal) ? body.scanGoal as ScanGoal : null
 
     if (!raw || !isValidUrl(normalizeUrl(raw))) {
       return NextResponse.json({ error: 'Invalid URL' }, { status: 400 })

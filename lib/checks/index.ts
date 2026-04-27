@@ -14,6 +14,8 @@ import { generateWowInsights } from '@/lib/ai/generate-wow-insights'
 import { measurement } from '@/lib/checks/issue-meta'
 import { buildMonitoringAlertDecision } from '@/lib/monitoring/alerts'
 import { sendMonitoringAlert } from '@/lib/email/send-alert'
+import { analyzeBusinessContext } from '@/lib/ai/analyze-business-context'
+import type { BusinessContext, ScanGoal } from '@/types/scan'
 
 async function safeTask<T>(
   task: Promise<T> | (() => Promise<T>),
@@ -153,7 +155,7 @@ async function finalizeMonitoredDomain(scanId: string): Promise<void> {
   }
 }
 
-export async function runAllChecks(url: string, scanId: string): Promise<void> {
+export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanGoal): Promise<void> {
   const startedAt = Date.now()
   await saveScan(scanId, 'running_fast')
 
@@ -163,12 +165,22 @@ export async function runAllChecks(url: string, scanId: string): Promise<void> {
     const finalUrl = fetchContext.finalUrl || safeUrl
     const timings: ScanTimings = { htmlFetchMs: fetchContext.durationMs }
 
-    const [seoFast, securityFast, mobileFast, aiVisibilityFast] = await Promise.all([
+    const [seoFast, securityFast, mobileFast, aiVisibilityFast, biAnalysis] = await Promise.all([
       safeTask(runSEOChecks(finalUrl, fetchContext.html, { includeLikely: false, includeHeuristics: false }), 8000, 'seo-fast'),
       safeTask(runSecurityChecks(finalUrl, fetchContext.html, fetchContext), 10000, 'security-fast'),
       safeTask(runMobileChecks(fetchContext.html), 4000, 'mobile-fast'),
       safeTask(runAIVisibilityChecks(finalUrl, fetchContext.html, { includeLikely: false, includeHeuristics: false }), 8000, 'ai-visibility-fast'),
+      safeTask(
+        analyzeBusinessContext(
+          fetchContext.html,
+          Object.fromEntries(fetchContext.headers.entries()),
+        ),
+        12000,
+        'bi-analysis',
+      ),
     ])
+
+    const businessContext: BusinessContext | null = biAnalysis.ok ? biAnalysis.value : null
 
     const fastResult = buildScanResult({
       url: finalUrl,
@@ -184,6 +196,8 @@ export async function runAllChecks(url: string, scanId: string): Promise<void> {
       security: buildCategoryScore(securityFast.ok ? securityFast.value : [], 'security'),
       mobile: buildCategoryScore(mobileFast.ok ? mobileFast.value : [], 'mobile'),
       ai_visibility: buildCategoryScore(aiVisibilityFast.ok ? aiVisibilityFast.value : [], 'ai_visibility'),
+      businessContext,
+      scanGoal,
     })
 
     await saveScan(scanId, 'running_deep', fastResult)
@@ -225,12 +239,18 @@ export async function runAllChecks(url: string, scanId: string): Promise<void> {
       ai_visibility: buildCategoryScore(aiVisibilityIssues, 'ai_visibility', {
         measurement: measurement('AI visibility audit', aiVisibilityDeep.ok ? 'measured' : 'partial', aiVisibilityDeep.ok ? undefined : 'Heuristic checks unavailable', aiVisibilityDeep.durationMs),
       }),
+      businessContext,
+      scanGoal,
     })
 
     await saveScan(scanId, 'enriching', result)
 
     if (process.env.OPENAI_API_KEY) {
-      const enrichment = await safeTask(generateEvidenceEnrichment(result), 35_000, 'ai-enrichment')
+      const enrichment = await safeTask(
+        generateEvidenceEnrichment(result, businessContext, scanGoal),
+        35_000,
+        'ai-enrichment',
+      )
       timings.aiEnrichmentMs = enrichment.durationMs
 
       if (enrichment.ok) {
@@ -241,8 +261,9 @@ export async function runAllChecks(url: string, scanId: string): Promise<void> {
           aiSummary: enrichment.value.summary,
           topPriorities: enrichment.value.topPriorities,
           aiTechnicalPrompt: enrichment.value.technicalPrompt,
-          aiVibePrompt: enrichment.value.vibePrompt,
           issuePrompts: enrichment.value.issuePrompts,
+          businessContext,
+          scanGoal,
         })
 
         const categories = ['performance', 'seo', 'security', 'mobile', 'ai_visibility'] as const
@@ -253,7 +274,6 @@ export async function runAllChecks(url: string, scanId: string): Promise<void> {
             return {
               ...issue,
               cursorPrompt: aiPrompt.technical || issue.cursorPrompt,
-              boltPrompt: aiPrompt.vibe || issue.boltPrompt,
             }
           })
         }
@@ -275,6 +295,8 @@ export async function runAllChecks(url: string, scanId: string): Promise<void> {
         ...timings,
         totalMs: Date.now() - startedAt,
       },
+      businessContext,
+      scanGoal,
     })
 
     await saveScan(scanId, 'done', result)
