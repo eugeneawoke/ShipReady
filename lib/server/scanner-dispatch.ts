@@ -1,6 +1,11 @@
 import 'server-only'
+import type { ScanGoal } from '@/types/scan'
 
-export async function dispatchScanToRailway(scanId: string, url: string): Promise<void> {
+export async function dispatchScanToRailway(
+  scanId: string,
+  url: string,
+  scanGoal?: ScanGoal,
+): Promise<void> {
   const railwayUrl = process.env.RAILWAY_SCANNER_URL
   const scannerSecret = process.env.SCANNER_SECRET
 
@@ -14,7 +19,7 @@ export async function dispatchScanToRailway(scanId: string, url: string): Promis
       'Content-Type': 'application/json',
       Authorization: `Bearer ${scannerSecret}`,
     },
-    body: JSON.stringify({ url, scanId }),
+    body: JSON.stringify({ url, scanId, scanGoal }),
   })
 
   if (!response.ok) {

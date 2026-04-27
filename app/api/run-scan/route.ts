@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isValidUrl } from '@/lib/utils'
+import type { ScanGoal } from '@/types/scan'
 
 // This endpoint is deployed on Railway only.
 // Vercel calls it to offload heavy Lighthouse scans.
@@ -7,6 +8,7 @@ export const maxDuration = 300
 export const runtime = 'nodejs'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+const VALID_GOALS = ['sales', 'leads', 'traffic', 'visibility', 'general'] as const
 
 export async function POST(request: NextRequest) {
   const auth = request.headers.get('authorization')
@@ -14,11 +16,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  let url: string, scanId: string
+  let url: string, scanId: string, scanGoal: ScanGoal | undefined
   try {
     const body = await request.json()
     url = body.url
     scanId = body.scanId
+    scanGoal = VALID_GOALS.includes(body.scanGoal) ? body.scanGoal : undefined
   } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
@@ -38,7 +41,7 @@ export async function POST(request: NextRequest) {
   // Respond immediately — Railway is a persistent server so the Promise
   // continues running after the response is sent (unlike Vercel serverless)
   const { runAllChecks } = await import('@/lib/checks/index')
-  runAllChecks(url, scanId).catch((e: unknown) => {
+  runAllChecks(url, scanId, scanGoal).catch((e: unknown) => {
     console.error('run-scan background error:', e)
   })
 
