@@ -121,7 +121,6 @@ export function buildPerformanceIssues(lh: LighthouseMetrics): Issue[] {
       description: `LCP is ${(lh.lcp / 1000).toFixed(1)}s`,
       plainEnglish: `Your page takes ${(lh.lcp / 1000).toFixed(1)}s to show the main content. Google's target is under 2.5s.`,
       cursorPrompt: 'Optimize Largest Contentful Paint: lazy load below-the-fold assets, prioritize the hero asset, and remove render-blocking work.',
-      boltPrompt: 'Prioritize the hero content and reduce render-blocking resources so the main content appears under 2.5 seconds.',
       value: `${(lh.lcp / 1000).toFixed(1)}s`,
     }, 'lighthouse', [evidence('metric', 'LCP', `${(lh.lcp / 1000).toFixed(1)}s`) ]))
   }
@@ -135,7 +134,6 @@ export function buildPerformanceIssues(lh: LighthouseMetrics): Issue[] {
       description: `CLS score is ${lh.cls.toFixed(3)}`,
       plainEnglish: 'Your page layout shifts during load. This makes the page feel unstable and hurts Core Web Vitals.',
       cursorPrompt: 'Reserve space for images and embeds, avoid injecting content above existing content, and stabilize font/layout loading.',
-      boltPrompt: 'Set explicit dimensions and reserve space for dynamic elements to stop layout jumps.',
       value: lh.cls.toFixed(3),
     }, 'lighthouse', [evidence('metric', 'CLS', lh.cls.toFixed(3))]))
   }
@@ -149,7 +147,6 @@ export function buildPerformanceIssues(lh: LighthouseMetrics): Issue[] {
       description: `INP is ${lh.inp}ms`,
       plainEnglish: `Your page takes ${lh.inp}ms to react to interactions. Target is under 200ms.`,
       cursorPrompt: 'Break up long tasks, defer non-critical work, and reduce main-thread blocking during interaction.',
-      boltPrompt: 'Reduce the JavaScript work that runs during clicks and typing so the page responds faster.',
       value: `${lh.inp}ms`,
     }, 'lighthouse', [evidence('metric', 'INP', `${lh.inp}ms`) ]))
   }
@@ -163,7 +160,6 @@ export function buildPerformanceIssues(lh: LighthouseMetrics): Issue[] {
       description: `FCP is ${(lh.fcp / 1000).toFixed(1)}s`,
       plainEnglish: `Your page takes ${(lh.fcp / 1000).toFixed(1)}s before users see anything. Target is under 1.8s.`,
       cursorPrompt: 'Reduce render-blocking work, preload critical assets, and improve first response rendering.',
-      boltPrompt: 'Make above-the-fold assets load first and delay non-critical resources so the page paints sooner.',
       value: `${(lh.fcp / 1000).toFixed(1)}s`,
     }, 'lighthouse', [evidence('metric', 'FCP', `${(lh.fcp / 1000).toFixed(1)}s`) ]))
   }
@@ -177,7 +173,6 @@ export function buildPerformanceIssues(lh: LighthouseMetrics): Issue[] {
       description: `Performance score: ${lh.performanceScore}/100`,
       plainEnglish: `Google rates your page ${lh.performanceScore}/100 for performance. This suggests users are paying a noticeable speed penalty.`,
       cursorPrompt: 'Use the Lighthouse trace to remove top performance bottlenecks and improve the mobile score above 70.',
-      boltPrompt: 'Focus on the biggest Lighthouse opportunities first until the mobile score clears 70.',
       value: lh.performanceScore,
     }, 'lighthouse', [evidence('metric', 'Performance score', lh.performanceScore)]))
   }
@@ -191,7 +186,6 @@ export function buildPerformanceIssues(lh: LighthouseMetrics): Issue[] {
       description: `Accessibility score: ${lh.a11yScore}/100`,
       plainEnglish: `Your site scores ${lh.a11yScore}/100 for accessibility. This usually means avoidable barriers for users and weaker baseline markup quality.`,
       cursorPrompt: 'Fix the failing Lighthouse accessibility audits and improve semantic structure, labels, and contrast.',
-      boltPrompt: 'Improve accessibility basics like labels, contrast, alt text, and semantic headings until the score is above 70.',
       value: lh.a11yScore,
     }, 'lighthouse', [evidence('metric', 'Accessibility score', lh.a11yScore)]))
   }

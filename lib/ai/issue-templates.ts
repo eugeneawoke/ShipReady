@@ -27,13 +27,6 @@ export const T: Record<string, IssueTemplate> = {
    - Avoid placing the heading inside a lazy-loaded component
 4. Check for render-blocking third-party scripts — move them to next/script with strategy="lazyOnload"
 5. Enable Vercel Edge Network caching for static assets`,
-    boltPrompt: `Speed up your page's main content:
-1. Add <link rel="preload"> for your hero image in <head>:
-   <link rel="preload" as="image" href="/hero.webp">
-2. Convert images to WebP format (use squoosh.app)
-3. Add loading="eager" and fetchpriority="high" to your hero image
-4. Remove or defer any scripts in <head> that aren't critical
-5. Host fonts locally instead of loading from Google Fonts`,
     docsUrl: 'https://web.dev/articles/lcp',
   },
 
@@ -53,13 +46,6 @@ export const T: Record<string, IssueTemplate> = {
 4. If using fonts from next/font, add display: 'swap' option
 5. Check for FOUT (flash of unstyled text) — use font-display: optional for non-critical fonts
 6. Open Chrome DevTools > Performance > Layout Shift regions to identify offending elements`,
-    boltPrompt: `Stop your page from jumping around:
-1. Add width and height attributes to every <img> tag:
-   <img src="photo.jpg" width="800" height="600" alt="...">
-2. Add CSS for images to prevent reflow:
-   img { aspect-ratio: attr(width) / attr(height); }
-3. If you load ads or embeds, wrap them in a fixed-height div
-4. Avoid adding content at the top of the page after it loads (banners, cookie notices)`,
     docsUrl: 'https://web.dev/articles/cls',
   },
 
@@ -78,11 +64,6 @@ export const T: Record<string, IssueTemplate> = {
 4. Move heavy computation to a Web Worker
 5. Avoid synchronous localStorage or large DOM reads inside click handlers
 6. Use React.memo and useMemo to prevent unnecessary re-renders on interaction`,
-    boltPrompt: `Make your page respond faster to clicks:
-1. Identify if you have large JavaScript files — split them or remove unused code
-2. Debounce search/filter inputs (wait 300ms after typing stops)
-3. Avoid doing heavy work on every click — cache results where possible
-4. Check for synchronous fetch calls inside click handlers — make them async`,
     docsUrl: 'https://web.dev/articles/inp',
   },
 
@@ -102,12 +83,6 @@ export const T: Record<string, IssueTemplate> = {
    <link rel="preconnect" href="https://fonts.googleapis.com" />
 5. Remove or defer non-critical third-party scripts
 6. Use next/font for fonts to eliminate render-blocking font requests`,
-    boltPrompt: `Show content to users faster:
-1. Add preconnect hints in <head> for external resources:
-   <link rel="preconnect" href="https://fonts.googleapis.com">
-2. Move non-critical <script> tags to the bottom of <body>
-3. Inline the CSS for your above-the-fold content in a <style> tag in <head>
-4. Reduce the size of your HTML — remove unused HTML sections`,
     docsUrl: 'https://web.dev/articles/fcp',
   },
 
@@ -128,12 +103,6 @@ export const T: Record<string, IssueTemplate> = {
    - Enable next.config.ts: { compress: true, images: { formats: ['image/avif', 'image/webp'] } }
    - Audit and remove unused npm packages (use next-bundle-analyzer)
 4. Check Core Web Vitals in Vercel Analytics dashboard`,
-    boltPrompt: `Improve your overall page speed:
-1. Compress all images — use squoosh.app and convert to WebP
-2. Minify your CSS and JS (most hosting platforms do this automatically)
-3. Enable GZIP or Brotli compression on your server/hosting
-4. Remove unused CSS — paste your CSS into purgecss.com to identify it
-5. Reduce the number of third-party scripts loaded on the page`,
     docsUrl: 'https://developer.chrome.com/docs/lighthouse/performance/',
   },
 
@@ -154,12 +123,6 @@ export const T: Record<string, IssueTemplate> = {
    - Add <label> or aria-label to all form inputs
    - Ensure heading levels are sequential (h1 → h2 → h3, no skipping)
 3. Install eslint-plugin-jsx-a11y and fix all warnings`,
-    boltPrompt: `Make your site accessible:
-1. Add alt="" attribute to every <img> tag (describe what's in the image)
-2. Add aria-label to buttons that only contain icons
-3. Add <label for="..."> to every form input
-4. Check text contrast — dark text on light background or vice versa
-5. Make sure your headings go in order: h1, then h2, then h3 (no skipping)`,
     docsUrl: 'https://web.dev/accessibility/',
   },
 
@@ -185,14 +148,6 @@ For dynamic pages (e.g. blog posts), use:
 export async function generateMetadata({ params }) {
   return { title: \`\${post.title} — My Site\` }
 }`,
-    boltPrompt: `Add a title to your page:
-Inside your HTML <head> tag, add:
-<title>Your Page Name — Your Brand</title>
-
-Tips:
-- Keep it under 60 characters
-- Include your most important keyword
-- Add your brand name at the end`,
     docsUrl: 'https://nextjs.org/docs/app/api-reference/functions/generate-metadata#title',
   },
 
@@ -213,12 +168,6 @@ export const metadata: Metadata = {
   },
 }
 Rule: 50–60 characters is ideal. Include the main keyword near the start.`,
-    boltPrompt: `Fix your page title length:
-Edit your <title> tag to be between 50 and 60 characters:
-<title>Your Main Keyword — Descriptive Phrase | Brand</title>
-
-- Too short: adds no value, wastes the SEO opportunity
-- Too long: Google cuts it off at ~60 characters in search results`,
     docsUrl: 'https://developers.google.com/search/docs/appearance/title-link',
   },
 
@@ -239,14 +188,6 @@ For dynamic pages:
 export async function generateMetadata({ params }) {
   return { description: post.excerpt.slice(0, 160) }
 }`,
-    boltPrompt: `Add a meta description:
-Inside your HTML <head> tag, add:
-<meta name="description" content="Your page description here. 150-160 characters. Explain what visitors get and why they should click.">
-
-Tips:
-- Keep it between 150–160 characters
-- Include your main keyword naturally
-- Write it like an ad — make people want to click`,
     docsUrl: 'https://developers.google.com/search/docs/appearance/snippet',
   },
 
@@ -265,15 +206,6 @@ Tips:
    <h1 className="text-4xl font-bold">Your Primary Keyword Phrase</h1>
 4. Run: grep -r "<h1" app/ to find all h1 tags and ensure one per page
 5. Don't use h1 in shared layouts or components that render on multiple pages`,
-    boltPrompt: `Fix your H1 heading:
-Each page should have exactly one <h1> tag:
-<h1>Your Main Page Headline Here</h1>
-
-Rules:
-- One per page (not zero, not two)
-- Put your main keyword in it
-- It should describe what the page is about
-- Don't style other elements as h1 using CSS if they're not h1 tags`,
     docsUrl: 'https://developers.google.com/search/docs/appearance/visual-elements-gallery',
   },
 
@@ -298,12 +230,6 @@ export async function generateMetadata({ params }) {
     alternates: { canonical: \`/blog/\${params.slug}\` }
   }
 }`,
-    boltPrompt: `Add a canonical tag to your page:
-Inside your HTML <head> tag, add:
-<link rel="canonical" href="https://yourdomain.com/this-page">
-
-Use the full URL including https:// but without unnecessary query parameters.
-This tells Google which version of the URL is the "official" one.`,
     docsUrl: 'https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls',
   },
 
@@ -325,12 +251,6 @@ export const metadata: Metadata = {
   },
 }
 Note: Next.js copies title to og:title automatically if you don't set openGraph.title separately.`,
-    boltPrompt: `Add Open Graph title to your page:
-Inside your HTML <head> tag, add:
-<meta property="og:title" content="Your Page Title Here">
-
-This controls what title appears when your link is shared on:
-- Twitter/X, Facebook, LinkedIn, Telegram, WhatsApp, Slack`,
     docsUrl: 'https://ogp.me/',
   },
 
@@ -351,11 +271,6 @@ export const metadata: Metadata = {
   },
 }
 Next.js copies the description to og:description automatically if not set separately.`,
-    boltPrompt: `Add Open Graph description to your page:
-Inside your HTML <head> tag, add:
-<meta property="og:description" content="A compelling 1-2 sentence description of your page. Make people want to click.">
-
-Keep it under 200 characters. This shows up under the title in link previews.`,
     docsUrl: 'https://ogp.me/',
   },
 
@@ -372,11 +287,6 @@ Keep it under 200 characters. This shows up under the title in link previews.`,
 2. In app/layout.tsx add to metadata:
    openGraph: { images: [{ url: '/og-image.png', width: 1200, height: 630 }] }
 Or use app/opengraph-image.tsx with next/og for dynamic generation.`,
-    boltPrompt: `Add to HTML <head>:
-<meta property="og:image" content="https://YOURDOMAIN.com/og-image.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-Upload a 1200×630px image to your public folder.`,
     docsUrl: 'https://nextjs.org/docs/app/api-reference/file-conventions/opengraph-image',
   },
 
@@ -395,12 +305,6 @@ Upload a 1200×630px image to your public folder.`,
 3. If using next/og (opengraph-image.tsx), test the route at /opengraph-image
 4. Ensure the image file exists in the public/ directory
 5. Check Vercel deployment logs for image-related 404s`,
-    boltPrompt: `Fix your broken og:image:
-1. Open the image URL from your og:image tag in a browser — check it loads
-2. If it gives a 404, verify the image file exists in your public folder
-3. Make sure the URL is the full absolute URL including https://
-4. Replace the broken URL with a working one:
-   <meta property="og:image" content="https://yourdomain.com/og-image.png">`,
     docsUrl: 'https://developers.facebook.com/tools/debug/',
   },
 
@@ -423,14 +327,6 @@ export const metadata: Metadata = {
     // creator: '@yourhandle', // optional
   },
 }`,
-    boltPrompt: `Add Twitter card tags to your page:
-Inside your HTML <head> tag, add:
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Your Page Title">
-<meta name="twitter:description" content="Your description">
-<meta name="twitter:image" content="https://yourdomain.com/og-image.png">
-
-"summary_large_image" shows a big image preview — the best format for engagement.`,
     docsUrl: 'https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/abouts-cards',
   },
 
@@ -448,11 +344,6 @@ Inside your HTML <head> tag, add:
 2. Replace all found placeholder text with real content
 3. Check all page components and any mock/seed data
 4. If using CMS data, ensure all content fields are populated in production`,
-    boltPrompt: `Remove placeholder text from your site:
-1. Search your HTML files for "Lorem ipsum", "Your name here", etc.
-2. Replace every instance with your actual content
-3. Check all pages — not just the homepage
-4. Look inside components, modals, and less-visited pages too`,
   },
 
   // ─────────────────────────────────────────
@@ -476,13 +367,6 @@ Inside your HTML <head> tag, add:
    async redirects() {
      return [{ source: '/:path*', has: [{ type: 'header', key: 'x-forwarded-proto', value: 'http' }], destination: 'https://yourdomain.com/:path*', permanent: true }]
    }`,
-    boltPrompt: `Enable HTTPS on your site:
-1. If using Vercel, Netlify, or similar: HTTPS is automatic — just redeploy
-2. If using shared hosting: enable SSL in your hosting control panel (usually free via Let's Encrypt)
-3. After enabling, redirect all HTTP traffic to HTTPS in your server config or .htaccess:
-   RewriteEngine On
-   RewriteCond %{HTTPS} off
-   RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]`,
     docsUrl: 'https://web.dev/articles/why-https-matters',
   },
 
@@ -506,14 +390,6 @@ async headers() {
   }]
 }
 Note: Only add this once your site is fully on HTTPS — HSTS cannot be easily reverted.`,
-    boltPrompt: `Add HSTS to your server response headers:
-In your server config (nginx example):
-add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
-
-In Apache .htaccess:
-Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
-
-Only do this after confirming HTTPS works correctly on all pages.`,
     docsUrl: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security',
   },
 
@@ -537,16 +413,6 @@ async headers() {
     ],
   }]
 }`,
-    boltPrompt: `Add X-Frame-Options header:
-In nginx:
-add_header X-Frame-Options "SAMEORIGIN" always;
-
-In Apache:
-Header always set X-Frame-Options "SAMEORIGIN"
-
-Or if your hosting platform supports custom headers, add:
-Key: X-Frame-Options
-Value: SAMEORIGIN`,
     docsUrl: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options',
   },
 
@@ -568,14 +434,6 @@ async headers() {
     ],
   }]
 }`,
-    boltPrompt: `Add X-Content-Type-Options header:
-In nginx:
-add_header X-Content-Type-Options "nosniff" always;
-
-In Apache:
-Header always set X-Content-Type-Options "nosniff"
-
-This is a simple one-line fix — just add it alongside your other headers.`,
     docsUrl: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options',
   },
 
@@ -598,14 +456,6 @@ async headers() {
   }]
 }
 'strict-origin-when-cross-origin' is a sensible default: sends full URL to same-origin, only the origin to cross-origin HTTPS, nothing to HTTP destinations.`,
-    boltPrompt: `Add Referrer-Policy header:
-In nginx:
-add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-
-In Apache:
-Header always set Referrer-Policy "strict-origin-when-cross-origin"
-
-This is low risk and easy to add alongside your other security headers.`,
     docsUrl: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy',
   },
 
@@ -636,11 +486,6 @@ async headers() {
   }]
 }
 See Next.js docs for nonce-based CSP with App Router.`,
-    boltPrompt: `Add a basic Content Security Policy:
-In your server response headers, add:
-Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: https:; font-src 'self' https:
-
-Start with Content-Security-Policy-Report-Only first to check for breakage, then switch to Content-Security-Policy once confirmed.`,
     docsUrl: 'https://nextjs.org/docs/app/building-your-application/configuring/content-security-policy',
   },
 
@@ -668,16 +513,6 @@ Start with Content-Security-Policy-Report-Only first to check for breakage, then
    }
 2. For styles, prefer CSS Modules or Tailwind (no inline styles needed)
 3. Remove 'unsafe-eval' — ensure no libraries use eval() (check bundle with next-bundle-analyzer)`,
-    boltPrompt: `Strengthen your Content Security Policy:
-Remove 'unsafe-inline' and 'unsafe-eval' from your CSP header.
-
-To remove 'unsafe-inline' for scripts:
-- Move all inline <script> code to external .js files
-- Remove onclick="" and other inline event handlers — use addEventListener instead
-
-To remove 'unsafe-eval':
-- Find and replace any eval() calls in your code
-- Check if any libraries you use require eval (look for alternatives)`,
     docsUrl: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src',
   },
 
@@ -697,16 +532,6 @@ For custom certificates:
 2. If using Let's Encrypt with Certbot: sudo certbot renew
 3. Set up auto-renewal: add to crontab: 0 12 * * * /usr/bin/certbot renew --quiet
 4. If using Cloudflare, certificates auto-renew — check the SSL/TLS dashboard`,
-    boltPrompt: `Renew your SSL certificate before it expires:
-1. Log in to your hosting control panel
-2. Find SSL/TLS or HTTPS settings
-3. Click "Renew" or "Auto-Renew" for your certificate
-
-If you're using Let's Encrypt (free SSL):
-- Run: certbot renew
-- Enable auto-renewal so this never happens again
-
-If you have a paid SSL certificate, contact your SSL provider to renew it.`,
     docsUrl: 'https://letsencrypt.org/docs/renewing/',
   },
 
@@ -724,11 +549,6 @@ If you have a paid SSL certificate, contact your SSL provider to renew it.`,
 3. Verify .env and .env.local are in .gitignore
 4. Check next.config.js has no rewrites exposing .env
 5. Redeploy`,
-    boltPrompt: `URGENT:
-1. Immediately revoke all API keys that were in the exposed file
-2. Never put .env files in your public folder
-3. Store all secrets in your hosting platform's Environment Variables only
-4. Redeploy your app`,
     docsUrl: 'https://nextjs.org/docs/app/building-your-application/configuring/environment-variables',
   },
 
@@ -752,13 +572,6 @@ If you have a paid SSL certificate, contact your SSL provider to renew it.`,
 5. Create a server-side API route to proxy requests that need the key
 6. Generate new key and add it only to Vercel server-side Environment Variables
 7. Redeploy`,
-    boltPrompt: `URGENT — your API key is exposed in your HTML:
-1. Immediately go to the API service (OpenAI, Stripe, etc.) and revoke the key
-2. Generate a new key
-3. NEVER put API keys directly in your HTML or JavaScript files
-4. Move all API calls to your server-side backend code only
-5. Use environment variables on your server — never expose them in client-side code
-6. Redeploy and verify the key is no longer visible in view-source`,
     docsUrl: 'https://nextjs.org/docs/app/building-your-application/configuring/environment-variables#bundling-environment-variables-for-the-browser',
   },
 
@@ -778,18 +591,6 @@ If you have a paid SSL certificate, contact your SSL provider to renew it.`,
 4. In next.config.ts, add Content-Security-Policy with upgrade-insecure-requests:
    { key: 'Content-Security-Policy', value: "upgrade-insecure-requests;" }
 5. Check third-party embed codes (maps, widgets) — update to their HTTPS versions`,
-    boltPrompt: `Fix mixed content warnings:
-Find and replace all http:// with https:// in your HTML, CSS, and JavaScript files.
-
-Common places to check:
-- Image src attributes: <img src="http://..."> → <img src="https://...">
-- CSS background-image URLs
-- Script src attributes
-- Iframe src attributes
-- Any external API or CDN URLs
-
-Add this to your <head> as a quick fix while you update the URLs:
-<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">`,
     docsUrl: 'https://developer.mozilla.org/en-US/docs/Web/Security/Mixed_content/How_to_fix_website_with_mixed_content',
   },
 
@@ -817,12 +618,6 @@ export const viewport: Viewport = {
   initialScale: 1,
 }
 // Import: import type { Viewport } from 'next'`,
-    boltPrompt: `Add viewport meta tag to your page:
-Inside your HTML <head> tag, add:
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-This is essential for every website — without it, your site looks broken on mobile phones.
-It tells the browser to use the device's actual screen width instead of assuming a desktop.`,
     docsUrl: 'https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag',
   },
 
@@ -845,16 +640,6 @@ If set via <meta> tag directly, change:
 content="width=device-width, initial-scale=1, user-scalable=no"
 to:
 content="width=device-width, initial-scale=1"`,
-    boltPrompt: `Remove the zoom restriction from your viewport:
-Find this in your <head>:
-<meta name="viewport" content="..., user-scalable=no">
-or
-<meta name="viewport" content="..., maximum-scale=1">
-
-Remove the user-scalable=no and maximum-scale=1 parts:
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-Users should always be able to zoom in — this is an accessibility requirement.`,
     docsUrl: 'https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag',
   },
 
@@ -879,14 +664,6 @@ Users should always be able to zoom in — this is an accessibility requirement.
      },
    }
 4. Generate all sizes from your logo using realfavicongenerator.net`,
-    boltPrompt: `Add a favicon to your site:
-1. Create a small 32×32px icon image (save as favicon.ico or favicon.png)
-2. Place it in your public/root folder
-3. Add to your HTML <head>:
-   <link rel="icon" href="/favicon.ico" sizes="any">
-   <link rel="icon" href="/favicon.png" type="image/png">
-
-Use realfavicongenerator.net to generate all the different sizes needed.`,
     docsUrl: 'https://nextjs.org/docs/app/api-reference/file-conventions/metadata/app-icons',
   },
 
@@ -908,13 +685,6 @@ Use realfavicongenerator.net to generate all the different sizes needed.`,
      },
    }
 Or place the file at app/apple-icon.png — Next.js handles it automatically.`,
-    boltPrompt: `Add Apple touch icon:
-1. Create a 180×180px PNG image of your logo
-2. Save it as apple-touch-icon.png in your public folder
-3. Add to your HTML <head>:
-   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-
-This makes your site look professional when added to iPhone/iPad home screens.`,
     docsUrl: 'https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariWebContent/ConfiguringWebApplications/ConfiguringWebApplications.html',
   },
 
@@ -940,14 +710,6 @@ This makes your site look professional when added to iPhone/iPad home screens.`,
      return [{ source: '/old-page', destination: '/new-page', permanent: true }]
    }
 5. Add a custom 404 page at app/not-found.tsx to handle any remaining broken links gracefully`,
-    boltPrompt: `Fix broken links on your site:
-1. Go through each page and click every link to find the broken ones
-2. For each broken link either:
-   - Update the href to the correct URL
-   - Remove the link if the page no longer exists
-   - Create the missing page
-3. Set up a redirect from the old URL to the new one in your server config
-4. Add a custom 404 page so users have a helpful experience if they do hit a broken link`,
     docsUrl: 'https://nextjs.org/docs/app/api-reference/file-conventions/not-found',
   },
 }

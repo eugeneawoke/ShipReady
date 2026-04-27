@@ -85,7 +85,6 @@ export async function runAIVisibilityChecks(
       description: 'No Schema.org markup found in JSON-LD or microdata form.',
       plainEnglish: 'AI assistants and search engines use structured data to understand what your product is. Without it, they have less reliable context.',
       cursorPrompt: 'Add Schema.org markup for your product or organization in app metadata/layout so AI and search engines can identify the page correctly.',
-      boltPrompt: 'Add structured data (Schema.org) to your page head so AI tools can understand what the site is about.',
       docsUrl: 'https://schema.org/docs/gs.html',
     }, 'ai-visibility', [evidence('selector', 'Schema.org markup', 'missing')]))
   }
@@ -111,7 +110,6 @@ export async function runAIVisibilityChecks(
       description: 'FAQPage structured data found in the page, but no matching visible Q&A content was detected.',
       plainEnglish: 'Your page has FAQ structured data but no actual FAQ accordion or Q&A section. Google may penalise this as misleading markup.',
       cursorPrompt: 'Either add a real visible FAQ accordion to the page that matches the schema, or remove the FAQPage schema from the head.',
-      boltPrompt: 'Add a visible FAQ section matching the FAQPage schema, or remove the schema if there is no real FAQ content.',
       docsUrl: 'https://developers.google.com/search/docs/appearance/structured-data/faqpage',
     }, 'ai-visibility', [evidence('selector', 'FAQPage schema', 'present without visible Q&A content')]))
   }
@@ -125,7 +123,6 @@ export async function runAIVisibilityChecks(
       description: 'A FAQ section was detected but FAQPage structured data was not found.',
       plainEnglish: 'You have a real FAQ section, but it is not marked up for machines. Adding FAQPage schema increases the chance of reuse in search and AI answers.',
       cursorPrompt: 'Add FAQPage schema to match the visible questions and answers in your FAQ section.',
-      boltPrompt: 'Add matching FAQ schema so machines can reuse your FAQ content correctly.',
       docsUrl: 'https://developers.google.com/search/docs/appearance/structured-data/faqpage',
     }, 'ai-visibility', [evidence('selector', 'FAQ section', 'found without schema')]))
   }
@@ -152,7 +149,6 @@ export async function runAIVisibilityChecks(
       description: 'Headings skip levels (for example H1 → H3).',
       plainEnglish: 'The page outline skips heading levels. That makes machine parsing and assistive reading less reliable.',
       cursorPrompt: 'Fix heading levels so the content outline moves sequentially without skipping levels.',
-      boltPrompt: 'Adjust the headings so they follow a clean order like H1, H2, H3.',
     }, 'ai-visibility', [evidence('text', 'Heading hierarchy', 'skipped level detected')]))
   }
 
@@ -166,7 +162,6 @@ export async function runAIVisibilityChecks(
       description: `Only about ${wordCount} readable words found.`,
       plainEnglish: `This page has only about ${wordCount} readable words after ignoring scripts and styles. That may be too little context for AI systems and search engines.`,
       cursorPrompt: 'Add more readable explanatory content for humans: what the product does, who it is for, and how it works.',
-      boltPrompt: 'Add more real explanatory copy so the page has enough context to be understood and cited.',
       value: `${wordCount} words`,
     }, 'ai-visibility', [evidence('count', 'Readable word count', wordCount)]))
   }
@@ -182,7 +177,6 @@ export async function runAIVisibilityChecks(
         description: 'No llms.txt was found.',
         plainEnglish: 'An llms.txt file can help AI systems understand which product pages and context to prefer.',
         cursorPrompt: 'Create a public llms.txt file that lists the core product pages and a short product description.',
-        boltPrompt: 'Add an llms.txt file in the public root with a short product summary and key URLs.',
         docsUrl: 'https://llmstxt.org',
       }, 'ai-visibility', [evidence('response', 'llms.txt status', llmsResult.status)]))
     }
@@ -195,7 +189,6 @@ export async function runAIVisibilityChecks(
       description: 'No llms.txt was found.',
       plainEnglish: 'An llms.txt file can help AI systems understand which product pages and context to prefer.',
       cursorPrompt: 'Create a public llms.txt file that lists the core product pages and a short product description.',
-      boltPrompt: 'Add an llms.txt file in the public root with a short product summary and key URLs.',
       docsUrl: 'https://llmstxt.org',
     }, 'ai-visibility'))
   }
@@ -215,7 +208,6 @@ export async function runAIVisibilityChecks(
           description: `Blocked: ${blocked.join(', ')}`,
           plainEnglish: `Your robots.txt blocks ${blocked.join(', ')}. That prevents some AI crawlers from using the site.`,
           cursorPrompt: 'Update robots.txt so product pages are not fully disallowed for the AI crawlers you want to allow.',
-          boltPrompt: 'Remove full-site disallow rules for the AI crawlers you want to permit.',
           value: blocked.join(', '),
         }, 'ai-visibility', [evidence('text', 'Blocked AI crawlers', blocked.join(', '))]))
       }
@@ -242,7 +234,6 @@ export async function runAIVisibilityChecks(
       description: 'No sitemap.xml at /sitemap.xml and none referenced in the document.',
       plainEnglish: 'A sitemap helps crawlers discover the pages you want cited and indexed.',
       cursorPrompt: 'Expose a sitemap.xml endpoint or static file that covers the important public pages.',
-      boltPrompt: 'Add a sitemap.xml file so crawlers can discover the important pages on the site.',
       docsUrl: 'https://nextjs.org/docs/app/api-reference/file-conventions/metadata/sitemap',
     }, 'ai-visibility', [evidence('selector', 'sitemap.xml', 'missing')]))
   }
@@ -263,7 +254,6 @@ export async function runAIVisibilityChecks(
       description: 'No About page, contact page, or Organization/Person schema was found.',
       plainEnglish: 'The site does not expose many signals that identify the people or organization behind it.',
       cursorPrompt: 'Add stronger organization/person signals such as About, Contact, or Organization schema.',
-      boltPrompt: 'Add an About or Contact page and optionally structured data for the brand or author.',
     }, 'ai-visibility', [evidence('text', 'Entity signals', 'missing about/contact/org schema')]))
   }
 
