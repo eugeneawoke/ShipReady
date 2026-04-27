@@ -108,8 +108,18 @@ export async function runSEOChecks(
     }
   }
 
-  if (!$('meta[name="twitter:card"]').attr('content')) {
+  const twitterCard = $('meta[name="twitter:card"]').attr('content')
+  if (!twitterCard) {
     issues.push(withIssueMeta({ ...T['missing-twitter-card'] }, 'dom', [evidence('selector', 'meta[name="twitter:card"]', 'missing')]))
+  }
+
+  const twitterImage = $('meta[name="twitter:image"]').attr('content') || $('meta[name="twitter:image:src"]').attr('content')
+  if (includeLikely && twitterCard === 'summary_large_image' && !twitterImage) {
+    issues.push(withIssueMeta(
+      { ...T['missing-twitter-image'] },
+      'dom',
+      [evidence('text', 'twitter:card', twitterCard), evidence('selector', 'meta[name="twitter:image"]', 'missing')],
+    ))
   }
 
   const body = $('body').clone()
@@ -121,6 +131,63 @@ export async function runSEOChecks(
       'dom',
       [evidence('text', 'Matched placeholder phrase', 'lorem ipsum / your name here')],
     ))
+  }
+
+  const jsonLdBlocks = $('script[type="application/ld+json"]').toArray()
+  if (includeLikely && jsonLdBlocks.length === 0) {
+    issues.push(withIssueMeta(
+      { ...T['missing-structured-data'] },
+      'dom',
+      [evidence('selector', 'script[type="application/ld+json"]', 'missing')],
+    ))
+  }
+
+  if (includeLikely && jsonLdBlocks.length > 0) {
+    let hasWebApp = false
+    let missingOS = false
+    for (const el of jsonLdBlocks) {
+      try {
+        const data = JSON.parse($(el).html() || '{}')
+        const schemas = Array.isArray(data) ? data : [data]
+        for (const schema of schemas) {
+          if (schema['@type'] === 'WebApplication' || schema['@type'] === 'SoftwareApplication') {
+            hasWebApp = true
+            if (!schema.operatingSystem) missingOS = true
+          }
+        }
+      } catch { /* malformed JSON-LD */ }
+    }
+    if (hasWebApp && missingOS) {
+      issues.push(withIssueMeta(
+        { ...T['missing-operating-system'] },
+        'dom',
+        [evidence('selector', 'WebApplication.operatingSystem', 'missing')],
+      ))
+    }
+  }
+
+  if (includeLikely) {
+    try {
+      const origin = new URL(url).origin
+      const robotsRes = await fetchSafeResource(`${origin}/robots.txt`, { signal: AbortSignal.timeout(3000) })
+      if (robotsRes.ok) {
+        const robotsText = await robotsRes.text()
+        const sitemapMatch = robotsText.match(/^Sitemap:\s*(.+)$/im)
+        if (sitemapMatch) {
+          const sitemapUrl = sitemapMatch[1].trim()
+          if (sitemapUrl.includes('//') && !sitemapUrl.startsWith('//')) {
+            const afterProtocol = sitemapUrl.replace(/^https?:\/\//, '')
+            if (afterProtocol.includes('//')) {
+              issues.push(withIssueMeta(
+                { ...T['sitemap-double-slash'], value: sitemapUrl },
+                'http',
+                [evidence('text', 'Sitemap URL in robots.txt', sitemapUrl)],
+              ))
+            }
+          }
+        }
+      }
+    } catch { /* robots.txt fetch failed — not an issue */ }
   }
 
   return issues

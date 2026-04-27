@@ -1,6 +1,7 @@
 import * as cheerio from 'cheerio'
 import type { Issue } from '@/types/scan'
 import { evidence, withIssueMeta } from '@/lib/checks/issue-meta'
+import { T } from '@/lib/ai/issue-templates'
 import { fetchSafeResource, fetchWithHeadFallback } from '@/lib/checks/fetch-context'
 
 function parseJsonLdTypes(raw: string | null | undefined): string[] {
@@ -166,9 +167,10 @@ export async function runAIVisibilityChecks(
     }, 'ai-visibility', [evidence('count', 'Readable word count', wordCount)]))
   }
 
+  let llmsTxtBody: string | null = null
   try {
-    const llmsResult = await fetchWithHeadFallback(`${origin}/llms.txt`, 2500)
-    if (!llmsResult.ok) {
+    const llmsRes = await fetchSafeResource(`${origin}/llms.txt`, { signal: AbortSignal.timeout(2500) })
+    if (!llmsRes.ok) {
       issues.push(withIssueMeta({
         id: 'missing-llms-txt',
         category: 'ai_visibility',
@@ -178,7 +180,9 @@ export async function runAIVisibilityChecks(
         plainEnglish: 'An llms.txt file can help AI systems understand which product pages and context to prefer.',
         cursorPrompt: 'Create a public llms.txt file that lists the core product pages and a short product description.',
         docsUrl: 'https://llmstxt.org',
-      }, 'ai-visibility', [evidence('response', 'llms.txt status', llmsResult.status)]))
+      }, 'ai-visibility', [evidence('response', 'llms.txt status', llmsRes.status)]))
+    } else {
+      llmsTxtBody = await llmsRes.text()
     }
   } catch {
     issues.push(withIssueMeta({
@@ -193,12 +197,24 @@ export async function runAIVisibilityChecks(
     }, 'ai-visibility'))
   }
 
+  if (llmsTxtBody && includeHeuristics) {
+    const wordCount = llmsTxtBody.trim().split(/\s+/).length
+    if (wordCount < 100) {
+      issues.push(withIssueMeta(
+        { ...T['thin-llms-txt'], value: `${wordCount} words` },
+        'http',
+        [evidence('count', 'llms.txt word count', wordCount), evidence('text', 'Recommended minimum', '100 words')],
+      ))
+    }
+  }
+
   const aiCrawlers = ['GPTBot', 'ClaudeBot', 'PerplexityBot', 'CCBot', 'anthropic-ai']
+  let robotsTxt: string | null = null
   try {
     const robotsRes = await fetchSafeResource(`${origin}/robots.txt`, { signal: AbortSignal.timeout(2500) })
     if (robotsRes.ok) {
-      const robotsText = await robotsRes.text()
-      const blocked = aiCrawlers.filter(bot => parseRobotsBlock(robotsText, bot))
+      robotsTxt = await robotsRes.text()
+      const blocked = aiCrawlers.filter(bot => parseRobotsBlock(robotsTxt!, bot))
       if (blocked.length > 0) {
         issues.push(withIssueMeta({
           id: 'ai-crawlers-blocked',
@@ -214,6 +230,17 @@ export async function runAIVisibilityChecks(
     }
   } catch {
     // ignore robots fetch failures
+  }
+
+  if (includeHeuristics && robotsTxt) {
+    const hasExplicitAiCrawlers = /GPTBot|OAI-SearchBot|ClaudeBot|PerplexityBot/i.test(robotsTxt)
+    if (!hasExplicitAiCrawlers) {
+      issues.push(withIssueMeta(
+        { ...T['no-explicit-ai-crawlers'] },
+        'http',
+        [evidence('text', 'robots.txt', 'No named AI crawler rules found'), evidence('text', 'Recommendation', 'Add explicit Allow rules for GPTBot, ClaudeBot, PerplexityBot')],
+      ))
+    }
   }
 
   const hasSitemapInHead = !!$('link[rel="sitemap"]').attr('href')
@@ -255,6 +282,18 @@ export async function runAIVisibilityChecks(
       plainEnglish: 'The site does not expose many signals that identify the people or organization behind it.',
       cursorPrompt: 'Add stronger organization/person signals such as About, Contact, or Organization schema.',
     }, 'ai-visibility', [evidence('text', 'Entity signals', 'missing about/contact/org schema')]))
+  }
+
+  if (includeLikely) {
+    const allSchemaTypes = jsonLdScripts.flatMap(el => parseJsonLdTypes($(el).html()))
+    const hasPerson = allSchemaTypes.some(t => t === 'Person')
+    if (!hasPerson) {
+      issues.push(withIssueMeta(
+        { ...T['missing-author-entity'] },
+        'dom',
+        [evidence('selector', 'schema.org/Person', 'missing')],
+      ))
+    }
   }
 
   return issues
