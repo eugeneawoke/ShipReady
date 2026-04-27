@@ -1,6 +1,7 @@
 "use client"
 
 import React, {
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -19,11 +20,17 @@ function MousePosition(): MousePosition {
     x: 0,
     y: 0,
   })
+  const rafPending = useRef(false)
 
   useEffect(() => {
-    const handleMouseMove = (event: MouseEvent) => {
-      setMousePosition({ x: event.clientX, y: event.clientY })
-    }
+    const handleMouseMove = useCallback((event: MouseEvent) => {
+      if (rafPending.current) return
+      rafPending.current = true
+      requestAnimationFrame(() => {
+        setMousePosition({ x: event.clientX, y: event.clientY })
+        rafPending.current = false
+      })
+    }, [])
 
     window.addEventListener("mousemove", handleMouseMove)
 

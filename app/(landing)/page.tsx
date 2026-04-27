@@ -8,12 +8,12 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useLocale, useMessages } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { ScanForm } from '@/components/landing/ScanForm'
+import { PricingSection } from '@/components/landing/PricingSection'
 import { AnimatedGradientText } from '@/components/ui/animated-gradient-text'
 import { NumberTicker } from '@/components/ui/number-ticker'
 import { AnimatedShinyText } from '@/components/ui/animated-shiny-text'
 import { DotPattern } from '@/components/ui/dot-pattern'
 import { SpotlightCard } from '@/components/ui/spotlight-card'
-import { CinematicFooter } from '@/components/ui/motion-footer'
 import { SiteBrandLink } from '@/components/SiteHeader'
 import { localeCookieName } from '@/lib/i18n'
 import type { AppMessages } from '@/messages/en'
@@ -27,6 +27,7 @@ const Particles = dynamic(async () => { const m = await import('@/components/ui/
 const HeroNoise = dynamic(async () => { const m = await import('@/components/ui/hero-noise'); return m.HeroNoise as AnyComponent }, { ssr: false })
 const FlickeringGrid = dynamic(async () => { const m = await import('@/components/ui/flickering-grid'); return m.FlickeringGrid as AnyComponent }, { ssr: false })
 const Meteors = dynamic(async () => { const m = await import('@/components/ui/meteors'); return m.Meteors as AnyComponent }, { ssr: false })
+const CinematicFooter = dynamic(async () => { const m = await import('@/components/ui/motion-footer'); return m.CinematicFooter as AnyComponent }, { ssr: false })
 
 // ─── smooth scroll ────────────────────────────────────────────────────────────
 
@@ -176,7 +177,7 @@ export default function LandingPage() {
       <ReportPreviewSection t={t} />
       <FeaturesSection t={t} />
       <AIPromptsSection t={t} />
-      <PricingSection t={t} />
+      <PricingSection />
       <FAQSection t={t} />
       <BottomCTA t={t} />
       <CinematicFooter />
