@@ -45,13 +45,13 @@ export async function generateMetadata(): Promise<Metadata> {
       description: t('appDescription'),
       siteName: t('appTitle'),
       type: 'website',
-      images: [{ url: '/og.png', width: 1200, height: 630, alt: 'ShipReady — Site audits that understand your client\'s business' }],
+      images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'ShipReady — Site audits that understand your client\'s business' }],
     },
     twitter: {
       card: 'summary_large_image',
       title: t('appTitle'),
       description: t('appDescription'),
-      images: ['/og.png'],
+      images: ['/opengraph-image'],
     },
     icons: {
       apple: '/logo.svg',
