@@ -10,7 +10,7 @@ import { CategoryCard } from '@/components/report/CategoryCard'
 import { IssueCard } from '@/components/report/IssueCard'
 import { ScanForm, useScanLauncher } from '@/components/landing/ScanForm'
 import { SiteBrandLink } from '@/components/SiteHeader'
-import type { Scan, Issue, IssueCategory, ScanResult, ScanStatus } from '@/types/scan'
+import type { Scan, Issue, IssueCategory, ScanResult, ScanStatus, BusinessContext, ScanGoal } from '@/types/scan'
 import { createBrowserClient } from '@/lib/supabase-browser'
 
 function JumpingDots() {
@@ -101,6 +101,74 @@ function FixPromptSection({ prompt, isPro, isReady }: {
   )
 }
 
+const BUSINESS_TYPE_LABELS: Record<BusinessContext['businessType'], string> = {
+  ecommerce: 'E-commerce',
+  saas: 'SaaS',
+  local_business: 'Local business',
+  portfolio: 'Portfolio',
+  blog: 'Blog',
+  agency: 'Agency',
+  other: 'Other',
+}
+
+const SCAN_GOAL_LABELS: Record<ScanGoal, string | null> = {
+  sales: 'More sales',
+  leads: 'More leads',
+  traffic: 'More traffic',
+  visibility: 'AI visibility',
+  general: null,
+}
+
+function BusinessProfileBlock({ businessContext, scanGoal }: {
+  businessContext?: BusinessContext | null
+  scanGoal?: ScanGoal
+}) {
+  const isHighConfidence = businessContext != null && businessContext.businessType !== 'other'
+
+  return (
+    <div
+      className="rounded-xl border border-white/6 bg-white/[0.03] px-4 py-3"
+      style={{ borderLeft: '3px solid #6E56CF' }}
+    >
+      {isHighConfidence ? (
+        <div className="space-y-1.5">
+          <p className="text-[10px] uppercase tracking-[0.12em] text-[#8B8A85] font-mono">Site identified as</p>
+          <p className="text-sm font-medium text-[#F1F0EE]">
+            {BUSINESS_TYPE_LABELS[businessContext.businessType]}
+            {businessContext.techStack.length > 0 && (
+              <span className="text-[#8B8A85] font-normal">
+                {' · '}{businessContext.techStack.join(' + ')}
+              </span>
+            )}
+          </p>
+          {businessContext.detectedService && (
+            <p className="text-xs text-[#8B8A85]">
+              <span className="text-[#6F6E69]">Selling:</span>{' '}{businessContext.detectedService}
+            </p>
+          )}
+          {businessContext.targetAudience && (
+            <p className="text-xs text-[#8B8A85]">
+              <span className="text-[#6F6E69]">Audience:</span>{' '}{businessContext.targetAudience}{' '}
+              <span className="text-[#5A5955]">(estimated)</span>
+            </p>
+          )}
+          {scanGoal && scanGoal !== 'general' && SCAN_GOAL_LABELS[scanGoal] && (
+            <p className="text-xs text-[#8B8A85]">
+              <span className="text-[#6F6E69]">Your goal:</span>{' '}{SCAN_GOAL_LABELS[scanGoal]}
+            </p>
+          )}
+          <p className="text-xs text-[#5A5955] pt-0.5">Recommendations below are tailored to this context.</p>
+        </div>
+      ) : (
+        <div className="space-y-1">
+          <p className="text-sm text-[#8B8A85]">Site type could not be determined confidently.</p>
+          <p className="text-xs text-[#5A5955]">Recommendations are general.</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
 const SEVERITY_ORDER: Record<string, number> = {
   critical: 0,
   high: 1,
@@ -143,7 +211,7 @@ function buildScanStages(scan: Scan, results: ScanResult, t: ReturnType<typeof u
   const performanceMeasurement = results.performance.measurement
   const isActive = ACTIVE_SCAN_STATUSES.includes(scan.status)
   const deepDone = results.phase === 'deep' || results.phase === 'enriching' || results.phase === 'final'
-  const aiDone = Boolean(results.aiSummary || results.aiTechnicalPrompt || results.aiVibePrompt)
+  const aiDone = Boolean(results.aiSummary || results.aiTechnicalPrompt || (results.issuePrompts && Object.keys(results.issuePrompts).length > 0))
   const performanceStillRunning = performanceMeasurement?.status === 'unavailable'
     && /still running/i.test(performanceMeasurement.message ?? '')
 
@@ -307,7 +375,6 @@ HOW TO VERIFY YOUR FIXES Rules:
 
   return {
     technical: prompt,
-    vibe: prompt,
   }
 }
 
@@ -481,11 +548,14 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
   const isScanActive = ACTIVE_SCAN_STATUSES.includes(scan.status)
   const isFinalReport = scan.status === 'done'
   const hasUnavailable = hasUnavailableMeasurements(results)
-  const fixEverythingPrompt = isWeakFixPrompt(results.aiVibePrompt, activeIssues, measurementNotes)
+  const aiCombinedPrompt = results.issuePrompts && Object.keys(results.issuePrompts).length > 0
+    ? Object.values(results.issuePrompts).map(p => p.technical).join('\n\n')
+    : undefined
+  const fixEverythingPrompt = isWeakFixPrompt(aiCombinedPrompt, activeIssues, measurementNotes)
     ? isWeakFixPrompt(results.aiTechnicalPrompt, activeIssues, measurementNotes)
-      ? deterministicPrompts.vibe
+      ? deterministicPrompts.technical
       : results.aiTechnicalPrompt
-    : results.aiVibePrompt
+    : aiCombinedPrompt
 
   let domain = scan.url
   try { domain = new URL(scan.url).hostname } catch { /* use raw url */ }
@@ -732,6 +802,14 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
           onRetryLighthouse={handleRetryLighthouse}
         />
 
+        {/* Business profile — only when scan is done */}
+        {isFinalReport && (
+          <BusinessProfileBlock
+            businessContext={results.businessContext}
+            scanGoal={results.scanGoal}
+          />
+        )}
+
         {/* Score + Summary */}
         <section className="flex flex-col sm:flex-row items-center sm:items-start gap-8">
           <div className="shrink-0">
@@ -823,10 +901,10 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
           </div>
         </section>
 
-        {/* Fix everything prompts — hidden in print */}
+        {/* Fix prompts — hidden in print */}
         <section className="print:hidden">
           <div className="mb-4">
-            <h2 className="text-sm font-medium text-[#F1F0EE]">{t('fixEverything')}</h2>
+            <h2 className="text-sm font-medium text-[#F1F0EE]">Fix prompts for Cursor · Claude Code · Windsurf</h2>
           </div>
           <FixPromptSection
             prompt={fixEverythingPrompt}
