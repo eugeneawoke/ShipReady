@@ -43,7 +43,18 @@ interface PageSignals {
   mainCTA: string | null
   hasCart: boolean
   hasPricing: boolean
+  hasDemo: boolean
+  hasSignup: boolean
+  hasContact: boolean
+  hasNewsletter: boolean
   structuredDataTypes: string[]
+}
+
+export interface BusinessContextSignals {
+  monetizationModel: NonNullable<BusinessContext['monetizationModel']>
+  productType: NonNullable<BusinessContext['productType']>
+  primaryConversionPath: NonNullable<BusinessContext['primaryConversionPath']>
+  icpHint: NonNullable<BusinessContext['icpHint']>
 }
 
 function extractPageSignals(html: string): PageSignals {
@@ -65,6 +76,10 @@ function extractPageSignals(html: string): PageSignals {
 
   const hasCart = /cart|basket|add[\s-]to[\s-]cart/i.test(html)
   const hasPricing = /href=["'][^"']*\/(pricing|plans|subscribe)[/"']/i.test(html)
+  const hasDemo = /demo|sample report|example report|view report/i.test(html)
+  const hasSignup = /sign[\s-]?up|create account|start free|free scan|try free/i.test(html)
+  const hasContact = /contact|book a call|get a quote|request consultation/i.test(html)
+  const hasNewsletter = /newsletter|subscribe for updates/i.test(html)
 
   const structuredDataTypes: string[] = []
   for (const block of html.matchAll(
@@ -84,8 +99,58 @@ function extractPageSignals(html: string): PageSignals {
     mainCTA: extractMainCTA(html),
     hasCart,
     hasPricing,
+    hasDemo,
+    hasSignup,
+    hasContact,
+    hasNewsletter,
     structuredDataTypes,
   }
+}
+
+export function extractBusinessContextSignals(html: string): BusinessContextSignals {
+  const signals = extractPageSignals(html)
+  const content = [
+    signals.title,
+    signals.description,
+    signals.headings.join(' '),
+    signals.mainCTA ?? '',
+    html.replace(/<[^>]+>/g, ' '),
+  ].join(' ').toLowerCase()
+
+  const icpHint: BusinessContextSignals['icpHint'] =
+    /\bagenc(y|ies)\b|client sites|white[-\s]?label/.test(content) ? 'agency'
+      : /\bdevelopers?\b|dev teams?|cursor|claude code|windsurf/.test(content) ? 'developer'
+        : /local business|near me|service area/.test(content) ? 'local_business'
+          : /ecommerce|shopify|store owners?/.test(content) ? 'ecommerce_team'
+            : /founders?|indie hackers?|startup/.test(content) ? 'founder'
+              : /consumer|families|homeowners/.test(content) ? 'consumer'
+                : 'unknown'
+
+  const productType: BusinessContextSignals['productType'] =
+    signals.hasCart || /product page|online store|shopify/.test(content) ? 'online_store'
+      : signals.hasPricing || /software|platform|dashboard|tool|audit/.test(content) ? 'saas_tool'
+        : signals.hasContact || /services?|consulting|agency/.test(content) ? 'service_business'
+          : /blog|articles|newsletter/.test(content) ? 'content_site'
+            : /portfolio|case studies/.test(content) ? 'portfolio'
+              : 'unknown'
+
+  const monetizationModel: BusinessContextSignals['monetizationModel'] =
+    signals.hasCart ? 'ecommerce'
+      : signals.hasPricing || /subscription|per month|monthly|pricing|plans/.test(content) ? 'subscription'
+        : signals.hasContact ? 'lead_generation'
+          : signals.hasNewsletter ? 'content'
+            : 'unknown'
+
+  const primaryConversionPath: BusinessContextSignals['primaryConversionPath'] =
+    /free scan|start scan|scan now/.test(content) ? 'free_scan'
+      : signals.hasSignup ? 'signup'
+        : signals.hasDemo ? 'demo'
+          : signals.hasContact ? 'contact'
+            : signals.hasCart ? 'checkout'
+              : signals.hasNewsletter ? 'newsletter'
+                : 'unknown'
+
+  return { monetizationModel, productType, primaryConversionPath, icpHint }
 }
 
 function inferBusinessTypeFromSignals(
@@ -105,6 +170,7 @@ export async function analyzeBusinessContext(
 ): Promise<BusinessContext> {
   const techStack = detectTechStack(html, headers)
   const signals = extractPageSignals(html)
+  const businessSignals = extractBusinessContextSignals(html)
   const deterministicType = inferBusinessTypeFromSignals(signals, techStack)
 
   const client = new OpenAI()
@@ -133,6 +199,8 @@ Signals:
 - Structured data types: ${signals.structuredDataTypes.join(', ') || 'none'}
 - Has cart/shop elements: ${signals.hasCart}
 - Has pricing/plans page: ${signals.hasPricing}
+- Has demo/sample-report path: ${signals.hasDemo}
+- Deterministic business signals: ${JSON.stringify(businessSignals)}
 - Detected tech stack: ${techStack.join(', ') || 'unknown'}
 ${deterministicType ? `- Strong heuristic signal: ${deterministicType}` : ''}
 
@@ -164,6 +232,10 @@ Rules: never invent details not in the signals. If uncertain about businessType 
     businessType,
     techStack,
     mainCTA: signals.mainCTA,
+    monetizationModel: businessSignals.monetizationModel,
+    productType: businessSignals.productType,
+    primaryConversionPath: businessSignals.primaryConversionPath,
+    icpHint: businessSignals.icpHint,
     detectedService: parsed.detectedService ?? null,
     targetAudience: parsed.targetAudience ?? null,
     businessProfile: parsed.businessProfile ?? null,

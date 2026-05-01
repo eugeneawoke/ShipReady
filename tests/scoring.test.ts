@@ -1,0 +1,39 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import type { CategoryScore } from '../types/scan'
+import { buildScanResult } from '../lib/scoring'
+
+function category(): CategoryScore {
+  return {
+    score: 100,
+    label: 'excellent',
+    issues: [],
+    passedChecks: 1,
+    totalChecks: 1,
+    measurement: { label: 'test', status: 'measured' },
+  }
+}
+
+test('strategic recommendations are preserved without changing score or confidence counts', () => {
+  const result = buildScanResult({
+    url: 'https://example.com',
+    phase: 'final',
+    performance: category(),
+    seo: category(),
+    security: category(),
+    mobile: category(),
+    ai_visibility: category(),
+    strategicRecommendations: [
+      {
+        timeframe: 'next_2_weeks',
+        title: 'Create a sample report page',
+        body: 'Expose a public demo report so agency buyers can inspect the deliverable before signing up.',
+        evidenceRefs: ['businessContext:agency'],
+      },
+    ],
+  })
+
+  assert.equal(result.totalScore, 100)
+  assert.deepEqual(result.confidenceSummary, { verified: 0, likely: 0, heuristic: 0 })
+  assert.equal(result.strategicRecommendations?.[0]?.timeframe, 'next_2_weeks')
+})

@@ -260,6 +260,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
           timings,
           aiSummary: enrichment.value.summary,
           topPriorities: enrichment.value.topPriorities,
+          strategicRecommendations: enrichment.value.strategicRecommendations,
           aiTechnicalPrompt: enrichment.value.technicalPrompt,
           issuePrompts: enrichment.value.issuePrompts,
           businessContext,

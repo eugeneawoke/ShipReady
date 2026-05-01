@@ -1,15 +1,17 @@
 import OpenAI from 'openai'
-import type { BusinessContext, ScanGoal, ScanResult } from '@/types/scan'
+import type { BusinessContext, ScanGoal, ScanResult, StrategicRecommendation } from '@/types/scan'
 import { getAllIssues } from '@/lib/scoring'
 
 const DEFAULT_ENRICHMENT_MODEL = 'gpt-4.1-nano'
 const MAX_AI_ISSUES = 12
+const VALID_STRATEGIC_TIMEFRAMES = ['now', 'next_2_weeks', 'next_month'] as const
 
 export interface EvidenceEnrichment {
   summary: string
   topPriorities: string[]
   technicalPrompt: string
   issuePrompts: Record<string, { technical: string }>
+  strategicRecommendations: StrategicRecommendation[]
 }
 
 function compactIssue(issue: ReturnType<typeof getAllIssues>[number]) {
@@ -46,6 +48,18 @@ function buildBusinessContextBlock(
     if (businessContext.mainCTA) {
       lines.push(`- Primary CTA: "${businessContext.mainCTA}"`)
     }
+    if (businessContext.monetizationModel && businessContext.monetizationModel !== 'unknown') {
+      lines.push(`- Monetization model: ${businessContext.monetizationModel}`)
+    }
+    if (businessContext.productType && businessContext.productType !== 'unknown') {
+      lines.push(`- Product type: ${businessContext.productType}`)
+    }
+    if (businessContext.primaryConversionPath && businessContext.primaryConversionPath !== 'unknown') {
+      lines.push(`- Primary conversion path: ${businessContext.primaryConversionPath}`)
+    }
+    if (businessContext.icpHint && businessContext.icpHint !== 'unknown') {
+      lines.push(`- ICP signal: ${businessContext.icpHint}`)
+    }
     if (businessContext.businessProfile) {
       lines.push(`- Profile: ${businessContext.businessProfile}`)
     }
@@ -63,6 +77,33 @@ function buildBusinessContextBlock(
   }
 
   return lines.join('\n')
+}
+
+function normalizeStrategicRecommendations(value: unknown): StrategicRecommendation[] {
+  if (!Array.isArray(value)) return []
+
+  return value
+    .map((item): StrategicRecommendation | null => {
+      if (!item || typeof item !== 'object') return null
+      const candidate = item as Record<string, unknown>
+      if (!VALID_STRATEGIC_TIMEFRAMES.includes(candidate.timeframe as typeof VALID_STRATEGIC_TIMEFRAMES[number])) {
+        return null
+      }
+      if (typeof candidate.title !== 'string' || typeof candidate.body !== 'string') {
+        return null
+      }
+
+      return {
+        timeframe: candidate.timeframe as StrategicRecommendation['timeframe'],
+        title: candidate.title,
+        body: candidate.body,
+        evidenceRefs: Array.isArray(candidate.evidenceRefs)
+          ? candidate.evidenceRefs.filter((ref): ref is string => typeof ref === 'string').slice(0, 5)
+          : undefined,
+      }
+    })
+    .filter((item): item is StrategicRecommendation => item !== null)
+    .slice(0, 3)
 }
 
 export async function generateEvidenceEnrichment(
@@ -103,6 +144,14 @@ Return EXACTLY this JSON shape:
 {
   "summary": "1-2 sentence summary. Mention if some measurements were unavailable.",
   "topPriorities": ["priority 1", "priority 2", "priority 3"],
+  "strategicRecommendations": [
+    {
+      "timeframe": "now" | "next_2_weeks" | "next_month",
+      "title": "short recommendation title",
+      "body": "business-aware recommendation based only on findings, evidence, business context, and scan goal",
+      "evidenceRefs": ["issue-id or business-context field"]
+    }
+  ],
   "technicalPrompt": "A precise fix prompt for Cursor, Claude Code, or Windsurf. Reference specific files or config paths for the detected tech stack. Format: goal → concrete fix steps (4-7 bullets) → how to verify each fix on the live site.",
   "issuePrompts": {
     ${issueIds.map(id => `"${id}": { "technical": "..." }`).join(',\n    ')}
@@ -130,6 +179,7 @@ Rules:
       topPriorities: Array.isArray(parsed.topPriorities) ? parsed.topPriorities : [],
       technicalPrompt: parsed.technicalPrompt ?? '',
       issuePrompts: parsed.issuePrompts ?? {},
+      strategicRecommendations: normalizeStrategicRecommendations(parsed.strategicRecommendations),
     }
   } catch {
     return {
@@ -137,6 +187,7 @@ Rules:
       topPriorities: [],
       technicalPrompt: '',
       issuePrompts: {},
+      strategicRecommendations: [],
     }
   }
 }

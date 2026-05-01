@@ -60,6 +60,15 @@ function renderHtml(result: ScanResult, options: { whiteLabel: boolean; domain: 
   const priorities = result.topPriorities?.length
     ? `<div class="priorities"><h3>Top priorities</h3><ol>${result.topPriorities.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ol></div>`
     : ''
+  const strategicRecommendations = result.strategicRecommendations?.length
+    ? `<section class="strategy"><h3>Strategic recommendations</h3>${result.strategicRecommendations.map(item => `
+        <div class="strategy-item">
+          <span class="timeframe">${escapeHtml(item.timeframe.replaceAll('_', ' '))}</span>
+          <h4>${escapeHtml(item.title)}</h4>
+          <p>${escapeHtml(item.body)}</p>
+        </div>
+      `).join('')}</section>`
+    : ''
 
   return `<!DOCTYPE html>
   <html lang="en">
@@ -91,6 +100,13 @@ function renderHtml(result: ScanResult, options: { whiteLabel: boolean; domain: 
         .severity-low { background:#dbeafe; color:#1d4ed8; }
         .evidence-list { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
         .measurement { margin:0 0 10px; color:#9a3412; }
+        .strategy { margin:0 0 24px; padding:16px; border:1px solid #dbeafe; background:#f8fbff; border-radius:14px; page-break-inside: avoid; }
+        .strategy h3 { margin:0 0 12px; font-size:16px; }
+        .strategy-item { border-top:1px solid #dbeafe; padding-top:10px; margin-top:10px; }
+        .strategy-item:first-of-type { border-top:none; padding-top:0; margin-top:0; }
+        .strategy-item h4 { margin:6px 0; font-size:13px; }
+        .strategy-item p { margin:0; color:#374151; line-height:1.55; }
+        .timeframe { display:inline-block; border-radius:999px; padding:3px 8px; font-size:10px; background:#e0f2fe; color:#075985; text-transform:uppercase; }
         .footer { margin-top:24px; padding-top:12px; border-top:1px solid #e5e7eb; font-size:11px; color:#6b7280; }
         ol { margin:8px 0 0 18px; padding:0; }
         li { margin:4px 0; }
@@ -124,6 +140,8 @@ function renderHtml(result: ScanResult, options: { whiteLabel: boolean; domain: 
           </div>
         `).join('')}
       </section>
+
+      ${strategicRecommendations}
 
       ${categories}
 

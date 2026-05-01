@@ -152,6 +152,16 @@ function BusinessProfileBlock({ businessContext, scanGoal }: {
               <span className="text-[#5A5955]">(estimated)</span>
             </p>
           )}
+          {(businessContext.icpHint && businessContext.icpHint !== 'unknown') && (
+            <p className="text-xs text-[#8B8A85]">
+              <span className="text-[#6F6E69]">ICP signal:</span>{' '}{businessContext.icpHint.replaceAll('_', ' ')}
+            </p>
+          )}
+          {(businessContext.primaryConversionPath && businessContext.primaryConversionPath !== 'unknown') && (
+            <p className="text-xs text-[#8B8A85]">
+              <span className="text-[#6F6E69]">Conversion path:</span>{' '}{businessContext.primaryConversionPath.replaceAll('_', ' ')}
+            </p>
+          )}
           {scanGoal && scanGoal !== 'general' && SCAN_GOAL_LABELS[scanGoal] && (
             <p className="text-xs text-[#8B8A85]">
               <span className="text-[#6F6E69]">Your goal:</span>{' '}{SCAN_GOAL_LABELS[scanGoal]}
@@ -166,6 +176,40 @@ function BusinessProfileBlock({ businessContext, scanGoal }: {
         </div>
       )}
     </div>
+  )
+}
+
+const STRATEGIC_TIMEFRAME_LABELS: Record<NonNullable<ScanResult['strategicRecommendations']>[number]['timeframe'], string> = {
+  now: 'Now',
+  next_2_weeks: 'Next 2 weeks',
+  next_month: 'Next month',
+}
+
+function StrategicRecommendationsBlock({ recommendations }: {
+  recommendations?: ScanResult['strategicRecommendations']
+}) {
+  if (!recommendations?.length) return null
+
+  return (
+    <section className="rounded-xl border border-[#4A9EFF]/18 bg-[#101922] px-4 py-4">
+      <div className="mb-3">
+        <p className="text-[10px] uppercase tracking-[0.12em] text-[#8B8A85] font-mono">Strategic recommendations</p>
+        <p className="mt-1 text-xs text-[#6F6E69]">
+          Non-score guidance based on the findings, business context, and scan goal.
+        </p>
+      </div>
+      <div className="space-y-3">
+        {recommendations.slice(0, 3).map((item, index) => (
+          <div key={`${item.timeframe}-${item.title}-${index}`} className="rounded-lg border border-white/6 bg-white/[0.03] p-3">
+            <span className="inline-flex rounded-full border border-[#4A9EFF]/20 bg-[#4A9EFF]/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-[#A9D1FF]">
+              {STRATEGIC_TIMEFRAME_LABELS[item.timeframe]}
+            </span>
+            <h3 className="mt-2 text-sm font-medium text-[#F1F0EE]">{item.title}</h3>
+            <p className="mt-1 text-sm leading-relaxed text-[#8B8A85]">{item.body}</p>
+          </div>
+        ))}
+      </div>
+    </section>
   )
 }
 
@@ -840,6 +884,10 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
             </div>
           )}
         </section>
+
+        {isFinalReport && (
+          <StrategicRecommendationsBlock recommendations={results.strategicRecommendations} />
+        )}
 
         {(pdfState !== 'idle' || pdfError) && (
           <section className={`rounded-xl border px-4 py-3 transition-all ${
