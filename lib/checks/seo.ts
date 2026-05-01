@@ -3,7 +3,19 @@ import type { Issue } from '@/types/scan'
 import { T } from '@/lib/ai/issue-templates'
 import { isValidUrl } from '@/lib/utils'
 import { evidence, withIssueMeta } from '@/lib/checks/issue-meta'
-import { fetchSafeResource, fetchWithHeadFallback } from '@/lib/checks/fetch-context'
+
+function parsePageUrl(value: string | undefined, baseUrl: string): URL | null {
+  if (!value) return null
+  try {
+    return new URL(value, baseUrl)
+  } catch {
+    return null
+  }
+}
+
+function hasDoubleSlashPath(url: URL): boolean {
+  return url.pathname.includes('//')
+}
 
 export async function runSEOChecks(
   url: string,
@@ -54,8 +66,16 @@ export async function runSEOChecks(
   }
 
   if (canonical) {
-    try {
-      const canonicalHostname = new URL(canonical).hostname
+    const canonicalUrl = parsePageUrl(canonical, url)
+    if (canonicalUrl) {
+      if (hasDoubleSlashPath(canonicalUrl)) {
+        issues.push(withIssueMeta(
+          { ...T['canonical-double-slash'], value: canonicalUrl.toString() },
+          'dom',
+          [evidence('text', 'Canonical URL', canonicalUrl.toString())],
+        ))
+      }
+      const canonicalHostname = canonicalUrl.hostname
       const pageHostname = new URL(url).hostname
       if (canonicalHostname !== pageHostname) {
         issues.push(withIssueMeta(
@@ -64,7 +84,7 @@ export async function runSEOChecks(
           [evidence('text', 'Canonical domain', canonicalHostname), evidence('text', 'Page domain', pageHostname)],
         ))
       }
-    } catch { /* invalid URL — ignore */ }
+    }
   }
 
   const ogTitle = $('meta[property="og:title"]').attr('content')
@@ -78,6 +98,7 @@ export async function runSEOChecks(
   }
 
   const ogImage = $('meta[property="og:image"]').attr('content')
+  const ogUrl = $('meta[property="og:url"]').attr('content')
   if (!ogImage) {
     issues.push(withIssueMeta({ ...T['missing-og-image'] }, 'dom', [evidence('selector', 'meta[property="og:image"]', 'missing')]))
   } else if (includeLikely && !isValidUrl(ogImage)) {
@@ -88,6 +109,7 @@ export async function runSEOChecks(
     ))
   } else if (includeLikely) {
     try {
+      const { fetchWithHeadFallback } = await import('@/lib/checks/fetch-context')
       const result = await fetchWithHeadFallback(ogImage, 2500)
       if (!result.ok) {
         issues.push(withIssueMeta(
@@ -108,13 +130,36 @@ export async function runSEOChecks(
     }
   }
 
+  if (!ogUrl) {
+    issues.push(withIssueMeta({ ...T['missing-og-url'] }, 'dom', [evidence('selector', 'meta[property="og:url"]', 'missing')]))
+  } else {
+    const parsedOgUrl = parsePageUrl(ogUrl, url)
+    if (parsedOgUrl) {
+      if (hasDoubleSlashPath(parsedOgUrl)) {
+        issues.push(withIssueMeta(
+          { ...T['og-url-double-slash'], value: parsedOgUrl.toString() },
+          'dom',
+          [evidence('text', 'og:url', parsedOgUrl.toString())],
+        ))
+      }
+      const pageHostname = new URL(url).hostname
+      if (parsedOgUrl.hostname !== pageHostname) {
+        issues.push(withIssueMeta(
+          { ...T['og-url-mismatch'], value: parsedOgUrl.hostname },
+          'dom',
+          [evidence('text', 'og:url domain', parsedOgUrl.hostname), evidence('text', 'Page domain', pageHostname)],
+        ))
+      }
+    }
+  }
+
   const twitterCard = $('meta[name="twitter:card"]').attr('content')
   if (!twitterCard) {
     issues.push(withIssueMeta({ ...T['missing-twitter-card'] }, 'dom', [evidence('selector', 'meta[name="twitter:card"]', 'missing')]))
   }
 
   const twitterImage = $('meta[name="twitter:image"]').attr('content') || $('meta[name="twitter:image:src"]').attr('content')
-  if (includeLikely && twitterCard === 'summary_large_image' && !twitterImage) {
+  if (twitterCard === 'summary_large_image' && !twitterImage) {
     issues.push(withIssueMeta(
       { ...T['missing-twitter-image'] },
       'dom',
@@ -168,6 +213,7 @@ export async function runSEOChecks(
 
   if (includeLikely) {
     try {
+      const { fetchSafeResource } = await import('@/lib/checks/fetch-context')
       const origin = new URL(url).origin
       const robotsRes = await fetchSafeResource(`${origin}/robots.txt`, { signal: AbortSignal.timeout(3000) })
       if (robotsRes.ok) {

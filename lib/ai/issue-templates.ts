@@ -382,6 +382,54 @@ export const metadata: Metadata = {
     cursorPrompt: 'In Next.js, set `alternates: { canonical: process.env.NEXT_PUBLIC_APP_URL }` in `generateMetadata()`. Ensure `NEXT_PUBLIC_APP_URL` matches your actual production domain (no trailing slash).',
   },
 
+  'canonical-double-slash': {
+    id: 'canonical-double-slash',
+    category: 'seo',
+    severity: 'high',
+    confidence: 'verified',
+    scoreEligible: true,
+    title: 'Canonical URL contains a double-slash path',
+    description: 'The canonical URL contains a malformed double-slash in the path.',
+    plainEnglish: 'Your canonical URL has an extra slash in the path. Google may treat that as a different URL and split ranking signals.',
+    cursorPrompt: 'Normalize the base URL before building canonical URLs. In Next.js, strip the trailing slash from `NEXT_PUBLIC_APP_URL` and use `new URL(path, baseUrl).toString()` or `.replace(/\\/$/, "")` before concatenating paths.',
+  },
+
+  'missing-og-url': {
+    id: 'missing-og-url',
+    category: 'seo',
+    severity: 'medium',
+    confidence: 'verified',
+    scoreEligible: true,
+    title: 'Open Graph URL missing',
+    description: 'No og:url meta tag found.',
+    plainEnglish: 'Social platforms and crawlers have no explicit canonical sharing URL for this page. This can weaken preview consistency across channels.',
+    cursorPrompt: 'Add `openGraph: { url: process.env.NEXT_PUBLIC_APP_URL }` or a page-specific absolute URL in Next.js metadata. Make sure it matches the canonical URL.',
+  },
+
+  'og-url-mismatch': {
+    id: 'og-url-mismatch',
+    category: 'seo',
+    severity: 'high',
+    confidence: 'verified',
+    scoreEligible: true,
+    title: 'Open Graph URL points to a different domain',
+    description: 'The og:url hostname does not match the page hostname.',
+    plainEnglish: 'Your share preview says the page belongs to a different domain than the one visitors are on. That creates inconsistent social previews and indexing signals.',
+    cursorPrompt: 'Set `openGraph.url` to the same production domain used by the canonical URL. In Next.js, normalize `NEXT_PUBLIC_APP_URL` once and reuse it for canonical and Open Graph URL generation.',
+  },
+
+  'og-url-double-slash': {
+    id: 'og-url-double-slash',
+    category: 'seo',
+    severity: 'high',
+    confidence: 'verified',
+    scoreEligible: true,
+    title: 'Open Graph URL contains a double-slash path',
+    description: 'The og:url value contains a malformed double-slash in the path.',
+    plainEnglish: 'Your Open Graph URL has an extra slash in the path. Social platforms may cache or display the wrong page URL.',
+    cursorPrompt: 'Normalize the base URL before building `openGraph.url`. In Next.js, strip trailing slash from `NEXT_PUBLIC_APP_URL` before adding route paths.',
+  },
+
   'missing-structured-data': {
     id: 'missing-structured-data',
     category: 'seo',
