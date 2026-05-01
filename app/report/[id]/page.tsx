@@ -152,6 +152,16 @@ function BusinessProfileBlock({ businessContext, scanGoal }: {
               <span className="text-[#5A5955]">(estimated)</span>
             </p>
           )}
+          {(businessContext.icpHint && businessContext.icpHint !== 'unknown') && (
+            <p className="text-xs text-[#8B8A85]">
+              <span className="text-[#6F6E69]">ICP signal:</span>{' '}{businessContext.icpHint.replaceAll('_', ' ')}
+            </p>
+          )}
+          {(businessContext.primaryConversionPath && businessContext.primaryConversionPath !== 'unknown') && (
+            <p className="text-xs text-[#8B8A85]">
+              <span className="text-[#6F6E69]">Conversion path:</span>{' '}{businessContext.primaryConversionPath.replaceAll('_', ' ')}
+            </p>
+          )}
           {scanGoal && scanGoal !== 'general' && SCAN_GOAL_LABELS[scanGoal] && (
             <p className="text-xs text-[#8B8A85]">
               <span className="text-[#6F6E69]">Your goal:</span>{' '}{SCAN_GOAL_LABELS[scanGoal]}

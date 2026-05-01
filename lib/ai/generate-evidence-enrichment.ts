@@ -47,6 +47,18 @@ function buildBusinessContextBlock(
     if (businessContext.mainCTA) {
       lines.push(`- Primary CTA: "${businessContext.mainCTA}"`)
     }
+    if (businessContext.monetizationModel && businessContext.monetizationModel !== 'unknown') {
+      lines.push(`- Monetization model: ${businessContext.monetizationModel}`)
+    }
+    if (businessContext.productType && businessContext.productType !== 'unknown') {
+      lines.push(`- Product type: ${businessContext.productType}`)
+    }
+    if (businessContext.primaryConversionPath && businessContext.primaryConversionPath !== 'unknown') {
+      lines.push(`- Primary conversion path: ${businessContext.primaryConversionPath}`)
+    }
+    if (businessContext.icpHint && businessContext.icpHint !== 'unknown') {
+      lines.push(`- ICP signal: ${businessContext.icpHint}`)
+    }
     if (businessContext.businessProfile) {
       lines.push(`- Profile: ${businessContext.businessProfile}`)
     }

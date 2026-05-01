@@ -21,6 +21,10 @@ export interface BusinessContext {
   businessType: 'ecommerce' | 'saas' | 'local_business' | 'portfolio' | 'blog' | 'agency' | 'other'
   techStack: string[]
   mainCTA: string | null
+  monetizationModel?: 'subscription' | 'lead_generation' | 'ecommerce' | 'content' | 'unknown'
+  productType?: 'saas_tool' | 'service_business' | 'content_site' | 'online_store' | 'portfolio' | 'unknown'
+  primaryConversionPath?: 'free_scan' | 'signup' | 'demo' | 'contact' | 'checkout' | 'newsletter' | 'unknown'
+  icpHint?: 'agency' | 'developer' | 'local_business' | 'ecommerce_team' | 'founder' | 'consumer' | 'unknown'
   detectedService: string | null
   targetAudience: string | null
   businessProfile: string | null
