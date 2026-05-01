@@ -430,6 +430,54 @@ export const metadata: Metadata = {
     cursorPrompt: 'Normalize the base URL before building `openGraph.url`. In Next.js, strip trailing slash from `NEXT_PUBLIC_APP_URL` before adding route paths.',
   },
 
+  'sensitive-page-indexable': {
+    id: 'sensitive-page-indexable',
+    category: 'seo',
+    severity: 'high',
+    confidence: 'verified',
+    scoreEligible: true,
+    title: 'Sensitive page appears indexable',
+    description: 'This private or low-value route has no noindex directive.',
+    plainEnglish: 'This page looks like a report, dashboard, or account page, but search engines are not told to keep it out of the index.',
+    cursorPrompt: 'Add `robots: { index: false, follow: false }` metadata for private routes. In Next.js App Router, export `metadata` from the route page or add a route-specific noindex header.',
+  },
+
+  'page-noindex': {
+    id: 'page-noindex',
+    category: 'seo',
+    severity: 'medium',
+    confidence: 'verified',
+    scoreEligible: true,
+    title: 'Page is marked noindex',
+    description: 'The page has a robots noindex directive.',
+    plainEnglish: 'Search engines are instructed not to index this page. This is correct for private pages, but a problem for public marketing or product pages.',
+    cursorPrompt: 'If this is a public page, remove the noindex directive from page metadata or headers. If it is private, keep noindex and make sure it is not included in sitemap.xml.',
+  },
+
+  'image-missing-alt': {
+    id: 'image-missing-alt',
+    category: 'seo',
+    severity: 'medium',
+    confidence: 'verified',
+    scoreEligible: true,
+    title: 'Images are missing alt text',
+    description: 'One or more non-decorative images do not have an alt attribute.',
+    plainEnglish: 'Some images have no alt text. Screen readers and search engines lose context, and image search previews are weaker.',
+    cursorPrompt: 'Add descriptive `alt` text to meaningful images. In Next.js, every `<Image>` should have an `alt` prop. Use `alt=""` only for decorative images.',
+  },
+
+  'image-missing-dimensions': {
+    id: 'image-missing-dimensions',
+    category: 'seo',
+    severity: 'medium',
+    confidence: 'verified',
+    scoreEligible: true,
+    title: 'Images are missing dimensions',
+    description: 'One or more images are missing width/height attributes.',
+    plainEnglish: 'Images without dimensions can cause layout shifts while the page loads. That hurts Core Web Vitals and makes the page feel unstable.',
+    cursorPrompt: 'Set explicit `width` and `height` on images, or reserve space with CSS `aspect-ratio`. In Next.js, prefer `<Image width={...} height={...} />` for known assets.',
+  },
+
   'missing-structured-data': {
     id: 'missing-structured-data',
     category: 'seo',

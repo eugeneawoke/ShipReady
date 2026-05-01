@@ -17,6 +17,14 @@ function hasDoubleSlashPath(url: URL): boolean {
   return url.pathname.includes('//')
 }
 
+function isSensitivePath(pathname: string): boolean {
+  return /^\/(report|dashboard|account|admin|scan)(\/|$)/i.test(pathname)
+}
+
+function hasNoindexDirective(content: string | undefined): boolean {
+  return /\bnoindex\b/i.test(content ?? '')
+}
+
 export async function runSEOChecks(
   url: string,
   html: string,
@@ -48,6 +56,23 @@ export async function runSEOChecks(
       { ...T['desc-length'], value: `${desc.length} chars` },
       'dom',
       [evidence('text', 'Meta description', desc.slice(0, 80) + (desc.length > 80 ? '…' : '')), evidence('count', 'Length', desc.length)],
+    ))
+  }
+
+  const robots = $('meta[name="robots"]').attr('content') || $('meta[name="googlebot"]').attr('content')
+  const pagePath = new URL(url).pathname
+  const pageNoindex = hasNoindexDirective(robots)
+  if (isSensitivePath(pagePath) && !pageNoindex) {
+    issues.push(withIssueMeta(
+      { ...T['sensitive-page-indexable'], value: pagePath },
+      'dom',
+      [evidence('text', 'Sensitive route', pagePath), evidence('selector', 'meta[name=robots] noindex', 'missing')],
+    ))
+  } else if (!isSensitivePath(pagePath) && pageNoindex) {
+    issues.push(withIssueMeta(
+      { ...T['page-noindex'], value: robots ?? 'noindex' },
+      'dom',
+      [evidence('text', 'Robots directive', robots ?? 'noindex')],
     ))
   }
 
@@ -175,6 +200,33 @@ export async function runSEOChecks(
       { ...T['placeholder-text'] },
       'dom',
       [evidence('text', 'Matched placeholder phrase', 'lorem ipsum / your name here')],
+    ))
+  }
+
+  const images = $('img').toArray()
+  const missingAlt = images.filter((el) => {
+    const img = $(el)
+    const isDecorative = img.attr('role') === 'presentation' || img.attr('aria-hidden') === 'true' || img.attr('alt') === ''
+    return !isDecorative && img.attr('alt') == null
+  })
+  if (missingAlt.length > 0) {
+    issues.push(withIssueMeta(
+      { ...T['image-missing-alt'], value: `${missingAlt.length} images` },
+      'dom',
+      [evidence('count', 'Images missing alt', missingAlt.length)],
+    ))
+  }
+
+  const missingDimensions = images.filter((el) => {
+    const img = $(el)
+    const style = img.attr('style') ?? ''
+    return !img.attr('width') && !img.attr('height') && !/aspect-ratio\s*:/i.test(style)
+  })
+  if (missingDimensions.length > 0) {
+    issues.push(withIssueMeta(
+      { ...T['image-missing-dimensions'], value: `${missingDimensions.length} images` },
+      'dom',
+      [evidence('count', 'Images missing dimensions', missingDimensions.length)],
     ))
   }
 
