@@ -127,7 +127,7 @@ export function ScanForm({
 
       {!compact && (
         <div className="mt-4 space-y-2">
-          <label className="text-xs text-[#8B8A85]">What's your main goal? (optional)</label>
+          <label className="text-xs text-[#8B8A85]">What&apos;s your main goal? (optional)</label>
           <div className="flex flex-wrap gap-2">
             {SCAN_GOALS.map(goal => (
               <button

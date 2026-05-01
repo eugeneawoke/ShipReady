@@ -51,7 +51,7 @@ export default function OGImage() {
             ShipReady
           </span>
           <span style={{ color: '#8B8A85', fontSize: '28px', fontWeight: 400 }}>
-            Site audits that understand your client's business
+            Site audits that understand your client&apos;s business
           </span>
           <span style={{ color: '#5A5955', fontSize: '20px', marginTop: '8px' }}>
             40+ checks · fast truth pass · AI fix prompts

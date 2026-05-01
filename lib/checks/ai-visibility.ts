@@ -70,7 +70,6 @@ export async function runAIVisibilityChecks(
   const issues: Issue[] = []
   const origin = new URL(url).origin
   const readableBodyText = getReadableBodyText($)
-  const bodyText = readableBodyText.toLowerCase()
   const jsonLdScripts = $('script[type="application/ld+json"]').toArray()
 
   const hasJsonLd = jsonLdScripts.length > 0
