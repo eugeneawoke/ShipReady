@@ -79,6 +79,13 @@ export interface WowInsight {
   evidenceRefs?: string[]
 }
 
+export interface StrategicRecommendation {
+  timeframe: 'now' | 'next_2_weeks' | 'next_month'
+  title: string
+  body: string
+  evidenceRefs?: string[]
+}
+
 export interface ScanProcessingIssue {
   kind: 'timeout'
   stage: ScanStatus
@@ -108,6 +115,7 @@ export interface ScanResult {
   aiTechnicalPrompt?: string
   issuePrompts?: Record<string, { technical: string }>
   wowInsights?: WowInsight[]
+  strategicRecommendations?: StrategicRecommendation[]
   businessContext?: BusinessContext | null
   scanGoal?: ScanGoal
   processingIssue?: ScanProcessingIssue

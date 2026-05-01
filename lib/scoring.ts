@@ -207,6 +207,7 @@ export function buildScanResult(params: {
   aiTechnicalPrompt?: string
   issuePrompts?: Record<string, { technical: string }>
   wowInsights?: ScanResult['wowInsights']
+  strategicRecommendations?: ScanResult['strategicRecommendations']
   businessContext?: BusinessContext | null
   scanGoal?: ScanGoal
 }): ScanResult {
@@ -225,6 +226,7 @@ export function buildScanResult(params: {
     aiTechnicalPrompt: params.aiTechnicalPrompt,
     issuePrompts: params.issuePrompts,
     wowInsights: params.wowInsights,
+    strategicRecommendations: params.strategicRecommendations,
     businessContext: params.businessContext,
     scanGoal: params.scanGoal,
   }

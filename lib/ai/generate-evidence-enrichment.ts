@@ -1,5 +1,5 @@
 import OpenAI from 'openai'
-import type { BusinessContext, ScanGoal, ScanResult } from '@/types/scan'
+import type { BusinessContext, ScanGoal, ScanResult, StrategicRecommendation } from '@/types/scan'
 import { getAllIssues } from '@/lib/scoring'
 
 const DEFAULT_ENRICHMENT_MODEL = 'gpt-4.1-nano'
@@ -10,6 +10,7 @@ export interface EvidenceEnrichment {
   topPriorities: string[]
   technicalPrompt: string
   issuePrompts: Record<string, { technical: string }>
+  strategicRecommendations: StrategicRecommendation[]
 }
 
 function compactIssue(issue: ReturnType<typeof getAllIssues>[number]) {
@@ -103,6 +104,14 @@ Return EXACTLY this JSON shape:
 {
   "summary": "1-2 sentence summary. Mention if some measurements were unavailable.",
   "topPriorities": ["priority 1", "priority 2", "priority 3"],
+  "strategicRecommendations": [
+    {
+      "timeframe": "now" | "next_2_weeks" | "next_month",
+      "title": "short recommendation title",
+      "body": "business-aware recommendation based only on findings, evidence, business context, and scan goal",
+      "evidenceRefs": ["issue-id or business-context field"]
+    }
+  ],
   "technicalPrompt": "A precise fix prompt for Cursor, Claude Code, or Windsurf. Reference specific files or config paths for the detected tech stack. Format: goal → concrete fix steps (4-7 bullets) → how to verify each fix on the live site.",
   "issuePrompts": {
     ${issueIds.map(id => `"${id}": { "technical": "..." }`).join(',\n    ')}
@@ -130,6 +139,7 @@ Rules:
       topPriorities: Array.isArray(parsed.topPriorities) ? parsed.topPriorities : [],
       technicalPrompt: parsed.technicalPrompt ?? '',
       issuePrompts: parsed.issuePrompts ?? {},
+      strategicRecommendations: Array.isArray(parsed.strategicRecommendations) ? parsed.strategicRecommendations : [],
     }
   } catch {
     return {
@@ -137,6 +147,7 @@ Rules:
       topPriorities: [],
       technicalPrompt: '',
       issuePrompts: {},
+      strategicRecommendations: [],
     }
   }
 }
