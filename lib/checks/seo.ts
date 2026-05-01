@@ -220,7 +220,7 @@ export async function runSEOChecks(
   const missingDimensions = images.filter((el) => {
     const img = $(el)
     const style = img.attr('style') ?? ''
-    return !img.attr('width') && !img.attr('height') && !/aspect-ratio\s*:/i.test(style)
+    return (!img.attr('width') || !img.attr('height')) && !/aspect-ratio\s*:/i.test(style)
   })
   if (missingDimensions.length > 0) {
     issues.push(withIssueMeta(

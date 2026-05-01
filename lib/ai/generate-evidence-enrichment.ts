@@ -4,6 +4,7 @@ import { getAllIssues } from '@/lib/scoring'
 
 const DEFAULT_ENRICHMENT_MODEL = 'gpt-4.1-nano'
 const MAX_AI_ISSUES = 12
+const VALID_STRATEGIC_TIMEFRAMES = ['now', 'next_2_weeks', 'next_month'] as const
 
 export interface EvidenceEnrichment {
   summary: string
@@ -76,6 +77,33 @@ function buildBusinessContextBlock(
   }
 
   return lines.join('\n')
+}
+
+function normalizeStrategicRecommendations(value: unknown): StrategicRecommendation[] {
+  if (!Array.isArray(value)) return []
+
+  return value
+    .map((item): StrategicRecommendation | null => {
+      if (!item || typeof item !== 'object') return null
+      const candidate = item as Record<string, unknown>
+      if (!VALID_STRATEGIC_TIMEFRAMES.includes(candidate.timeframe as typeof VALID_STRATEGIC_TIMEFRAMES[number])) {
+        return null
+      }
+      if (typeof candidate.title !== 'string' || typeof candidate.body !== 'string') {
+        return null
+      }
+
+      return {
+        timeframe: candidate.timeframe as StrategicRecommendation['timeframe'],
+        title: candidate.title,
+        body: candidate.body,
+        evidenceRefs: Array.isArray(candidate.evidenceRefs)
+          ? candidate.evidenceRefs.filter((ref): ref is string => typeof ref === 'string').slice(0, 5)
+          : undefined,
+      }
+    })
+    .filter((item): item is StrategicRecommendation => item !== null)
+    .slice(0, 3)
 }
 
 export async function generateEvidenceEnrichment(
@@ -151,7 +179,7 @@ Rules:
       topPriorities: Array.isArray(parsed.topPriorities) ? parsed.topPriorities : [],
       technicalPrompt: parsed.technicalPrompt ?? '',
       issuePrompts: parsed.issuePrompts ?? {},
-      strategicRecommendations: Array.isArray(parsed.strategicRecommendations) ? parsed.strategicRecommendations : [],
+      strategicRecommendations: normalizeStrategicRecommendations(parsed.strategicRecommendations),
     }
   } catch {
     return {
