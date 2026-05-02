@@ -1,12 +1,17 @@
 import type {
   BusinessContext,
+  ScanBudget,
   CategoryScore,
   Issue,
   IssueSeverity,
   MeasurementState,
   ScanGoal,
   ScanPhase,
+  ScanProcessingIssue,
+  ScanProviderData,
   ScanResult,
+  SiteSummary,
+  ScanStage,
   ScanTimings,
 } from '@/types/scan'
 import { measurement, withIssueMeta, evidence } from '@/lib/checks/issue-meta'
@@ -53,7 +58,7 @@ export function buildCategoryScore(
   options?: { measurement?: MeasurementState },
 ): CategoryScore {
   const measurementState = options?.measurement ?? measurement(category, 'measured')
-  const scorableIssues = issues.filter(issue => issue.scoreEligible)
+  const scorableIssues = issues.filter(issue => issue.scoreEligible && issue.confidence === 'verified')
   const deduction = scorableIssues.reduce((sum, issue) => sum + DEDUCTIONS[issue.severity], 0)
   const score = measurementState.status === 'unavailable' ? null : Math.max(0, 100 - deduction)
   const totalChecks = TOTAL_CHECKS[category]
@@ -197,6 +202,10 @@ export function buildScanResult(params: {
   url: string
   phase: ScanPhase
   timings?: ScanTimings
+  stages?: ScanStage[]
+  budget?: ScanBudget
+  providerData?: ScanProviderData
+  siteSummary?: SiteSummary
   performance: CategoryScore
   seo: CategoryScore
   security: CategoryScore
@@ -208,6 +217,7 @@ export function buildScanResult(params: {
   issuePrompts?: Record<string, { technical: string }>
   wowInsights?: ScanResult['wowInsights']
   strategicRecommendations?: ScanResult['strategicRecommendations']
+  processingIssue?: ScanProcessingIssue
   businessContext?: BusinessContext | null
   scanGoal?: ScanGoal
 }): ScanResult {
@@ -216,6 +226,10 @@ export function buildScanResult(params: {
     scannedAt: new Date().toISOString(),
     phase: params.phase,
     timings: params.timings,
+    stages: params.stages,
+    budget: params.budget,
+    providerData: params.providerData,
+    siteSummary: params.siteSummary,
     performance: params.performance,
     seo: params.seo,
     security: params.security,
@@ -227,6 +241,7 @@ export function buildScanResult(params: {
     issuePrompts: params.issuePrompts,
     wowInsights: params.wowInsights,
     strategicRecommendations: params.strategicRecommendations,
+    processingIssue: params.processingIssue,
     businessContext: params.businessContext,
     scanGoal: params.scanGoal,
   }

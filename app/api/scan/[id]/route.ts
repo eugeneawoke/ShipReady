@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase'
+import { failRunningStages } from '@/lib/scan/stage-telemetry'
 import type { ScanProcessingIssue, ScanResult, ScanStatus } from '@/types/scan'
 
 const ACTIVE_SCAN_STATUSES = ['pending', 'running', 'running_fast', 'running_deep', 'enriching']
@@ -73,6 +74,7 @@ export async function GET(
     if (results) {
       results = {
         ...results,
+        ...(results.stages ? { stages: failRunningStages(results.stages, processingIssue.message) } : {}),
         processingIssue,
       }
     }

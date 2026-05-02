@@ -10,7 +10,7 @@ import { CategoryCard } from '@/components/report/CategoryCard'
 import { IssueCard } from '@/components/report/IssueCard'
 import { ScanForm, useScanLauncher } from '@/components/landing/ScanForm'
 import { SiteBrandLink } from '@/components/SiteHeader'
-import type { Scan, Issue, IssueCategory, ScanResult, ScanStatus, BusinessContext, ScanGoal } from '@/types/scan'
+import type { Scan, Issue, IssueCategory, ScanResult, ScanStage, ScanStatus, BusinessContext, ScanGoal } from '@/types/scan'
 import { createBrowserClient } from '@/lib/supabase-browser'
 import {
   issueBody,
@@ -236,11 +236,14 @@ const CATEGORY_LABELS: Record<IssueCategory, string> = {
   ai_visibility: 'AI Visibility',
 }
 
-type StageState = 'done' | 'running' | 'pending' | 'unavailable'
+type StageState = 'done' | 'running' | 'pending' | 'unavailable' | 'partial' | 'failed'
+type ProgressStage = { id: string; title: string; state: StageState; detail: string }
 
 function stageTone(state: StageState) {
   if (state === 'done') return 'border-[#3DDC84]/25 bg-[#3DDC84]/8 text-[#3DDC84]'
   if (state === 'running') return 'border-[#6E56CF]/35 bg-[#6E56CF]/10 text-[#C7BCFF]'
+  if (state === 'partial') return 'border-[#E8A83E]/25 bg-[#E8A83E]/8 text-[#E8A83E]'
+  if (state === 'failed') return 'border-[#FF6B6B]/25 bg-[#FF6B6B]/8 text-[#FF8A8A]'
   if (state === 'unavailable') return 'border-[#E8A83E]/25 bg-[#E8A83E]/8 text-[#E8A83E]'
   return 'border-white/8 bg-white/[0.03] text-[#6F6E69]'
 }
@@ -248,6 +251,8 @@ function stageTone(state: StageState) {
 function stageLabel(state: StageState, t: ReturnType<typeof useTranslations<'Report.progress'>>) {
   if (state === 'done') return t('state.done')
   if (state === 'running') return t('state.running')
+  if (state === 'partial') return t('state.partial')
+  if (state === 'failed') return t('state.failed')
   if (state === 'unavailable') return t('state.unavailable')
   return t('state.pending')
 }
@@ -256,7 +261,40 @@ function hasUnavailableMeasurements(results: ScanResult) {
   return CATEGORIES.some(category => results[category].measurement?.status === 'unavailable')
 }
 
-function buildScanStages(scan: Scan, results: ScanResult, t: ReturnType<typeof useTranslations<'Report.progress'>>): Array<{ id: string; title: string; state: StageState; detail: string }> {
+function hasIncompleteStages(results: ScanResult) {
+  return results.stages?.some(stage => stage.status === 'partial' || stage.status === 'failed') ?? false
+}
+
+function stageTitle(stage: ScanStage, t: ReturnType<typeof useTranslations<'Report.progress'>>) {
+  if (stage.id === 'fast') return t('stages.fastTitle')
+  if (stage.id === 'crawl') return t('stages.crawlTitle')
+  if (stage.id === 'lighthouse') return t('stages.lighthouseTitle')
+  return t('stages.aiTitle')
+}
+
+function stageDetail(stage: ScanStage, t: ReturnType<typeof useTranslations<'Report.progress'>>) {
+  if (stage.message) return stage.message
+  if (stage.id === 'fast') return t('stages.fastDetail')
+  if (stage.id === 'crawl') return stage.status === 'done' ? t('stages.crawlDone') : t('stages.crawlPending')
+  if (stage.id === 'lighthouse') return stage.status === 'done' ? t('stages.lighthouseDone') : t('stages.lighthousePending')
+  return stage.status === 'done' ? t('stages.aiDone') : t('stages.aiPending')
+}
+
+function mapTelemetryStageState(stage: ScanStage): StageState {
+  if (stage.status === 'queued') return 'pending'
+  return stage.status
+}
+
+function buildScanStages(scan: Scan, results: ScanResult, t: ReturnType<typeof useTranslations<'Report.progress'>>): ProgressStage[] {
+  if (results.stages?.length) {
+    return results.stages.map(stage => ({
+      id: stage.id,
+      title: stageTitle(stage, t),
+      state: mapTelemetryStageState(stage),
+      detail: stageDetail(stage, t),
+    }))
+  }
+
   const performanceMeasurement = results.performance.measurement
   const isActive = ACTIVE_SCAN_STATUSES.includes(scan.status)
   const deepDone = results.phase === 'deep' || results.phase === 'enriching' || results.phase === 'final'
@@ -285,7 +323,7 @@ function buildScanStages(scan: Scan, results: ScanResult, t: ReturnType<typeof u
         ?? (deepDone ? t('stages.lighthouseDone') : t('stages.lighthousePending')),
     },
     {
-      id: 'ai',
+      id: 'enrichment',
       title: t('stages.aiTitle'),
       state: aiDone
         ? 'done'
@@ -314,13 +352,14 @@ function ScanProgressPanel({ scan, results, processingIssue, retryingMeasurement
   const t = useTranslations('Report.progress')
   const isActive = ACTIVE_SCAN_STATUSES.includes(scan.status)
   const unavailable = hasUnavailableMeasurements(results)
+  const incompleteStages = hasIncompleteStages(results)
   const stages = buildScanStages(scan, results, t)
 
-  if (!isActive && scan.status !== 'error' && !unavailable) return null
+  if (!isActive && scan.status !== 'error' && !unavailable && !incompleteStages) return null
 
   return (
     <section className={`rounded-xl border px-4 py-4 ${
-      scan.status === 'error' || unavailable
+      scan.status === 'error' || unavailable || incompleteStages
         ? 'border-[#E8A83E]/20 bg-[#E8A83E]/5'
         : 'border-[#6E56CF]/25 bg-[#6E56CF]/7'
     }`}>
@@ -332,7 +371,7 @@ function ScanProgressPanel({ scan, results, processingIssue, retryingMeasurement
         )}
         <div className="min-w-0 flex-1">
           <p className="text-sm text-[#F1F0EE]">
-            {isActive ? t('scanRunning') : t('unavailableMeasurements')}
+            {isActive ? t('scanRunning') : (unavailable ? t('unavailableMeasurements') : t('partialReport'))}
           </p>
           <p className="text-xs text-[#8B8A85] mt-1 leading-relaxed">
             {scan.status === 'error' && processingIssue
@@ -346,7 +385,9 @@ function ScanProgressPanel({ scan, results, processingIssue, retryingMeasurement
 
       <div className="grid gap-2 mt-4">
         {stages.map(stage => {
-          const canRetryLighthouse = !isActive && stage.id === 'lighthouse' && stage.state === 'unavailable'
+          const canRetryLighthouse = !isActive
+            && stage.id === 'lighthouse'
+            && results.performance.measurement?.status === 'unavailable'
           return (
           <div key={stage.id} className="flex items-start gap-3 rounded-lg border border-white/[0.04] bg-[#111113] px-3 py-2.5">
             <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-mono uppercase tracking-[0.08em] ${stageTone(stage.state)}`}>
@@ -595,6 +636,8 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
   const isScanActive = ACTIVE_SCAN_STATUSES.includes(scan.status)
   const isFinalReport = scan.status === 'done'
   const hasUnavailable = hasUnavailableMeasurements(results)
+  const pagespeedData = results.providerData?.pagespeed
+  const recurringIssues = results.siteSummary?.recurringIssues ?? []
   const aiCombinedPrompt = results.issuePrompts && Object.keys(results.issuePrompts).length > 0
     ? Object.values(results.issuePrompts).map(p => p.technical).join('\n\n')
     : undefined
@@ -848,6 +891,38 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
           retryError={retryError}
           onRetryLighthouse={handleRetryLighthouse}
         />
+        {pagespeedData && (
+          <section className="rounded-xl border border-white/8 bg-white/[0.02] px-4 py-3">
+            <p className="text-sm text-[#F1F0EE]">{t('pagespeedTitle')}</p>
+            <p className="mt-1 text-xs text-[#8B8A85] leading-relaxed">
+              {t('pagespeedBody', {
+                strategy: pagespeedData.strategy,
+                fetchedAt: new Date(pagespeedData.fetchedAt).toLocaleString(),
+                source: `${pagespeedData.source} · ${pagespeedData.analysisUrl}`,
+              })}
+            </p>
+          </section>
+        )}
+        {recurringIssues.length > 0 && (
+          <section className="rounded-xl border border-white/8 bg-white/[0.02] px-4 py-4">
+            <p className="text-sm text-[#F1F0EE]">{t('siteSummaryTitle')}</p>
+            <p className="mt-1 text-xs text-[#8B8A85] leading-relaxed">
+              {t('siteSummaryBody', { count: results.siteSummary?.pagesCrawled ?? 0 })}
+            </p>
+            <div className="mt-3 space-y-2">
+              {recurringIssues.slice(0, 3).map((issue) => (
+                <div key={`${issue.issueId}-${issue.category}`} className="rounded-lg border border-white/[0.05] bg-[#111113] px-3 py-2.5">
+                  <p className="text-xs text-[#F1F0EE]">
+                    {issue.title} · {issue.occurrenceCount} pages
+                  </p>
+                  <p className="mt-1 text-[11px] text-[#6F6E69] leading-relaxed">
+                    {issue.urls.slice(0, 3).join(' • ')}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Business profile — only when scan is done */}
         {isFinalReport && (

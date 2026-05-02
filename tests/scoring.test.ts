@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import type { CategoryScore } from '../types/scan'
-import { buildScanResult } from '../lib/scoring'
+import type { CategoryScore, ScanStage } from '../types/scan'
+import { buildCategoryScore, buildScanResult } from '../lib/scoring'
 
 function category(): CategoryScore {
   return {
@@ -36,4 +36,66 @@ test('strategic recommendations are preserved without changing score or confiden
   assert.equal(result.totalScore, 100)
   assert.deepEqual(result.confidenceSummary, { verified: 0, likely: 0, heuristic: 0 })
   assert.equal(result.strategicRecommendations?.[0]?.timeframe, 'next_2_weeks')
+})
+
+test('stage telemetry is preserved without affecting score output', () => {
+  const stages: ScanStage[] = [
+    {
+      id: 'fast',
+      label: 'Fast truth checks',
+      status: 'done',
+      message: 'Completed from fetched page evidence.',
+    },
+    {
+      id: 'crawl',
+      label: 'Site crawl',
+      status: 'queued',
+      message: 'Bounded crawl is not enabled for this scan yet.',
+    },
+  ]
+
+  const result = buildScanResult({
+    url: 'https://example.com',
+    phase: 'final',
+    performance: category(),
+    seo: category(),
+    security: category(),
+    mobile: category(),
+    ai_visibility: category(),
+    stages,
+  })
+
+  assert.equal(result.totalScore, 100)
+  assert.deepEqual(result.stages, stages)
+})
+
+test('only verified score-eligible issues reduce score', () => {
+  const categoryScore = buildCategoryScore([
+    {
+      id: 'verified-issue',
+      category: 'performance',
+      severity: 'high',
+      title: 'Verified issue',
+      description: 'Counts against score.',
+      plainEnglish: 'Counts against score.',
+      cursorPrompt: 'Fix it.',
+      confidence: 'verified',
+      scoreEligible: true,
+    },
+    {
+      id: 'likely-issue',
+      category: 'performance',
+      severity: 'critical',
+      title: 'Likely issue',
+      description: 'Must not count against score.',
+      plainEnglish: 'Must not count against score.',
+      cursorPrompt: 'Investigate it.',
+      confidence: 'likely',
+      scoreEligible: true,
+    },
+  ], 'performance', {
+    measurement: { label: 'test', status: 'measured' },
+  })
+
+  assert.equal(categoryScore.score, 85)
 })

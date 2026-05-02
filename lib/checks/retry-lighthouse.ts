@@ -3,6 +3,7 @@ import type { ScanResult, ScanTimings } from '@/types/scan'
 import { runLighthouse } from '@/lib/checks/lighthouse'
 import { measurement } from '@/lib/checks/issue-meta'
 import { buildCategoryScore, buildPerformanceIssues, buildScanResult } from '@/lib/scoring'
+import { updateScanStage } from '@/lib/scan/stage-telemetry'
 
 async function runWithTimeout<T>(
   task: Promise<T> | (() => Promise<T>),
@@ -45,6 +46,12 @@ export async function markLighthouseRetryRunning(scanId: string): Promise<ScanRe
   const nextResult = buildScanResult({
     ...current,
     phase: 'deep',
+    stages: current.stages
+      ? updateScanStage(current.stages, 'lighthouse', {
+          status: 'running',
+          message: 'Lighthouse retry is running against the latest page state.',
+        })
+      : current.stages,
     performance: buildCategoryScore([], 'performance', {
       measurement: measurement('Lighthouse mobile audit', 'unavailable', 'Lighthouse retry still running'),
     }),
@@ -103,6 +110,19 @@ export async function retryLighthouseForScan(scanId: string): Promise<void> {
     ...current,
     phase: 'final',
     timings,
+    stages: current.stages
+      ? updateScanStage(current.stages, 'lighthouse', {
+          status: retry.ok ? (retry.value.warnings.length > 0 ? 'partial' : 'done') : 'failed',
+          message: retry.ok
+            ? (
+              retry.value.warnings.length > 0
+                ? `Measured with warnings: ${retry.value.warnings.slice(0, 2).join('; ')}`
+                : 'Performance data was measured by Lighthouse.'
+            )
+            : `Lighthouse retry failed: ${retry.error}`,
+          durationMs: retry.durationMs,
+        })
+      : current.stages,
     performance,
     aiSummary: retry.ok ? undefined : current.aiSummary,
     topPriorities: retry.ok ? undefined : current.topPriorities,
@@ -139,6 +159,12 @@ export async function finishLighthouseRetryUnavailable(scanId: string, message: 
   const nextResult = buildScanResult({
     ...current,
     phase: 'final',
+    stages: current.stages
+      ? updateScanStage(current.stages, 'lighthouse', {
+          status: 'failed',
+          message,
+        })
+      : current.stages,
     performance: buildCategoryScore([], 'performance', {
       measurement: measurement('Lighthouse mobile audit', 'unavailable', message),
     }),

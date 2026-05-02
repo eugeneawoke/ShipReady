@@ -8,6 +8,11 @@ export type ScanStatus =
   | 'error'
 
 export type ScanPhase = 'fast' | 'deep' | 'enriching' | 'final'
+export type ScanPlan = 'free' | 'pro' | 'agency'
+export type ScanStageId = 'fast' | 'crawl' | 'lighthouse' | 'enrichment'
+export type ScanStageStatus = 'queued' | 'running' | 'partial' | 'failed' | 'done'
+export type ScanProviderId = 'aiEnrichment' | 'wowInsights' | 'pagespeed'
+export type ScanProviderStatus = 'ready' | 'done' | 'failed' | 'skipped' | 'unavailable' | 'blocked'
 export type IssueSeverity = 'critical' | 'high' | 'medium' | 'low' | 'pass'
 export type IssueCategory = 'performance' | 'seo' | 'security' | 'mobile' | 'ai_visibility'
 export type IssueConfidence = 'verified' | 'likely' | 'heuristic'
@@ -77,6 +82,62 @@ export interface ScanTimings {
   totalMs?: number
 }
 
+export interface ScanStage {
+  id: ScanStageId
+  label: string
+  status: ScanStageStatus
+  message?: string
+  durationMs?: number
+}
+
+export interface ScanProviderBudget {
+  maxCalls: number
+  callsUsed: number
+  status: ScanProviderStatus
+  message?: string
+}
+
+export interface ScanBudget {
+  plan: ScanPlan
+  crawl: {
+    enabled: boolean
+    maxDepth: number
+    maxPages: number
+  }
+  providers: Record<ScanProviderId, ScanProviderBudget>
+}
+
+export interface PageSpeedProviderData {
+  source: 'google-pagespeed-insights'
+  fetchedAt: string
+  strategy: 'mobile'
+  analysisUrl: string
+  origin?: string
+  performanceScore: number | null
+  fieldMetrics: {
+    lcpMs?: number
+    inpMs?: number
+    cls?: number
+  }
+}
+
+export interface ScanProviderData {
+  pagespeed?: PageSpeedProviderData
+}
+
+export interface SiteIssueAggregate {
+  issueId: string
+  title: string
+  category: IssueCategory
+  occurrenceCount: number
+  urls: string[]
+}
+
+export interface SiteSummary {
+  pagesCrawled: number
+  recurringIssues: SiteIssueAggregate[]
+}
+
 export interface WowInsight {
   title: string
   body: string
@@ -91,7 +152,7 @@ export interface StrategicRecommendation {
 }
 
 export interface ScanProcessingIssue {
-  kind: 'timeout'
+  kind: 'timeout' | 'stage_failure'
   stage: ScanStatus
   message: string
   recommendation: string
@@ -109,6 +170,10 @@ export interface ScanResult {
     heuristic: number
   }
   timings?: ScanTimings
+  stages?: ScanStage[]
+  budget?: ScanBudget
+  providerData?: ScanProviderData
+  siteSummary?: SiteSummary
   performance: CategoryScore
   seo: CategoryScore
   security: CategoryScore
