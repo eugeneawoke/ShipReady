@@ -3,7 +3,7 @@ const en = {
     appTitle: 'ShipReady',
     appDescription: 'Site audits that understand your client\'s business.',
     layoutTitle: 'ShipReady - Site audits that understand your client\'s business.',
-    layoutDescription: '35+ automated checks across performance, SEO, security, mobile, and AI visibility. Get evidence-based fix prompts for Cursor and Claude Code.',
+    layoutDescription: '35+ automated checks across performance, SEO, security, mobile, and AI visibility. Get evidence-based fix prompts ready for any AI coding tool.',
     pricingTitle: 'Pricing - ShipReady',
     pricingDescription: 'Simple and transparent ShipReady pricing for solo founders and teams.',
     roadmapTitle: 'Roadmap - ShipReady',
@@ -31,6 +31,15 @@ const en = {
     placeholder: 'https://yoursite.com',
     defaultSubmit: 'Scan ->',
     scanning: 'Scanning...',
+    goalTitle: "What's your main goal? (optional)",
+    goalHint: 'Pick one and we will bias the scan summary and fix guidance toward that outcome.',
+    goals: {
+      sales: 'More sales',
+      leads: 'More leads',
+      traffic: 'More traffic',
+      visibility: 'AI visibility',
+      general: 'General',
+    },
     contactPrefix: 'If the problem persists, contact me:',
     contactTelegram: 'Telegram',
     contactEmail: 'Email',
@@ -482,9 +491,11 @@ const en = {
     hero: {
       h1a: 'Site audits that understand',
       h1b: 'your client\'s business.',
-      sub: 'Scan any URL in minutes. Evidence-backed performance, SEO, security, and AI visibility — with fix prompts for Cursor and Claude Code.',
+      sub: 'Scan any URL in minutes. Evidence-backed performance, SEO, security, and AI visibility — with fix prompts ready for any AI coding tool.',
       noSignup: 'No signup required for first scan',
-      worksWith: 'Works with',
+      aiCompatibilityBadge: 'AI-ready fixes',
+      worksWith: 'Choose a goal, scan the site, then paste the fixes into any AI coding tool.',
+      worksWithExamples: 'and any other AI assistant',
     },
     stats: [
       { value: '35+', label: 'automated checks' },
@@ -498,7 +509,7 @@ const en = {
       steps: [
         { step: '01', emoji: '1', title: 'Paste your URL', desc: 'Drop any live URL. Vercel, Netlify, or a custom domain. No setup or browser extension needed.' },
         { step: '02', emoji: '2', title: '35+ checks run', desc: 'Fast truth checks run first, then deeper analysis follows for performance and noisier heuristics.' },
-        { step: '03', emoji: '3', title: 'Get AI fix prompts', desc: 'Each issue has a plain-English explanation and one ready-to-paste prompt for Cursor, Claude Code, or Windsurf.' },
+        { step: '03', emoji: '3', title: 'Get AI fix prompts', desc: 'Each issue has a plain-English explanation and one ready-to-paste prompt you can use in any AI coding tool.' },
       ],
     },
     preview: {
@@ -532,11 +543,11 @@ const en = {
     ai: {
       eyebrow: 'The key difference',
       title: 'Not just what is wrong,\nbut how to fix it',
-      sub: 'Every issue comes with a plain-English explanation and a ready-to-paste prompt. Paste it into Cursor, Claude Code, or Windsurf and fix the problem directly in the codebase.',
+      sub: 'Every issue comes with a plain-English explanation and a ready-to-paste prompt. Use it in any AI coding tool and fix the problem directly in the codebase.',
       bullets: [
         'One prompt per issue. No Stack Overflow hunting',
         'Tailored for Next.js, React, and modern web apps',
-        'Works with Cursor · Claude Code · Windsurf',
+        'Works with Cursor · Claude Code · Windsurf · and more',
       ],
       fileLabel: 'fix_prompt.txt',
       ready: 'ready to paste',
@@ -564,7 +575,7 @@ const en = {
       items: [
         {
           q: 'What is ShipReady?',
-          a: 'ShipReady is a site audit tool for web agencies and developers. Submit your URL and get a scan report covering performance, SEO, security, mobile readiness, and AI visibility — with fix prompts ready to paste into Cursor, Claude Code, or Windsurf.',
+          a: 'ShipReady is a site audit tool for web agencies and developers. Submit your URL and get a scan report covering performance, SEO, security, mobile readiness, and AI visibility — with fix prompts ready to paste into any AI coding tool.',
         },
         {
           q: 'How does the scan work?',
@@ -575,8 +586,8 @@ const en = {
           a: 'Yes. The core scan is free — 3 scans per month, all category scores, and issue descriptions. Upgrade to Pro for unlimited scans, full AI fix prompts, PDF export, and weekly monitoring.',
         },
         {
-          q: 'Does ShipReady work with Cursor, Claude Code, and Windsurf?',
-          a: 'Yes. Every issue in your report includes a ready-to-paste fix prompt tailored for Cursor, Claude Code, Windsurf, and other AI coding tools. Just copy and paste to fix.',
+          q: 'Does ShipReady work with AI coding tools?',
+          a: 'Yes. Every issue in your report includes a ready-to-paste fix prompt you can use with Cursor, Claude Code, Windsurf, or any other AI coding tool. Just copy and paste to fix.',
         },
         {
           q: 'How accurate are the results?',
