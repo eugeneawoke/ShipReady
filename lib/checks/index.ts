@@ -8,7 +8,7 @@ import { runMobileChecks } from '@/lib/checks/mobile'
 import { runLinksCheck } from '@/lib/checks/links'
 import { runAIVisibilityChecks } from '@/lib/checks/ai-visibility'
 import { assertSafeScanUrl } from '@/lib/server/url-safety'
-import { fetchPrimaryContext } from '@/lib/checks/fetch-context'
+import { fetchPrimaryContext, fetchSafeResource } from '@/lib/checks/fetch-context'
 import { generateEvidenceEnrichment } from '@/lib/ai/generate-evidence-enrichment'
 import { generateWowInsights } from '@/lib/ai/generate-wow-insights'
 import { measurement } from '@/lib/checks/issue-meta'
@@ -16,11 +16,13 @@ import { buildMonitoringAlertDecision } from '@/lib/monitoring/alerts'
 import { sendMonitoringAlert } from '@/lib/email/send-alert'
 import { analyzeBusinessContext } from '@/lib/ai/analyze-business-context'
 import { fetchPageSpeedData } from '@/lib/providers/pagespeed'
+import { crawlSite } from '@/lib/crawl/engine'
 import {
   buildDefaultScanStages,
   failRunningStages,
   updateScanStage,
 } from '@/lib/scan/stage-telemetry'
+import { buildSiteSummary } from '@/lib/scan/aggregation'
 import {
   buildScanBudget,
   markProviderState,
@@ -204,10 +206,18 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
       status: 'done',
       message: 'SEO, security, mobile, and AI visibility basics were verified from fetched page evidence.',
     })
-    currentStages = updateScanStage(currentStages, 'lighthouse', {
-      status: 'running',
-      message: 'Core Web Vitals are being measured via Lighthouse.',
-    })
+
+    if (budget.crawl.enabled && budget.crawl.maxPages > 1) {
+      currentStages = updateScanStage(currentStages, 'crawl', {
+        status: 'running',
+        message: `Bounded crawl is running within same-origin limits (${budget.crawl.maxPages} pages, depth ${budget.crawl.maxDepth}).`,
+      })
+    } else {
+      currentStages = updateScanStage(currentStages, 'lighthouse', {
+        status: 'running',
+        message: 'Core Web Vitals are being measured via Lighthouse.',
+      })
+    }
 
     const fastResult = buildScanResult({
       url: finalUrl,
@@ -232,6 +242,86 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
     latestResult = fastResult
     currentStatus = 'running_deep'
     await saveScan(scanId, currentStatus, fastResult)
+
+    let siteSummary = fastResult.siteSummary
+    if (budget.crawl.enabled && budget.crawl.maxPages > 1) {
+      const crawlSnapshot = await safeTask(async () => {
+        const crawlResult = await crawlSite({
+          startUrl: finalUrl,
+          options: {
+            maxDepth: budget.crawl.maxDepth,
+            maxPages: budget.crawl.maxPages,
+            userAgent: 'ShipReadyBot',
+          },
+          loadRobotsTxt: async (origin) => {
+            try {
+              const response = await fetchSafeResource(`${origin}/robots.txt`, {
+                signal: AbortSignal.timeout(5000),
+              })
+              if (!response.ok) return null
+              return response.text()
+            } catch {
+              return null
+            }
+          },
+          fetchPage: async (pageUrl) => {
+            if (pageUrl === finalUrl) {
+              return {
+                url: finalUrl,
+                html: fetchContext.html,
+                status: fetchContext.status,
+                headers: fetchContext.headers,
+              }
+            }
+
+            const context = await fetchPrimaryContext(pageUrl)
+            return {
+              url: context.finalUrl || context.requestedUrl,
+              html: context.html,
+              status: context.status,
+              headers: context.headers,
+            }
+          },
+        })
+
+        const pageSnapshots = await Promise.all(
+          crawlResult.pages.map(async (page) => {
+            const seo = await safeTask(
+              runSEOChecks(page.url, page.html, { includeLikely: false, includeHeuristics: false }),
+              4_000,
+              `crawl-seo:${page.url}`,
+            )
+            return {
+              url: page.url,
+              issues: seo.ok ? seo.value : [],
+            }
+          }),
+        )
+
+        return {
+          crawlResult,
+          siteSummary: buildSiteSummary(pageSnapshots),
+        }
+      }, 20_000, 'bounded-crawl')
+
+      if (crawlSnapshot.ok) {
+        siteSummary = crawlSnapshot.value.siteSummary
+        currentStages = updateScanStage(currentStages, 'crawl', {
+          status: 'done',
+          message: `Crawled ${crawlSnapshot.value.crawlResult.pages.length} same-origin pages and summarized recurring SEO issues.`,
+        })
+      } else {
+        currentStages = updateScanStage(currentStages, 'crawl', {
+          status: 'failed',
+          message: `Bounded crawl failed: ${crawlSnapshot.error}`,
+        })
+      }
+
+      currentStages = updateScanStage(currentStages, 'lighthouse', {
+        status: 'running',
+        message: 'Core Web Vitals are being measured via Lighthouse.',
+      })
+    }
 
     const [lighthouseResult, linksResult, seoDeep, aiVisibilityDeep] = await Promise.all([
       safeTask(() => runLighthouse(finalUrl), 0, 'lighthouse'),
@@ -288,6 +378,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
       scanGoal,
       stages: currentStages,
       budget,
+      siteSummary,
     })
 
     let providerData = result.providerData
@@ -312,6 +403,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
         ...result,
         budget,
         providerData,
+        siteSummary,
         businessContext,
         scanGoal,
       })
@@ -361,6 +453,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
             stages: currentStages,
             budget,
             providerData,
+            siteSummary,
             aiSummary: enrichment.value.summary,
             topPriorities: enrichment.value.topPriorities,
             strategicRecommendations: enrichment.value.strategicRecommendations,
@@ -427,6 +520,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
       stages: currentStages,
       budget,
       providerData,
+      siteSummary,
       businessContext,
       scanGoal,
     })
@@ -458,6 +552,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
         },
         budget: latestResult.budget,
         providerData: latestResult.providerData,
+        siteSummary: latestResult.siteSummary,
         businessContext: latestResult.businessContext,
         scanGoal: latestResult.scanGoal,
       })

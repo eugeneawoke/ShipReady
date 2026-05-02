@@ -180,6 +180,8 @@ const ru: AppMessages = {
     summary: 'Сводка',
     pagespeedTitle: 'Внешний performance-контекст',
     pagespeedBody: 'Google PageSpeed Insights ({strategy}) получен {fetchedAt}. Источник: {source}.',
+    siteSummaryTitle: 'Повторяющиеся проблемы на обходе страниц',
+    siteSummaryBody: 'Ограниченный crawl просмотрел {count} страниц и отдельно сгруппировал повторяющиеся SEO-проблемы без влияния на score.',
     fixEverything: 'Исправить всё',
     issuesToFix: 'Что нужно исправить',
     checksPassed: 'Проверок пройдено: {count}',

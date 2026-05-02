@@ -125,6 +125,19 @@ export interface ScanProviderData {
   pagespeed?: PageSpeedProviderData
 }
 
+export interface SiteIssueAggregate {
+  issueId: string
+  title: string
+  category: IssueCategory
+  occurrenceCount: number
+  urls: string[]
+}
+
+export interface SiteSummary {
+  pagesCrawled: number
+  recurringIssues: SiteIssueAggregate[]
+}
+
 export interface WowInsight {
   title: string
   body: string
@@ -160,6 +173,7 @@ export interface ScanResult {
   stages?: ScanStage[]
   budget?: ScanBudget
   providerData?: ScanProviderData
+  siteSummary?: SiteSummary
   performance: CategoryScore
   seo: CategoryScore
   security: CategoryScore

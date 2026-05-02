@@ -637,6 +637,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
   const isFinalReport = scan.status === 'done'
   const hasUnavailable = hasUnavailableMeasurements(results)
   const pagespeedData = results.providerData?.pagespeed
+  const recurringIssues = results.siteSummary?.recurringIssues ?? []
   const aiCombinedPrompt = results.issuePrompts && Object.keys(results.issuePrompts).length > 0
     ? Object.values(results.issuePrompts).map(p => p.technical).join('\n\n')
     : undefined
@@ -900,6 +901,26 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
                 source: `${pagespeedData.source} · ${pagespeedData.analysisUrl}`,
               })}
             </p>
+          </section>
+        )}
+        {recurringIssues.length > 0 && (
+          <section className="rounded-xl border border-white/8 bg-white/[0.02] px-4 py-4">
+            <p className="text-sm text-[#F1F0EE]">{t('siteSummaryTitle')}</p>
+            <p className="mt-1 text-xs text-[#8B8A85] leading-relaxed">
+              {t('siteSummaryBody', { count: results.siteSummary?.pagesCrawled ?? 0 })}
+            </p>
+            <div className="mt-3 space-y-2">
+              {recurringIssues.slice(0, 3).map((issue) => (
+                <div key={`${issue.issueId}-${issue.category}`} className="rounded-lg border border-white/[0.05] bg-[#111113] px-3 py-2.5">
+                  <p className="text-xs text-[#F1F0EE]">
+                    {issue.title} · {issue.occurrenceCount} pages
+                  </p>
+                  <p className="mt-1 text-[11px] text-[#6F6E69] leading-relaxed">
+                    {issue.urls.slice(0, 3).join(' • ')}
+                  </p>
+                </div>
+              ))}
+            </div>
           </section>
         )}
 

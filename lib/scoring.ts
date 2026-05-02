@@ -10,6 +10,7 @@ import type {
   ScanProcessingIssue,
   ScanProviderData,
   ScanResult,
+  SiteSummary,
   ScanStage,
   ScanTimings,
 } from '@/types/scan'
@@ -204,6 +205,7 @@ export function buildScanResult(params: {
   stages?: ScanStage[]
   budget?: ScanBudget
   providerData?: ScanProviderData
+  siteSummary?: SiteSummary
   performance: CategoryScore
   seo: CategoryScore
   security: CategoryScore
@@ -227,6 +229,7 @@ export function buildScanResult(params: {
     stages: params.stages,
     budget: params.budget,
     providerData: params.providerData,
+    siteSummary: params.siteSummary,
     performance: params.performance,
     seo: params.seo,
     security: params.security,

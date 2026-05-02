@@ -179,6 +179,8 @@ const en = {
     summary: 'Summary',
     pagespeedTitle: 'External performance context',
     pagespeedBody: 'Google PageSpeed Insights ({strategy}) captured on {fetchedAt}. Source: {source}.',
+    siteSummaryTitle: 'Recurring issues across crawled pages',
+    siteSummaryBody: 'Bounded crawl reviewed {count} pages and grouped repeat SEO issues separately from score.',
     fixEverything: 'Fix everything',
     issuesToFix: 'Issues to fix',
     checksPassed: '{count} checks passed',
