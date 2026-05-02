@@ -6,7 +6,9 @@ import type {
   MeasurementState,
   ScanGoal,
   ScanPhase,
+  ScanProcessingIssue,
   ScanResult,
+  ScanStage,
   ScanTimings,
 } from '@/types/scan'
 import { measurement, withIssueMeta, evidence } from '@/lib/checks/issue-meta'
@@ -197,6 +199,7 @@ export function buildScanResult(params: {
   url: string
   phase: ScanPhase
   timings?: ScanTimings
+  stages?: ScanStage[]
   performance: CategoryScore
   seo: CategoryScore
   security: CategoryScore
@@ -208,6 +211,7 @@ export function buildScanResult(params: {
   issuePrompts?: Record<string, { technical: string }>
   wowInsights?: ScanResult['wowInsights']
   strategicRecommendations?: ScanResult['strategicRecommendations']
+  processingIssue?: ScanProcessingIssue
   businessContext?: BusinessContext | null
   scanGoal?: ScanGoal
 }): ScanResult {
@@ -216,6 +220,7 @@ export function buildScanResult(params: {
     scannedAt: new Date().toISOString(),
     phase: params.phase,
     timings: params.timings,
+    stages: params.stages,
     performance: params.performance,
     seo: params.seo,
     security: params.security,
@@ -227,6 +232,7 @@ export function buildScanResult(params: {
     issuePrompts: params.issuePrompts,
     wowInsights: params.wowInsights,
     strategicRecommendations: params.strategicRecommendations,
+    processingIssue: params.processingIssue,
     businessContext: params.businessContext,
     scanGoal: params.scanGoal,
   }

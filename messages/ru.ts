@@ -194,11 +194,15 @@ const ru: AppMessages = {
     progress: {
       scanRunning: 'Сканирование ещё идёт',
       unavailableMeasurements: 'В отчёте есть недоступные измерения',
+      partialReport: 'В отчёте есть частично завершённые этапы сканирования',
       activeBody: 'Это черновой отчёт на основе уже завершённых проверок. Он обновляется автоматически, а недоступные измерения не считаются успешными.',
       inactiveBody: 'Ниже показаны только доступные подтверждённые результаты. Чтобы завершить недостающие измерения, перезапустите проверку.',
       stages: {
         fastTitle: 'Быстрые truth-checks',
         fastDetail: 'SEO, security, mobile и базовые AI visibility проверки строятся на реальных данных страницы.',
+        crawlTitle: 'Ограниченный обход сайта',
+        crawlPending: 'Телеметрия для crawl уже подготовлена, но multi-page crawl ещё не включён для этого скана.',
+        crawlDone: 'Ограниченный обход сайта завершён в рамках заданных лимитов.',
         lighthouseTitle: 'Lighthouse mobile audit',
         lighthouseDone: 'Данные по производительности измерены через Lighthouse.',
         lighthousePending: 'Core Web Vitals ещё измеряются. Недоступные данные не считаются “всё в порядке”.',
@@ -210,6 +214,8 @@ const ru: AppMessages = {
       state: {
         done: 'Подтверждено',
         running: 'В работе',
+        partial: 'Частично',
+        failed: 'Ошибка',
         unavailable: 'Нужен повтор',
         pending: 'В очереди',
       },

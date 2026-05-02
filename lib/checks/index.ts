@@ -1,5 +1,5 @@
 import { createServiceClient } from '@/lib/supabase'
-import type { ScanResult, ScanTimings } from '@/types/scan'
+import type { BusinessContext, ScanGoal, ScanResult, ScanStatus, ScanTimings } from '@/types/scan'
 import { buildCategoryScore, buildPerformanceIssues, buildScanResult } from '@/lib/scoring'
 import { runLighthouse } from '@/lib/checks/lighthouse'
 import { runSEOChecks } from '@/lib/checks/seo'
@@ -15,7 +15,11 @@ import { measurement } from '@/lib/checks/issue-meta'
 import { buildMonitoringAlertDecision } from '@/lib/monitoring/alerts'
 import { sendMonitoringAlert } from '@/lib/email/send-alert'
 import { analyzeBusinessContext } from '@/lib/ai/analyze-business-context'
-import type { BusinessContext, ScanGoal } from '@/types/scan'
+import {
+  buildDefaultScanStages,
+  failRunningStages,
+  updateScanStage,
+} from '@/lib/scan/stage-telemetry'
 
 async function safeTask<T>(
   task: Promise<T> | (() => Promise<T>),
@@ -157,7 +161,14 @@ async function finalizeMonitoredDomain(scanId: string): Promise<void> {
 
 export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanGoal): Promise<void> {
   const startedAt = Date.now()
-  await saveScan(scanId, 'running_fast')
+  let currentStatus: ScanStatus = 'running_fast'
+  let currentStages = updateScanStage(buildDefaultScanStages(), 'fast', {
+    status: 'running',
+    message: 'Fast truth checks are running against the fetched page.',
+  })
+  let latestResult: ScanResult | undefined
+
+  await saveScan(scanId, currentStatus)
 
   try {
     const safeUrl = await assertSafeScanUrl(url)
@@ -181,6 +192,14 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
     ])
 
     const businessContext: BusinessContext | null = biAnalysis.ok ? biAnalysis.value : null
+    currentStages = updateScanStage(currentStages, 'fast', {
+      status: 'done',
+      message: 'SEO, security, mobile, and AI visibility basics were verified from fetched page evidence.',
+    })
+    currentStages = updateScanStage(currentStages, 'lighthouse', {
+      status: 'running',
+      message: 'Core Web Vitals are being measured via Lighthouse.',
+    })
 
     const fastResult = buildScanResult({
       url: finalUrl,
@@ -189,6 +208,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
         ...timings,
         fastPassMs: Date.now() - startedAt,
       },
+      stages: currentStages,
       performance: buildCategoryScore([], 'performance', {
         measurement: measurement('Lighthouse mobile audit', 'unavailable', 'Deep performance audit still running'),
       }),
@@ -200,7 +220,9 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
       scanGoal,
     })
 
-    await saveScan(scanId, 'running_deep', fastResult)
+    latestResult = fastResult
+    currentStatus = 'running_deep'
+    await saveScan(scanId, currentStatus, fastResult)
 
     const [lighthouseResult, linksResult, seoDeep, aiVisibilityDeep] = await Promise.all([
       safeTask(() => runLighthouse(finalUrl), 0, 'lighthouse'),
@@ -216,6 +238,20 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
     const performanceIssues = lighthouseResult.ok ? buildPerformanceIssues(lighthouseResult.value) : []
     const seoIssues = seoDeep.ok ? [...seoDeep.value, ...(linksResult.ok ? linksResult.value : [])] : (linksResult.ok ? linksResult.value : [])
     const aiVisibilityIssues = aiVisibilityDeep.ok ? aiVisibilityDeep.value : []
+    const lighthouseStageStatus = lighthouseResult.ok
+      ? (lighthouseResult.value.warnings.length > 0 ? 'partial' : 'done')
+      : 'failed'
+    currentStages = updateScanStage(currentStages, 'lighthouse', {
+      status: lighthouseStageStatus,
+      message: lighthouseResult.ok
+        ? (
+          lighthouseResult.value.warnings.length > 0
+            ? `Measured with warnings: ${lighthouseResult.value.warnings.slice(0, 2).join('; ')}`
+            : 'Performance data was measured by Lighthouse.'
+        )
+        : `Deep performance audit failed: ${lighthouseResult.error}`,
+      durationMs: lighthouseResult.durationMs,
+    })
 
     let result = buildScanResult({
       url: finalUrl,
@@ -241,9 +277,24 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
       }),
       businessContext,
       scanGoal,
+      stages: currentStages,
     })
 
-    await saveScan(scanId, 'enriching', result)
+    latestResult = result
+    currentStatus = 'enriching'
+    currentStages = updateScanStage(currentStages, 'enrichment', {
+      status: 'running',
+      message: 'AI enrichment is running against the verified scan evidence.',
+    })
+    result = buildScanResult({
+      ...result,
+      phase: 'enriching',
+      stages: currentStages,
+      businessContext,
+      scanGoal,
+    })
+    latestResult = result
+    await saveScan(scanId, currentStatus, result)
 
     if (process.env.OPENAI_API_KEY) {
       const enrichment = await safeTask(
@@ -254,10 +305,16 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
       timings.aiEnrichmentMs = enrichment.durationMs
 
       if (enrichment.ok) {
+        currentStages = updateScanStage(currentStages, 'enrichment', {
+          status: 'done',
+          message: 'Final summary and fix prompts are available.',
+          durationMs: enrichment.durationMs,
+        })
         result = buildScanResult({
           ...result,
           phase: 'enriching',
           timings,
+          stages: currentStages,
           aiSummary: enrichment.value.summary,
           topPriorities: enrichment.value.topPriorities,
           strategicRecommendations: enrichment.value.strategicRecommendations,
@@ -286,7 +343,18 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
             result.wowInsights = wowInsights.value
           }
         }
+      } else {
+        currentStages = updateScanStage(currentStages, 'enrichment', {
+          status: 'failed',
+          message: `AI enrichment failed: ${enrichment.error}`,
+          durationMs: enrichment.durationMs,
+        })
       }
+    } else {
+      currentStages = updateScanStage(currentStages, 'enrichment', {
+        status: 'partial',
+        message: 'AI enrichment was skipped because OPENAI_API_KEY is not configured.',
+      })
     }
 
     result = buildScanResult({
@@ -296,15 +364,44 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
         ...timings,
         totalMs: Date.now() - startedAt,
       },
+      stages: currentStages,
       businessContext,
       scanGoal,
     })
 
+    latestResult = result
     await saveScan(scanId, 'done', result)
     await maybeSendMonitoringAlert(scanId, result)
     await finalizeMonitoredDomain(scanId)
   } catch (error) {
     console.error('[checks] runAllChecks fatal error:', error)
+    if (latestResult) {
+      const failedStages = failRunningStages(currentStages, 'Stage execution crashed before completion.')
+      const message = currentStatus === 'enriching'
+        ? 'The scan failed while writing the AI-assisted report.'
+        : currentStatus === 'running_deep'
+          ? 'The scan failed while running deep analysis.'
+          : 'The scan failed while running fast truth checks.'
+
+      const errorResult = buildScanResult({
+        ...latestResult,
+        phase: 'final',
+        stages: failedStages,
+        processingIssue: {
+          kind: 'stage_failure',
+          stage: currentStatus,
+          staleAgeSeconds: 0,
+          message,
+          recommendation: 'Run the scan again. If it fails again, send us this report URL so we can inspect the scanner logs.',
+        },
+        businessContext: latestResult.businessContext,
+        scanGoal: latestResult.scanGoal,
+      })
+
+      await saveScan(scanId, 'error', errorResult)
+      return
+    }
+
     await saveScan(scanId, 'error')
   }
 }

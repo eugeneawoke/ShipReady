@@ -8,6 +8,8 @@ export type ScanStatus =
   | 'error'
 
 export type ScanPhase = 'fast' | 'deep' | 'enriching' | 'final'
+export type ScanStageId = 'fast' | 'crawl' | 'lighthouse' | 'enrichment'
+export type ScanStageStatus = 'queued' | 'running' | 'partial' | 'failed' | 'done'
 export type IssueSeverity = 'critical' | 'high' | 'medium' | 'low' | 'pass'
 export type IssueCategory = 'performance' | 'seo' | 'security' | 'mobile' | 'ai_visibility'
 export type IssueConfidence = 'verified' | 'likely' | 'heuristic'
@@ -77,6 +79,14 @@ export interface ScanTimings {
   totalMs?: number
 }
 
+export interface ScanStage {
+  id: ScanStageId
+  label: string
+  status: ScanStageStatus
+  message?: string
+  durationMs?: number
+}
+
 export interface WowInsight {
   title: string
   body: string
@@ -91,7 +101,7 @@ export interface StrategicRecommendation {
 }
 
 export interface ScanProcessingIssue {
-  kind: 'timeout'
+  kind: 'timeout' | 'stage_failure'
   stage: ScanStatus
   message: string
   recommendation: string
@@ -109,6 +119,7 @@ export interface ScanResult {
     heuristic: number
   }
   timings?: ScanTimings
+  stages?: ScanStage[]
   performance: CategoryScore
   seo: CategoryScore
   security: CategoryScore
