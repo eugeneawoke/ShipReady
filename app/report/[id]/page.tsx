@@ -13,11 +13,12 @@ import { SiteBrandLink } from '@/components/SiteHeader'
 import type { Scan, Issue, IssueCategory, ScanResult, ScanStage, ScanStatus, BusinessContext, ScanGoal } from '@/types/scan'
 import { createBrowserClient } from '@/lib/supabase-browser'
 import {
-  issueBody,
-  issueConfidenceLabel,
-  issueEvidenceLine,
-  issueSeverityLabel,
-  issueTitle,
+  buildFixEverythingPrompt,
+  buildPassedCheckGroups,
+  formatIssueCategoryLabel,
+  groupIssuesByCategory,
+} from '@/lib/report/report-helpers'
+import {
   normalizeStrategicRecommendationsForDisplay,
   strategicTimeframeLabel,
 } from '@/lib/report/report-safety'
@@ -228,14 +229,6 @@ const SEVERITY_ORDER: Record<string, number> = {
 
 const CATEGORIES: IssueCategory[] = ['performance', 'seo', 'security', 'mobile', 'ai_visibility']
 const ACTIVE_SCAN_STATUSES: ScanStatus[] = ['pending', 'running', 'running_fast', 'running_deep', 'enriching']
-const CATEGORY_LABELS: Record<IssueCategory, string> = {
-  performance: 'Performance',
-  seo: 'SEO',
-  security: 'Security',
-  mobile: 'Mobile',
-  ai_visibility: 'AI Visibility',
-}
-
 type StageState = 'done' | 'running' | 'pending' | 'unavailable' | 'partial' | 'failed'
 type ProgressStage = { id: string; title: string; state: StageState; detail: string }
 
@@ -422,56 +415,12 @@ function ScanProgressPanel({ scan, results, processingIssue, retryingMeasurement
   )
 }
 
-function evidenceText(issue: Issue): string {
-  return issueEvidenceLine(issue)
-}
-
-function buildMeasurementNotes(results: ScanResult): string[] {
-  return CATEGORIES.flatMap(category => {
-    const measurement = results[category].measurement
-    if (!measurement || measurement.status === 'measured') return []
-    return `${CATEGORY_LABELS[category]}: ${measurement.label} is ${measurement.status}${measurement.message ? ` (${measurement.message})` : ''}.`
-  })
-}
-
-function buildDeterministicFixPrompts(results: ScanResult, activeIssues: Issue[]) {
-  const issueLines = activeIssues.map((issue, index) =>
-    `${index + 1}. [${issueSeverityLabel(issue)} · ${issueConfidenceLabel(issue)}] ${issueTitle(issue)}. ${issueBody(issue)}${evidenceText(issue)}`
-  )
-  const measurementNotes = buildMeasurementNotes(results)
-
-  const issueBlock = issueLines.length
-    ? issueLines.join('\n')
-    : 'No verified score-bearing issues were found in the completed checks.'
-  const measurementBlock = measurementNotes.length
-    ? `\n\nUnavailable or partial measurements:\n${measurementNotes.map((note, index) => `${index + 1}. ${note}`).join('\n')}`
-    : ''
-
-  const prompt = `You are a senior engineer performing a targeted fix pass. These are verified production issues found by an automated audit — apply each fix directly in the existing codebase, no refactoring, no scope creep.
-
-${issueBlock}${measurementBlock}
-
-THE GOLDEN RULE:
-Every fix must be real and independently verifiable. A scanner fetching the live page must confirm it — not by reading source code, but by observing the actual HTTP response and rendered content. Never add hidden metadata, schema, or tags to pass a check while the underlying problem remains. Fix the real problem.
-
-HOW TO VERIFY YOUR FIXES Rules:
-- Address only the listed issues.
-- Use the stack and patterns already present in the project.
-- Do not treat unavailable measurements as healthy — absence of data is not a pass.
-- If Lighthouse/performance could not be measured, run Lighthouse or PageSpeed locally after fixes and confirm the audit completes.
-- After all fixes: rerun local scan — performance, SEO, security, mobile, and AI visibility — and confirm each listed issue is gone.`
-
-  return {
-    technical: prompt,
-  }
-}
-
-function isWeakFixPrompt(prompt: string | undefined, activeIssues: Issue[], measurementNotes: string[]) {
+function isWeakFixPrompt(prompt: string | undefined, activeIssues: Issue[]) {
   const text = prompt?.trim() ?? ''
   if (!text) return true
-  if (text.length < 180) return true
-  if (activeIssues.length > 1 && text.split(/\s+/).length < 45) return true
-  return measurementNotes.length > 0 && !/unavailable|could not|lighthouse|performance|measurement/i.test(text)
+  if (text.length < 260) return true
+  if (activeIssues.length > 1 && text.split(/\s+/).length < 80) return true
+  return !/verify|verification|checklist|issue|fix/i.test(text)
 }
 
 export default function ReportPage({ params }: { params: Promise<{ id: string }> }) {
@@ -497,6 +446,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
   const [pollVersion, setPollVersion] = useState(0)
   const [retryingMeasurement, setRetryingMeasurement] = useState(false)
   const [retryError, setRetryError] = useState<string | null>(null)
+  const [passedCategoryOpen, setPassedCategoryOpen] = useState<Record<string, boolean>>({})
   const {
     loading: rescanLoading,
     error: rescanError,
@@ -629,23 +579,18 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
   )
 
   const activeIssues = allIssues.filter(i => i.severity !== 'pass')
-  const passedIssues = allIssues.filter(i => i.severity === 'pass')
   const totalPassed = CATEGORIES.reduce((sum, cat) => sum + results[cat].passedChecks, 0)
-  const deterministicPrompts = buildDeterministicFixPrompts(results, activeIssues)
-  const measurementNotes = buildMeasurementNotes(results)
+  const deterministicPrompt = buildFixEverythingPrompt(results, activeIssues)
+  const groupedIssues = groupIssuesByCategory(activeIssues)
+  const passedCheckGroups = buildPassedCheckGroups(results)
   const isScanActive = ACTIVE_SCAN_STATUSES.includes(scan.status)
   const isFinalReport = scan.status === 'done'
   const hasUnavailable = hasUnavailableMeasurements(results)
   const pagespeedData = results.providerData?.pagespeed
   const recurringIssues = results.siteSummary?.recurringIssues ?? []
-  const aiCombinedPrompt = results.issuePrompts && Object.keys(results.issuePrompts).length > 0
-    ? Object.values(results.issuePrompts).map(p => p.technical).join('\n\n')
-    : undefined
-  const fixEverythingPrompt = isWeakFixPrompt(aiCombinedPrompt, activeIssues, measurementNotes)
-    ? isWeakFixPrompt(results.aiTechnicalPrompt, activeIssues, measurementNotes)
-      ? deterministicPrompts.technical
-      : results.aiTechnicalPrompt
-    : aiCombinedPrompt
+  const fixEverythingPrompt = isWeakFixPrompt(results.aiTechnicalPrompt, activeIssues)
+    ? deterministicPrompt
+    : `${results.aiTechnicalPrompt}\n\nFull issue context to cover in the same pass:\n${deterministicPrompt}`
 
   let domain = scan.url
   try { domain = new URL(scan.url).hostname } catch { /* use raw url */ }
@@ -1030,7 +975,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
         {/* Fix prompts — hidden in print */}
         <section className="print:hidden">
           <div className="mb-4">
-            <h2 className="text-sm font-medium text-[#F1F0EE]">Fix prompts for Cursor · Claude Code · Windsurf</h2>
+            <h2 className="text-sm font-medium text-[#F1F0EE]">{t('fixPromptsTitle')}</h2>
           </div>
           <FixPromptSection
             prompt={fixEverythingPrompt}
@@ -1043,9 +988,23 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
         {activeIssues.length > 0 && (
           <section>
             <h2 className="text-sm font-medium text-[#F1F0EE] mb-4">{t('issuesToFix')}</h2>
-            <div className="space-y-2">
-              {activeIssues.map(issue => (
-                <IssueCard key={issue.id} issue={issue} isPro={isPro} promptsReady={isFinalReport} />
+            <div className="space-y-5">
+              {groupedIssues.map(group => (
+                <div key={group.category}>
+                  <div className="mb-3 flex items-center gap-2">
+                    <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-[#6F6E69]">
+                      {formatIssueCategoryLabel(group.category)}
+                    </span>
+                    <span className="text-[10px] text-[#5A5955]">
+                      {group.issues.length}
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    {group.issues.map(issue => (
+                      <IssueCard key={issue.id} issue={issue} isPro={isPro} promptsReady={isFinalReport} />
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           </section>
@@ -1066,24 +1025,42 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
               />
             </button>
 
-            {passedOpen && passedIssues.length > 0 && (
+            {passedOpen && (
               <div className="mt-3 space-y-2">
-                {passedIssues.map(issue => (
-                  <IssueCard key={issue.id} issue={issue} isPro={isPro} promptsReady={isFinalReport} />
-                ))}
-              </div>
-            )}
-
-            {passedOpen && passedIssues.length === 0 && (
-              <div className="mt-3 space-y-1">
-                {CATEGORIES.map(cat =>
-                  results[cat].passedChecks > 0 ? (
-                    <p key={cat} className="text-xs text-[#5A5955]">
-                      <span className="text-[#3DDC84]">✓</span>{' '}
-                      {t('categoryChecksPassed', { count: results[cat].passedChecks, category: t(`categories.${cat}`) })}
-                    </p>
-                  ) : null
-                )}
+                {passedCheckGroups.map(group => {
+                  const isGroupOpen = Boolean(passedCategoryOpen[group.category])
+                  return (
+                    <div key={group.category} className="rounded-xl border border-white/6 bg-[#161618] overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={() => setPassedCategoryOpen(current => ({ ...current, [group.category]: !current[group.category] }))}
+                        className="flex w-full items-center gap-2 px-4 py-3 text-left hover:bg-white/[0.02] transition-colors cursor-pointer"
+                      >
+                        <span className="text-[#3DDC84] text-[11px]">✓</span>
+                        <span className="flex-1 text-sm text-[#8B8A85]">
+                          {t('categoryChecksPassed', { count: group.checks.length, category: t(`categories.${group.category}`) })}
+                        </span>
+                        <ChevronDown
+                          className="w-4 h-4 text-[#5A5955] transition-transform duration-200"
+                          style={{ transform: isGroupOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                        />
+                      </button>
+                      {isGroupOpen && (
+                        <div className="border-t border-white/[0.04] px-4 py-3 space-y-2">
+                          {group.checks.map(check => (
+                            <div key={check.id} className="flex items-start gap-2">
+                              <span className="text-[#3DDC84] text-[10px] mt-0.5 shrink-0">✓</span>
+                              <div>
+                                <p className="text-xs text-[#8B8A85]">{check.name}</p>
+                                <p className="text-[11px] text-[#5A5955] mt-0.5 leading-relaxed">{check.detail}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             )}
           </section>

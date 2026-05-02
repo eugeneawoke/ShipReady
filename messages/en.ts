@@ -177,6 +177,7 @@ const en = {
     draftScore: 'Draft score',
     unavailableExcluded: 'Unavailable checks excluded',
     summary: 'Summary',
+    fixPromptsTitle: 'Implementation prompt',
     pagespeedTitle: 'External performance context',
     pagespeedBody: 'Google PageSpeed Insights ({strategy}) captured on {fetchedAt}. Source: {source}.',
     siteSummaryTitle: 'Recurring issues across crawled pages',
