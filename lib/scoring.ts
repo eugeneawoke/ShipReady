@@ -1,5 +1,6 @@
 import type {
   BusinessContext,
+  ScanBudget,
   CategoryScore,
   Issue,
   IssueSeverity,
@@ -55,7 +56,7 @@ export function buildCategoryScore(
   options?: { measurement?: MeasurementState },
 ): CategoryScore {
   const measurementState = options?.measurement ?? measurement(category, 'measured')
-  const scorableIssues = issues.filter(issue => issue.scoreEligible)
+  const scorableIssues = issues.filter(issue => issue.scoreEligible && issue.confidence === 'verified')
   const deduction = scorableIssues.reduce((sum, issue) => sum + DEDUCTIONS[issue.severity], 0)
   const score = measurementState.status === 'unavailable' ? null : Math.max(0, 100 - deduction)
   const totalChecks = TOTAL_CHECKS[category]
@@ -200,6 +201,7 @@ export function buildScanResult(params: {
   phase: ScanPhase
   timings?: ScanTimings
   stages?: ScanStage[]
+  budget?: ScanBudget
   performance: CategoryScore
   seo: CategoryScore
   security: CategoryScore
@@ -221,6 +223,7 @@ export function buildScanResult(params: {
     phase: params.phase,
     timings: params.timings,
     stages: params.stages,
+    budget: params.budget,
     performance: params.performance,
     seo: params.seo,
     security: params.security,

@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import type { CategoryScore, ScanStage } from '../types/scan'
-import { buildScanResult } from '../lib/scoring'
+import { buildCategoryScore, buildScanResult } from '../lib/scoring'
 
 function category(): CategoryScore {
   return {
@@ -67,4 +67,35 @@ test('stage telemetry is preserved without affecting score output', () => {
 
   assert.equal(result.totalScore, 100)
   assert.deepEqual(result.stages, stages)
+})
+
+test('only verified score-eligible issues reduce score', () => {
+  const categoryScore = buildCategoryScore([
+    {
+      id: 'verified-issue',
+      category: 'performance',
+      severity: 'high',
+      title: 'Verified issue',
+      description: 'Counts against score.',
+      plainEnglish: 'Counts against score.',
+      cursorPrompt: 'Fix it.',
+      confidence: 'verified',
+      scoreEligible: true,
+    },
+    {
+      id: 'likely-issue',
+      category: 'performance',
+      severity: 'critical',
+      title: 'Likely issue',
+      description: 'Must not count against score.',
+      plainEnglish: 'Must not count against score.',
+      cursorPrompt: 'Investigate it.',
+      confidence: 'likely',
+      scoreEligible: true,
+    },
+  ], 'performance', {
+    measurement: { label: 'test', status: 'measured' },
+  })
+
+  assert.equal(categoryScore.score, 85)
 })

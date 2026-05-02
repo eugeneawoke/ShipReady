@@ -8,8 +8,11 @@ export type ScanStatus =
   | 'error'
 
 export type ScanPhase = 'fast' | 'deep' | 'enriching' | 'final'
+export type ScanPlan = 'free' | 'pro' | 'agency'
 export type ScanStageId = 'fast' | 'crawl' | 'lighthouse' | 'enrichment'
 export type ScanStageStatus = 'queued' | 'running' | 'partial' | 'failed' | 'done'
+export type ScanProviderId = 'aiEnrichment' | 'wowInsights' | 'pagespeed'
+export type ScanProviderStatus = 'ready' | 'done' | 'failed' | 'skipped' | 'unavailable' | 'blocked'
 export type IssueSeverity = 'critical' | 'high' | 'medium' | 'low' | 'pass'
 export type IssueCategory = 'performance' | 'seo' | 'security' | 'mobile' | 'ai_visibility'
 export type IssueConfidence = 'verified' | 'likely' | 'heuristic'
@@ -87,6 +90,23 @@ export interface ScanStage {
   durationMs?: number
 }
 
+export interface ScanProviderBudget {
+  maxCalls: number
+  callsUsed: number
+  status: ScanProviderStatus
+  message?: string
+}
+
+export interface ScanBudget {
+  plan: ScanPlan
+  crawl: {
+    enabled: boolean
+    maxDepth: number
+    maxPages: number
+  }
+  providers: Record<ScanProviderId, ScanProviderBudget>
+}
+
 export interface WowInsight {
   title: string
   body: string
@@ -120,6 +140,7 @@ export interface ScanResult {
   }
   timings?: ScanTimings
   stages?: ScanStage[]
+  budget?: ScanBudget
   performance: CategoryScore
   seo: CategoryScore
   security: CategoryScore

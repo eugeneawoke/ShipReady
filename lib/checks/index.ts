@@ -1,5 +1,5 @@
 import { createServiceClient } from '@/lib/supabase'
-import type { BusinessContext, ScanGoal, ScanResult, ScanStatus, ScanTimings } from '@/types/scan'
+import type { BusinessContext, ScanGoal, ScanPlan, ScanResult, ScanStatus, ScanTimings } from '@/types/scan'
 import { buildCategoryScore, buildPerformanceIssues, buildScanResult } from '@/lib/scoring'
 import { runLighthouse } from '@/lib/checks/lighthouse'
 import { runSEOChecks } from '@/lib/checks/seo'
@@ -20,6 +20,11 @@ import {
   failRunningStages,
   updateScanStage,
 } from '@/lib/scan/stage-telemetry'
+import {
+  buildScanBudget,
+  markProviderState,
+  reserveProviderCall,
+} from '@/lib/scan/guardrails'
 
 async function safeTask<T>(
   task: Promise<T> | (() => Promise<T>),
@@ -61,7 +66,7 @@ async function saveScan(
   if (error) console.error('[checks] Failed to save scan state:', error)
 }
 
-async function getPlanForScan(scanId: string): Promise<'free' | 'pro' | 'agency'> {
+async function getPlanForScan(scanId: string): Promise<ScanPlan> {
   const supabase = createServiceClient()
   const { data } = await supabase
     .from('scans')
@@ -77,7 +82,7 @@ async function getPlanForScan(scanId: string): Promise<'free' | 'pro' | 'agency'
     .eq('id', data.user_id)
     .single()
 
-  return (profile?.plan ?? 'free') as 'free' | 'pro' | 'agency'
+  return (profile?.plan ?? 'free') as ScanPlan
 }
 
 async function maybeSendMonitoringAlert(scanId: string, result: ScanResult): Promise<void> {
@@ -171,6 +176,8 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
   await saveScan(scanId, currentStatus)
 
   try {
+    const plan = await getPlanForScan(scanId)
+    let budget = buildScanBudget(plan)
     const safeUrl = await assertSafeScanUrl(url)
     const fetchContext = await fetchPrimaryContext(safeUrl)
     const finalUrl = fetchContext.finalUrl || safeUrl
@@ -209,6 +216,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
         fastPassMs: Date.now() - startedAt,
       },
       stages: currentStages,
+      budget,
       performance: buildCategoryScore([], 'performance', {
         measurement: measurement('Lighthouse mobile audit', 'unavailable', 'Deep performance audit still running'),
       }),
@@ -278,6 +286,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
       businessContext,
       scanGoal,
       stages: currentStages,
+      budget,
     })
 
     latestResult = result
@@ -290,6 +299,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
       ...result,
       phase: 'enriching',
       stages: currentStages,
+      budget,
       businessContext,
       scanGoal,
     })
@@ -297,60 +307,80 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
     await saveScan(scanId, currentStatus, result)
 
     if (process.env.OPENAI_API_KEY) {
-      const enrichment = await safeTask(
-        generateEvidenceEnrichment(result, businessContext, scanGoal),
-        35_000,
-        'ai-enrichment',
-      )
-      timings.aiEnrichmentMs = enrichment.durationMs
+      const aiBudgetReservation = reserveProviderCall(budget, 'aiEnrichment')
+      budget = aiBudgetReservation.budget
 
-      if (enrichment.ok) {
-        currentStages = updateScanStage(currentStages, 'enrichment', {
-          status: 'done',
-          message: 'Final summary and fix prompts are available.',
-          durationMs: enrichment.durationMs,
-        })
-        result = buildScanResult({
-          ...result,
-          phase: 'enriching',
-          timings,
-          stages: currentStages,
-          aiSummary: enrichment.value.summary,
-          topPriorities: enrichment.value.topPriorities,
-          strategicRecommendations: enrichment.value.strategicRecommendations,
-          aiTechnicalPrompt: enrichment.value.technicalPrompt,
-          issuePrompts: enrichment.value.issuePrompts,
-          businessContext,
-          scanGoal,
-        })
+      if (aiBudgetReservation.allowed) {
+        const enrichment = await safeTask(
+          generateEvidenceEnrichment(result, businessContext, scanGoal),
+          35_000,
+          'ai-enrichment',
+        )
+        timings.aiEnrichmentMs = enrichment.durationMs
 
-        const categories = ['performance', 'seo', 'security', 'mobile', 'ai_visibility'] as const
-        for (const category of categories) {
-          result[category].issues = result[category].issues.map(issue => {
-            const aiPrompt = enrichment.value.issuePrompts?.[issue.id]
-            if (!aiPrompt) return issue
-            return {
-              ...issue,
-              cursorPrompt: aiPrompt.technical || issue.cursorPrompt,
-            }
+        if (enrichment.ok) {
+          budget = markProviderState(budget, 'aiEnrichment', 'done', 'Evidence-grounded enrichment completed.')
+          currentStages = updateScanStage(currentStages, 'enrichment', {
+            status: 'done',
+            message: 'Final summary and fix prompts are available.',
+            durationMs: enrichment.durationMs,
           })
-        }
+          result = buildScanResult({
+            ...result,
+            phase: 'enriching',
+            timings,
+            stages: currentStages,
+            budget,
+            aiSummary: enrichment.value.summary,
+            topPriorities: enrichment.value.topPriorities,
+            strategicRecommendations: enrichment.value.strategicRecommendations,
+            aiTechnicalPrompt: enrichment.value.technicalPrompt,
+            issuePrompts: enrichment.value.issuePrompts,
+            businessContext,
+            scanGoal,
+          })
 
-        const plan = await getPlanForScan(scanId)
-        if (plan === 'pro' || plan === 'agency') {
-          const wowInsights = await safeTask(generateWowInsights(result), 35_000, 'wow-insights')
-          if (wowInsights.ok) {
-            result.wowInsights = wowInsights.value
+          const categories = ['performance', 'seo', 'security', 'mobile', 'ai_visibility'] as const
+          for (const category of categories) {
+            result[category].issues = result[category].issues.map(issue => {
+              const aiPrompt = enrichment.value.issuePrompts?.[issue.id]
+              if (!aiPrompt) return issue
+              return {
+                ...issue,
+                cursorPrompt: aiPrompt.technical || issue.cursorPrompt,
+              }
+            })
           }
+
+          if (plan === 'pro' || plan === 'agency') {
+            const wowBudgetReservation = reserveProviderCall(budget, 'wowInsights')
+            budget = wowBudgetReservation.budget
+            if (wowBudgetReservation.allowed) {
+              const wowInsights = await safeTask(generateWowInsights(result), 35_000, 'wow-insights')
+              if (wowInsights.ok) {
+                budget = markProviderState(budget, 'wowInsights', 'done', 'Premium wow insights completed.')
+                result.wowInsights = wowInsights.value
+              } else {
+                budget = markProviderState(budget, 'wowInsights', 'failed', `Wow insights failed: ${wowInsights.error}`)
+              }
+            }
+          }
+        } else {
+          budget = markProviderState(budget, 'aiEnrichment', 'failed', `AI enrichment failed: ${enrichment.error}`)
+          currentStages = updateScanStage(currentStages, 'enrichment', {
+            status: 'failed',
+            message: `AI enrichment failed: ${enrichment.error}`,
+            durationMs: enrichment.durationMs,
+          })
         }
       } else {
         currentStages = updateScanStage(currentStages, 'enrichment', {
-          status: 'failed',
-          message: `AI enrichment failed: ${enrichment.error}`,
-          durationMs: enrichment.durationMs,
+          status: 'partial',
+          message: 'AI enrichment was skipped because the per-scan provider budget was exhausted.',
         })
       }
     } else {
+      budget = markProviderState(budget, 'aiEnrichment', 'unavailable', 'OPENAI_API_KEY is not configured.')
       currentStages = updateScanStage(currentStages, 'enrichment', {
         status: 'partial',
         message: 'AI enrichment was skipped because OPENAI_API_KEY is not configured.',
@@ -365,6 +395,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
         totalMs: Date.now() - startedAt,
       },
       stages: currentStages,
+      budget,
       businessContext,
       scanGoal,
     })
@@ -394,6 +425,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
           message,
           recommendation: 'Run the scan again. If it fails again, send us this report URL so we can inspect the scanner logs.',
         },
+        budget: latestResult.budget,
         businessContext: latestResult.businessContext,
         scanGoal: latestResult.scanGoal,
       })
