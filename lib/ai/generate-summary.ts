@@ -47,14 +47,14 @@ ${issueList || 'No issues — site looks great!'}
 Return EXACTLY this JSON (no extra fields):
 {
   "summary": "2-3 sentence plain-English summary for an agency or developer. No jargon. Direct, not scary. If score > 70, end with encouragement.",
-  "technicalPrompt": "A ready-to-paste prompt for code-aware AI tools (Cursor, Windsurf, Claude Code, Codex). Must reference URL ${result.url}. Include specific file paths (app/layout.tsx, next.config.js, etc), exact HTTP headers to add, meta tags to insert. Step-by-step instructions for an AI that has full codebase access. Cover ALL issues found.",
+  "technicalPrompt": "A ready-to-paste implementation prompt for any coding AI or engineer. Must reference URL ${result.url}. Include specific file paths (app/layout.tsx, next.config.js, etc), exact HTTP headers to add, meta tags to insert, and a verification checklist. Cover ALL issues found.",
   "issuePrompts": {
     ${issueIds.map(id => `"${id}": { "technical": "..." }`).join(',\n    ')}
   }
 }
 
 For each issuePrompts entry:
-- "technical": 2-5 step fix for this SPECIFIC issue for Cursor/Windsurf/Claude Code. Reference exact file paths and code. Be direct and actionable.`,
+- "technical": 2-5 step fix for this SPECIFIC issue for any coding AI or engineer. Reference exact file paths and code. Be direct and actionable.`,
       },
     ],
   })

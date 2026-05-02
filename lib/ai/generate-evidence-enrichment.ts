@@ -152,7 +152,7 @@ Return EXACTLY this JSON shape:
       "evidenceRefs": ["issue-id or business-context field"]
     }
   ],
-  "technicalPrompt": "A precise fix prompt for Cursor, Claude Code, or Windsurf. Reference specific files or config paths for the detected tech stack. Format: goal → concrete fix steps (4-7 bullets) → how to verify each fix on the live site.",
+  "technicalPrompt": "A precise implementation prompt for any coding AI or engineer. Reference specific files or config paths for the detected tech stack. Format: goal → grouped fix steps that cover all findings → live-site verification checklist.",
   "issuePrompts": {
     ${issueIds.map(id => `"${id}": { "technical": "..." }`).join(',\n    ')}
   }
@@ -163,7 +163,7 @@ Rules:
 - Never claim a fact not present in findings/evidence
 - If confidence is likely or heuristic, avoid overstating certainty
 - technicalPrompt must reference the specific tech stack if known (e.g. for Shopify: "open product.liquid", for Next.js: "in next.config.ts", for WordPress: "in functions.php")
-- technicalPrompt must name each concrete fix and the exact verification step on the live site
+- technicalPrompt must cover every included finding in one coherent pass and end with exact live-site verification steps
 - Never use generic advice like "improve your meta description" — always say what to add/change and where
 - For each issue prompt: one strong recommended fix with enough technical detail to act on. No alternatives.
 - If business context is available, reference the detected service/audience/CTA when explaining business impact`,

@@ -5,6 +5,7 @@ import React from 'react'
 import { useTranslations } from 'next-intl'
 import { Zap, Search, Shield, Smartphone, Bot, ChevronDown } from 'lucide-react'
 import type { CategoryScore, IssueCategory } from '@/types/scan'
+import { getPassedChecksForIssues } from '@/lib/report/check-catalog'
 
 const ICONS: Record<IssueCategory, React.ComponentType<{ className?: string }>> = {
   performance: Zap,
@@ -12,60 +13,6 @@ const ICONS: Record<IssueCategory, React.ComponentType<{ className?: string }>> 
   security: Shield,
   mobile: Smartphone,
   ai_visibility: Bot,
-}
-
-const ALL_CHECKS: Record<IssueCategory, { id: string; name: string }[]> = {
-  performance: [
-    { id: 'lcp-slow', name: 'LCP under 2.5s (main content loads fast)' },
-    { id: 'cls-high', name: 'No layout shifts (CLS)' },
-    { id: 'inp-slow', name: 'Fast click response (INP under 200ms)' },
-    { id: 'fcp-slow', name: 'First paint under 1.8s (FCP)' },
-    { id: 'perf-score-low', name: 'Lighthouse performance score ≥70' },
-    { id: 'a11y-score-low', name: 'Accessibility score ≥70' },
-  ],
-  seo: [
-    { id: 'missing-title', name: 'Title tag present' },
-    { id: 'title-length', name: 'Title 30–60 characters' },
-    { id: 'missing-description', name: 'Meta description present' },
-    { id: 'missing-h1', name: 'Single H1 heading' },
-    { id: 'missing-canonical', name: 'Canonical URL set' },
-    { id: 'missing-og-title', name: 'Open Graph title' },
-    { id: 'missing-og-description', name: 'Open Graph description' },
-    { id: 'missing-og-image', name: 'Open Graph image' },
-    { id: 'og-image-invalid', name: 'OG image accessible (returns 200)' },
-    { id: 'missing-twitter-card', name: 'Twitter/X card meta tag' },
-    { id: 'placeholder-text', name: 'No placeholder text' },
-    { id: 'broken-links', name: 'No broken internal links' },
-  ],
-  security: [
-    { id: 'no-https', name: 'HTTPS enabled' },
-    { id: 'missing-hsts', name: 'HSTS header (force HTTPS)' },
-    { id: 'missing-x-frame', name: 'X-Frame-Options (clickjacking protection)' },
-    { id: 'missing-xcto', name: 'X-Content-Type-Options header' },
-    { id: 'missing-referrer-policy', name: 'Referrer-Policy header' },
-    { id: 'missing-csp', name: 'Content-Security-Policy header' },
-    { id: 'unsafe-csp', name: 'Safe CSP (no unsafe-inline/eval)' },
-    { id: 'ssl-expiring', name: 'SSL certificate valid for 30+ days' },
-    { id: 'exposed-env-file', name: 'No exposed .env files' },
-    { id: 'api-key-in-html', name: 'No API keys in HTML source' },
-    { id: 'mixed-content', name: 'No mixed HTTP/HTTPS content' },
-  ],
-  mobile: [
-    { id: 'missing-viewport', name: 'Viewport meta tag present' },
-    { id: 'blocking-viewport', name: 'Viewport allows user scaling' },
-    { id: 'missing-favicon', name: 'Favicon present' },
-    { id: 'missing-touch-icon', name: 'Apple touch icon' },
-  ],
-  ai_visibility: [
-    { id: 'missing-schema-org', name: 'Schema.org structured data' },
-    { id: 'missing-faq-schema', name: 'FAQ schema markup' },
-    { id: 'poor-heading-hierarchy', name: 'Proper heading hierarchy (H1→H2→H3)' },
-    { id: 'thin-content', name: 'Sufficient content (300+ words)' },
-    { id: 'missing-llms-txt', name: 'llms.txt file present' },
-    { id: 'ai-crawlers-blocked', name: 'AI crawlers allowed in robots.txt' },
-    { id: 'missing-sitemap', name: 'Sitemap.xml present' },
-    { id: 'missing-author-entity', name: 'Author or organization entity' },
-  ],
 }
 
 const SEVERITY_COLORS: Record<string, string> = {
@@ -100,8 +47,7 @@ export function CategoryCard({ category, data }: CategoryCardProps) {
     unavailable: t('scoreLabels.unavailable'),
   }
 
-  const failedIds = new Set(data.issues.filter(issue => issue.severity !== 'pass').map(i => i.id))
-  const passedChecks = ALL_CHECKS[category].filter(c => !failedIds.has(c.id))
+  const passedChecks = getPassedChecksForIssues(category, data.issues)
 
   function scrollToIssue(issueId: string) {
     const el = document.getElementById(`issue-${issueId}`)
@@ -219,7 +165,10 @@ export function CategoryCard({ category, data }: CategoryCardProps) {
                   {passedChecks.map(check => (
                     <div key={check.id} className="flex items-start gap-2">
                       <span className="text-[#3DDC84] text-[10px] mt-0.5 shrink-0">✓</span>
-                      <span className="text-xs text-[#5A5955]">{check.name}</span>
+                      <div>
+                        <p className="text-xs text-[#8B8A85]">{check.name}</p>
+                        <p className="text-[11px] text-[#5A5955] mt-0.5 leading-relaxed">{check.detail}</p>
+                      </div>
                     </div>
                   ))}
                 </div>

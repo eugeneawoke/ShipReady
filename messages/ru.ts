@@ -178,6 +178,7 @@ const ru: AppMessages = {
     draftScore: 'Черновая оценка',
     unavailableExcluded: 'Недоступные проверки исключены',
     summary: 'Сводка',
+    fixPromptsTitle: 'Промпт для исправления',
     pagespeedTitle: 'Внешний performance-контекст',
     pagespeedBody: 'Google PageSpeed Insights ({strategy}) получен {fetchedAt}. Источник: {source}.',
     siteSummaryTitle: 'Повторяющиеся проблемы на обходе страниц',
