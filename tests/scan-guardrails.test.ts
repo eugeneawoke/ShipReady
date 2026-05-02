@@ -23,6 +23,8 @@ test('buildScanBudget returns plan-based crawl and provider limits', () => {
   })
   assert.equal(free.providers.wowInsights.maxCalls, 0)
   assert.equal(agency.providers.wowInsights.maxCalls, 1)
+  assert.equal(free.providers.pagespeed.maxCalls, 0)
+  assert.equal(agency.providers.pagespeed.maxCalls, 1)
 })
 
 test('reserveProviderCall blocks providers once the per-scan budget is exhausted', () => {

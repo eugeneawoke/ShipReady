@@ -636,6 +636,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
   const isScanActive = ACTIVE_SCAN_STATUSES.includes(scan.status)
   const isFinalReport = scan.status === 'done'
   const hasUnavailable = hasUnavailableMeasurements(results)
+  const pagespeedData = results.providerData?.pagespeed
   const aiCombinedPrompt = results.issuePrompts && Object.keys(results.issuePrompts).length > 0
     ? Object.values(results.issuePrompts).map(p => p.technical).join('\n\n')
     : undefined
@@ -889,6 +890,18 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
           retryError={retryError}
           onRetryLighthouse={handleRetryLighthouse}
         />
+        {pagespeedData && (
+          <section className="rounded-xl border border-white/8 bg-white/[0.02] px-4 py-3">
+            <p className="text-sm text-[#F1F0EE]">{t('pagespeedTitle')}</p>
+            <p className="mt-1 text-xs text-[#8B8A85] leading-relaxed">
+              {t('pagespeedBody', {
+                strategy: pagespeedData.strategy,
+                fetchedAt: new Date(pagespeedData.fetchedAt).toLocaleString(),
+                source: `${pagespeedData.source} · ${pagespeedData.analysisUrl}`,
+              })}
+            </p>
+          </section>
+        )}
 
         {/* Business profile — only when scan is done */}
         {isFinalReport && (

@@ -15,6 +15,7 @@ import { measurement } from '@/lib/checks/issue-meta'
 import { buildMonitoringAlertDecision } from '@/lib/monitoring/alerts'
 import { sendMonitoringAlert } from '@/lib/email/send-alert'
 import { analyzeBusinessContext } from '@/lib/ai/analyze-business-context'
+import { fetchPageSpeedData } from '@/lib/providers/pagespeed'
 import {
   buildDefaultScanStages,
   failRunningStages,
@@ -289,6 +290,33 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
       budget,
     })
 
+    let providerData = result.providerData
+    const pageSpeedBudgetReservation = reserveProviderCall(budget, 'pagespeed')
+    budget = pageSpeedBudgetReservation.budget
+    if (pageSpeedBudgetReservation.allowed) {
+      const pageSpeed = await fetchPageSpeedData(finalUrl, {
+        apiKey: process.env.PAGESPEED_API_KEY,
+      })
+
+      if (pageSpeed.ok) {
+        budget = markProviderState(budget, 'pagespeed', 'done', 'Google PageSpeed Insights data captured.')
+        providerData = {
+          ...providerData,
+          pagespeed: pageSpeed.data,
+        }
+      } else {
+        budget = markProviderState(budget, 'pagespeed', pageSpeed.status, pageSpeed.message)
+      }
+
+      result = buildScanResult({
+        ...result,
+        budget,
+        providerData,
+        businessContext,
+        scanGoal,
+      })
+    }
+
     latestResult = result
     currentStatus = 'enriching'
     currentStages = updateScanStage(currentStages, 'enrichment', {
@@ -300,6 +328,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
       phase: 'enriching',
       stages: currentStages,
       budget,
+      providerData,
       businessContext,
       scanGoal,
     })
@@ -331,6 +360,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
             timings,
             stages: currentStages,
             budget,
+            providerData,
             aiSummary: enrichment.value.summary,
             topPriorities: enrichment.value.topPriorities,
             strategicRecommendations: enrichment.value.strategicRecommendations,
@@ -396,6 +426,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
       },
       stages: currentStages,
       budget,
+      providerData,
       businessContext,
       scanGoal,
     })
@@ -426,6 +457,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
           recommendation: 'Run the scan again. If it fails again, send us this report URL so we can inspect the scanner logs.',
         },
         budget: latestResult.budget,
+        providerData: latestResult.providerData,
         businessContext: latestResult.businessContext,
         scanGoal: latestResult.scanGoal,
       })

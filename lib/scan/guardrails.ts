@@ -24,7 +24,7 @@ const PLAN_BUDGETS: Record<ScanPlan, ScanBudget> = {
     providers: {
       aiEnrichment: { maxCalls: 1, callsUsed: 0, status: 'ready' },
       wowInsights: { maxCalls: 1, callsUsed: 0, status: 'ready' },
-      pagespeed: { maxCalls: 0, callsUsed: 0, status: 'blocked' },
+      pagespeed: { maxCalls: 1, callsUsed: 0, status: 'ready' },
     },
   },
   agency: {
@@ -37,7 +37,7 @@ const PLAN_BUDGETS: Record<ScanPlan, ScanBudget> = {
     providers: {
       aiEnrichment: { maxCalls: 1, callsUsed: 0, status: 'ready' },
       wowInsights: { maxCalls: 1, callsUsed: 0, status: 'ready' },
-      pagespeed: { maxCalls: 0, callsUsed: 0, status: 'blocked' },
+      pagespeed: { maxCalls: 1, callsUsed: 0, status: 'ready' },
     },
   },
 }

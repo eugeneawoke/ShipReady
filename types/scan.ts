@@ -107,6 +107,24 @@ export interface ScanBudget {
   providers: Record<ScanProviderId, ScanProviderBudget>
 }
 
+export interface PageSpeedProviderData {
+  source: 'google-pagespeed-insights'
+  fetchedAt: string
+  strategy: 'mobile'
+  analysisUrl: string
+  origin?: string
+  performanceScore: number | null
+  fieldMetrics: {
+    lcpMs?: number
+    inpMs?: number
+    cls?: number
+  }
+}
+
+export interface ScanProviderData {
+  pagespeed?: PageSpeedProviderData
+}
+
 export interface WowInsight {
   title: string
   body: string
@@ -141,6 +159,7 @@ export interface ScanResult {
   timings?: ScanTimings
   stages?: ScanStage[]
   budget?: ScanBudget
+  providerData?: ScanProviderData
   performance: CategoryScore
   seo: CategoryScore
   security: CategoryScore
