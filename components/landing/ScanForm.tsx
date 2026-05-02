@@ -68,11 +68,11 @@ export function useScanLauncher() {
 }
 
 const SCAN_GOALS = [
-  { value: 'sales', label: 'More sales' },
-  { value: 'leads', label: 'More leads' },
-  { value: 'traffic', label: 'More traffic' },
-  { value: 'visibility', label: 'AI visibility' },
-  { value: 'general', label: 'General' },
+  { value: 'sales', labelKey: 'goals.sales' },
+  { value: 'leads', labelKey: 'goals.leads' },
+  { value: 'traffic', labelKey: 'goals.traffic' },
+  { value: 'visibility', labelKey: 'goals.visibility' },
+  { value: 'general', labelKey: 'goals.general' },
 ] as const
 
 export function ScanForm({
@@ -126,22 +126,35 @@ export function ScanForm({
       </div>
 
       {!compact && (
-        <div className="mt-4 space-y-2">
-          <label className="text-xs text-[#8B8A85]">What&apos;s your main goal? (optional)</label>
-          <div className="flex flex-wrap gap-2">
+        <div className="mt-5 rounded-2xl border border-white/[0.08] bg-white/[0.02] px-4 py-4 text-left shadow-[0_18px_48px_rgba(0,0,0,0.22)]">
+          <div className="flex items-start gap-3">
+            <div className="mt-0.5 flex h-6 min-w-6 items-center justify-center rounded-full border border-[#6E56CF]/40 bg-[#6E56CF]/16 text-[10px] font-mono text-[#CBBEFF]">
+              02
+            </div>
+            <div className="min-w-0 flex-1">
+              <label className="block text-sm font-medium tracking-[-0.01em] text-[#F1F0EE]">
+                {t('goalTitle')}
+              </label>
+              <p className="mt-1 text-xs leading-relaxed text-[#8B8A85]">
+                {t('goalHint')}
+              </p>
+            </div>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
             {SCAN_GOALS.map(goal => (
               <button
                 key={goal.value}
                 type="button"
                 onClick={() => setScanGoal(scanGoal === goal.value ? '' : goal.value)}
                 disabled={loading}
-                className={`px-3 py-1.5 text-sm rounded-full font-medium transition-all ${
+                aria-pressed={scanGoal === goal.value}
+                className={`min-h-11 px-3.5 py-2 text-sm rounded-full font-medium transition-all cursor-pointer ${
                   scanGoal === goal.value
-                    ? 'bg-[#6E56CF] text-white border-transparent'
-                    : 'border border-white/10 text-[#8B8A85] hover:border-white/20 disabled:opacity-50'
+                    ? 'bg-[#6E56CF] text-white border border-[#8A73E6] shadow-[0_10px_30px_rgba(110,86,207,0.35)]'
+                    : 'border border-white/10 bg-white/[0.01] text-[#B7B5B0] hover:border-white/22 hover:bg-white/[0.04] disabled:opacity-50'
                 }`}
               >
-                {goal.label}
+                {t(goal.labelKey)}
               </button>
             ))}
           </div>

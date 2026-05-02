@@ -345,13 +345,24 @@ function HeroSection({ t }: { t: Translations }) {
           <p className="mt-3 text-xs text-[#5A5955]">{t.hero.noSignup}</p>
         </div>
 
-        <div className="hero-4 mt-8 flex flex-wrap items-center justify-center gap-2">
-          <span className="text-xs text-[#5A5955] mr-1">{t.hero.worksWith}</span>
-          {['Cursor', 'Claude Code', 'Windsurf'].map(p => (
-            <div key={p} className="works-chip">
-              <span className="works-chip-inner">{p}</span>
+        <div className="hero-4 mt-8 max-w-2xl mx-auto rounded-2xl border border-white/[0.08] bg-white/[0.03] px-4 py-4 shadow-[0_20px_60px_rgba(0,0,0,0.24)]">
+          <div className="flex flex-col items-center gap-2 text-center">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#6E56CF]/25 bg-[#6E56CF]/10 px-3 py-1 text-[11px] font-mono uppercase tracking-[0.12em] text-[#CBBEFF]">
+              <IconBot />
+              <span>{t.hero.aiCompatibilityBadge}</span>
             </div>
-          ))}
+            <p className="text-sm font-medium leading-relaxed text-[#E7E4DE]">
+              {t.hero.worksWith}
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {['Cursor', 'Claude Code', 'Windsurf'].map(p => (
+                <div key={p} className="works-chip">
+                  <span className="works-chip-inner">{p}</span>
+                </div>
+              ))}
+              <span className="text-xs text-[#6F6E69]">{t.hero.worksWithExamples}</span>
+            </div>
+          </div>
         </div>
 
       </div>
