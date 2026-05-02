@@ -12,6 +12,15 @@ import { ScanForm, useScanLauncher } from '@/components/landing/ScanForm'
 import { SiteBrandLink } from '@/components/SiteHeader'
 import type { Scan, Issue, IssueCategory, ScanResult, ScanStatus, BusinessContext, ScanGoal } from '@/types/scan'
 import { createBrowserClient } from '@/lib/supabase-browser'
+import {
+  issueBody,
+  issueConfidenceLabel,
+  issueEvidenceLine,
+  issueSeverityLabel,
+  issueTitle,
+  normalizeStrategicRecommendationsForDisplay,
+  strategicTimeframeLabel,
+} from '@/lib/report/report-safety'
 
 function JumpingDots() {
   return (
@@ -179,16 +188,12 @@ function BusinessProfileBlock({ businessContext, scanGoal }: {
   )
 }
 
-const STRATEGIC_TIMEFRAME_LABELS: Record<NonNullable<ScanResult['strategicRecommendations']>[number]['timeframe'], string> = {
-  now: 'Now',
-  next_2_weeks: 'Next 2 weeks',
-  next_month: 'Next month',
-}
-
 function StrategicRecommendationsBlock({ recommendations }: {
   recommendations?: ScanResult['strategicRecommendations']
 }) {
-  if (!recommendations?.length) return null
+  const safeRecommendations = normalizeStrategicRecommendationsForDisplay(recommendations)
+
+  if (!safeRecommendations.length) return null
 
   return (
     <section className="rounded-xl border border-[#4A9EFF]/18 bg-[#101922] px-4 py-4">
@@ -199,10 +204,10 @@ function StrategicRecommendationsBlock({ recommendations }: {
         </p>
       </div>
       <div className="space-y-3">
-        {recommendations.slice(0, 3).map((item, index) => (
+        {safeRecommendations.map((item, index) => (
           <div key={`${item.timeframe}-${item.title}-${index}`} className="rounded-lg border border-white/6 bg-white/[0.03] p-3">
             <span className="inline-flex rounded-full border border-[#4A9EFF]/20 bg-[#4A9EFF]/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-[#A9D1FF]">
-              {STRATEGIC_TIMEFRAME_LABELS[item.timeframe]}
+              {strategicTimeframeLabel(item.timeframe)}
             </span>
             <h3 className="mt-2 text-sm font-medium text-[#F1F0EE]">{item.title}</h3>
             <p className="mt-1 text-sm leading-relaxed text-[#8B8A85]">{item.body}</p>
@@ -377,9 +382,7 @@ function ScanProgressPanel({ scan, results, processingIssue, retryingMeasurement
 }
 
 function evidenceText(issue: Issue): string {
-  const evidence = issue.evidence?.slice(0, 2)
-  if (!evidence?.length) return ''
-  return ` Evidence: ${evidence.map(item => `${item.label}: ${item.value}`).join('; ')}.`
+  return issueEvidenceLine(issue)
 }
 
 function buildMeasurementNotes(results: ScanResult): string[] {
@@ -392,7 +395,7 @@ function buildMeasurementNotes(results: ScanResult): string[] {
 
 function buildDeterministicFixPrompts(results: ScanResult, activeIssues: Issue[]) {
   const issueLines = activeIssues.map((issue, index) =>
-    `${index + 1}. [${issue.severity.toUpperCase()} · ${issue.confidence ?? 'unknown'}] ${issue.title}. ${issue.plainEnglish || issue.description}${evidenceText(issue)}`
+    `${index + 1}. [${issueSeverityLabel(issue)} · ${issueConfidenceLabel(issue)}] ${issueTitle(issue)}. ${issueBody(issue)}${evidenceText(issue)}`
   )
   const measurementNotes = buildMeasurementNotes(results)
 

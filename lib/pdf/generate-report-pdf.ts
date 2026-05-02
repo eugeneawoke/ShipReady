@@ -2,6 +2,14 @@ import chromium from '@sparticuz/chromium'
 import puppeteer from 'puppeteer-core'
 import path from 'node:path'
 import type { ScanResult, IssueCategory } from '@/types/scan'
+import {
+  issueBody,
+  issueConfidenceLabel,
+  issueSeverityLabel,
+  issueTitle,
+  normalizeStrategicRecommendationsForDisplay,
+  strategicTimeframeLabel,
+} from '@/lib/report/report-safety'
 
 const CATEGORY_LABELS: Record<IssueCategory, string> = {
   performance: 'Performance',
@@ -22,18 +30,20 @@ function escapeHtml(value: string) {
 
 function renderIssue(issue: NonNullable<ScanResult['performance']['issues']>[number]) {
   const evidence = issue.evidence?.slice(0, 3).map(item =>
-    `<span class="evidence">${escapeHtml(item.label)}: ${escapeHtml(String(item.value))}</span>`
+    `<span class="evidence">${escapeHtml(item.label ?? 'Evidence')}: ${escapeHtml(String(item.value ?? 'unknown'))}</span>`
   ).join('') ?? ''
+  const severity = issueSeverityLabel(issue).toLowerCase()
+  const confidence = issueConfidenceLabel(issue)
 
   return `
     <div class="issue">
       <div class="issue-meta">
-        <span class="severity severity-${issue.severity}">${escapeHtml(issue.severity)}</span>
-        ${issue.confidence ? `<span class="confidence">${escapeHtml(issue.confidence)}</span>` : ''}
+        <span class="severity severity-${escapeHtml(severity)}">${escapeHtml(severity)}</span>
+        ${confidence !== 'unknown' ? `<span class="confidence">${escapeHtml(confidence)}</span>` : ''}
         ${issue.value !== undefined ? `<span class="value">${escapeHtml(String(issue.value))}</span>` : ''}
       </div>
-      <h4>${escapeHtml(issue.title)}</h4>
-      <p>${escapeHtml(issue.plainEnglish)}</p>
+      <h4>${escapeHtml(issueTitle(issue))}</h4>
+      <p>${escapeHtml(issueBody(issue))}</p>
       ${evidence ? `<div class="evidence-list">${evidence}</div>` : ''}
     </div>
   `
@@ -60,10 +70,11 @@ function renderHtml(result: ScanResult, options: { whiteLabel: boolean; domain: 
   const priorities = result.topPriorities?.length
     ? `<div class="priorities"><h3>Top priorities</h3><ol>${result.topPriorities.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ol></div>`
     : ''
-  const strategicRecommendations = result.strategicRecommendations?.length
-    ? `<section class="strategy"><h3>Strategic recommendations</h3>${result.strategicRecommendations.map(item => `
+  const safeStrategicRecommendations = normalizeStrategicRecommendationsForDisplay(result.strategicRecommendations)
+  const strategicRecommendations = safeStrategicRecommendations.length
+    ? `<section class="strategy"><h3>Strategic recommendations</h3>${safeStrategicRecommendations.map(item => `
         <div class="strategy-item">
-          <span class="timeframe">${escapeHtml(item.timeframe.replaceAll('_', ' '))}</span>
+          <span class="timeframe">${escapeHtml(strategicTimeframeLabel(item.timeframe))}</span>
           <h4>${escapeHtml(item.title)}</h4>
           <p>${escapeHtml(item.body)}</p>
         </div>
