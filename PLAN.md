@@ -29,6 +29,11 @@
 | 9 | Quality Overhaul | Confidence/evidence model, phased scan flow, truthful scoring, telemetry | ✅ core shipped; telemetry script остаётся |
 | 10 | Private Beta Readiness | Продовая проверка, env, миграции, feedback loop | 🔄 текущая фаза |
 | 11 | AI Content Checks | AI-only wow insights поверх evidence, Pro-only аддон | 💡 идея |
+| 12 | Scanner Expansion Stage 1 | +11 checks: SEO×5, Security×4, Mobile×2 | ✅ done (2026-05-07, commit 53c37c3) |
+| 13 | Scanner Expansion Stage 2 | Accessibility category + REST API v1 + api_keys table | 🔄 in progress |
+| 14 | Scanner Expansion Stage 3 | GitHub Action + Vercel hook + Slack/Discord | ⏳ после Stage 2 |
+| 15 | Scanner Expansion Stage 4 | Multi-page crawl (Pro/Agency) | ⏳ после Stage 2 |
+| 16 | Scanner Expansion Stage 5 | Agency dashboard + team seats | ⏳ после Stage 2 |
 
 ---
 

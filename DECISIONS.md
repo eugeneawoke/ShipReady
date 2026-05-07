@@ -123,6 +123,17 @@ Fallback: локально в dev можно продолжать запуска
 Почему: Lemon Squeezy не подходит для страны основателя. Документация, публичные тексты и roadmap не должны обещать или рекомендовать Lemon Squeezy.
 Последствие: billing webhook/checkout код должен быть перепроектирован provider-agnostic, когда будет выбран новый провайдер.
 
+### D-24: api_keys таблица использует key_hash + service role для валидации
+Решение: API ключи хранятся как `sha256(rawKey)` в поле `key_hash`. Route handlers, которые валидируют ключ по `key_hash`, используют Supabase **service role client** (bypasses RLS), а не anon/user клиент.
+Почему: API caller не имеет Supabase сессии — только Bearer token. RLS на `api_keys` настроена для dashboard UI (пользователь управляет своими ключами через сессию). Но валидация ключа при API-запросе — это server-side операция от имени сервиса, не от имени пользователя.
+Последствие: `key_hash` — единственное поле для lookup при API-запросе. Никогда не хранить plain-text ключ. Service role используется только в API route handlers, не в клиентском коде.
+
+### D-25: Accessibility — 6-я категория сканера, a11y-score мигрирует из performance
+Решение: добавляем категорию `accessibility` (6-я). Существующий check `a11y-score-low` в `buildPerformanceIssues` переносится в новый `lib/checks/accessibility.ts` под новым ID `low-a11y-score`. TOTAL_CHECKS.performance падает с 6 до 5.
+Почему: accessibility — самостоятельная область, не подкатегория performance. Группировка её под performance размывала scoring и делала performance category семантически нечёткой.
+Веса после Stage 2: performance 0.22, seo 0.18, security 0.22, mobile 0.10, ai_visibility 0.18, accessibility 0.10 = 1.0.
+Последствие: `IssueCategory`, `IssueSource`, `ScanResult`, `getAllIssues()`, `buildScanResult()` и `CATEGORY_WEIGHTS` — все обновляются в рамках Stage 2. Report UI добавляет accessibility card.
+
 ### D-23: Lighthouse runner должен использовать официальный config path и облегчённый mobile fallback
 Решение: запускать Lighthouse через custom config object по официальной схеме `lighthouse(url, flags, config)`, а не через случайный набор flags/settings. Основной профиль остаётся mobile, но ограничивается нужными категориями (`performance`, `accessibility`), возвращается к коротким wait thresholds (`15s/35s`) и отключает full-page screenshot. При `TARGET_CRASHED` допускается один честный fallback на более лёгкий mobile performance-only профиль с `partial` статусом.
 Почему: документация Lighthouse прямо рекомендует config extension для кастомных запусков, предупреждает что очень высокий `max-wait-for-load` ведёт к большим trace и instability, и отдельно даёт флаг `disable-full-page-screenshot` как способ убрать тяжёлый артефакт. Наш предыдущий запуск делал обратное: держал `maxWaitForLoad=120s`, тащил лишние категории и собирал тяжёлые артефакты, повышая шанс `TARGET_CRASHED`.
