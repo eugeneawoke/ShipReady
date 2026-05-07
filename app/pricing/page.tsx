@@ -53,14 +53,12 @@ function Cell({ value, highlight }: { value: CellValue; highlight?: boolean }) {
   )
 }
 
-// ─── plan card ────────────────────────────────────────────────────────────────
+// ─── plan strip ───────────────────────────────────────────────────────────────
 
-interface PlanCardProps {
+interface PlanStripProps {
   tag: string
   price: string
   period: string | null
-  desc: string
-  features: string[]
   cta: string
   ctaHref: string
   highlight?: boolean
@@ -70,13 +68,13 @@ interface PlanCardProps {
   cancelLabel: string
 }
 
-function PlanCard({ tag, price, period, desc, features, cta, ctaHref, highlight, comingSoon, popularLabel, comingSoonLabel, cancelLabel }: PlanCardProps) {
+function PlanStrip({ tag, price, period, cta, ctaHref, highlight, comingSoon, popularLabel, comingSoonLabel, cancelLabel }: PlanStripProps) {
   return (
-    <div className={`relative flex flex-col p-6 rounded-2xl border transition-colors h-full ${
+    <div className={`relative flex flex-col items-center gap-3 px-5 py-5 pt-7 rounded-2xl border transition-colors ${
       comingSoon
         ? 'bg-[#161618] border-white/[0.04] opacity-60'
         : highlight
-        ? 'bg-[#6E56CF]/[0.06] border-[#6E56CF] shadow-[0_0_60px_rgba(110,86,207,0.12)]'
+        ? 'bg-[#6E56CF]/[0.06] border-[#6E56CF]'
         : 'bg-[#161618] border-white/[0.06] hover:border-white/[0.14]'
     }`}>
       {highlight && !comingSoon && (
@@ -90,39 +88,25 @@ function PlanCard({ tag, price, period, desc, features, cta, ctaHref, highlight,
         </div>
       )}
 
-      <p className="text-[10px] text-[#5A5955] uppercase tracking-[0.15em] font-mono mb-1">{tag}</p>
-      <p className="text-sm text-[#8B8A85] mb-4">{desc}</p>
+      <p className="text-[10px] text-[#5A5955] uppercase tracking-[0.15em] font-mono">{tag}</p>
 
-      <div className="flex items-baseline gap-1 mb-5">
-        <span className="text-[38px] font-mono font-medium leading-none">{price}</span>
+      <div className="flex items-baseline gap-1">
+        <span className="text-[34px] font-mono font-medium leading-none">{price}</span>
         {period && <span className="text-[#8B8A85] text-sm">{period}</span>}
       </div>
 
-      <ul className="space-y-2.5 flex-1 mb-6">
-        {features.map((f) => (
-          <li key={f} className={`text-sm flex items-center gap-2 ${comingSoon ? 'text-[#5A5955]' : highlight ? 'text-[#F1F0EE]' : 'text-[#8B8A85]'}`}>
-            <span className="shrink-0">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={comingSoon ? '#3A3A3A' : '#3DDC84'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" /><path d="M9 12l2 2 4-4" />
-              </svg>
-            </span>
-            {f}
-          </li>
-        ))}
-      </ul>
-
-      <div>
-        {comingSoon ? (
-          <Link
-            href="/roadmap"
-            className="block w-full py-2.5 rounded-xl text-sm font-medium text-center bg-[#1E1E21] border border-white/[0.06] text-[#5A5955] hover:text-[#8B8A85] transition-colors"
-          >
-            {comingSoonLabel} →
-          </Link>
-        ) : (
+      {comingSoon ? (
+        <Link
+          href="/roadmap"
+          className="block w-full py-2 rounded-xl text-sm font-medium text-center bg-[#1E1E21] border border-white/[0.06] text-[#5A5955] hover:text-[#8B8A85] transition-colors"
+        >
+          {comingSoonLabel} →
+        </Link>
+      ) : (
+        <>
           <Link
             href={ctaHref}
-            className={`block w-full py-2.5 rounded-xl text-sm font-medium text-center transition-colors ${
+            className={`block w-full py-2 rounded-xl text-sm font-medium text-center transition-colors ${
               highlight
                 ? 'bg-[#6E56CF] text-white hover:bg-[#7C68D4]'
                 : 'bg-[#1E1E21] border border-white/[0.08] text-[#F1F0EE] hover:bg-[#232328]'
@@ -130,11 +114,11 @@ function PlanCard({ tag, price, period, desc, features, cta, ctaHref, highlight,
           >
             {cta}
           </Link>
-        )}
-        {!comingSoon && period && (
-          <p className="mt-2 text-center text-[11px] text-[#5A5955]">{cancelLabel}</p>
-        )}
-      </div>
+          {period && (
+            <p className="text-[11px] text-[#5A5955]">{cancelLabel}</p>
+          )}
+        </>
+      )}
     </div>
   )
 }
@@ -297,16 +281,14 @@ export default async function PricingPage() {
           <p className="text-[#8B8A85] text-sm max-w-sm mx-auto leading-relaxed">{tpricing('sub')}</p>
         </div>
 
-        {/* plan cards */}
-        <div className="grid md:grid-cols-3 gap-4 items-stretch mb-20">
+        {/* plan strip */}
+        <div className="grid md:grid-cols-3 gap-3 mb-8">
           {plans.map((plan) => (
-            <PlanCard
+            <PlanStrip
               key={plan.nameKey}
               tag={plan.nameKey}
               price={plan.price}
               period={plan.period}
-              desc={plan.desc}
-              features={plan.features}
               cta={plan.cta}
               ctaHref={plan.highlight ? '/auth/login' : plan.coming ? '/roadmap' : '/'}
               highlight={plan.highlight}
@@ -318,8 +300,20 @@ export default async function PricingPage() {
           ))}
         </div>
 
+        {/* scroll invitation */}
+        <div className="flex items-center gap-4 mb-10">
+          <div className="h-px flex-1 bg-white/[0.04]" />
+          <a
+            href="#comparison"
+            className="text-[11px] font-mono uppercase tracking-[0.14em] text-[#3A3A40] hover:text-[#8B8A85] transition-colors cursor-pointer whitespace-nowrap"
+          >
+            {tp('tableHeading')} ↓
+          </a>
+          <div className="h-px flex-1 bg-white/[0.04]" />
+        </div>
+
         {/* comparison table */}
-        <div className="mb-20">
+        <div id="comparison" className="mb-20 scroll-mt-24">
           <h2 className="text-[11px] font-mono uppercase tracking-[0.14em] text-[#5A5955] mb-6 text-center">
             {tp('tableHeading')}
           </h2>
