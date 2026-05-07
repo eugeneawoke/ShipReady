@@ -302,14 +302,18 @@ export default async function PricingPage() {
 
         {/* scroll invitation */}
         <div className="flex items-center gap-4 mb-10">
-          <div className="h-px flex-1 bg-white/[0.04]" />
-          <a
-            href="#comparison"
-            className="text-[11px] font-mono uppercase tracking-[0.14em] text-[#3A3A40] hover:text-[#8B8A85] transition-colors cursor-pointer whitespace-nowrap"
-          >
-            {tp('tableHeading')} ↓
-          </a>
-          <div className="h-px flex-1 bg-white/[0.04]" />
+          <div className="h-px flex-1" style={{ background: 'linear-gradient(to right, transparent, rgba(110,86,207,0.25))' }} />
+          <span className="p-px rounded-full shadow-[0_0_24px_rgba(110,86,207,0.18)]" style={{ background: 'linear-gradient(135deg, rgba(110,86,207,0.6), rgba(167,139,250,0.4))' }}>
+            <a
+              href="#comparison"
+              className="flex items-center px-5 py-2 rounded-full bg-[#0E0E0F] hover:bg-[#111113] transition-colors cursor-pointer whitespace-nowrap"
+            >
+              <span className="text-[11px] font-mono uppercase tracking-[0.14em]" style={{ background: 'linear-gradient(90deg, #9b7cf8, #c4b5fd)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                {tp('tableHeading')} ↓
+              </span>
+            </a>
+          </span>
+          <div className="h-px flex-1" style={{ background: 'linear-gradient(to left, transparent, rgba(110,86,207,0.25))' }} />
         </div>
 
         {/* comparison table */}
