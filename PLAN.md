@@ -33,7 +33,7 @@
 | 13 | Scanner Expansion Stage 2 | Accessibility category + REST API v1 + api_keys table | ✅ done (2026-05-07, commit a272270) |
 | 14 | Scanner Expansion Stage 3 | GitHub Action + Vercel hook + Slack/Discord | 🚫 отложено → Agency roadmap |
 | 15 | Scanner Expansion Stage 4 | Multi-page crawl (Pro/Agency) | ✅ done (2026-05-07, BFS crawler + guardrails + report UI) |
-| 16 | Scanner Expansion Stage 5 | Agency dashboard + team seats | ⏳ после Stage 4 |
+| 16 | Scanner Expansion Stage 5 | Team seats + bulk scan API | ✅ done (2026-05-07) — Agency dashboard defer→Phase 17 |
 | 17 | Agency Integrations | GitHub Action (Marketplace), Vercel deploy hook, Slack/Discord alerts | 💡 Agency tier, post-Stage 5 |
 
 ---

@@ -34,7 +34,17 @@ export async function GET(
   }
 
   if (scan.user_id !== apiKeyCtx.userId) {
-    return NextResponse.json({ error: 'Access denied' }, { status: 403 })
+    const { data: membership } = await supabase
+      .from('team_members')
+      .select('id')
+      .eq('owner_user_id', scan.user_id)
+      .eq('member_user_id', apiKeyCtx.userId)
+      .not('accepted_at', 'is', null)
+      .maybeSingle()
+
+    if (!membership) {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
+    }
   }
 
   if (!scan.results) {

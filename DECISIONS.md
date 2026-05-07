@@ -138,3 +138,13 @@ Fallback: локально в dev можно продолжать запуска
 Решение: запускать Lighthouse через custom config object по официальной схеме `lighthouse(url, flags, config)`, а не через случайный набор flags/settings. Основной профиль остаётся mobile, но ограничивается нужными категориями (`performance`, `accessibility`), возвращается к коротким wait thresholds (`15s/35s`) и отключает full-page screenshot. При `TARGET_CRASHED` допускается один честный fallback на более лёгкий mobile performance-only профиль с `partial` статусом.
 Почему: документация Lighthouse прямо рекомендует config extension для кастомных запусков, предупреждает что очень высокий `max-wait-for-load` ведёт к большим trace и instability, и отдельно даёт флаг `disable-full-page-screenshot` как способ убрать тяжёлый артефакт. Наш предыдущий запуск делал обратное: держал `maxWaitForLoad=120s`, тащил лишние категории и собирал тяжёлые артефакты, повышая шанс `TARGET_CRASHED`.
 Последствие: mobile audit остаётся правдивым и продуктово полезным, но не тратит ресурсы на ненужный SEO score внутри Lighthouse. При деградации пользователь получает partial measurement с предупреждением, а не silent pass и не полностью пустой результат.
+
+### D-26: Agency multi-domain dashboard UI отложен до Phase 17
+Решение: не реализовывать multi-domain dashboard UI (Stage 5.1 из спека) в рамках Scanner Expansion. Инфраструктура (`monitored_domains` с `last_scan_id`, `last_alerted_at`) уже есть; нужна только UI для domain cards с trend badge и plan-limit enforcement.
+Почему: dashboard UI сложнее, чем team seats + bulk scan API. Billing ещё не активирован, поэтому Agency-клиентов пока нет. Добавление UI без реальных пользователей — преждевременно.
+Последствие: Phase 17 содержит Agency Integrations (GitHub Action, Vercel hook, Slack/Discord alerts) + multi-domain dashboard UI. Всё Agency-tier — в одной итерации после подтверждения первых agency-клиентов.
+
+### D-27: team_members — design owner-centric, accept через API key
+Решение: таблица `team_members` с полями `owner_user_id`, `member_user_id`, `invite_token`, `invited_email`. "Команда" — это аккаунт Agency-владельца, без отдельного `teams` table. Accept через `POST /api/v1/teams/accept` с Bearer API-ключом приглашённого + токеном из письма.
+Почему: отдельная `teams` таблица нужна только при multi-owner setup. Для Agency (один владелец, до 5 мест) owner-centric model проще и не создаёт лишних join'ов. Приглашённые — разработчики с API-ключами, поэтому token+API-key accept достаточен для MVP.
+Последствие: team access check в `/api/v1/scan/:id` и `/api/v1/scan/:id/issues` смотрит в `team_members` по `owner_user_id` = scan owner и `member_user_id` = requester. Максимум 5 мест на Agency аккаунт проверяется при invite, не через DB constraint.
