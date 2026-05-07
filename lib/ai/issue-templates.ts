@@ -127,7 +127,7 @@ export const T: Record<string, IssueTemplate> = {
   },
 
   // ─────────────────────────────────────────
-  // SEO / SOCIAL (11)
+  // SEO / SOCIAL (16)
   // ─────────────────────────────────────────
 
   'missing-title': {
@@ -538,8 +538,72 @@ export const metadata: Metadata = {
     cursorPrompt: 'In `app/robots.ts`, add explicit Allow rules: `{ userAgent: "GPTBot", allow: "/" }`, `{ userAgent: "ClaudeBot", allow: "/" }`, `{ userAgent: "PerplexityBot", allow: "/" }`, `{ userAgent: "OAI-SearchBot", allow: "/" }`.',
   },
 
+  'images-missing-alt': {
+    id: 'images-missing-alt',
+    category: 'seo',
+    severity: 'medium',
+    confidence: 'heuristic',
+    scoreEligible: false,
+    title: 'Images with empty or missing alt text',
+    description: 'One or more non-decorative images have empty or missing alt attributes.',
+    plainEnglish: 'Some images have no meaningful alt text. Screen readers read these as "image" with no context, hurting accessibility and image search visibility.',
+    cursorPrompt: 'Add descriptive alt text to all meaningful images. Use alt="" only for purely decorative images that also have role="presentation" or aria-hidden="true". In Next.js every <Image> requires an alt prop.',
+  },
+
+  'meta-robots-noindex': {
+    id: 'meta-robots-noindex',
+    category: 'seo',
+    severity: 'high',
+    confidence: 'verified',
+    scoreEligible: true,
+    title: 'Page blocked from indexing via meta robots',
+    description: 'meta[name="robots"] contains noindex — search engines will not index this page.',
+    plainEnglish: 'A meta tag explicitly tells search engines not to index this page. If this is a public marketing or product page, removing noindex is critical for organic traffic.',
+    cursorPrompt: 'In Next.js, remove `robots: { index: false }` from the page metadata export or generateMetadata(). Check that no middleware or layout is injecting a noindex directive for this route.',
+    docsUrl: 'https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag',
+  },
+
+  'robots-txt-disallow': {
+    id: 'robots-txt-disallow',
+    category: 'seo',
+    severity: 'high',
+    confidence: 'verified',
+    scoreEligible: true,
+    title: 'URL disallowed in robots.txt',
+    description: 'The scanned URL path is blocked by a Disallow rule in robots.txt for Googlebot or all crawlers.',
+    plainEnglish: 'Your robots.txt file tells Google not to crawl this page. If this is a public page you want indexed, the Disallow rule needs to be removed or narrowed.',
+    cursorPrompt: 'In Next.js, update app/robots.ts and remove or narrow the Disallow rule that blocks this path. Check both wildcard (*) and Googlebot-specific rules. After deploying, use Google Search Console > URL Inspection to request re-crawling.',
+    docsUrl: 'https://developers.google.com/search/docs/crawling-indexing/robots/create-robots-txt',
+  },
+
+  'thin-internal-linking': {
+    id: 'thin-internal-linking',
+    category: 'seo',
+    severity: 'low',
+    confidence: 'heuristic',
+    scoreEligible: false,
+    title: 'Very few internal links on the page',
+    description: 'Fewer than 3 internal anchor links found in the page body.',
+    plainEnglish: 'This page has almost no links to other pages on your site. Internal links help Google discover and understand your site structure, and help visitors navigate. Most substantive pages should link to at least 3–5 related pages.',
+    cursorPrompt: 'Add at least 3 internal links from this page to related pages on your site. In Next.js, use <Link href="/related-page"> components. Good candidates: navigation links, related articles, CTAs pointing to other sections of your product.',
+    docsUrl: 'https://developers.google.com/search/docs/crawling-indexing/links-crawlable',
+  },
+
+  'canonical-url-mismatch': {
+    id: 'canonical-url-mismatch',
+    category: 'seo',
+    severity: 'medium',
+    confidence: 'likely',
+    scoreEligible: false,
+    title: 'Canonical URL differs from page URL',
+    description: 'The canonical tag points to a different URL than the current page after normalising trailing slashes.',
+    plainEnglish: 'Your canonical tag points to a slightly different URL than the page you\'re on (e.g., with/without trailing slash, or a different path). Google will treat the canonical URL as the "real" version and may not index this one.',
+    cursorPrompt: 'In Next.js, ensure alternates.canonical in generateMetadata() exactly matches the production URL for this page. Set metadataBase to your NEXT_PUBLIC_APP_URL and use relative paths in alternates.canonical.',
+    docsUrl: 'https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls',
+  },
+
   // ─────────────────────────────────────────
-  // SECURITY (11)
+  // SECURITY (15)
   // ─────────────────────────────────────────
 
   'no-https': {
@@ -786,8 +850,58 @@ For custom certificates:
     docsUrl: 'https://developer.mozilla.org/en-US/docs/Web/Security/Mixed_content/How_to_fix_website_with_mixed_content',
   },
 
+  'missing-permissions-policy': {
+    id: 'missing-permissions-policy',
+    category: 'security',
+    severity: 'low',
+    confidence: 'verified',
+    scoreEligible: true,
+    title: 'Missing Permissions-Policy header',
+    description: 'Permissions-Policy response header is absent — browser features are unrestricted.',
+    plainEnglish: 'Without a Permissions-Policy header, any script on your page can access the camera, microphone, geolocation, and other sensitive browser features. This is a defence-in-depth security header that limits exposure if you get XSS.',
+    cursorPrompt: 'In next.config.ts headers(), add: { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" }. Adjust the value to allow only the features your site actually uses.',
+    docsUrl: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy',
+  },
+
+  'missing-cookie-consent': {
+    id: 'missing-cookie-consent',
+    category: 'security',
+    severity: 'medium',
+    confidence: 'heuristic',
+    scoreEligible: false,
+    title: 'No cookie consent mechanism detected',
+    description: 'Analytics/tracking scripts found but no cookie consent banner pattern detected.',
+    plainEnglish: 'Your site loads tracking scripts (Google Analytics, Meta Pixel, etc.) but no cookie consent banner was found. GDPR and similar laws require informed consent before tracking EU visitors — fines can reach €20M.',
+    cursorPrompt: 'Add a cookie consent solution before your analytics scripts load. Options: (1) CookieYes or Cookiebot (managed SaaS), (2) react-cookie-consent package, (3) build a simple banner that conditionally loads analytics. In Next.js, wrap GA/GTM initialization in a consent check before calling gtag() or loading the script.',
+    docsUrl: 'https://gdpr.eu/cookies/',
+  },
+
+  'missing-privacy-policy': {
+    id: 'missing-privacy-policy',
+    category: 'security',
+    severity: 'medium',
+    confidence: 'heuristic',
+    scoreEligible: false,
+    title: 'No privacy policy link found',
+    description: 'No link to a privacy policy page was detected on this page.',
+    plainEnglish: 'A privacy policy link is legally required in most jurisdictions if you collect any user data. It also builds trust with visitors who want to understand how their data is handled.',
+    cursorPrompt: 'Create a privacy policy page at /privacy and add a link to it in your site footer. In Next.js: (1) create app/privacy/page.tsx, (2) add <Link href="/privacy">Privacy Policy</Link> in your footer component. Use a privacy policy generator (e.g., Termly, PrivacyPolicies.com) as a starting template.',
+  },
+
+  'third-party-trackers': {
+    id: 'third-party-trackers',
+    category: 'security',
+    severity: 'low',
+    confidence: 'heuristic',
+    scoreEligible: false,
+    title: 'Third-party tracking scripts detected',
+    description: 'External scripts from known tracker domains were found on the page.',
+    plainEnglish: 'Your site loads scripts from third-party tracking services. Each tracker adds latency, can access cookies/localStorage, and represents a privacy surface. More trackers = slower page + more GDPR liability.',
+    cursorPrompt: 'Review each tracking script and remove any you don\'t actively use. For essential trackers, ensure: (1) consent gate before loading, (2) use next/script with strategy="afterInteractive", (3) configure the tracker to respect Do Not Track. Consider server-side analytics (Plausible, Fathom, PostHog cloud) which load no client-side tracker.',
+  },
+
   // ─────────────────────────────────────────
-  // MOBILE (4)
+  // MOBILE (6)
   // ─────────────────────────────────────────
 
   'missing-viewport': {
@@ -878,6 +992,31 @@ content="width=device-width, initial-scale=1"`,
    }
 Or place the file at app/apple-icon.png — Next.js handles it automatically.`,
     docsUrl: 'https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariWebContent/ConfiguringWebApplications/ConfiguringWebApplications.html',
+  },
+
+  'missing-web-manifest': {
+    id: 'missing-web-manifest',
+    category: 'mobile',
+    severity: 'low',
+    confidence: 'likely',
+    scoreEligible: false,
+    title: 'No web app manifest found',
+    description: 'No <link rel="manifest"> found in head and /manifest.json returned non-200.',
+    plainEnglish: 'Your site has no web app manifest. Without it, users who add your site to their home screen on Android get a generic browser icon and no app-like experience. It also helps Chrome show the "Add to Home Screen" prompt.',
+    cursorPrompt: 'In Next.js App Router, create app/manifest.ts: export default function manifest() { return { name: "Your App", short_name: "App", start_url: "/", display: "standalone", background_color: "#ffffff", theme_color: "#000000", icons: [{ src: "/icon.png", sizes: "192x192", type: "image/png" }] } }. Next.js will serve this at /manifest.webmanifest automatically.',
+    docsUrl: 'https://nextjs.org/docs/app/api-reference/file-conventions/metadata/manifest',
+  },
+
+  'phone-numbers-not-linked': {
+    id: 'phone-numbers-not-linked',
+    category: 'mobile',
+    severity: 'low',
+    confidence: 'heuristic',
+    scoreEligible: false,
+    title: 'Phone numbers not linked for tap-to-call',
+    description: 'Phone number patterns detected in body text without adjacent tel: links.',
+    plainEnglish: 'Phone numbers on your page are plain text — mobile users cannot tap to call. Wrapping them in <a href="tel:+1234567890"> lets users call directly from the page, which significantly increases conversion on mobile.',
+    cursorPrompt: 'Wrap all phone numbers in tel: links. In React/Next.js: <a href="tel:+1234567890" className="...">(123) 456-7890</a>. Search your components for phone number patterns and replace with linked versions. Include the country code (+1 for US) in the href for international compatibility.',
   },
 
   // ─────────────────────────────────────────

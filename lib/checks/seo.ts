@@ -25,6 +25,25 @@ function hasNoindexDirective(content: string | undefined): boolean {
   return /\bnoindex\b/i.test(content ?? '')
 }
 
+function isPathDisallowedByRobots(robotsText: string, pagePath: string): boolean {
+  const lines = robotsText.split('\n').map(l => l.trim())
+  let inRelevantBlock = false
+  const disallowRules: string[] = []
+
+  for (const line of lines) {
+    if (/^user-agent:\s*(\*|googlebot)$/i.test(line)) {
+      inRelevantBlock = true
+    } else if (/^user-agent:/i.test(line)) {
+      inRelevantBlock = false
+    } else if (inRelevantBlock && /^disallow:/i.test(line)) {
+      const rule = line.replace(/^disallow:\s*/i, '').trim()
+      if (rule) disallowRules.push(rule)
+    }
+  }
+
+  return disallowRules.some(rule => pagePath.startsWith(rule))
+}
+
 export async function runSEOChecks(
   url: string,
   html: string,
@@ -76,6 +95,14 @@ export async function runSEOChecks(
     ))
   }
 
+  if (pageNoindex) {
+    issues.push(withIssueMeta(
+      { ...T['meta-robots-noindex'], value: robots ?? 'noindex' },
+      'dom',
+      [evidence('text', 'Robots directive', robots ?? 'noindex')],
+    ))
+  }
+
   const h1s = $('h1')
   if (h1s.length !== 1) {
     issues.push(withIssueMeta(
@@ -108,6 +135,21 @@ export async function runSEOChecks(
           'dom',
           [evidence('text', 'Canonical domain', canonicalHostname), evidence('text', 'Page domain', pageHostname)],
         ))
+      }
+      if (includeLikely && canonicalUrl.hostname === new URL(url).hostname) {
+        const normalizeUrl = (u: URL) => `${u.origin}${u.pathname.replace(/\/$/, '')}`
+        const normalizedCanonical = normalizeUrl(canonicalUrl)
+        const normalizedPage = normalizeUrl(new URL(url))
+        if (normalizedCanonical !== normalizedPage) {
+          issues.push(withIssueMeta(
+            { ...T['canonical-url-mismatch'], value: canonicalUrl.pathname },
+            'dom',
+            [
+              evidence('text', 'Canonical URL', canonicalUrl.toString()),
+              evidence('text', 'Page URL', url),
+            ],
+          ))
+        }
       }
     }
   }
@@ -230,6 +272,41 @@ export async function runSEOChecks(
     ))
   }
 
+  if (includeHeuristics) {
+    const emptyAltNonDecorative = images.filter((el) => {
+      const img = $(el)
+      const isDecorative = img.attr('role') === 'presentation' || img.attr('aria-hidden') === 'true'
+      return !isDecorative && img.attr('alt') === ''
+    })
+    if (emptyAltNonDecorative.length > 0) {
+      issues.push(withIssueMeta(
+        { ...T['images-missing-alt'], value: `${emptyAltNonDecorative.length} images` },
+        'dom',
+        [evidence('count', 'Images with empty alt', emptyAltNonDecorative.length)],
+      ))
+    }
+  }
+
+  if (includeHeuristics) {
+    const pageHostname = new URL(url).hostname
+    const internalLinks = $('body a[href]').toArray().filter((el) => {
+      const href = $(el).attr('href') ?? ''
+      if (href.startsWith('/') || href.startsWith('#')) return true
+      try {
+        return new URL(href).hostname === pageHostname
+      } catch {
+        return false
+      }
+    })
+    if (internalLinks.length < 3) {
+      issues.push(withIssueMeta(
+        { ...T['thin-internal-linking'], value: `${internalLinks.length} links` },
+        'dom',
+        [evidence('count', 'Internal links found', internalLinks.length)],
+      ))
+    }
+  }
+
   const jsonLdBlocks = $('script[type="application/ld+json"]').toArray()
   if (includeLikely && jsonLdBlocks.length === 0) {
     issues.push(withIssueMeta(
@@ -283,6 +360,14 @@ export async function runSEOChecks(
               ))
             }
           }
+        }
+        const robotsPagePath = new URL(url).pathname
+        if (isPathDisallowedByRobots(robotsText, robotsPagePath)) {
+          issues.push(withIssueMeta(
+            { ...T['robots-txt-disallow'], value: robotsPagePath },
+            'http',
+            [evidence('text', 'Disallowed path', robotsPagePath)],
+          ))
         }
       }
     } catch { /* robots.txt fetch failed — not an issue */ }

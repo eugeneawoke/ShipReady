@@ -60,6 +60,17 @@ const CONFIDENCE_MAP: Record<string, { confidence: IssueConfidence; scoreEligibl
   'ai-crawlers-blocked': { confidence: 'verified', scoreEligible: true },
   'missing-sitemap': { confidence: 'verified', scoreEligible: true },
   'missing-author-entity': { confidence: 'heuristic', scoreEligible: false },
+  'images-missing-alt': { confidence: 'heuristic', scoreEligible: false },
+  'meta-robots-noindex': { confidence: 'verified', scoreEligible: true },
+  'robots-txt-disallow': { confidence: 'verified', scoreEligible: true },
+  'thin-internal-linking': { confidence: 'heuristic', scoreEligible: false },
+  'canonical-url-mismatch': { confidence: 'likely', scoreEligible: false },
+  'missing-permissions-policy': { confidence: 'verified', scoreEligible: true },
+  'missing-cookie-consent': { confidence: 'heuristic', scoreEligible: false },
+  'missing-privacy-policy': { confidence: 'heuristic', scoreEligible: false },
+  'third-party-trackers': { confidence: 'heuristic', scoreEligible: false },
+  'missing-web-manifest': { confidence: 'likely', scoreEligible: false },
+  'phone-numbers-not-linked': { confidence: 'heuristic', scoreEligible: false },
 }
 
 export function evidence(kind: IssueEvidence['kind'], label: string, value: string | number): IssueEvidence {

@@ -7,6 +7,16 @@ import { evidence, withIssueMeta } from '@/lib/checks/issue-meta'
 
 const SENSITIVE_FILES = ['.env', '.env.local', '.env.production', '.git/config']
 
+const TRACKER_DOMAINS = [
+  'google-analytics.com',
+  'googletagmanager.com',
+  'facebook.net',
+  'hotjar.com',
+  'mixpanel.com',
+  'segment.com',
+  'amplitude.com',
+]
+
 function looksLikeEnvFile(text: string) {
   const sample = text.slice(0, 3000)
   if (sample.includes('<html') || sample.includes('<!doctype')) return false
@@ -130,6 +140,62 @@ export async function runSecurityChecks(
 
     if (hasMixedContent) {
       issues.push(withIssueMeta({ ...T['mixed-content'] }, 'dom', [evidence('text', 'Mixed content', 'http:// resource detected')]))
+    }
+
+    if (!headers.get('permissions-policy')) {
+      issues.push(withIssueMeta({ ...T['missing-permissions-policy'] }, 'http', [evidence('header', 'Permissions-Policy', 'missing')]))
+    }
+
+    const trackerScripts = $('script[src]').toArray().filter((el) => {
+      const src = $(el).attr('src') ?? ''
+      try {
+        const hostname = new URL(src).hostname
+        return TRACKER_DOMAINS.some(domain => hostname.includes(domain))
+      } catch {
+        return false
+      }
+    })
+
+    if (trackerScripts.length > 0) {
+      issues.push(withIssueMeta(
+        { ...T['third-party-trackers'], value: `${trackerScripts.length} tracker${trackerScripts.length === 1 ? '' : 's'}` },
+        'dom',
+        [evidence('count', 'Tracker scripts found', trackerScripts.length)],
+      ))
+    }
+
+    const hasTrackers = trackerScripts.length > 0 ||
+      $('script:not([src])').toArray().some(el =>
+        ['gtag', 'ga(', '_gaq', 'fbq', 'hj(', 'mixpanel', 'analytics'].some(kw =>
+          ($(el).html() ?? '').includes(kw)
+        )
+      )
+
+    const hasConsentBanner =
+      $('[class*="cookie"],[id*="cookie"],[class*="consent"],[id*="consent"],[class*="gdpr"],[id*="gdpr"]').length > 0 ||
+      $('#onetrust-consent-sdk,.cc-window,#CybotCookiebotDialog').length > 0
+
+    if (hasTrackers && !hasConsentBanner) {
+      issues.push(withIssueMeta(
+        { ...T['missing-cookie-consent'] },
+        'dom',
+        [evidence('text', 'Tracking detected without consent banner', 'no consent pattern found')],
+      ))
+    }
+
+    const hasPrivacyLink = $('a[href]').toArray().some((el) => {
+      const href = ($(el).attr('href') ?? '').toLowerCase()
+      const text = ($(el).text() ?? '').toLowerCase()
+      return href.includes('/privacy') || href.includes('/datenschutz') ||
+        text.includes('privacy policy') || text.includes('политика')
+    })
+
+    if (!hasPrivacyLink) {
+      issues.push(withIssueMeta(
+        { ...T['missing-privacy-policy'] },
+        'dom',
+        [evidence('selector', 'a[href*=privacy]', 'missing')],
+      ))
     }
 
     return issues

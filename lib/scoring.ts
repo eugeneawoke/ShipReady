@@ -27,9 +27,9 @@ const DEDUCTIONS: Record<IssueSeverity, number> = {
 
 const TOTAL_CHECKS = {
   performance: 6,  // lcp, cls, inp, fcp, perf-score, a11y-score
-  seo: 16,         // title, description, h1, canonical, social tags, robots/indexability, images, placeholder, links
-  security: 10,    // https, hsts, x-frame, xcto, referrer-policy, csp, ssl, exposed-env, api-key, mixed-content
-  mobile: 3,       // viewport, favicon, apple-touch-icon
+  seo: 21,         // title, description, h1, canonical, social tags, robots/indexability, images, placeholder, links + 5 Stage 1
+  security: 14,    // https, hsts, x-frame, xcto, referrer-policy, csp, ssl, exposed-env, api-key, mixed-content + 4 Stage 1
+  mobile: 5,       // viewport, favicon, apple-touch-icon + 2 Stage 1
   ai_visibility: 8, // schema-org, faq-schema, heading-hierarchy, thin-content, llms-txt, ai-crawlers, sitemap, author-entity
 }
 
