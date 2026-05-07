@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { localeCookieName, resolveLocale, normalizeLocale } from '@/lib/i18n'
 
-const SESSION_MAX_AGE = 60 * 60 * 24 * 30 // 30 days
+const SESSION_MAX_AGE = 60 * 60 * 24 * 7 // 7 days
 
 // style-src keeps 'unsafe-inline' — React and framer-motion use inline style attributes.
 // script-src uses nonce + strict-dynamic — no unsafe-inline in script context.
