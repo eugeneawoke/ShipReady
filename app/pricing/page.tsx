@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase'
 import { SiteHeader } from '@/components/SiteHeader'
 import { CinematicFooter } from '@/components/ui/motion-footer'
+import { ScrollAnchorButton } from '@/components/ui/scroll-anchor-button'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('Metadata')
@@ -302,18 +303,14 @@ export default async function PricingPage() {
 
         {/* scroll invitation */}
         <div className="flex items-center gap-4 mb-10">
-          <div className="h-px flex-1" style={{ background: 'linear-gradient(to right, transparent, rgba(6,182,212,0.2))' }} />
-          <span className="p-px rounded-full shadow-[0_0_24px_rgba(6,182,212,0.15)]" style={{ background: 'linear-gradient(135deg, rgba(6,182,212,0.5), rgba(34,211,238,0.3))' }}>
-            <a
-              href="#comparison"
-              className="flex items-center px-5 py-2 rounded-full bg-[#0E0E0F] hover:bg-[#111113] transition-colors cursor-pointer whitespace-nowrap"
-            >
-              <span className="text-[11px] font-mono uppercase tracking-[0.14em]" style={{ background: 'linear-gradient(90deg, #22d3ee, #67e8f9)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                {tp('tableHeading')} ↓
-              </span>
-            </a>
-          </span>
-          <div className="h-px flex-1" style={{ background: 'linear-gradient(to left, transparent, rgba(6,182,212,0.2))' }} />
+          <div className="h-px flex-1 bg-white/[0.05]" />
+          <ScrollAnchorButton
+            targetId="comparison"
+            className="px-5 py-2 rounded-full border border-cyan-500/25 text-[11px] font-mono uppercase tracking-[0.14em] text-cyan-400/80 hover:text-cyan-300 hover:border-cyan-400/40 transition-colors cursor-pointer whitespace-nowrap"
+          >
+            {tp('tableHeading')} ↓
+          </ScrollAnchorButton>
+          <div className="h-px flex-1 bg-white/[0.05]" />
         </div>
 
         {/* comparison table */}
