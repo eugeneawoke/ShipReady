@@ -71,7 +71,12 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null
+    return new URLSearchParams(window.location.search).get('error') === 'auth'
+      ? 'Sign-in failed. Please try again.'
+      : null
+  })
 
   function resetForm() {
     setEmail('')
