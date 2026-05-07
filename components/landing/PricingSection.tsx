@@ -160,7 +160,7 @@ export function PricingSection() {
         <motion.div {...fadeUp(0.3)} className="mt-8 text-center">
           <a
             href="/pricing"
-            className="inline-flex items-center gap-2 text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors border border-white/[0.08] px-5 py-2.5 rounded-xl hover:border-white/[0.16]"
+            className="inline-flex items-center gap-2 text-sm text-cyan-400/80 hover:text-cyan-300 transition-colors border border-cyan-500/25 hover:border-cyan-400/40 px-5 py-2.5 rounded-xl"
           >
             {t('comparePlans')} →
           </a>

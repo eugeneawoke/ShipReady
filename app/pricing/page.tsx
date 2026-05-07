@@ -267,7 +267,7 @@ export default async function PricingPage() {
         }
       >
         <nav className="hidden md:flex items-center gap-5 text-sm text-[#8B8A85]">
-          <Link href="/#how" className="hover:text-[#F1F0EE] transition-colors">{tnav('howItWorks')}</Link>
+          <Link href="/#how-it-works" className="hover:text-[#F1F0EE] transition-colors">{tnav('howItWorks')}</Link>
           <Link href="/pricing" className="text-[#F1F0EE] font-medium">{tnav('pricing')}</Link>
           <Link href="/roadmap" className="hover:text-[#F1F0EE] transition-colors">{tnav('roadmap')}</Link>
         </nav>
