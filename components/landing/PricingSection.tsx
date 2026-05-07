@@ -82,12 +82,12 @@ export function PricingSection() {
           <p className="mt-3 text-[#8B8A85] text-sm">{t('sub')}</p>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className="grid md:grid-cols-3 gap-4 items-stretch" role="list">
           {plans.map((plan, i) => (
-            <motion.div
+            <motion.div role="listitem"
               key={plan.nameKey}
               {...fadeUp(i * 0.1)}
-              className={`relative p-6 rounded-2xl border ${
+              className={`relative flex flex-col p-6 rounded-2xl border ${
                 plan.coming
                   ? 'bg-[#161618] border-white/[0.04] opacity-70'
                   : plan.highlight
@@ -119,7 +119,7 @@ export function PricingSection() {
                   {plan.period && <span className="text-[#8B8A85] text-sm">{plan.period}</span>}
                 </div>
               </div>
-              <ul className="space-y-2.5 mb-6">
+              <ul className="space-y-2.5 flex-1 mb-6">
                 {plan.features.map((f, fi) => (
                   <li key={fi} className={`text-sm flex items-center gap-2 ${plan.coming ? 'text-[#5A5955]' : plan.highlight ? 'text-[#F1F0EE]' : 'text-[#8B8A85]'}`}>
                     <span className="shrink-0">
@@ -156,6 +156,15 @@ export function PricingSection() {
             </motion.div>
           ))}
         </div>
+
+        <motion.div {...fadeUp(0.3)} className="mt-8 text-center">
+          <a
+            href="/pricing"
+            className="inline-flex items-center gap-2 text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors border border-white/[0.08] px-5 py-2.5 rounded-xl hover:border-white/[0.16]"
+          >
+            {t('comparePlans')} →
+          </a>
+        </motion.div>
       </div>
     </section>
   )

@@ -568,6 +568,7 @@ const en = {
       popular: 'Most popular',
       cancelAnytime: 'Cancel anytime',
       comingSoon: 'Coming soon',
+      comparePlans: 'Compare all features',
     },
     faq: {
       eyebrow: 'FAQ',

@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase'
 import { SiteHeader } from '@/components/SiteHeader'
-import { SiteMicroFooter } from '@/components/SiteMicroFooter'
+import { CinematicFooter } from '@/components/ui/motion-footer'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('Metadata')
@@ -153,20 +153,30 @@ function Cell({ value, highlight }: { value: CellValue; highlight?: boolean }) {
 
 // ─── plan card ────────────────────────────────────────────────────────────────
 
+const IconCheck = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3DDC84" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" /><path d="M9 12l2 2 4-4" />
+  </svg>
+)
+
 interface PlanCardProps {
   tag: string
   price: string
   period: string | null
   desc: string
+  features: string[]
   cta: string
   ctaHref: string
   highlight?: boolean
   comingSoon?: boolean
+  popularLabel: string
+  comingSoonLabel: string
+  cancelLabel: string
 }
 
-function PlanCard({ tag, price, period, desc, cta, ctaHref, highlight, comingSoon }: PlanCardProps) {
+function PlanCard({ tag, price, period, desc, features, cta, ctaHref, highlight, comingSoon, popularLabel, comingSoonLabel, cancelLabel }: PlanCardProps) {
   return (
-    <div className={`relative flex flex-col p-6 rounded-2xl border transition-colors ${
+    <div className={`relative flex flex-col p-6 rounded-2xl border transition-colors h-full ${
       comingSoon
         ? 'bg-[#161618] border-white/[0.04] opacity-60'
         : highlight
@@ -175,30 +185,44 @@ function PlanCard({ tag, price, period, desc, cta, ctaHref, highlight, comingSoo
     }`}>
       {highlight && !comingSoon && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] bg-[#6E56CF] text-white px-3 py-1 rounded-full uppercase tracking-[0.1em] whitespace-nowrap font-medium">
-          Most popular
+          {popularLabel}
         </div>
       )}
       {comingSoon && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] bg-[#232328] text-[#8B8A85] border border-white/[0.10] px-3 py-1 rounded-full uppercase tracking-[0.1em] whitespace-nowrap font-medium">
-          Coming soon
+          {comingSoonLabel}
         </div>
       )}
 
       <p className="text-[10px] text-[#5A5955] uppercase tracking-[0.15em] font-mono mb-1">{tag}</p>
       <p className="text-sm text-[#8B8A85] mb-4">{desc}</p>
 
-      <div className="flex items-baseline gap-1 mb-6">
+      <div className="flex items-baseline gap-1 mb-5">
         <span className="text-[38px] font-mono font-medium leading-none">{price}</span>
         {period && <span className="text-[#8B8A85] text-sm">{period}</span>}
       </div>
 
-      <div className="mt-auto">
+      <ul className="space-y-2.5 flex-1 mb-6">
+        {features.map((f) => (
+          <li key={f} className={`text-sm flex items-center gap-2 ${comingSoon ? 'text-[#5A5955]' : highlight ? 'text-[#F1F0EE]' : 'text-[#8B8A85]'}`}>
+            <span className="shrink-0">
+              {comingSoon
+                ? <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3A3A3A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+                : <IconCheck />
+              }
+            </span>
+            {f}
+          </li>
+        ))}
+      </ul>
+
+      <div>
         {comingSoon ? (
           <Link
             href="/roadmap"
             className="block w-full py-2.5 rounded-xl text-sm font-medium text-center bg-[#1E1E21] border border-white/[0.06] text-[#5A5955] hover:text-[#8B8A85] transition-colors"
           >
-            View roadmap →
+            {comingSoonLabel} →
           </Link>
         ) : (
           <Link
@@ -213,7 +237,7 @@ function PlanCard({ tag, price, period, desc, cta, ctaHref, highlight, comingSoo
           </Link>
         )}
         {!comingSoon && period && (
-          <p className="mt-2 text-center text-[11px] text-[#5A5955]">Cancel anytime</p>
+          <p className="mt-2 text-center text-[11px] text-[#5A5955]">{cancelLabel}</p>
         )}
       </div>
     </div>
@@ -223,8 +247,17 @@ function PlanCard({ tag, price, period, desc, cta, ctaHref, highlight, comingSoo
 // ─── page ─────────────────────────────────────────────────────────────────────
 
 export default async function PricingPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const t = await getTranslations('Landing.pricing')
+
+  type Plan = { name: string; nameKey: string; price: string; period: string | null; desc: string; features: string[]; cta: string; highlight: boolean; coming: boolean }
+  const plans = t.raw('plans') as Plan[]
+
+  let user = null
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    const supabase = await createClient()
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  }
 
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE]">
@@ -268,33 +301,24 @@ export default async function PricingPage() {
         </div>
 
         {/* plan cards */}
-        <div className="grid md:grid-cols-3 gap-4 mb-20">
-          <PlanCard
-            tag="FREE"
-            price="$0"
-            period={null}
-            desc="Try it out"
-            cta="Start free"
-            ctaHref="/"
-          />
-          <PlanCard
-            tag="PRO"
-            price="$14"
-            period="/mo"
-            desc="For solo founders"
-            cta="Get Pro"
-            ctaHref="/auth/login"
-            highlight
-          />
-          <PlanCard
-            tag="AGENCY"
-            price="$39"
-            period="/mo"
-            desc="For teams auditing client sites"
-            cta="Get Agency"
-            ctaHref="/auth/login"
-            comingSoon
-          />
+        <div className="grid md:grid-cols-3 gap-4 items-stretch mb-20">
+          {plans.map((plan) => (
+            <PlanCard
+              key={plan.nameKey}
+              tag={plan.nameKey}
+              price={plan.price}
+              period={plan.period}
+              desc={plan.desc}
+              features={plan.features}
+              cta={plan.cta}
+              ctaHref={plan.highlight ? '/auth/login' : plan.coming ? '/roadmap' : '/'}
+              highlight={plan.highlight}
+              comingSoon={plan.coming}
+              popularLabel={t('popular')}
+              comingSoonLabel={t('comingSoon')}
+              cancelLabel={t('cancelAnytime')}
+            />
+          ))}
         </div>
 
         {/* comparison table */}
@@ -392,7 +416,7 @@ export default async function PricingPage() {
 
       </main>
 
-      <SiteMicroFooter />
+      <CinematicFooter scanHref="/" pricingHref="/pricing" />
     </div>
   )
 }

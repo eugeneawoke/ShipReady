@@ -569,6 +569,7 @@ const ru: AppMessages = {
       popular: 'Популярный',
       cancelAnytime: 'Отмена в любой момент',
       comingSoon: 'Скоро',
+      comparePlans: 'Сравнить все функции',
     },
     faq: {
       eyebrow: 'FAQ',
