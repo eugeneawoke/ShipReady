@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
-const SESSION_MAX_AGE = 60 * 60 * 24 * 7 // 7 days
+const SESSION_MAX_AGE = 60 * 60 * 24 * 7 // 7 days inactivity
 
 export async function createClient() {
   const cookieStore = await cookies()
@@ -16,7 +16,13 @@ export async function createClient() {
         setAll(cookiesToSet) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, { ...options, maxAge: SESSION_MAX_AGE }))
+              cookieStore.set(name, value, {
+                ...options,
+                maxAge: SESSION_MAX_AGE,
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax',
+              }))
           } catch {}
         },
       },

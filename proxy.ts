@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { localeCookieName, resolveLocale, normalizeLocale } from '@/lib/i18n'
 
-const SESSION_MAX_AGE = 60 * 60 * 24 * 7 // 7 days
+const SESSION_MAX_AGE = 60 * 60 * 24 * 7 // 7 days inactivity
 
 // style-src keeps 'unsafe-inline' — React and framer-motion use inline style attributes.
 // script-src uses nonce + strict-dynamic — no unsafe-inline in script context.
@@ -26,7 +26,7 @@ function buildCsp(nonce: string): string {
  * Handles three concerns per request:
  * 1. Persist the locale cookie on first visit.
  * 2. Generate a CSP nonce and set Content-Security-Policy header.
- * 3. Refresh the Supabase session cookie (30-day maxAge, prevents infinite sessions).
+ * 3. Refresh the Supabase session cookie (7-day maxAge, prevents infinite sessions).
  *
  * Locale priority (same as i18n/request.ts):
  *   1. Existing cookie (user's explicit choice)
@@ -71,7 +71,13 @@ export async function proxy(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, { ...options, maxAge: SESSION_MAX_AGE })
+            response.cookies.set(name, value, {
+              ...options,
+              maxAge: SESSION_MAX_AGE,
+              httpOnly: true,
+              secure: process.env.NODE_ENV === 'production',
+              sameSite: 'lax',
+            })
           )
         },
       },

@@ -114,10 +114,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to create invite' }, { status: 500 })
   }
 
-  const acceptUrl = `${process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || ''}/api/v1/teams/accept?token=${token}`
-
   try {
-    await sendTeamInvite({ invitedEmail: email, ownerEmail, acceptUrl })
+    await sendTeamInvite({ invitedEmail: email, ownerEmail, inviteToken: token })
   } catch (err) {
     console.warn('[api/v1/teams/members] Failed to send invite email:', err)
   }

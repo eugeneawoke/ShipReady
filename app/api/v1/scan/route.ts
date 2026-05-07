@@ -4,6 +4,8 @@ import { assertSafeScanUrl } from '@/lib/server/url-safety'
 import { validateApiKey, ApiKeyError } from '@/lib/api/api-key-auth'
 import type { ScanGoal } from '@/types/scan'
 
+const VALID_GOALS = new Set<string>(['sales', 'leads', 'traffic', 'visibility', 'general'])
+
 export const runtime = 'nodejs'
 
 export async function POST(request: NextRequest) {
@@ -17,11 +19,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Authentication failed' }, { status: 401 })
   }
 
-  let body: { url?: string; goal?: ScanGoal }
+  let body: { url?: string; goal?: string }
   try {
     body = await request.json()
   } catch {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+  }
+
+  if (body?.goal !== undefined && !VALID_GOALS.has(body.goal)) {
+    return NextResponse.json({ error: `Invalid goal. Must be one of: ${[...VALID_GOALS].join(', ')}` }, { status: 422 })
   }
 
   const rawUrl = body?.url
@@ -47,7 +53,7 @@ export async function POST(request: NextRequest) {
       url: safeUrl,
       status: 'pending',
       user_id: apiKeyCtx.userId,
-      goal: body.goal ?? null,
+      goal: (body.goal as ScanGoal) ?? null,
     })
     .select('id, url, status')
     .single()
