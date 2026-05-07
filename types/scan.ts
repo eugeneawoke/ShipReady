@@ -4,6 +4,7 @@ export type ScanStatus =
   | 'running_fast'
   | 'running_deep'
   | 'enriching'
+  | 'crawling'
   | 'done'
   | 'error'
 
