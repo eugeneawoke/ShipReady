@@ -30,13 +30,17 @@ export async function POST(request: NextRequest) {
   const supabase = createServiceClient()
   const { data: member, error } = await supabase
     .from('team_members')
-    .select('id, owner_user_id')
+    .select('id, owner_user_id, invite_expires_at')
     .eq('invite_token', token)
     .is('accepted_at', null)
     .maybeSingle()
 
   if (error || !member) {
     return NextResponse.json({ error: 'Invite not found or already accepted' }, { status: 404 })
+  }
+
+  if (member.invite_expires_at && new Date(member.invite_expires_at) < new Date()) {
+    return NextResponse.json({ error: 'Invite has expired' }, { status: 410 })
   }
 
   if (apiKeyCtx.userId === member.owner_user_id) {

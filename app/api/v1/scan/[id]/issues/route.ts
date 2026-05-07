@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase'
 import { validateApiKey, ApiKeyError } from '@/lib/api/api-key-auth'
+import { hasScanAccess } from '@/lib/api/assert-scan-access'
 import { getAllIssues } from '@/lib/scoring'
 import type { IssueCategory, IssueSeverity, IssueConfidence, ScanResult } from '@/types/scan'
 
@@ -33,18 +34,8 @@ export async function GET(
     return NextResponse.json({ error: 'Scan not found' }, { status: 404 })
   }
 
-  if (scan.user_id !== apiKeyCtx.userId) {
-    const { data: membership } = await supabase
-      .from('team_members')
-      .select('id')
-      .eq('owner_user_id', scan.user_id)
-      .eq('member_user_id', apiKeyCtx.userId)
-      .not('accepted_at', 'is', null)
-      .maybeSingle()
-
-    if (!membership) {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
-    }
+  if (!await hasScanAccess(supabase, scan.user_id, apiKeyCtx.userId)) {
+    return NextResponse.json({ error: 'Access denied' }, { status: 403 })
   }
 
   if (!scan.results) {

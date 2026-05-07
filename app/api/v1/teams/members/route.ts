@@ -74,15 +74,6 @@ export async function POST(request: NextRequest) {
 
   const supabase = createServiceClient()
 
-  const { count } = await supabase
-    .from('team_members')
-    .select('id', { count: 'exact', head: true })
-    .eq('owner_user_id', apiKeyCtx.userId)
-
-  if ((count ?? 0) >= 5) {
-    return NextResponse.json({ error: 'Team seat limit of 5 reached' }, { status: 422 })
-  }
-
   const { data: existing } = await supabase
     .from('team_members')
     .select('id')
@@ -100,17 +91,23 @@ export async function POST(request: NextRequest) {
 
   const token = randomBytes(32).toString('hex')
 
+  const inviteExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+
   const { data: member, error: insertError } = await supabase
     .from('team_members')
     .insert({
       owner_user_id: apiKeyCtx.userId,
       invited_email: email,
       invite_token: token,
+      invite_expires_at: inviteExpiresAt,
     })
     .select('id, invited_email, invited_at')
     .single()
 
   if (insertError || !member) {
+    if (insertError?.message?.includes('team_seat_limit_reached')) {
+      return NextResponse.json({ error: 'Team seat limit of 5 reached' }, { status: 422 })
+    }
     return NextResponse.json({ error: 'Failed to create invite' }, { status: 500 })
   }
 
