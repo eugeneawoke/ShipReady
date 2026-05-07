@@ -24,14 +24,16 @@
       "seo": "Анализируем SEO и соцсети...",
       "security": "Аудит безопасности...",
       "mobile": "Мобильные проверки...",
-      "ai_visibility": "Аудит видимости для ИИ..."
+      "ai_visibility": "Аудит видимости для ИИ...",
+      "accessibility": "Аудит доступности..."
     },
     "categories": {
       "performance": "Производительность",
       "seo": "SEO и соцсети",
       "security": "Безопасность",
       "mobile": "Мобильный",
-      "ai_visibility": "Видимость для ИИ"
+      "ai_visibility": "Видимость для ИИ",
+      "accessibility": "Доступность"
     }
   },
   "pricing": {

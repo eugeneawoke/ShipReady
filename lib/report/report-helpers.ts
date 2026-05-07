@@ -8,7 +8,7 @@ import {
   issueTitle,
 } from '@/lib/report/report-safety'
 
-const ISSUE_CATEGORY_ORDER: IssueCategory[] = ['performance', 'seo', 'security', 'mobile', 'ai_visibility']
+const ISSUE_CATEGORY_ORDER: IssueCategory[] = ['performance', 'seo', 'security', 'mobile', 'ai_visibility', 'accessibility']
 
 const ISSUE_CATEGORY_LABELS: Record<IssueCategory, string> = {
   performance: 'Performance',
@@ -16,6 +16,7 @@ const ISSUE_CATEGORY_LABELS: Record<IssueCategory, string> = {
   security: 'Security',
   mobile: 'Mobile',
   ai_visibility: 'AI visibility',
+  accessibility: 'Accessibility',
 }
 
 export function formatIssueCategoryLabel(category: IssueCategory): string {

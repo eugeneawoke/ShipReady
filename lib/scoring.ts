@@ -26,19 +26,21 @@ const DEDUCTIONS: Record<IssueSeverity, number> = {
 }
 
 const TOTAL_CHECKS = {
-  performance: 6,  // lcp, cls, inp, fcp, perf-score, a11y-score
-  seo: 21,         // title, description, h1, canonical, social tags, robots/indexability, images, placeholder, links + 5 Stage 1
-  security: 14,    // https, hsts, x-frame, xcto, referrer-policy, csp, ssl, exposed-env, api-key, mixed-content + 4 Stage 1
-  mobile: 5,       // viewport, favicon, apple-touch-icon + 2 Stage 1
-  ai_visibility: 8, // schema-org, faq-schema, heading-hierarchy, thin-content, llms-txt, ai-crawlers, sitemap, author-entity
+  performance: 5,      // lcp, cls, inp, fcp, perf-score (a11y-score moved to accessibility)
+  seo: 21,             // title, description, h1, canonical, social tags, robots/indexability, images, placeholder, links + 5 Stage 1
+  security: 14,        // https, hsts, x-frame, xcto, referrer-policy, csp, ssl, exposed-env, api-key, mixed-content + 4 Stage 1
+  mobile: 5,           // viewport, favicon, apple-touch-icon + 2 Stage 1
+  ai_visibility: 8,    // schema-org, faq-schema, heading-hierarchy, thin-content, llms-txt, ai-crawlers, sitemap, author-entity
+  accessibility: 6,    // low-a11y-score, images-missing-alt-a11y, form-inputs-no-label, buttons-no-label, missing-lang, missing-skip-nav
 }
 
 const CATEGORY_WEIGHTS = {
-  performance: 0.25,
-  seo: 0.20,
-  security: 0.25,
-  mobile: 0.10,
-  ai_visibility: 0.20,
+  performance:   0.22,
+  seo:           0.18,
+  security:      0.22,
+  mobile:        0.10,
+  ai_visibility: 0.18,
+  accessibility: 0.10,
 } as const
 
 // "Excellent" requires both a high numeric score AND no visible issues of any kind.
@@ -80,6 +82,7 @@ export function getAllIssues(result: ScanResult): Issue[] {
     ...result.security.issues,
     ...result.mobile.issues,
     ...result.ai_visibility.issues,
+    ...result.accessibility.issues,
   ]
 }
 
@@ -182,19 +185,6 @@ export function buildPerformanceIssues(lh: LighthouseMetrics): Issue[] {
     }, 'lighthouse', [evidence('metric', 'Performance score', lh.performanceScore)]))
   }
 
-  if (lh.a11yScore !== null && lh.a11yScore < 70) {
-    issues.push(withIssueMeta({
-      id: 'a11y-score-low',
-      category: 'performance',
-      severity: 'medium',
-      title: 'Accessibility score is low',
-      description: `Accessibility score: ${lh.a11yScore}/100`,
-      plainEnglish: `Your site scores ${lh.a11yScore}/100 for accessibility. This usually means avoidable barriers for users and weaker baseline markup quality.`,
-      cursorPrompt: 'Fix the failing Lighthouse accessibility audits and improve semantic structure, labels, and contrast.',
-      value: lh.a11yScore,
-    }, 'lighthouse', [evidence('metric', 'Accessibility score', lh.a11yScore)]))
-  }
-
   return issues
 }
 
@@ -211,6 +201,7 @@ export function buildScanResult(params: {
   security: CategoryScore
   mobile: CategoryScore
   ai_visibility: CategoryScore
+  accessibility: CategoryScore
   aiSummary?: string
   topPriorities?: string[]
   aiTechnicalPrompt?: string
@@ -235,6 +226,7 @@ export function buildScanResult(params: {
     security: params.security,
     mobile: params.mobile,
     ai_visibility: params.ai_visibility,
+    accessibility: params.accessibility,
     aiSummary: params.aiSummary,
     topPriorities: params.topPriorities,
     aiTechnicalPrompt: params.aiTechnicalPrompt,

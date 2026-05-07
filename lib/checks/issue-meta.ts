@@ -71,6 +71,12 @@ const CONFIDENCE_MAP: Record<string, { confidence: IssueConfidence; scoreEligibl
   'third-party-trackers': { confidence: 'heuristic', scoreEligible: false },
   'missing-web-manifest': { confidence: 'likely', scoreEligible: false },
   'phone-numbers-not-linked': { confidence: 'heuristic', scoreEligible: false },
+  'low-a11y-score': { confidence: 'verified', scoreEligible: true },
+  'images-missing-alt-a11y': { confidence: 'verified', scoreEligible: true },
+  'form-inputs-no-label': { confidence: 'verified', scoreEligible: true },
+  'buttons-no-label': { confidence: 'verified', scoreEligible: true },
+  'missing-lang-attribute': { confidence: 'verified', scoreEligible: true },
+  'missing-skip-navigation': { confidence: 'heuristic', scoreEligible: false },
 }
 
 export function evidence(kind: IssueEvidence['kind'], label: string, value: string | number): IssueEvidence {

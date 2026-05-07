@@ -59,6 +59,14 @@ export const CHECK_CATALOG: Record<IssueCategory, CheckCatalogEntry[]> = {
     { id: 'missing-sitemap', name: 'Sitemap present', detail: 'The site exposes a crawlable sitemap file.' },
     { id: 'missing-author-entity', name: 'Author or organization entity present', detail: 'The page publishes an attributable author or organization signal.' },
   ],
+  accessibility: [
+    { id: 'low-a11y-score', name: 'Lighthouse accessibility score ≥70', detail: 'Automated accessibility audits show a passing score.' },
+    { id: 'images-missing-alt-a11y', name: 'All images have alt text', detail: 'Every non-decorative image has a descriptive alt attribute.' },
+    { id: 'form-inputs-no-label', name: 'Form inputs are labelled', detail: 'Every visible form control has an associated label or aria attribute.' },
+    { id: 'buttons-no-label', name: 'Buttons have accessible names', detail: 'Every button has visible text or an aria-label.' },
+    { id: 'missing-lang-attribute', name: 'HTML lang attribute present', detail: 'The html element declares the page language.' },
+    { id: 'missing-skip-navigation', name: 'Skip navigation link present', detail: 'Keyboard users can skip to main content without tabbing through navigation.' },
+  ],
 }
 
 export function getPassedChecksForCategory(category: IssueCategory, result: ScanResult): CheckCatalogEntry[] {

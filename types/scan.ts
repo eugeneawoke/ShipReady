@@ -14,9 +14,9 @@ export type ScanStageStatus = 'queued' | 'running' | 'partial' | 'failed' | 'don
 export type ScanProviderId = 'aiEnrichment' | 'wowInsights' | 'pagespeed'
 export type ScanProviderStatus = 'ready' | 'done' | 'failed' | 'skipped' | 'unavailable' | 'blocked'
 export type IssueSeverity = 'critical' | 'high' | 'medium' | 'low' | 'pass'
-export type IssueCategory = 'performance' | 'seo' | 'security' | 'mobile' | 'ai_visibility'
+export type IssueCategory = 'performance' | 'seo' | 'security' | 'mobile' | 'ai_visibility' | 'accessibility'
 export type IssueConfidence = 'verified' | 'likely' | 'heuristic'
-export type IssueSource = 'lighthouse' | 'http' | 'dom' | 'ssl' | 'link-check' | 'ai-visibility' | 'ai-enrichment'
+export type IssueSource = 'lighthouse' | 'http' | 'dom' | 'ssl' | 'link-check' | 'ai-visibility' | 'ai-enrichment' | 'accessibility'
 export type EvidenceKind = 'metric' | 'header' | 'selector' | 'response' | 'text' | 'count' | 'status'
 export type MeasurementStatus = 'measured' | 'partial' | 'unavailable'
 
@@ -179,6 +179,7 @@ export interface ScanResult {
   security: CategoryScore
   mobile: CategoryScore
   ai_visibility: CategoryScore
+  accessibility: CategoryScore
   aiSummary?: string
   topPriorities?: string[]
   aiTechnicalPrompt?: string

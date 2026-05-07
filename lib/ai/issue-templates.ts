@@ -1043,4 +1043,86 @@ Or place the file at app/apple-icon.png — Next.js handles it automatically.`,
 5. Add a custom 404 page at app/not-found.tsx to handle any remaining broken links gracefully`,
     docsUrl: 'https://nextjs.org/docs/app/api-reference/file-conventions/not-found',
   },
+
+  // ─────────────────────────────────────────
+  // ACCESSIBILITY (6)
+  // ─────────────────────────────────────────
+
+  'low-a11y-score': {
+    id: 'low-a11y-score',
+    category: 'accessibility',
+    severity: 'high',
+    confidence: 'verified',
+    scoreEligible: true,
+    title: 'Low Lighthouse accessibility score',
+    description: 'Lighthouse accessibility score is below 70.',
+    plainEnglish: 'Your site scores poorly on automated accessibility tests. This means real users — people using screen readers, keyboard navigation, or who need high contrast — likely struggle to use your site.',
+    cursorPrompt: 'Run: npx lighthouse <url> --only-categories=accessibility --output=html\nFix every "Failing" item. Common fixes: add alt text to images, add aria-label to icon buttons, ensure colour contrast ≥4.5:1, add <label> to form inputs, ensure headings are sequential.',
+    docsUrl: 'https://web.dev/accessibility/',
+  },
+
+  'images-missing-alt-a11y': {
+    id: 'images-missing-alt-a11y',
+    category: 'accessibility',
+    severity: 'high',
+    confidence: 'verified',
+    scoreEligible: true,
+    title: 'Images missing alt text (accessibility)',
+    description: 'One or more images have no alt attribute — screen readers cannot describe them.',
+    plainEnglish: 'Some images have no alt attribute at all. Screen readers will say "image" with no context, or skip the image entirely. This is an unambiguous accessibility failure.',
+    cursorPrompt: 'Add alt attributes to all img elements. In Next.js every <Image> requires an alt prop. Use descriptive text for content images (alt="Product screenshot showing dashboard"), empty string for decorative images that also have role="presentation" (alt="" role="presentation").',
+    docsUrl: 'https://www.w3.org/WAI/tutorials/images/decision-tree/',
+  },
+
+  'form-inputs-no-label': {
+    id: 'form-inputs-no-label',
+    category: 'accessibility',
+    severity: 'high',
+    confidence: 'verified',
+    scoreEligible: true,
+    title: 'Form inputs missing labels',
+    description: 'One or more visible form inputs have no associated label, aria-label, or aria-labelledby.',
+    plainEnglish: 'Some form fields have no label. Screen reader users cannot tell what the field is for. Placeholder text is not a substitute — it disappears when you start typing.',
+    cursorPrompt: 'Add a <label htmlFor="inputId"> paired with an <input id="inputId">, or add aria-label="Field purpose" to each input. In Next.js/React: <label htmlFor="email">Email address</label><input id="email" type="email" />. Never use placeholder as the only label.',
+    docsUrl: 'https://www.w3.org/WAI/tutorials/forms/labels/',
+  },
+
+  'buttons-no-label': {
+    id: 'buttons-no-label',
+    category: 'accessibility',
+    severity: 'high',
+    confidence: 'verified',
+    scoreEligible: true,
+    title: 'Buttons without accessible label',
+    description: 'One or more buttons have no visible text and no aria-label or aria-labelledby.',
+    plainEnglish: 'Some buttons (icon buttons, hamburger menus, close buttons) have no accessible name. Screen readers will say "button" with no context — users cannot tell what clicking the button does.',
+    cursorPrompt: 'Add aria-label to icon buttons: <button aria-label="Close menu"><XIcon /></button>. Or wrap icon and hidden text: <button><XIcon aria-hidden="true" /><span className="sr-only">Close menu</span></button>. The sr-only class: position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0).',
+    docsUrl: 'https://www.w3.org/WAI/WCAG21/Understanding/name-role-value',
+  },
+
+  'missing-lang-attribute': {
+    id: 'missing-lang-attribute',
+    category: 'accessibility',
+    severity: 'medium',
+    confidence: 'verified',
+    scoreEligible: true,
+    title: 'Missing lang attribute on html element',
+    description: 'The <html> element is missing a lang attribute — screen readers cannot select the correct language profile.',
+    plainEnglish: 'Your page has no language declaration. Screen readers need this to choose the right pronunciation engine. Without it, content may be read in the wrong language, making it incomprehensible for visually impaired users.',
+    cursorPrompt: 'In Next.js App Router, set lang in app/layout.tsx: <html lang="en">. For multi-language sites, set the correct language code per locale. Use ISO 639-1 codes: en, de, fr, ru, etc.',
+    docsUrl: 'https://www.w3.org/International/questions/qa-html-language-declarations',
+  },
+
+  'missing-skip-navigation': {
+    id: 'missing-skip-navigation',
+    category: 'accessibility',
+    severity: 'low',
+    confidence: 'heuristic',
+    scoreEligible: false,
+    title: 'No skip navigation link',
+    description: 'No skip-to-main-content link found before the first navigation block.',
+    plainEnglish: 'Keyboard and screen reader users have to tab through every navigation item on every page to reach the main content. A "skip to content" link at the top of the page lets them jump directly to the main area.',
+    cursorPrompt: 'Add a skip link as the very first element in <body>: <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-white focus:px-4 focus:py-2">Skip to content</a>. Then add id="main-content" to your <main> element.',
+    docsUrl: 'https://www.w3.org/WAI/WCAG21/Techniques/general/G1',
+  },
 }

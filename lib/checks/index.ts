@@ -7,11 +7,12 @@ import { runSecurityChecks } from '@/lib/checks/security'
 import { runMobileChecks } from '@/lib/checks/mobile'
 import { runLinksCheck } from '@/lib/checks/links'
 import { runAIVisibilityChecks } from '@/lib/checks/ai-visibility'
+import { runAccessibilityChecks } from '@/lib/checks/accessibility'
 import { assertSafeScanUrl } from '@/lib/server/url-safety'
 import { fetchPrimaryContext, fetchSafeResource } from '@/lib/checks/fetch-context'
 import { generateEvidenceEnrichment } from '@/lib/ai/generate-evidence-enrichment'
 import { generateWowInsights } from '@/lib/ai/generate-wow-insights'
-import { measurement } from '@/lib/checks/issue-meta'
+import { measurement, withIssueMeta, evidence } from '@/lib/checks/issue-meta'
 import { buildMonitoringAlertDecision } from '@/lib/monitoring/alerts'
 import { sendMonitoringAlert } from '@/lib/email/send-alert'
 import { analyzeBusinessContext } from '@/lib/ai/analyze-business-context'
@@ -186,11 +187,12 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
     const finalUrl = fetchContext.finalUrl || safeUrl
     const timings: ScanTimings = { htmlFetchMs: fetchContext.durationMs }
 
-    const [seoFast, securityFast, mobileFast, aiVisibilityFast, biAnalysis] = await Promise.all([
+    const [seoFast, securityFast, mobileFast, aiVisibilityFast, accessibilityFast, biAnalysis] = await Promise.all([
       safeTask(runSEOChecks(finalUrl, fetchContext.html, { includeLikely: false, includeHeuristics: false }), 8000, 'seo-fast'),
       safeTask(runSecurityChecks(finalUrl, fetchContext.html, fetchContext), 10000, 'security-fast'),
       safeTask(runMobileChecks(fetchContext.html), 4000, 'mobile-fast'),
       safeTask(runAIVisibilityChecks(finalUrl, fetchContext.html, { includeLikely: false, includeHeuristics: false }), 8000, 'ai-visibility-fast'),
+      safeTask(Promise.resolve(runAccessibilityChecks(fetchContext.html)), 4000, 'accessibility-fast'),
       safeTask(
         analyzeBusinessContext(
           fetchContext.html,
@@ -204,7 +206,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
     const businessContext: BusinessContext | null = biAnalysis.ok ? biAnalysis.value : null
     currentStages = updateScanStage(currentStages, 'fast', {
       status: 'done',
-      message: 'SEO, security, mobile, and AI visibility basics were verified from fetched page evidence.',
+      message: 'SEO, security, mobile, accessibility, and AI visibility basics were verified from fetched page evidence.',
     })
 
     if (budget.crawl.enabled && budget.crawl.maxPages > 1) {
@@ -235,6 +237,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
       security: buildCategoryScore(securityFast.ok ? securityFast.value : [], 'security'),
       mobile: buildCategoryScore(mobileFast.ok ? mobileFast.value : [], 'mobile'),
       ai_visibility: buildCategoryScore(aiVisibilityFast.ok ? aiVisibilityFast.value : [], 'ai_visibility'),
+      accessibility: buildCategoryScore(accessibilityFast.ok ? accessibilityFast.value : [], 'accessibility'),
       businessContext,
       scanGoal,
     })
@@ -335,6 +338,22 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
     timings.deepPassMs = Date.now() - startedAt - (timings.fastPassMs ?? 0)
 
     const performanceIssues = lighthouseResult.ok ? buildPerformanceIssues(lighthouseResult.value) : []
+    const accessibilityIssues = accessibilityFast.ok ? [...accessibilityFast.value] : []
+    if (lighthouseResult.ok && lighthouseResult.value.a11yScore !== null) {
+      const a11yScore = lighthouseResult.value.a11yScore
+      if (a11yScore < 90) {
+        accessibilityIssues.push(withIssueMeta({
+          id: 'low-a11y-score',
+          category: 'accessibility',
+          severity: a11yScore < 70 ? 'high' : 'medium',
+          title: 'Low Lighthouse accessibility score',
+          description: `Accessibility score: ${a11yScore}/100`,
+          plainEnglish: `Your site scores ${a11yScore}/100 for accessibility.`,
+          cursorPrompt: 'Fix the failing Lighthouse accessibility audits and improve semantic structure, labels, and contrast.',
+          value: a11yScore,
+        }, 'lighthouse', [evidence('metric', 'Accessibility score', a11yScore)]))
+      }
+    }
     const seoIssues = seoDeep.ok ? [...seoDeep.value, ...(linksResult.ok ? linksResult.value : [])] : (linksResult.ok ? linksResult.value : [])
     const aiVisibilityIssues = aiVisibilityDeep.ok ? aiVisibilityDeep.value : []
     const lighthouseStageStatus = lighthouseResult.ok
@@ -373,6 +392,11 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
       mobile: buildCategoryScore(mobileFast.ok ? mobileFast.value : [], 'mobile'),
       ai_visibility: buildCategoryScore(aiVisibilityIssues, 'ai_visibility', {
         measurement: measurement('AI visibility audit', aiVisibilityDeep.ok ? 'measured' : 'partial', aiVisibilityDeep.ok ? undefined : 'Heuristic checks unavailable', aiVisibilityDeep.durationMs),
+      }),
+      accessibility: buildCategoryScore(accessibilityIssues, 'accessibility', {
+        measurement: lighthouseResult.ok
+          ? measurement('Accessibility audit', 'measured', undefined, lighthouseResult.durationMs)
+          : measurement('Accessibility audit', 'partial', 'Lighthouse a11y score unavailable'),
       }),
       businessContext,
       scanGoal,
@@ -463,7 +487,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
             scanGoal,
           })
 
-          const categories = ['performance', 'seo', 'security', 'mobile', 'ai_visibility'] as const
+          const categories = ['performance', 'seo', 'security', 'mobile', 'ai_visibility', 'accessibility'] as const
           for (const category of categories) {
             result[category].issues = result[category].issues.map(issue => {
               const aiPrompt = enrichment.value.issuePrompts?.[issue.id]

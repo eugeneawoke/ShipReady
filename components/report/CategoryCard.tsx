@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import React from 'react'
 import { useTranslations } from 'next-intl'
-import { Zap, Search, Shield, Smartphone, Bot, ChevronDown } from 'lucide-react'
+import { Zap, Search, Shield, Smartphone, Bot, Accessibility, ChevronDown } from 'lucide-react'
 import type { CategoryScore, IssueCategory } from '@/types/scan'
 import { getPassedChecksForIssues } from '@/lib/report/check-catalog'
 
@@ -13,6 +13,7 @@ const ICONS: Record<IssueCategory, React.ComponentType<{ className?: string }>> 
   security: Shield,
   mobile: Smartphone,
   ai_visibility: Bot,
+  accessibility: Accessibility,
 }
 
 const SEVERITY_COLORS: Record<string, string> = {

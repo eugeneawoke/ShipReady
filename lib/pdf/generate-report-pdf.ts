@@ -17,6 +17,7 @@ const CATEGORY_LABELS: Record<IssueCategory, string> = {
   security: 'Security',
   mobile: 'Mobile',
   ai_visibility: 'AI Visibility',
+  accessibility: 'Accessibility',
 }
 
 function escapeHtml(value: string) {

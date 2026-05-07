@@ -227,7 +227,7 @@ const SEVERITY_ORDER: Record<string, number> = {
   pass: 4,
 }
 
-const CATEGORIES: IssueCategory[] = ['performance', 'seo', 'security', 'mobile', 'ai_visibility']
+const CATEGORIES: IssueCategory[] = ['performance', 'seo', 'security', 'mobile', 'ai_visibility', 'accessibility']
 const ACTIVE_SCAN_STATUSES: ScanStatus[] = ['pending', 'running', 'running_fast', 'running_deep', 'enriching']
 type StageState = 'done' | 'running' | 'pending' | 'unavailable' | 'partial' | 'failed'
 type ProgressStage = { id: string; title: string; state: StageState; detail: string }

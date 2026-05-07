@@ -24,14 +24,16 @@
       "seo": "Analyzing SEO & social...",
       "security": "Security audit...",
       "mobile": "Mobile checks...",
-      "ai_visibility": "AI visibility audit..."
+      "ai_visibility": "AI visibility audit...",
+      "accessibility": "Accessibility audit..."
     },
     "categories": {
       "performance": "Performance",
       "seo": "SEO & Social",
       "security": "Security",
       "mobile": "Mobile",
-      "ai_visibility": "AI Visibility"
+      "ai_visibility": "AI Visibility",
+      "accessibility": "Accessibility"
     }
   },
   "pricing": {
