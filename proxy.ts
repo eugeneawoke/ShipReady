@@ -65,7 +65,11 @@ export async function proxy(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  if (supabaseUrl && supabaseAnonKey) {
+  // Skip session refresh on auth callback — middleware interference destroys the PKCE code_verifier cookie
+  // before exchangeCodeForSession can read it, causing "PKCE code verifier not found in storage"
+  const isAuthCallback = request.nextUrl.pathname.startsWith('/auth/callback')
+
+  if (supabaseUrl && supabaseAnonKey && !isAuthCallback) {
     const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
       cookies: {
         getAll() {
