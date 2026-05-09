@@ -36,7 +36,18 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t('layoutTitle'),
     description: t('layoutDescription'),
-    keywords: ['web quality', 'lighthouse', 'SEO checker', 'security audit', 'site audit', 'agency', 'cursor', 'windsurf', 'claude code'],
+    keywords: [
+      'free website SEO audit',
+      'AI visibility checker',
+      'appear in ChatGPT',
+      'appear in Claude AI',
+      'get found on Perplexity',
+      'generative engine optimization',
+      'AEO optimization',
+      'website security check free',
+      'website audit tool',
+      'Google AI Overview optimization',
+    ],
     alternates: {
       canonical: appUrl,
     },
@@ -45,7 +56,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description: t('appDescription'),
       siteName: t('appTitle'),
       type: 'website',
-      images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'ShipReady — Site audits that understand your client\'s business' }],
+      images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'ShipReady — Free Website Audit: SEO, AI Visibility & Security' }],
     },
     twitter: {
       card: 'summary_large_image',
@@ -66,8 +77,8 @@ const organizationSchema = {
   name: 'ShipReady',
   url: (process.env.NEXT_PUBLIC_APP_URL || 'https://shipready.app').replace(/\/$/, ''),
   logo: `${(process.env.NEXT_PUBLIC_APP_URL || 'https://shipready.app').replace(/\/$/, '')}/logo.svg`,
-  description: 'Site audits that understand your client\'s business. Scans performance, SEO, security, mobile readiness, and AI visibility.',
-  sameAs: [] as string[],  // TODO: add Twitter, GitHub, LinkedIn URLs
+  description: 'Free website audit tool. Find out why your site is not showing up in Google, ChatGPT, Claude, or Perplexity — and get the exact fix.',
+  sameAs: [] as string[],
 }
 
 const webApplicationSchema = {
@@ -77,15 +88,21 @@ const webApplicationSchema = {
   url: (process.env.NEXT_PUBLIC_APP_URL || 'https://shipready.app').replace(/\/$/, ''),
   applicationCategory: 'BusinessApplication',
   operatingSystem: 'Web',
-  description: 'Site audits that understand your client\'s business. Scans performance, SEO, security, mobile readiness, and AI visibility.',
+  description: 'Free website audit. Find out why your site isn\'t showing up in Google, ChatGPT, Claude, or Perplexity — and fix it. SEO, AI visibility, and security in 30 seconds.',
   featureList: [
     'Lighthouse performance audit',
     'SEO metadata and structured data check',
     'HTTP security header scan',
     'Mobile readiness audit',
-    'AI visibility check (llms.txt, FAQ schema, author entity)',
+    'GEO (Generative Engine Optimization) audit',
+    'AEO (Answer Engine Optimization) audit',
+    'AI visibility check — llms.txt, ChatGPT/Claude/Perplexity crawler access, FAQ schema, author entity',
+    'Organization sameAs entity check',
+    'Content date freshness signal',
+    'Answer-first paragraph structure check',
+    'OG image dimensions validation',
     'Evidence-based verified/likely/heuristic confidence model',
-    'AI fix prompts for Cursor, Claude Code, Windsurf',
+    'AI fix prompts for any AI coding tool',
   ],
   offers: [
     { '@type': 'Offer', name: 'Free', price: '0', priceCurrency: 'USD', description: '3 scans per month. All category scores and issue descriptions.' },
