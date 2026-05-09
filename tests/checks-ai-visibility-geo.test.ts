@@ -116,7 +116,7 @@ describe('geo-answer-first-paragraph', () => {
 
   it('does not flag when first paragraph is 50+ words', async () => {
     const longPara =
-      'This product is a comprehensive web audit tool that helps developers and founders understand exactly why their website is not getting found in Google search results, ChatGPT answers, Claude AI responses, and Perplexity citations. It runs automated checks and provides actionable fix prompts for every issue it finds.'
+      'This product is a comprehensive web audit tool that helps developers and founders understand exactly why their website is not getting found in Google search results, ChatGPT answers, Claude AI responses, and Perplexity citations. It runs automated checks and provides clear, actionable fix prompts for every single issue it finds across all categories.'
     const html = minimalHtml('', `<h1>Title</h1><p>${longPara}</p>`)
     const issues = await runAIVisibilityChecks('https://test.com', html, { includeHeuristics: true })
     assert.ok(!issues.some(i => i.id === 'geo-answer-first-paragraph'), 'should not flag 50+ word paragraph')

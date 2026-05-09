@@ -358,5 +358,57 @@ export async function runAIVisibilityChecks(
     ))
   }
 
+  // ── geo-no-question-headings ────────────────────────────
+  if (includeHeuristics) {
+    const questionPattern = /^(what|how|why|when|who|which|can|is|are|does|do|will|should|where)\b/i
+    const subheadings = $('h2, h3').toArray()
+
+    if (subheadings.length > 0) {
+      const hasQuestionHeading = subheadings.some(el => {
+        const text = $(el).text().trim()
+        return questionPattern.test(text) || text.endsWith('?')
+      })
+
+      if (!hasQuestionHeading) {
+        issues.push(withIssueMeta(
+          { ...T['geo-no-question-headings'] },
+          'dom',
+          [
+            evidence('count', 'H2/H3 headings found', subheadings.length),
+            evidence('selector', 'Question-format heading', 'none found'),
+          ],
+        ))
+      }
+    }
+  }
+
+  // ── geo-answer-first-paragraph ──────────────────────────
+  if (includeHeuristics) {
+    const bodyClone = $('body').clone()
+    bodyClone.find('nav, header, footer, aside, script, style, noscript').remove()
+
+    const firstMeaningfulP = bodyClone.find('p').toArray().find(el => {
+      const text = $(el).text().trim()
+      return text.split(/\s+/).length > 10
+    })
+
+    if (!firstMeaningfulP) {
+      issues.push(withIssueMeta(
+        { ...T['geo-answer-first-paragraph'] },
+        'dom',
+        [evidence('selector', 'First meaningful paragraph', 'not found')],
+      ))
+    } else {
+      const wordCount = $(firstMeaningfulP).text().trim().split(/\s+/).length
+      if (wordCount < 50) {
+        issues.push(withIssueMeta(
+          { ...T['geo-answer-first-paragraph'], value: `${wordCount} words` },
+          'dom',
+          [evidence('count', 'First paragraph word count', wordCount)],
+        ))
+      }
+    }
+  }
+
   return issues
 }
