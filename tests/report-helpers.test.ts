@@ -59,6 +59,7 @@ function createResult(): ScanResult {
     security: categoryScore('security', [securityIssue]),
     mobile: categoryScore('mobile'),
     ai_visibility: categoryScore('ai_visibility'),
+    accessibility: categoryScore('accessibility'),
     providerData: {
       pagespeed: {
         source: 'google-pagespeed-insights',

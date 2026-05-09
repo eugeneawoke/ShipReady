@@ -23,6 +23,7 @@ test('strategic recommendations are preserved without changing score or confiden
     security: category(),
     mobile: category(),
     ai_visibility: category(),
+    accessibility: category(),
     strategicRecommendations: [
       {
         timeframe: 'next_2_weeks',
@@ -62,6 +63,7 @@ test('stage telemetry is preserved without affecting score output', () => {
     security: category(),
     mobile: category(),
     ai_visibility: category(),
+    accessibility: category(),
     stages,
   })
 
