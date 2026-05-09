@@ -16,7 +16,7 @@ export const T: Record<string, IssueTemplate> = {
     description: 'LCP exceeds 2500ms — the main content takes too long to appear.',
     plainEnglish:
       `Your page's main image or headline takes more than 2.5 seconds to show up. Visitors see a blank or half-loaded page, and most will leave before it finishes loading.`,
-    cursorPrompt: `Fix slow LCP in my Next.js app:
+    fixPrompt: `Fix slow LCP in my Next.js app:
 1. Identify the LCP element (usually a hero image or h1) in Chrome DevTools > Performance
 2. If it's an image:
    - Add priority prop: <Image src="..." priority />
@@ -38,7 +38,7 @@ export const T: Record<string, IssueTemplate> = {
     description: 'Cumulative Layout Shift score exceeds 0.1 — page elements move after load.',
     plainEnglish:
       'Your page jumps around as it loads — buttons and text shift position, causing visitors to click the wrong thing. Google penalizes sites with this in search rankings.',
-    cursorPrompt: `Fix layout shifts in my Next.js app:
+    fixPrompt: `Fix layout shifts in my Next.js app:
 1. Always set explicit width and height on all images and videos:
    <Image src="..." width={800} height={600} alt="..." />
 2. Reserve space for ads or dynamic content with a min-height container
@@ -57,7 +57,7 @@ export const T: Record<string, IssueTemplate> = {
     description: 'INP exceeds 200ms — the page feels sluggish when users click or type.',
     plainEnglish:
       "When visitors click a button or fill in a form, the page takes more than 200ms to respond. This makes your site feel slow and unresponsive, even if it loads quickly.",
-    cursorPrompt: `Fix slow INP in my Next.js app:
+    fixPrompt: `Fix slow INP in my Next.js app:
 1. Identify slow interactions in Chrome DevTools > Performance > Interactions
 2. Break up long JavaScript tasks — use setTimeout or scheduler.yield() to yield to the browser
 3. Debounce or throttle expensive event handlers (search inputs, scroll handlers)
@@ -75,7 +75,7 @@ export const T: Record<string, IssueTemplate> = {
     description: 'FCP exceeds 1800ms — visitors wait too long before seeing anything on screen.',
     plainEnglish:
       "Your page takes more than 1.8 seconds before showing any content at all. Visitors stare at a blank screen and may leave before your site even starts to appear.",
-    cursorPrompt: `Fix slow FCP in my Next.js app:
+    fixPrompt: `Fix slow FCP in my Next.js app:
 1. Enable Static Site Generation (SSG) or Incremental Static Regeneration (ISR) — avoid SSR for pages that don't need it
 2. Reduce server response time — check Vercel Analytics for TTFB
 3. Inline critical CSS (above-the-fold styles) — avoid render-blocking stylesheets
@@ -94,7 +94,7 @@ export const T: Record<string, IssueTemplate> = {
     description: 'Lighthouse performance score is under 70 on mobile.',
     plainEnglish:
       `Your site scores poorly on Google\'s performance test. Slow sites rank lower in search results and convert significantly fewer visitors into customers.`,
-    cursorPrompt: `Improve Lighthouse performance score in my Next.js app:
+    fixPrompt: `Improve Lighthouse performance score in my Next.js app:
 1. Run: npx lighthouse <url> --only-categories=performance --output=html
 2. Fix the top opportunities shown in the report
 3. Quick wins:
@@ -114,7 +114,7 @@ export const T: Record<string, IssueTemplate> = {
     description: 'Lighthouse accessibility score is under 70.',
     plainEnglish:
       'Your site is difficult or impossible to use for people with disabilities. This also hurts your SEO — search engines use many of the same signals as screen readers.',
-    cursorPrompt: `Improve accessibility in my Next.js app:
+    fixPrompt: `Improve accessibility in my Next.js app:
 1. Run: npx lighthouse <url> --only-categories=accessibility --output=html
 2. Fix all "Failing" items in the report — common issues:
    - Add alt text to all images: <Image alt="Descriptive text" ... />
@@ -138,7 +138,7 @@ export const T: Record<string, IssueTemplate> = {
     description: 'No <title> tag found on the page.',
     plainEnglish:
       'Your page has no title. Browser tabs show a blank name, and Google has nothing to display in search results. This is one of the most basic SEO requirements.',
-    cursorPrompt: `Add a page title in my Next.js app:
+    fixPrompt: `Add a page title in my Next.js app:
 In app/layout.tsx or the specific page file, add metadata export:
 export const metadata: Metadata = {
   title: 'Your Page Title — Brand Name',
@@ -159,7 +159,7 @@ export async function generateMetadata({ params }) {
     description: 'Title is either too short (<30 chars) or too long (>60 chars).',
     plainEnglish:
       'Your page title is either too short to be descriptive, or too long and gets cut off in Google search results with "...". Both reduce click-through rates.',
-    cursorPrompt: `Fix title length in my Next.js app:
+    fixPrompt: `Fix title length in my Next.js app:
 In app/layout.tsx or the page's metadata export:
 export const metadata: Metadata = {
   title: {
@@ -179,7 +179,7 @@ Rule: 50–60 characters is ideal. Include the main keyword near the start.`,
     description: 'No <meta name="description"> tag found.',
     plainEnglish:
       'Your page has no description. Google shows a random snippet of text from your page in search results instead, which often looks unprofessional and reduces clicks.',
-    cursorPrompt: `Add meta description in my Next.js app:
+    fixPrompt: `Add meta description in my Next.js app:
 In app/layout.tsx or the page file:
 export const metadata: Metadata = {
   description: 'Clear, compelling description of this page in 150–160 characters. Include your main keyword and a reason to click.',
@@ -199,7 +199,7 @@ export async function generateMetadata({ params }) {
     description: 'Page has 0 or more than 1 <h1> tag.',
     plainEnglish:
       'Every page should have exactly one main heading (H1) that tells Google what the page is about. Missing or multiple H1s confuse search engines and lower your rankings.',
-    cursorPrompt: `Fix H1 heading in my Next.js app:
+    fixPrompt: `Fix H1 heading in my Next.js app:
 1. Each page should have exactly one <h1> — put it in the page component, not layout
 2. The h1 should contain your primary keyword for that page
 3. In app/page.tsx:
@@ -217,7 +217,7 @@ export async function generateMetadata({ params }) {
     description: 'No <link rel="canonical"> tag found.',
     plainEnglish:
       'Without a canonical tag, Google might index multiple versions of your page (with/without www, with/without trailing slash) and split your SEO value between them.',
-    cursorPrompt: `Add canonical URL in my Next.js app:
+    fixPrompt: `Add canonical URL in my Next.js app:
 Next.js 13+ App Router adds canonical automatically when you set metadataBase.
 In app/layout.tsx:
 export const metadata: Metadata = {
@@ -241,7 +241,7 @@ export async function generateMetadata({ params }) {
     description: 'No og:title meta tag found.',
     plainEnglish:
       'When someone shares your link on social media or messaging apps, no title appears — just a blank card or raw URL. This drastically reduces engagement with shared links.',
-    cursorPrompt: `Add og:title in my Next.js app:
+    fixPrompt: `Add og:title in my Next.js app:
 In app/layout.tsx or the page file:
 export const metadata: Metadata = {
   title: 'Your Page Title',
@@ -262,7 +262,7 @@ Note: Next.js copies title to og:title automatically if you don't set openGraph.
     description: 'No og:description meta tag found.',
     plainEnglish:
       'When someone shares your link, no description shows under the title. Social media cards look incomplete and get fewer clicks than ones with clear descriptions.',
-    cursorPrompt: `Add og:description in my Next.js app:
+    fixPrompt: `Add og:description in my Next.js app:
 In app/layout.tsx or the page file:
 export const metadata: Metadata = {
   description: 'Your meta description',
@@ -282,7 +282,7 @@ Next.js copies the description to og:description automatically if not set separa
     description: 'No og:image meta tag found.',
     plainEnglish:
       'When someone shares your link on Twitter or Telegram, no image appears. This cuts click-through rates by up to 3×.',
-    cursorPrompt: `Add og:image to my Next.js app:
+    fixPrompt: `Add og:image to my Next.js app:
 1. Create public/og-image.png (1200×630px)
 2. In app/layout.tsx add to metadata:
    openGraph: { images: [{ url: '/og-image.png', width: 1200, height: 630 }] }
@@ -298,7 +298,7 @@ Or use app/opengraph-image.tsx with next/og for dynamic generation.`,
     description: 'The og:image URL returns a non-200 status or is unreachable.',
     plainEnglish:
       'You have an og:image tag, but the image URL is broken — it returns an error. Social media sites will show a placeholder or nothing when your link is shared.',
-    cursorPrompt: `Fix broken og:image in my Next.js app:
+    fixPrompt: `Fix broken og:image in my Next.js app:
 1. Check the current og:image URL in your metadata — open it in a browser tab
 2. If using a relative path, ensure metadataBase is set in app/layout.tsx:
    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL!)
@@ -316,7 +316,7 @@ Or use app/opengraph-image.tsx with next/og for dynamic generation.`,
     description: 'No twitter:card meta tag found.',
     plainEnglish:
       'Without this tag, Twitter/X may not show a rich link preview when your URL is shared. Links without rich cards get significantly less engagement.',
-    cursorPrompt: `Add Twitter card meta tags in my Next.js app:
+    fixPrompt: `Add Twitter card meta tags in my Next.js app:
 In app/layout.tsx or the page file:
 export const metadata: Metadata = {
   twitter: {
@@ -338,7 +338,7 @@ export const metadata: Metadata = {
     description: 'Generic placeholder text like "lorem ipsum" or "your name here" found in page body.',
     plainEnglish:
       'Your page contains dummy text that was never replaced with real content. This looks unprofessional to visitors and can cause Google to rank your page as low-quality content.',
-    cursorPrompt: `Find and replace placeholder text in my Next.js app:
+    fixPrompt: `Find and replace placeholder text in my Next.js app:
 1. Search for placeholder strings:
    grep -ri "lorem ipsum\\|your name here\\|placeholder" app/ components/ --include="*.tsx" --include="*.ts"
 2. Replace all found placeholder text with real content
@@ -355,7 +355,7 @@ export const metadata: Metadata = {
     title: 'Meta description length is not optimal',
     description: 'Meta description is either too short (<100 chars) or too long (>165 chars).',
     plainEnglish: 'Your meta description is either too short (under 100 chars) or too long (over 165 chars). Google typically shows 100–165 characters. Too short leaves value on the table; too long gets cut off with "…".',
-    cursorPrompt: 'Update the meta description to be between 120–160 characters. In Next.js, update the `description` field in `generateMetadata()`. Aim for: keyword-rich first 120 characters, compelling CTA in the last 30.',
+    fixPrompt: 'Update the meta description to be between 120–160 characters. In Next.js, update the `description` field in `generateMetadata()`. Aim for: keyword-rich first 120 characters, compelling CTA in the last 30.',
   },
 
   'missing-twitter-image': {
@@ -367,7 +367,7 @@ export const metadata: Metadata = {
     title: 'Twitter/X card declares summary_large_image but no twitter:image is set',
     description: 'twitter:card is summary_large_image but no twitter:image meta tag was found.',
     plainEnglish: 'Your page uses `twitter:card = summary_large_image` but provides no `twitter:image` URL. Twitter/X will show a blank card. Set the image or downgrade the card type.',
-    cursorPrompt: 'In Next.js `generateMetadata()`, add `twitter: { card: "summary_large_image", images: ["/og.png"] }`. Create a 1200×630 PNG at `public/og.png` as the default OG image.',
+    fixPrompt: 'In Next.js `generateMetadata()`, add `twitter: { card: "summary_large_image", images: ["/og.png"] }`. Create a 1200×630 PNG at `public/og.png` as the default OG image.',
   },
 
   'canonical-mismatch': {
@@ -379,7 +379,7 @@ export const metadata: Metadata = {
     title: 'Canonical URL points to a different domain',
     description: 'The canonical tag hostname does not match the page hostname.',
     plainEnglish: 'The canonical tag says this page belongs to a different domain than the one you\'re actually on. Google will index the canonical domain\'s version and ignore this one, potentially splitting ranking signals.',
-    cursorPrompt: 'In Next.js, set `alternates: { canonical: process.env.NEXT_PUBLIC_APP_URL }` in `generateMetadata()`. Ensure `NEXT_PUBLIC_APP_URL` matches your actual production domain (no trailing slash).',
+    fixPrompt: 'In Next.js, set `alternates: { canonical: process.env.NEXT_PUBLIC_APP_URL }` in `generateMetadata()`. Ensure `NEXT_PUBLIC_APP_URL` matches your actual production domain (no trailing slash).',
   },
 
   'canonical-double-slash': {
@@ -391,7 +391,7 @@ export const metadata: Metadata = {
     title: 'Canonical URL contains a double-slash path',
     description: 'The canonical URL contains a malformed double-slash in the path.',
     plainEnglish: 'Your canonical URL has an extra slash in the path. Google may treat that as a different URL and split ranking signals.',
-    cursorPrompt: 'Normalize the base URL before building canonical URLs. In Next.js, strip the trailing slash from `NEXT_PUBLIC_APP_URL` and use `new URL(path, baseUrl).toString()` or `.replace(/\\/$/, "")` before concatenating paths.',
+    fixPrompt: 'Normalize the base URL before building canonical URLs. In Next.js, strip the trailing slash from `NEXT_PUBLIC_APP_URL` and use `new URL(path, baseUrl).toString()` or `.replace(/\\/$/, "")` before concatenating paths.',
   },
 
   'missing-og-url': {
@@ -403,7 +403,7 @@ export const metadata: Metadata = {
     title: 'Open Graph URL missing',
     description: 'No og:url meta tag found.',
     plainEnglish: 'Social platforms and crawlers have no explicit canonical sharing URL for this page. This can weaken preview consistency across channels.',
-    cursorPrompt: 'Add `openGraph: { url: process.env.NEXT_PUBLIC_APP_URL }` or a page-specific absolute URL in Next.js metadata. Make sure it matches the canonical URL.',
+    fixPrompt: 'Add `openGraph: { url: process.env.NEXT_PUBLIC_APP_URL }` or a page-specific absolute URL in Next.js metadata. Make sure it matches the canonical URL.',
   },
 
   'og-url-mismatch': {
@@ -415,7 +415,7 @@ export const metadata: Metadata = {
     title: 'Open Graph URL points to a different domain',
     description: 'The og:url hostname does not match the page hostname.',
     plainEnglish: 'Your share preview says the page belongs to a different domain than the one visitors are on. That creates inconsistent social previews and indexing signals.',
-    cursorPrompt: 'Set `openGraph.url` to the same production domain used by the canonical URL. In Next.js, normalize `NEXT_PUBLIC_APP_URL` once and reuse it for canonical and Open Graph URL generation.',
+    fixPrompt: 'Set `openGraph.url` to the same production domain used by the canonical URL. In Next.js, normalize `NEXT_PUBLIC_APP_URL` once and reuse it for canonical and Open Graph URL generation.',
   },
 
   'og-url-double-slash': {
@@ -427,7 +427,7 @@ export const metadata: Metadata = {
     title: 'Open Graph URL contains a double-slash path',
     description: 'The og:url value contains a malformed double-slash in the path.',
     plainEnglish: 'Your Open Graph URL has an extra slash in the path. Social platforms may cache or display the wrong page URL.',
-    cursorPrompt: 'Normalize the base URL before building `openGraph.url`. In Next.js, strip trailing slash from `NEXT_PUBLIC_APP_URL` before adding route paths.',
+    fixPrompt: 'Normalize the base URL before building `openGraph.url`. In Next.js, strip trailing slash from `NEXT_PUBLIC_APP_URL` before adding route paths.',
   },
 
   'sensitive-page-indexable': {
@@ -439,7 +439,7 @@ export const metadata: Metadata = {
     title: 'Sensitive page appears indexable',
     description: 'This private or low-value route has no noindex directive.',
     plainEnglish: 'This page looks like a report, dashboard, or account page, but search engines are not told to keep it out of the index.',
-    cursorPrompt: 'Add `robots: { index: false, follow: false }` metadata for private routes. In Next.js App Router, export `metadata` from the route page or add a route-specific noindex header.',
+    fixPrompt: 'Add `robots: { index: false, follow: false }` metadata for private routes. In Next.js App Router, export `metadata` from the route page or add a route-specific noindex header.',
   },
 
   'page-noindex': {
@@ -451,7 +451,7 @@ export const metadata: Metadata = {
     title: 'Page is marked noindex',
     description: 'The page has a robots noindex directive.',
     plainEnglish: 'Search engines are instructed not to index this page. This is correct for private pages, but a problem for public marketing or product pages.',
-    cursorPrompt: 'If this is a public page, remove the noindex directive from page metadata or headers. If it is private, keep noindex and make sure it is not included in sitemap.xml.',
+    fixPrompt: 'If this is a public page, remove the noindex directive from page metadata or headers. If it is private, keep noindex and make sure it is not included in sitemap.xml.',
   },
 
   'image-missing-alt': {
@@ -463,7 +463,7 @@ export const metadata: Metadata = {
     title: 'Images are missing alt text',
     description: 'One or more non-decorative images do not have an alt attribute.',
     plainEnglish: 'Some images have no alt text. Screen readers and search engines lose context, and image search previews are weaker.',
-    cursorPrompt: 'Add descriptive `alt` text to meaningful images. In Next.js, every `<Image>` should have an `alt` prop. Use `alt=""` only for decorative images.',
+    fixPrompt: 'Add descriptive `alt` text to meaningful images. In Next.js, every `<Image>` should have an `alt` prop. Use `alt=""` only for decorative images.',
   },
 
   'image-missing-dimensions': {
@@ -475,7 +475,7 @@ export const metadata: Metadata = {
     title: 'Images are missing dimensions',
     description: 'One or more images are missing width/height attributes.',
     plainEnglish: 'Images without dimensions can cause layout shifts while the page loads. That hurts Core Web Vitals and makes the page feel unstable.',
-    cursorPrompt: 'Set explicit `width` and `height` on images, or reserve space with CSS `aspect-ratio`. In Next.js, prefer `<Image width={...} height={...} />` for known assets.',
+    fixPrompt: 'Set explicit `width` and `height` on images, or reserve space with CSS `aspect-ratio`. In Next.js, prefer `<Image width={...} height={...} />` for known assets.',
   },
 
   'missing-structured-data': {
@@ -487,7 +487,7 @@ export const metadata: Metadata = {
     title: 'No structured data (JSON-LD) found',
     description: 'No <script type="application/ld+json"> blocks found on the page.',
     plainEnglish: 'No Schema.org JSON-LD blocks were found on this page. Structured data helps Google understand your content and display rich results. It also improves AI search visibility.',
-    cursorPrompt: 'Add at minimum an Organization or WebApplication schema in a `<script type="application/ld+json">` tag in your page `<head>`. In Next.js, inject it server-side in the root layout.',
+    fixPrompt: 'Add at minimum an Organization or WebApplication schema in a `<script type="application/ld+json">` tag in your page `<head>`. In Next.js, inject it server-side in the root layout.',
   },
 
   'missing-operating-system': {
@@ -499,7 +499,7 @@ export const metadata: Metadata = {
     title: 'WebApplication schema is missing operatingSystem',
     description: 'WebApplication or SoftwareApplication JSON-LD is present but lacks the operatingSystem field.',
     plainEnglish: 'Your WebApplication or SoftwareApplication structured data is missing the `operatingSystem` field. Google requires this for Software rich results in search.',
-    cursorPrompt: 'Add `operatingSystem: "Web"` to your WebApplication JSON-LD schema. In Next.js, update the schema object in `app/layout.tsx` that contains `"@type": "WebApplication"`.',
+    fixPrompt: 'Add `operatingSystem: "Web"` to your WebApplication JSON-LD schema. In Next.js, update the schema object in `app/layout.tsx` that contains `"@type": "WebApplication"`.',
   },
 
   'sitemap-double-slash': {
@@ -511,7 +511,7 @@ export const metadata: Metadata = {
     title: 'Sitemap URL in robots.txt has a double-slash',
     description: 'The Sitemap: line in robots.txt contains a malformed URL with a double-slash after the protocol.',
     plainEnglish: 'The Sitemap: line in your robots.txt contains a malformed URL with a double-slash (e.g. `//sitemap.xml`). Googlebot cannot process this URL, so your sitemap is effectively invisible.',
-    cursorPrompt: 'The root cause is `NEXT_PUBLIC_APP_URL` ending with a trailing slash. Fix: (1) Remove the trailing slash from `NEXT_PUBLIC_APP_URL` in your Vercel environment variables, (2) Add `.replace(/\\/$/, "")` when using this env var to build URLs in `app/robots.ts` and `app/sitemap.ts`.',
+    fixPrompt: 'The root cause is `NEXT_PUBLIC_APP_URL` ending with a trailing slash. Fix: (1) Remove the trailing slash from `NEXT_PUBLIC_APP_URL` in your Vercel environment variables, (2) Add `.replace(/\\/$/, "")` when using this env var to build URLs in `app/robots.ts` and `app/sitemap.ts`.',
   },
 
   'thin-llms-txt': {
@@ -523,7 +523,7 @@ export const metadata: Metadata = {
     title: 'llms.txt file is too short',
     description: 'llms.txt was found but contains fewer than 100 words.',
     plainEnglish: 'Your llms.txt exists but has very few words. AI systems (Perplexity, ChatGPT, Claude) use this file to understand your product. A thin file means generic or wrong AI-generated summaries about your site.',
-    cursorPrompt: 'Expand llms.txt to at least 150 words. Include: a 1-paragraph product description, target audience, key features, a FAQ section (5+ Q&A pairs), and author/organization info. Save to `public/llms.txt`.',
+    fixPrompt: 'Expand llms.txt to at least 150 words. Include: a 1-paragraph product description, target audience, key features, a FAQ section (5+ Q&A pairs), and author/organization info. Save to `public/llms.txt`.',
   },
 
   'no-explicit-ai-crawlers': {
@@ -535,7 +535,7 @@ export const metadata: Metadata = {
     title: 'No explicit AI crawler rules in robots.txt',
     description: 'robots.txt has no explicit rules for named AI crawlers (GPTBot, ClaudeBot, PerplexityBot, OAI-SearchBot).',
     plainEnglish: 'Your robots.txt has no explicit rules for AI crawlers (GPTBot, ClaudeBot, PerplexityBot). While a wildcard `Allow: /` covers them, naming them explicitly signals AI-indexing intent and is best practice for AI search visibility.',
-    cursorPrompt: 'In `app/robots.ts`, add explicit Allow rules: `{ userAgent: "GPTBot", allow: "/" }`, `{ userAgent: "ClaudeBot", allow: "/" }`, `{ userAgent: "PerplexityBot", allow: "/" }`, `{ userAgent: "OAI-SearchBot", allow: "/" }`.',
+    fixPrompt: 'In `app/robots.ts`, add explicit Allow rules: `{ userAgent: "GPTBot", allow: "/" }`, `{ userAgent: "ClaudeBot", allow: "/" }`, `{ userAgent: "PerplexityBot", allow: "/" }`, `{ userAgent: "OAI-SearchBot", allow: "/" }`.',
   },
 
   'images-missing-alt': {
@@ -547,7 +547,7 @@ export const metadata: Metadata = {
     title: 'Images with empty or missing alt text',
     description: 'One or more non-decorative images have empty or missing alt attributes.',
     plainEnglish: 'Some images have no meaningful alt text. Screen readers read these as "image" with no context, hurting accessibility and image search visibility.',
-    cursorPrompt: 'Add descriptive alt text to all meaningful images. Use alt="" only for purely decorative images that also have role="presentation" or aria-hidden="true". In Next.js every <Image> requires an alt prop.',
+    fixPrompt: 'Add descriptive alt text to all meaningful images. Use alt="" only for purely decorative images that also have role="presentation" or aria-hidden="true". In Next.js every <Image> requires an alt prop.',
   },
 
   'meta-robots-noindex': {
@@ -559,7 +559,7 @@ export const metadata: Metadata = {
     title: 'Page blocked from indexing via meta robots',
     description: 'meta[name="robots"] contains noindex — search engines will not index this page.',
     plainEnglish: 'A meta tag explicitly tells search engines not to index this page. If this is a public marketing or product page, removing noindex is critical for organic traffic.',
-    cursorPrompt: 'In Next.js, remove `robots: { index: false }` from the page metadata export or generateMetadata(). Check that no middleware or layout is injecting a noindex directive for this route.',
+    fixPrompt: 'In Next.js, remove `robots: { index: false }` from the page metadata export or generateMetadata(). Check that no middleware or layout is injecting a noindex directive for this route.',
     docsUrl: 'https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag',
   },
 
@@ -572,7 +572,7 @@ export const metadata: Metadata = {
     title: 'URL disallowed in robots.txt',
     description: 'The scanned URL path is blocked by a Disallow rule in robots.txt for Googlebot or all crawlers.',
     plainEnglish: 'Your robots.txt file tells Google not to crawl this page. If this is a public page you want indexed, the Disallow rule needs to be removed or narrowed.',
-    cursorPrompt: 'In Next.js, update app/robots.ts and remove or narrow the Disallow rule that blocks this path. Check both wildcard (*) and Googlebot-specific rules. After deploying, use Google Search Console > URL Inspection to request re-crawling.',
+    fixPrompt: 'In Next.js, update app/robots.ts and remove or narrow the Disallow rule that blocks this path. Check both wildcard (*) and Googlebot-specific rules. After deploying, use Google Search Console > URL Inspection to request re-crawling.',
     docsUrl: 'https://developers.google.com/search/docs/crawling-indexing/robots/create-robots-txt',
   },
 
@@ -585,7 +585,7 @@ export const metadata: Metadata = {
     title: 'Very few internal links on the page',
     description: 'Fewer than 3 internal anchor links found in the page body.',
     plainEnglish: 'This page has almost no links to other pages on your site. Internal links help Google discover and understand your site structure, and help visitors navigate. Most substantive pages should link to at least 3–5 related pages.',
-    cursorPrompt: 'Add at least 3 internal links from this page to related pages on your site. In Next.js, use <Link href="/related-page"> components. Good candidates: navigation links, related articles, CTAs pointing to other sections of your product.',
+    fixPrompt: 'Add at least 3 internal links from this page to related pages on your site. In Next.js, use <Link href="/related-page"> components. Good candidates: navigation links, related articles, CTAs pointing to other sections of your product.',
     docsUrl: 'https://developers.google.com/search/docs/crawling-indexing/links-crawlable',
   },
 
@@ -598,7 +598,7 @@ export const metadata: Metadata = {
     title: 'Canonical URL differs from page URL',
     description: 'The canonical tag points to a different URL than the current page after normalising trailing slashes.',
     plainEnglish: 'Your canonical tag points to a slightly different URL than the page you\'re on (e.g., with/without trailing slash, or a different path). Google will treat the canonical URL as the "real" version and may not index this one.',
-    cursorPrompt: 'In Next.js, ensure alternates.canonical in generateMetadata() exactly matches the production URL for this page. Set metadataBase to your NEXT_PUBLIC_APP_URL and use relative paths in alternates.canonical.',
+    fixPrompt: 'In Next.js, ensure alternates.canonical in generateMetadata() exactly matches the production URL for this page. Set metadataBase to your NEXT_PUBLIC_APP_URL and use relative paths in alternates.canonical.',
     docsUrl: 'https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls',
   },
 
@@ -614,7 +614,7 @@ export const metadata: Metadata = {
     description: 'The URL uses HTTP, not HTTPS — traffic is unencrypted.',
     plainEnglish:
       'Your site is not encrypted. Anyone on the same network can read or modify data your visitors send you — including passwords and form submissions. Browsers also show a "Not Secure" warning, which kills trust instantly.',
-    cursorPrompt: `Enable HTTPS for my Next.js app:
+    fixPrompt: `Enable HTTPS for my Next.js app:
 1. On Vercel: HTTPS is automatic — just deploy and use your .vercel.app or custom domain
 2. For custom domain on Vercel: go to Project > Settings > Domains > add your domain — SSL is provisioned automatically
 3. If self-hosting, use Let's Encrypt with Certbot: certbot --nginx -d yourdomain.com
@@ -634,7 +634,7 @@ export const metadata: Metadata = {
     description: 'Strict-Transport-Security response header is not set.',
     plainEnglish:
       'Your site allows browsers to connect over HTTP even though you have HTTPS. Attackers can intercept the first request and downgrade visitors to unencrypted HTTP. HSTS prevents this.',
-    cursorPrompt: `Add HSTS header in my Next.js app:
+    fixPrompt: `Add HSTS header in my Next.js app:
 In next.config.ts, add to headers():
 async headers() {
   return [{
@@ -657,7 +657,7 @@ Note: Only add this once your site is fully on HTTPS — HSTS cannot be easily r
     description: 'X-Frame-Options response header is not set.',
     plainEnglish:
       'Your site can be embedded in an invisible iframe on another website. Attackers use this technique (called "clickjacking") to trick your users into clicking things without realising it.',
-    cursorPrompt: `Add X-Frame-Options header in my Next.js app:
+    fixPrompt: `Add X-Frame-Options header in my Next.js app:
 In next.config.ts:
 async headers() {
   return [{
@@ -680,7 +680,7 @@ async headers() {
     description: 'X-Content-Type-Options: nosniff header is not set.',
     plainEnglish:
       'Browsers can "sniff" your files and treat them as a different file type than intended. This can allow attackers to upload files that get executed as scripts. This header prevents that.',
-    cursorPrompt: `Add X-Content-Type-Options header in my Next.js app:
+    fixPrompt: `Add X-Content-Type-Options header in my Next.js app:
 In next.config.ts:
 async headers() {
   return [{
@@ -701,7 +701,7 @@ async headers() {
     description: 'Referrer-Policy response header is not set.',
     plainEnglish:
       'When visitors click a link to leave your site, their browser sends your full URL (including any private query parameters) to the destination site. A referrer policy controls what gets shared.',
-    cursorPrompt: `Add Referrer-Policy header in my Next.js app:
+    fixPrompt: `Add Referrer-Policy header in my Next.js app:
 In next.config.ts:
 async headers() {
   return [{
@@ -723,7 +723,7 @@ async headers() {
     description: 'No Content-Security-Policy header found.',
     plainEnglish:
       "There's no policy controlling what scripts and resources your page can load. Without this, an attacker who injects any code into your page can do anything — steal cookies, redirect users, exfiltrate data.",
-    cursorPrompt: `Add Content-Security-Policy in my Next.js app:
+    fixPrompt: `Add Content-Security-Policy in my Next.js app:
 In next.config.ts, start with a report-only policy to avoid breaking anything:
 async headers() {
   return [{
@@ -753,7 +753,7 @@ See Next.js docs for nonce-based CSP with App Router.`,
     description: "Content-Security-Policy includes 'unsafe-inline' or 'unsafe-eval', weakening protection.",
     plainEnglish:
       "You have a Content Security Policy, but it includes 'unsafe-inline' or 'unsafe-eval' which largely defeats the purpose. It's like having a lock on your door but leaving the key in it.",
-    cursorPrompt: `Remove unsafe-inline/unsafe-eval from CSP in my Next.js app:
+    fixPrompt: `Remove unsafe-inline/unsafe-eval from CSP in my Next.js app:
 1. Replace 'unsafe-inline' for scripts with a nonce-based approach:
    - Next.js 13.4+ supports nonce via middleware:
    // middleware.ts
@@ -780,7 +780,7 @@ See Next.js docs for nonce-based CSP with App Router.`,
     description: 'SSL certificate expires within 30 days.',
     plainEnglish:
       "Your HTTPS certificate is about to expire. Once it does, browsers will show a scary 'Your connection is not private' warning to every visitor — and most will immediately leave.",
-    cursorPrompt: `Renew SSL certificate:
+    fixPrompt: `Renew SSL certificate:
 If using Vercel: SSL is managed automatically — no action needed unless using a custom domain that was manually configured.
 
 For custom certificates:
@@ -799,7 +799,7 @@ For custom certificates:
     description: '.env or config file returns 200 at a public URL.',
     plainEnglish:
       'Your API keys and passwords are visible to anyone right now. Attackers scan for this automatically — rotate your keys immediately.',
-    cursorPrompt: `URGENT — do this now:
+    fixPrompt: `URGENT — do this now:
 1. Go to OpenAI/Stripe/etc. dashboards and revoke all exposed keys
 2. Generate new keys and add them to Vercel Environment Variables
 3. Verify .env and .env.local are in .gitignore
@@ -816,7 +816,7 @@ For custom certificates:
     description: 'A secret API key pattern was detected in the page source.',
     plainEnglish:
       "A secret API key is visible in your page's HTML source code. Anyone can view-source your page and steal it — this is actively exploited by bots that scrape the web looking for this.",
-    cursorPrompt: `URGENT — remove exposed API key from HTML:
+    fixPrompt: `URGENT — remove exposed API key from HTML:
 1. IMMEDIATELY revoke the exposed key in the respective service dashboard
 2. Find where the key is leaking — search your codebase:
    grep -r "sk-\\|pk_live_\\|AIzaSy\\|AKIA" --include="*.tsx" --include="*.ts" --include="*.js"
@@ -839,7 +839,7 @@ For custom certificates:
     description: 'Page loaded over HTTPS contains resources (scripts, images, styles) loaded over HTTP.',
     plainEnglish:
       'Your HTTPS page loads some resources (images, scripts, or styles) over insecure HTTP. Browsers block or warn about this, causing parts of your page to break or display incorrectly for visitors.',
-    cursorPrompt: `Fix mixed content in my Next.js app:
+    fixPrompt: `Fix mixed content in my Next.js app:
 1. Find all HTTP resource URLs in your code:
    grep -r '"http://' --include="*.tsx" --include="*.ts" --include="*.css" app/ components/
 2. Replace all http:// URLs with https:// equivalents
@@ -859,7 +859,7 @@ For custom certificates:
     title: 'Missing Permissions-Policy header',
     description: 'Permissions-Policy response header is absent — browser features are unrestricted.',
     plainEnglish: 'Without a Permissions-Policy header, any script on your page can access the camera, microphone, geolocation, and other sensitive browser features. This is a defence-in-depth security header that limits exposure if you get XSS.',
-    cursorPrompt: 'In next.config.ts headers(), add: { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" }. Adjust the value to allow only the features your site actually uses.',
+    fixPrompt: 'In next.config.ts headers(), add: { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" }. Adjust the value to allow only the features your site actually uses.',
     docsUrl: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy',
   },
 
@@ -872,7 +872,7 @@ For custom certificates:
     title: 'No cookie consent mechanism detected',
     description: 'Analytics/tracking scripts found but no cookie consent banner pattern detected.',
     plainEnglish: 'Your site loads tracking scripts (Google Analytics, Meta Pixel, etc.) but no cookie consent banner was found. GDPR and similar laws require informed consent before tracking EU visitors — fines can reach €20M.',
-    cursorPrompt: 'Add a cookie consent solution before your analytics scripts load. Options: (1) CookieYes or Cookiebot (managed SaaS), (2) react-cookie-consent package, (3) build a simple banner that conditionally loads analytics. In Next.js, wrap GA/GTM initialization in a consent check before calling gtag() or loading the script.',
+    fixPrompt: 'Add a cookie consent solution before your analytics scripts load. Options: (1) CookieYes or Cookiebot (managed SaaS), (2) react-cookie-consent package, (3) build a simple banner that conditionally loads analytics. In Next.js, wrap GA/GTM initialization in a consent check before calling gtag() or loading the script.',
     docsUrl: 'https://gdpr.eu/cookies/',
   },
 
@@ -885,7 +885,7 @@ For custom certificates:
     title: 'No privacy policy link found',
     description: 'No link to a privacy policy page was detected on this page.',
     plainEnglish: 'A privacy policy link is legally required in most jurisdictions if you collect any user data. It also builds trust with visitors who want to understand how their data is handled.',
-    cursorPrompt: 'Create a privacy policy page at /privacy and add a link to it in your site footer. In Next.js: (1) create app/privacy/page.tsx, (2) add <Link href="/privacy">Privacy Policy</Link> in your footer component. Use a privacy policy generator (e.g., Termly, PrivacyPolicies.com) as a starting template.',
+    fixPrompt: 'Create a privacy policy page at /privacy and add a link to it in your site footer. In Next.js: (1) create app/privacy/page.tsx, (2) add <Link href="/privacy">Privacy Policy</Link> in your footer component. Use a privacy policy generator (e.g., Termly, PrivacyPolicies.com) as a starting template.',
   },
 
   'third-party-trackers': {
@@ -897,7 +897,7 @@ For custom certificates:
     title: 'Third-party tracking scripts detected',
     description: 'External scripts from known tracker domains were found on the page.',
     plainEnglish: 'Your site loads scripts from third-party tracking services. Each tracker adds latency, can access cookies/localStorage, and represents a privacy surface. More trackers = slower page + more GDPR liability.',
-    cursorPrompt: 'Review each tracking script and remove any you don\'t actively use. For essential trackers, ensure: (1) consent gate before loading, (2) use next/script with strategy="afterInteractive", (3) configure the tracker to respect Do Not Track. Consider server-side analytics (Plausible, Fathom, PostHog cloud) which load no client-side tracker.',
+    fixPrompt: 'Review each tracking script and remove any you don\'t actively use. For essential trackers, ensure: (1) consent gate before loading, (2) use next/script with strategy="afterInteractive", (3) configure the tracker to respect Do Not Track. Consider server-side analytics (Plausible, Fathom, PostHog cloud) which load no client-side tracker.',
   },
 
   // ─────────────────────────────────────────
@@ -912,7 +912,7 @@ For custom certificates:
     description: 'No <meta name="viewport"> tag found.',
     plainEnglish:
       'Your site has no mobile viewport configuration. On phones, it will render as a tiny desktop page that visitors have to zoom into to read anything — a guaranteed high bounce rate.',
-    cursorPrompt: `Add viewport meta tag in my Next.js app:
+    fixPrompt: `Add viewport meta tag in my Next.js app:
 Next.js App Router sets the viewport automatically via the metadata API.
 In app/layout.tsx:
 export const metadata: Metadata = {
@@ -935,7 +935,7 @@ export const viewport: Viewport = {
     description: 'Viewport meta tag contains user-scalable=no, preventing zoom.',
     plainEnglish:
       'Your site prevents users from zooming in on mobile. This is a serious accessibility issue — many people with visual impairments rely on zoom. Apple and Google also penalise this in their quality guidelines.',
-    cursorPrompt: `Remove user-scalable=no from viewport in my Next.js app:
+    fixPrompt: `Remove user-scalable=no from viewport in my Next.js app:
 In app/layout.tsx, update the viewport export:
 export const viewport: Viewport = {
   width: 'device-width',
@@ -957,7 +957,7 @@ content="width=device-width, initial-scale=1"`,
     description: 'No favicon link tag found in the page.',
     plainEnglish:
       'Your site has no favicon — the small icon that appears in browser tabs and bookmarks. It makes your site look unfinished and makes it harder for users to find your tab when they have many tabs open.',
-    cursorPrompt: `Add favicon in my Next.js app:
+    fixPrompt: `Add favicon in my Next.js app:
 1. Create a favicon.ico or favicon.png (32×32px or 64×64px)
 2. Place it in the app/ directory (Next.js 13+ App Router):
    app/favicon.ico  ← automatic, no code needed
@@ -981,7 +981,7 @@ content="width=device-width, initial-scale=1"`,
     description: 'No <link rel="apple-touch-icon"> tag found.',
     plainEnglish:
       "When iPhone or iPad users save your site to their home screen, there's no proper icon — iOS will use a screenshot instead, which looks terrible. Adding this takes 5 minutes.",
-    cursorPrompt: `Add Apple touch icon in my Next.js app:
+    fixPrompt: `Add Apple touch icon in my Next.js app:
 1. Create a 180×180px PNG image (your logo on a solid background)
 2. Save as public/apple-touch-icon.png
 3. In app/layout.tsx metadata:
@@ -1003,7 +1003,7 @@ Or place the file at app/apple-icon.png — Next.js handles it automatically.`,
     title: 'No web app manifest found',
     description: 'No <link rel="manifest"> found in head and /manifest.json returned non-200.',
     plainEnglish: 'Your site has no web app manifest. Without it, users who add your site to their home screen on Android get a generic browser icon and no app-like experience. It also helps Chrome show the "Add to Home Screen" prompt.',
-    cursorPrompt: 'In Next.js App Router, create app/manifest.ts: export default function manifest() { return { name: "Your App", short_name: "App", start_url: "/", display: "standalone", background_color: "#ffffff", theme_color: "#000000", icons: [{ src: "/icon.png", sizes: "192x192", type: "image/png" }] } }. Next.js will serve this at /manifest.webmanifest automatically.',
+    fixPrompt: 'In Next.js App Router, create app/manifest.ts: export default function manifest() { return { name: "Your App", short_name: "App", start_url: "/", display: "standalone", background_color: "#ffffff", theme_color: "#000000", icons: [{ src: "/icon.png", sizes: "192x192", type: "image/png" }] } }. Next.js will serve this at /manifest.webmanifest automatically.',
     docsUrl: 'https://nextjs.org/docs/app/api-reference/file-conventions/metadata/manifest',
   },
 
@@ -1016,7 +1016,7 @@ Or place the file at app/apple-icon.png — Next.js handles it automatically.`,
     title: 'Phone numbers not linked for tap-to-call',
     description: 'Phone number patterns detected in body text without adjacent tel: links.',
     plainEnglish: 'Phone numbers on your page are plain text — mobile users cannot tap to call. Wrapping them in <a href="tel:+1234567890"> lets users call directly from the page, which significantly increases conversion on mobile.',
-    cursorPrompt: 'Wrap all phone numbers in tel: links. In React/Next.js: <a href="tel:+1234567890" className="...">(123) 456-7890</a>. Search your components for phone number patterns and replace with linked versions. Include the country code (+1 for US) in the href for international compatibility.',
+    fixPrompt: 'Wrap all phone numbers in tel: links. In React/Next.js: <a href="tel:+1234567890" className="...">(123) 456-7890</a>. Search your components for phone number patterns and replace with linked versions. Include the country code (+1 for US) in the href for international compatibility.',
   },
 
   // ─────────────────────────────────────────
@@ -1031,7 +1031,7 @@ Or place the file at app/apple-icon.png — Next.js handles it automatically.`,
     description: 'One or more internal links return 404 or 5xx status.',
     plainEnglish:
       "Some links on your site lead to pages that don't exist. Visitors click them and hit a dead end, which damages trust. Google also crawls these links — broken ones hurt your SEO.",
-    cursorPrompt: `Fix broken links in my Next.js app:
+    fixPrompt: `Fix broken links in my Next.js app:
 1. Find all broken links — the scan value shows how many were found
 2. Search for the broken URLs in your codebase:
    grep -r "href=" app/ components/ --include="*.tsx" | grep -v "node_modules"
@@ -1057,7 +1057,7 @@ Or place the file at app/apple-icon.png — Next.js handles it automatically.`,
     title: 'Low Lighthouse accessibility score',
     description: 'Lighthouse accessibility score is below 70.',
     plainEnglish: 'Your site scores poorly on automated accessibility tests. This means real users — people using screen readers, keyboard navigation, or who need high contrast — likely struggle to use your site.',
-    cursorPrompt: 'Run: npx lighthouse <url> --only-categories=accessibility --output=html\nFix every "Failing" item. Common fixes: add alt text to images, add aria-label to icon buttons, ensure colour contrast ≥4.5:1, add <label> to form inputs, ensure headings are sequential.',
+    fixPrompt: 'Run: npx lighthouse <url> --only-categories=accessibility --output=html\nFix every "Failing" item. Common fixes: add alt text to images, add aria-label to icon buttons, ensure colour contrast ≥4.5:1, add <label> to form inputs, ensure headings are sequential.',
     docsUrl: 'https://web.dev/accessibility/',
   },
 
@@ -1070,7 +1070,7 @@ Or place the file at app/apple-icon.png — Next.js handles it automatically.`,
     title: 'Images missing alt text (accessibility)',
     description: 'One or more images have no alt attribute — screen readers cannot describe them.',
     plainEnglish: 'Some images have no alt attribute at all. Screen readers will say "image" with no context, or skip the image entirely. This is an unambiguous accessibility failure.',
-    cursorPrompt: 'Add alt attributes to all img elements. In Next.js every <Image> requires an alt prop. Use descriptive text for content images (alt="Product screenshot showing dashboard"), empty string for decorative images that also have role="presentation" (alt="" role="presentation").',
+    fixPrompt: 'Add alt attributes to all img elements. In Next.js every <Image> requires an alt prop. Use descriptive text for content images (alt="Product screenshot showing dashboard"), empty string for decorative images that also have role="presentation" (alt="" role="presentation").',
     docsUrl: 'https://www.w3.org/WAI/tutorials/images/decision-tree/',
   },
 
@@ -1083,7 +1083,7 @@ Or place the file at app/apple-icon.png — Next.js handles it automatically.`,
     title: 'Form inputs missing labels',
     description: 'One or more visible form inputs have no associated label, aria-label, or aria-labelledby.',
     plainEnglish: 'Some form fields have no label. Screen reader users cannot tell what the field is for. Placeholder text is not a substitute — it disappears when you start typing.',
-    cursorPrompt: 'Add a <label htmlFor="inputId"> paired with an <input id="inputId">, or add aria-label="Field purpose" to each input. In Next.js/React: <label htmlFor="email">Email address</label><input id="email" type="email" />. Never use placeholder as the only label.',
+    fixPrompt: 'Add a <label htmlFor="inputId"> paired with an <input id="inputId">, or add aria-label="Field purpose" to each input. In Next.js/React: <label htmlFor="email">Email address</label><input id="email" type="email" />. Never use placeholder as the only label.',
     docsUrl: 'https://www.w3.org/WAI/tutorials/forms/labels/',
   },
 
@@ -1096,7 +1096,7 @@ Or place the file at app/apple-icon.png — Next.js handles it automatically.`,
     title: 'Buttons without accessible label',
     description: 'One or more buttons have no visible text and no aria-label or aria-labelledby.',
     plainEnglish: 'Some buttons (icon buttons, hamburger menus, close buttons) have no accessible name. Screen readers will say "button" with no context — users cannot tell what clicking the button does.',
-    cursorPrompt: 'Add aria-label to icon buttons: <button aria-label="Close menu"><XIcon /></button>. Or wrap icon and hidden text: <button><XIcon aria-hidden="true" /><span className="sr-only">Close menu</span></button>. The sr-only class: position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0).',
+    fixPrompt: 'Add aria-label to icon buttons: <button aria-label="Close menu"><XIcon /></button>. Or wrap icon and hidden text: <button><XIcon aria-hidden="true" /><span className="sr-only">Close menu</span></button>. The sr-only class: position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0).',
     docsUrl: 'https://www.w3.org/WAI/WCAG21/Understanding/name-role-value',
   },
 
@@ -1109,7 +1109,7 @@ Or place the file at app/apple-icon.png — Next.js handles it automatically.`,
     title: 'Missing lang attribute on html element',
     description: 'The <html> element is missing a lang attribute — screen readers cannot select the correct language profile.',
     plainEnglish: 'Your page has no language declaration. Screen readers need this to choose the right pronunciation engine. Without it, content may be read in the wrong language, making it incomprehensible for visually impaired users.',
-    cursorPrompt: 'In Next.js App Router, set lang in app/layout.tsx: <html lang="en">. For multi-language sites, set the correct language code per locale. Use ISO 639-1 codes: en, de, fr, ru, etc.',
+    fixPrompt: 'In Next.js App Router, set lang in app/layout.tsx: <html lang="en">. For multi-language sites, set the correct language code per locale. Use ISO 639-1 codes: en, de, fr, ru, etc.',
     docsUrl: 'https://www.w3.org/International/questions/qa-html-language-declarations',
   },
 
@@ -1122,7 +1122,7 @@ Or place the file at app/apple-icon.png — Next.js handles it automatically.`,
     title: 'No skip navigation link',
     description: 'No skip-to-main-content link found before the first navigation block.',
     plainEnglish: 'Keyboard and screen reader users have to tab through every navigation item on every page to reach the main content. A "skip to content" link at the top of the page lets them jump directly to the main area.',
-    cursorPrompt: 'Add a skip link as the very first element in <body>: <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-white focus:px-4 focus:py-2">Skip to content</a>. Then add id="main-content" to your <main> element.',
+    fixPrompt: 'Add a skip link as the very first element in <body>: <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-white focus:px-4 focus:py-2">Skip to content</a>. Then add id="main-content" to your <main> element.',
     docsUrl: 'https://www.w3.org/WAI/WCAG21/Techniques/general/G1',
   },
 }

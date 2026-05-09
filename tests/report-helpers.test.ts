@@ -16,7 +16,7 @@ function createIssue(overrides: Partial<Issue> = {}): Issue {
     title: 'Missing title',
     description: 'No title tag detected.',
     plainEnglish: 'Your page has no title tag.',
-    cursorPrompt: 'Add a title tag.',
+    fixPrompt: 'Add a title tag.',
     confidence: 'verified',
     scoreEligible: true,
     evidence: [{ kind: 'selector', label: 'title', value: 'missing' }],
