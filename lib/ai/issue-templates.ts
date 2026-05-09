@@ -1125,4 +1125,149 @@ Or place the file at app/apple-icon.png — Next.js handles it automatically.`,
     fixPrompt: 'Add a skip link as the very first element in <body>: <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-white focus:px-4 focus:py-2">Skip to content</a>. Then add id="main-content" to your <main> element.',
     docsUrl: 'https://www.w3.org/WAI/WCAG21/Techniques/general/G1',
   },
+
+  // ─────────────────────────────────────────
+  // GEO / AEO (5)
+  // ─────────────────────────────────────────
+
+  'geo-missing-org-sameas': {
+    id: 'geo-missing-org-sameas',
+    category: 'ai_visibility',
+    severity: 'medium',
+    title: 'Organization schema missing sameAs links',
+    description: 'Organization JSON-LD is present but has no sameAs field linking to external profiles.',
+    plainEnglish:
+      'ChatGPT, Claude, and Perplexity use sameAs links to connect your website to your brand as a known entity. Without them, AI systems may not reliably attribute your content to your brand when answering questions — reducing how often your site gets cited.',
+    fixPrompt: `Add sameAs to your Organization schema in app/layout.tsx.
+sameAs is an array of authoritative URLs where your brand appears.
+
+const organizationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Your Brand Name',
+  url: 'https://yoursite.com',
+  logo: 'https://yoursite.com/logo.svg',
+  sameAs: [
+    'https://twitter.com/yourhandle',
+    'https://www.linkedin.com/company/yourcompany',
+    'https://github.com/yourorg',
+    // Add any profile on a known platform
+  ],
+}
+
+This helps ChatGPT, Claude, and Perplexity connect your site
+to your brand entity in their knowledge graphs.`,
+    docsUrl: 'https://schema.org/sameAs',
+  },
+
+  'geo-missing-date-signal': {
+    id: 'geo-missing-date-signal',
+    category: 'ai_visibility',
+    severity: 'medium',
+    title: 'No content date signal found',
+    description:
+      'The page has no datePublished, dateModified, article:published_time meta tag, or <time datetime> element.',
+    plainEnglish:
+      'Perplexity and Google AI Overview weight fresh content significantly higher. Without a date signal, your page may be treated as potentially outdated — reducing how often AI systems cite it in answers.',
+    fixPrompt: `Add a date signal to your page. Choose the option that fits your content type:
+
+Option 1 — Article schema (best for blog posts and content pages):
+Add to your page's <head>:
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "datePublished": "2026-05-09",
+  "dateModified": "2026-05-09"
+}
+</script>
+
+Option 2 — Open Graph meta (works for any page):
+<meta property="article:modified_time" content="2026-05-09T00:00:00Z" />
+
+Option 3 — Visible time element (best when date is shown to users):
+<time dateTime="2026-05-09">Last updated: May 9, 2026</time>
+
+In Next.js, add to generateMetadata() or the page's layout.`,
+    docsUrl: 'https://schema.org/datePublished',
+  },
+
+  'geo-no-question-headings': {
+    id: 'geo-no-question-headings',
+    category: 'ai_visibility',
+    severity: 'low',
+    title: 'No question-format headings found',
+    description:
+      'None of the H2 or H3 headings start with a question word (What, How, Why, When, Who, Which, Can, Is, Are, Does, Do) or end with "?".',
+    plainEnglish:
+      'ChatGPT, Claude, and Perplexity extract headings as Q&A pairs and include them in answers with a link to your page. Pages with question-format headings are cited more often in AI responses.',
+    fixPrompt: `Restructure at least 2-3 of your H2 or H3 headings as questions.
+
+Examples (adapt to your content):
+<h2>How does [your product] work?</h2>
+<h2>What makes [your service] different?</h2>
+<h3>Can I use [feature] for free?</h3>
+<h3>Who is [product] designed for?</h3>
+<h3>What does [product] check?</h3>
+
+AI search engines extract these as Q&A pairs and reference them
+when answering related user questions — attributing the answer to your page.`,
+    docsUrl: 'https://developers.google.com/search/docs/appearance/structured-data/faqpage',
+  },
+
+  'geo-answer-first-paragraph': {
+    id: 'geo-answer-first-paragraph',
+    category: 'ai_visibility',
+    severity: 'low',
+    title: 'First paragraph too short for AI citation',
+    description:
+      'The first meaningful paragraph has fewer than 50 words — below the range AI systems extract as citation passages.',
+    plainEnglish:
+      'AI systems like ChatGPT, Claude, and Perplexity extract the beginning of your page as citation passages. A short or absent opening paragraph means they have little useful content to cite, reducing how often your page appears in AI answers.',
+    fixPrompt: `Expand the first paragraph of your page content to 50-170 words.
+
+Answer-first principle: the opening paragraph should directly answer
+the main question your page addresses — what it is, who it is for, why it matters.
+
+Structure to aim for:
+"[Product/service] is [clear description] that helps [target audience]
+[achieve main benefit]. Unlike [alternatives], [your key differentiator].
+[Specific capability] in [timeframe/context]."
+
+Optimal length for AI citation passage: 130-170 words.
+(Based on Princeton University GEO research, 2024: arxiv.org/abs/2311.09735)`,
+    docsUrl: 'https://arxiv.org/abs/2311.09735',
+  },
+
+  // ─────────────────────────────────────────
+  // SEO additions (1)
+  // ─────────────────────────────────────────
+
+  'seo-og-image-dimensions': {
+    id: 'seo-og-image-dimensions',
+    category: 'seo',
+    severity: 'medium',
+    title: 'OG image missing width and height',
+    description: 'og:image is set but og:image:width and og:image:height are absent.',
+    plainEnglish:
+      'Twitter/X, LinkedIn, Telegram, and Discord need the image dimensions declared in your HTML to display the preview correctly. Without them, the preview may be skipped entirely or shown at the wrong size — reducing click-through rate when your link is shared.',
+    fixPrompt: `Add og:image:width and og:image:height to your Open Graph metadata.
+
+In Next.js app/layout.tsx or any page's generateMetadata():
+
+export const metadata = {
+  openGraph: {
+    images: [{
+      url: '/og-image.png',   // use absolute URL in production
+      width: 1200,
+      height: 630,
+      alt: 'Descriptive text for the image',
+    }],
+  },
+}
+
+Standard OG image: 1200×630px (1.91:1 ratio).
+Twitter summary_large_image also works best at 1200×628px.`,
+    docsUrl: 'https://ogp.me/#structured',
+  },
 }
