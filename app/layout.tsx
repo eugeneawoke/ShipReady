@@ -78,7 +78,11 @@ const organizationSchema = {
   url: (process.env.NEXT_PUBLIC_APP_URL || 'https://shipready.app').replace(/\/$/, ''),
   logo: `${(process.env.NEXT_PUBLIC_APP_URL || 'https://shipready.app').replace(/\/$/, '')}/logo.svg`,
   description: 'Free website audit tool. Find out why your site is not showing up in Google, ChatGPT, Claude, or Perplexity — and get the exact fix.',
-  sameAs: [] as string[],
+  sameAs: [
+    'https://x.com/eugenegusakov',
+    'https://github.com/eugeneawoke',
+    'https://www.linkedin.com/in/eugene-gusakov/',
+  ],
 }
 
 const webApplicationSchema = {
