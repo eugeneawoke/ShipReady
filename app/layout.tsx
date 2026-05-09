@@ -85,6 +85,10 @@ const organizationSchema = {
   ],
 }
 
+const deployTimestamp = process.env.VERCEL_GIT_COMMIT_TIMESTAMP
+  ? new Date(parseInt(process.env.VERCEL_GIT_COMMIT_TIMESTAMP) * 1000).toISOString().split('T')[0]
+  : new Date().toISOString().split('T')[0]
+
 const webApplicationSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
@@ -92,6 +96,8 @@ const webApplicationSchema = {
   url: (process.env.NEXT_PUBLIC_APP_URL || 'https://shipready.app').replace(/\/$/, ''),
   applicationCategory: 'BusinessApplication',
   operatingSystem: 'Web',
+  datePublished: '2025-05-01',
+  dateModified: deployTimestamp,
   description: 'Free website audit. Find out why your site isn\'t showing up in Google, ChatGPT, Claude, or Perplexity — and fix it. SEO, AI visibility, and security in 30 seconds.',
   featureList: [
     'Lighthouse performance audit',
