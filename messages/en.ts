@@ -503,8 +503,12 @@ const en = {
   Landing: {
     nav: {
       howItWorks: 'How it works',
+      seeReport: 'See Report',
+      whatWeCheck: 'What We Check',
+      faq: 'FAQ',
       pricing: 'Pricing',
       roadmap: 'Roadmap',
+      methodology: 'Methodology',
       signIn: 'Sign in',
       getStarted: 'Get started',
       dashboard: 'Dashboard',
@@ -516,12 +520,12 @@ const en = {
       noSignup: 'No signup required for first scan',
       aiCompatibilityBadge: 'AI-ready fixes',
       worksWith: 'Choose a goal, scan the site, then paste the fixes into any AI coding tool.',
-      worksWithExamples: 'and any other AI assistant',
+      worksWithExamples: 'v0, Bolt, Lovable and more',
     },
     stats: [
       { value: '35+', label: 'automated checks' },
       { value: '5', label: 'categories covered' },
-      { value: 'Fast', label: 'initial findings' },
+      { value: '', label: 'sites scanned' },
       { value: 'AI', label: 'fix prompt per issue' },
     ],
     how: {

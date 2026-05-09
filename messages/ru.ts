@@ -505,8 +505,12 @@ const ru: AppMessages = {
   Landing: {
     nav: {
       howItWorks: 'Как это работает',
+      seeReport: 'Отчёт',
+      whatWeCheck: 'Что проверяем',
+      faq: 'FAQ',
       pricing: 'Тарифы',
       roadmap: 'Роадмэп',
+      methodology: 'Методология',
       signIn: 'Войти',
       getStarted: 'Начать',
       dashboard: 'Дашборд',
@@ -518,12 +522,12 @@ const ru: AppMessages = {
       noSignup: 'Первый скан без регистрации',
       aiCompatibilityBadge: 'AI-ready fixes',
       worksWith: 'Выберите цель, запустите скан и вставьте рекомендации в любой AI-инструмент для кода.',
-      worksWithExamples: 'и любой другой AI-ассистент',
+      worksWithExamples: 'v0, Bolt, Lovable и другие',
     },
     stats: [
       { value: '35+', label: 'автоматических проверок' },
       { value: '5', label: 'категорий' },
-      { value: 'Быстро', label: 'первые выводы' },
+      { value: '', label: 'сайтов проверено' },
       { value: 'AI', label: 'промпт на каждую проблему' },
     ],
     how: {

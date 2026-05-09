@@ -152,7 +152,6 @@ export default function LandingPage() {
   const messages = useMessages() as AppMessages
   const t = messages.Landing as Translations
   const languageAriaLabel = messages.LanguageSwitcher.ariaLabel
-  const roadmapLabel = messages.Roadmap.title
   const [isPending, startTransition] = useTransition()
   const lang: Lang = locale === 'ru' ? 'RU' : 'EN'
 
@@ -170,7 +169,7 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE] overflow-x-hidden">
-      <Nav t={t} lang={lang} setLang={handleSetLang} switching={isPending} languageAriaLabel={languageAriaLabel} roadmapLabel={roadmapLabel} />
+      <Nav t={t} lang={lang} setLang={handleSetLang} switching={isPending} languageAriaLabel={languageAriaLabel} />
       <HeroSection t={t} />
       <StatsBar t={t} />
       <HowItWorksSection t={t} />
@@ -187,7 +186,7 @@ export default function LandingPage() {
 
 // ─── Nav ──────────────────────────────────────────────────────────────────────
 
-function Nav({ t, lang, setLang, switching, languageAriaLabel, roadmapLabel }: { t: Translations; lang: Lang; setLang: (l: Lang) => void; switching: boolean; languageAriaLabel: string; roadmapLabel: string }) {
+function Nav({ t, lang, setLang, switching, languageAriaLabel }: { t: Translations; lang: Lang; setLang: (l: Lang) => void; switching: boolean; languageAriaLabel: string }) {
   const [langOpen, setLangOpen] = useState(false)
   const langRef = useRef<HTMLDivElement>(null)
   const [userEmail, setUserEmail] = useState<string | null>(null)
@@ -222,12 +221,30 @@ function Nav({ t, lang, setLang, switching, languageAriaLabel, roadmapLabel }: {
         {/* left */}
         <div className="flex items-center gap-8">
           <SiteBrandLink />
-          <div className="hidden md:flex items-center gap-6">
+          <div className="hidden md:flex items-center gap-5">
             <button
               onClick={() => smoothScrollTo('#how-it-works')}
               className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors whitespace-nowrap cursor-pointer"
             >
               {t.nav.howItWorks}
+            </button>
+            <button
+              onClick={() => smoothScrollTo('#preview')}
+              className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors whitespace-nowrap cursor-pointer"
+            >
+              {t.nav.seeReport}
+            </button>
+            <button
+              onClick={() => smoothScrollTo('#features')}
+              className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors whitespace-nowrap cursor-pointer"
+            >
+              {t.nav.whatWeCheck}
+            </button>
+            <button
+              onClick={() => smoothScrollTo('#faq')}
+              className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors whitespace-nowrap cursor-pointer"
+            >
+              {t.nav.faq}
             </button>
             <button
               onClick={() => smoothScrollTo('#pricing')}
@@ -236,10 +253,10 @@ function Nav({ t, lang, setLang, switching, languageAriaLabel, roadmapLabel }: {
               {t.nav.pricing}
             </button>
             <Link
-              href="/roadmap"
+              href="/methodology"
               className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors whitespace-nowrap"
             >
-              {roadmapLabel}
+              {t.nav.methodology}
             </Link>
           </div>
         </div>
@@ -355,7 +372,7 @@ function HeroSection({ t }: { t: Translations }) {
               {t.hero.worksWith}
             </p>
             <div className="flex flex-wrap items-center justify-center gap-2">
-              {['Cursor', 'Claude Code', 'Windsurf'].map(p => (
+              {['Cursor', 'Claude Code', 'Windsurf', 'Codex', 'Gemini'].map(p => (
                 <div key={p} className="works-chip">
                   <span className="works-chip-inner">{p}</span>
                 </div>
@@ -373,20 +390,44 @@ function HeroSection({ t }: { t: Translations }) {
 // ─── Stats bar ────────────────────────────────────────────────────────────────
 
 function StatsBar({ t }: { t: Translations }) {
+  const [scansCount, setScansCount] = useState<number | null>(null)
+
+  useEffect(() => {
+    fetch('/api/public/stats')
+      .then(r => r.json())
+      .then((data: { scansCount: number }) => setScansCount(data.scansCount))
+      .catch(() => {/* silently ignore */})
+  }, [])
+
   return (
     <section className="border-y border-white/[0.06] py-8 px-6">
       <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
         {t.stats.map((s, i) => {
-          const numMatch = s.value.match(/^(\d+)([+\w]*)$/)
+          const isLiveCount = i === 2
+          const displayValue = isLiveCount
+            ? (scansCount !== null ? String(scansCount) : null)
+            : s.value
+          const numMatch = displayValue?.match(/^(\d+)([+\w]*)$/)
+
           return (
             <motion.div key={i} {...fadeUp(i * 0.07)} className="text-center">
-              <div className="text-2xl font-mono font-medium">
-                {numMatch ? (
+              <div className="text-2xl font-mono font-medium flex items-center justify-center gap-2">
+                {isLiveCount && (
+                  <span
+                    className="w-1.5 h-1.5 rounded-full shrink-0"
+                    style={{ background: scansCount !== null ? '#3DDC84' : '#5A5955' }}
+                  />
+                )}
+                {displayValue === null ? (
+                  <span className="text-[#5A5955]">…</span>
+                ) : numMatch ? (
                   <>
                     <NumberTicker value={parseInt(numMatch[1])} className="text-2xl font-mono font-medium text-[#F1F0EE]" />
                     {numMatch[2]}
                   </>
-                ) : s.value}
+                ) : (
+                  displayValue
+                )}
               </div>
               <div className="text-xs text-[#5A5955] mt-1 min-h-[1.25rem]">{s.label}</div>
             </motion.div>
@@ -460,11 +501,11 @@ function HowItWorksSection({ t }: { t: Translations }) {
 
 function ReportPreviewSection({ t }: { t: Translations }) {
   const previewCategories = [
-    { name: t.features.items[0].title, score: 72, color: '#F5C518', icon: '⚡' },
-    { name: t.features.items[1].title, score: 85, color: '#4A9EFF', icon: '🔍' },
-    { name: t.features.items[2].title, score: 61, color: '#FF4444', icon: '🛡️' },
-    { name: t.features.items[3].title, score: 93, color: '#3DDC84', icon: '📱' },
-    { name: t.features.items[4].title, score: 48, color: '#A78BFA', icon: '🤖' },
+    { name: t.features.items[0].title, score: 74, color: '#F5C518', icon: '⚡' },
+    { name: t.features.items[1].title, score: 89, color: '#4A9EFF', icon: '🔍' },
+    { name: t.features.items[2].title, score: 63, color: '#FF4444', icon: '🛡️' },
+    { name: t.features.items[3].title, score: 91, color: '#3DDC84', icon: '📱' },
+    { name: t.features.items[4].title, score: 46, color: '#A78BFA', icon: '🤖' },
   ] as const
 
   return (
@@ -494,8 +535,11 @@ function ReportPreviewSection({ t }: { t: Translations }) {
               <div className="w-3 h-3 rounded-full bg-[#28C840]" />
             </div>
             <div className="flex-1 mx-2 px-3 py-1 rounded-md bg-[#1E1E21] text-xs font-mono text-[#5A5955] truncate">
-              shipready.app/report/my-startup-app
+              shipready.app/report/vercel-com-demo
             </div>
+            <span className="shrink-0 text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#6E56CF]/15 border border-[#6E56CF]/25 text-[#CBBEFF] uppercase tracking-[0.08em]">
+              Live example
+            </span>
           </div>
 
           <div className="p-6 md:p-8">
@@ -504,10 +548,10 @@ function ReportPreviewSection({ t }: { t: Translations }) {
                 <div className="relative w-[110px] h-[110px]">
                   <svg viewBox="0 0 110 110" className="w-full h-full -rotate-90">
                     <circle cx="55" cy="55" r="46" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="7" />
-                    <circle cx="55" cy="55" r="46" fill="none" stroke="#7BC67E" strokeWidth="7" strokeLinecap="round" strokeDasharray="289" strokeDashoffset="63" />
+                    <circle cx="55" cy="55" r="46" fill="none" stroke="#7BC67E" strokeWidth="7" strokeLinecap="round" strokeDasharray="289" strokeDashoffset="72" />
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-[22px] font-mono font-medium">78</span>
+                    <span className="text-[22px] font-mono font-medium">71</span>
                     <span className="text-[8px] text-[#5A5955] uppercase tracking-widest">{t.demo.score}</span>
                   </div>
                 </div>
@@ -531,14 +575,14 @@ function ReportPreviewSection({ t }: { t: Translations }) {
               </div>
             </div>
 
-            <div className="rounded-xl border border-[#FF4444]/25 bg-[#FF4444]/[0.04] overflow-hidden">
-              <div className="flex items-center gap-3 px-4 py-3 border-b border-[#FF4444]/15">
+            <div className="rounded-xl border border-[#A78BFA]/25 bg-[#A78BFA]/[0.04] overflow-hidden">
+              <div className="flex items-center gap-3 px-4 py-3 border-b border-[#A78BFA]/15">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#FF4444]" />
                 <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-[#FF4444]">{t.demo.severity}</span>
-                <span className="text-sm font-medium">{t.demo.issueTitle}</span>
+                <span className="text-sm font-medium">No llms.txt found</span>
               </div>
               <div className="px-4 py-4">
-                <p className="text-sm text-[#8B8A85] mb-4 leading-relaxed">{t.demo.issueDesc}</p>
+                <p className="text-sm text-[#8B8A85] mb-4 leading-relaxed">vercel.com has no llms.txt or ai.txt. AI assistants like ChatGPT, Perplexity, and Claude cannot discover the site&apos;s content boundaries — limiting citations and AI-driven traffic.</p>
                 <div className="flex gap-2 mb-4">
                   <button className="text-xs px-3 py-1.5 rounded-lg bg-[#6E56CF] text-white hover:bg-[#7C68D4] transition-colors">{t.demo.recommendedFix}</button>
                   <button className="text-xs px-3 py-1.5 rounded-lg bg-[#1E1E21] border border-white/[0.08] text-[#8B8A85] hover:bg-[#232328] transition-colors">{t.demo.copyPrompt}</button>
@@ -559,6 +603,8 @@ function ReportPreviewSection({ t }: { t: Translations }) {
                 </div>
               </div>
             </div>
+
+            <p className="mt-3 text-[10px] text-[#5A5955] text-center">Real scan of vercel.com · Updated May 2026</p>
           </div>
         </motion.div>
       </div>
@@ -570,7 +616,7 @@ function ReportPreviewSection({ t }: { t: Translations }) {
 
 function FeaturesSection({ t }: { t: Translations }) {
   return (
-    <section className="py-24 px-6">
+    <section id="features" className="py-24 px-6">
       <div className="max-w-5xl mx-auto">
         <motion.div {...fadeUp()} className="text-center mb-16">
           <div className="inline-flex items-center gap-2 mb-3">
