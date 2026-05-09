@@ -2,7 +2,6 @@ import * as cheerio from 'cheerio'
 import type { Issue } from '@/types/scan'
 import { evidence, withIssueMeta } from '@/lib/checks/issue-meta'
 import { T } from '@/lib/ai/issue-templates'
-import { fetchSafeResource, fetchWithHeadFallback } from '@/lib/checks/fetch-context'
 
 function parseJsonLdTypes(raw: string | null | undefined): string[] {
   if (!raw) return []
@@ -168,6 +167,7 @@ export async function runAIVisibilityChecks(
 
   let llmsTxtBody: string | null = null
   try {
+    const { fetchSafeResource } = await import('@/lib/checks/fetch-context')
     const llmsRes = await fetchSafeResource(`${origin}/llms.txt`, { signal: AbortSignal.timeout(2500) })
     if (!llmsRes.ok) {
       issues.push(withIssueMeta({
@@ -210,7 +210,8 @@ export async function runAIVisibilityChecks(
   const aiCrawlers = ['GPTBot', 'ClaudeBot', 'PerplexityBot', 'CCBot', 'anthropic-ai']
   let robotsTxt: string | null = null
   try {
-    const robotsRes = await fetchSafeResource(`${origin}/robots.txt`, { signal: AbortSignal.timeout(2500) })
+    const { fetchSafeResource: fetchSafeResourceRobots } = await import('@/lib/checks/fetch-context')
+    const robotsRes = await fetchSafeResourceRobots(`${origin}/robots.txt`, { signal: AbortSignal.timeout(2500) })
     if (robotsRes.ok) {
       robotsTxt = await robotsRes.text()
       const blocked = aiCrawlers.filter(bot => parseRobotsBlock(robotsTxt!, bot))
@@ -245,6 +246,7 @@ export async function runAIVisibilityChecks(
   const hasSitemapInHead = !!$('link[rel="sitemap"]').attr('href')
   let hasSitemapFile = false
   try {
+    const { fetchWithHeadFallback } = await import('@/lib/checks/fetch-context')
     const sitemapResult = await fetchWithHeadFallback(`${origin}/sitemap.xml`, 2500)
     hasSitemapFile = sitemapResult.ok
   } catch {
@@ -293,6 +295,67 @@ export async function runAIVisibilityChecks(
         [evidence('selector', 'schema.org/Person', 'missing')],
       ))
     }
+  }
+
+  // ── geo-missing-org-sameas ──────────────────────────────
+  let hasOrgSchemaBlock = false
+  let orgHasSameAs = false
+
+  for (const block of jsonLdScripts) {
+    try {
+      const raw = $(block).html()
+      if (!raw) continue
+      const data = JSON.parse(raw)
+      const items = Array.isArray(data) ? data : [data]
+      for (const item of items) {
+        if (item?.['@type'] === 'Organization') {
+          hasOrgSchemaBlock = true
+          const sameAs = item?.sameAs
+          if (Array.isArray(sameAs) && sameAs.length > 0) orgHasSameAs = true
+        }
+      }
+    } catch { /* skip malformed JSON-LD */ }
+  }
+
+  if (includeLikely && hasOrgSchemaBlock && !orgHasSameAs) {
+    issues.push(withIssueMeta(
+      { ...T['geo-missing-org-sameas'] },
+      'ai-visibility',
+      [evidence('selector', 'Organization @type sameAs', 'missing')],
+    ))
+  }
+
+  // ── geo-missing-date-signal ─────────────────────────────
+  let hasDateInSchema = false
+  for (const block of jsonLdScripts) {
+    try {
+      const raw = $(block).html()
+      if (!raw) continue
+      const data = JSON.parse(raw)
+      const items = Array.isArray(data) ? data : [data]
+      for (const item of items) {
+        if (item?.datePublished || item?.dateModified) hasDateInSchema = true
+      }
+    } catch { /* skip */ }
+  }
+
+  const hasArticlePublishedTime =
+    !!$('meta[property="article:published_time"]').attr('content') ||
+    !!$('meta[property="article:modified_time"]').attr('content')
+
+  const hasTimeElement = $('body time[datetime]')
+    .toArray()
+    .some(el => {
+      const dt = $(el).attr('datetime')
+      return typeof dt === 'string' && dt.length >= 10
+    })
+
+  if (!hasDateInSchema && !hasArticlePublishedTime && !hasTimeElement) {
+    issues.push(withIssueMeta(
+      { ...T['geo-missing-date-signal'] },
+      'dom',
+      [evidence('selector', 'datePublished / article:published_time / time[datetime]', 'all absent')],
+    ))
   }
 
   return issues
