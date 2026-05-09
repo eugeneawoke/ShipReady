@@ -140,7 +140,7 @@ export function ScanForm({
               </p>
             </div>
           </div>
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="mt-3 flex flex-nowrap gap-1.5 overflow-x-auto pb-0.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {SCAN_GOALS.map(goal => (
               <button
                 key={goal.value}
@@ -148,7 +148,7 @@ export function ScanForm({
                 onClick={() => setScanGoal(scanGoal === goal.value ? '' : goal.value)}
                 disabled={loading}
                 aria-pressed={scanGoal === goal.value}
-                className={`min-h-11 px-3.5 py-2 text-sm rounded-full font-medium transition-all cursor-pointer ${
+                className={`shrink-0 min-h-9 px-2.5 py-1 text-[11px] rounded-full font-medium transition-all cursor-pointer whitespace-nowrap ${
                   scanGoal === goal.value
                     ? 'bg-[#6E56CF] text-white border border-[#8A73E6] shadow-[0_10px_30px_rgba(110,86,207,0.35)]'
                     : 'border border-white/10 bg-white/[0.01] text-[#B7B5B0] hover:border-white/22 hover:bg-white/[0.04] disabled:opacity-50'
