@@ -6,42 +6,42 @@ const faqSchema = {
   mainEntity: [
     {
       '@type': 'Question',
-      name: 'What is ShipReady?',
+      name: 'How do I make my website appear in ChatGPT, Claude, and Perplexity?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'ShipReady is a site audit tool for web agencies and developers. Submit your URL and get a scan report covering performance, SEO, security, mobile readiness, and AI visibility — with fix prompts ready to paste into Cursor, Claude Code, or Windsurf.',
+        text: 'AI search engines need three things: access (robots.txt must allow GPTBot, ClaudeBot, and PerplexityBot), structure (FAQ schema, Organization sameAs links, and llms.txt help AI parse your content), and answer-first content (pages should answer their main question in the first paragraph). ShipReady\'s AI Visibility scan checks all of this automatically.',
       },
     },
     {
       '@type': 'Question',
-      name: 'How does the scan work?',
+      name: 'How do I check if my website has security vulnerabilities?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'ShipReady fetches your page, runs a real Lighthouse mobile audit, checks HTTP security headers, inspects HTML metadata, and verifies structured data. Results are labeled as verified, likely, or heuristic so you know exactly how confident each finding is.',
+        text: 'The most impactful security issues are misconfigured HTTP headers — missing CSP, HSTS, X-Frame-Options, and Referrer-Policy expose your site to XSS and clickjacking attacks. ShipReady runs 10+ security checks for free: paste your URL and get a report in under a minute, with exact fix prompts for each issue.',
       },
     },
     {
       '@type': 'Question',
-      name: 'Is ShipReady free?',
+      name: 'How do I audit my website\'s SEO for free?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes. The core scan is free — 3 scans per month, all category scores, and issue descriptions. Upgrade to Pro for unlimited scans, full AI fix prompts, PDF export, and weekly monitoring.',
+        text: 'A proper SEO audit checks title tags, meta descriptions, canonical URLs, Open Graph tags, robots.txt, sitemap.xml, structured data, and image alt text. ShipReady runs all of these in 30 seconds — free, no signup required for the first scan.',
       },
     },
     {
       '@type': 'Question',
-      name: 'Does ShipReady work with Cursor, Claude Code, and Windsurf?',
+      name: 'What is AI visibility and why does it matter for my site?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes. Every issue in your report includes a ready-to-paste fix prompt tailored for Cursor, Claude Code, Windsurf, and other AI coding tools. Just copy and paste to fix.',
+        text: 'AI search (ChatGPT, Claude, Perplexity, Google AI Overview) now handles over 40% of information queries. AI visibility is whether AI crawlers can access your pages, whether your structured data gives them context, and whether your content is structured to be cited. ShipReady checks all of this with a dedicated AI Visibility category.',
       },
     },
     {
       '@type': 'Question',
-      name: 'How accurate are the results?',
+      name: 'Is ShipReady free to use?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Every finding is labeled by confidence level. Verified issues are measured facts. Likely issues are strong heuristics. Lighthouse performance scores are real measured data. ShipReady never marks a check as passed if the measurement could not be completed.',
+        text: '3 scans per month are free — no credit card required. You get all category scores and issue descriptions. Upgrade to Pro ($14/mo) for unlimited scans, full AI fix prompts, PDF export, and weekly domain monitoring.',
       },
     },
   ],

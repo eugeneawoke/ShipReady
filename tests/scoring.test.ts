@@ -23,6 +23,7 @@ test('strategic recommendations are preserved without changing score or confiden
     security: category(),
     mobile: category(),
     ai_visibility: category(),
+    accessibility: category(),
     strategicRecommendations: [
       {
         timeframe: 'next_2_weeks',
@@ -62,6 +63,7 @@ test('stage telemetry is preserved without affecting score output', () => {
     security: category(),
     mobile: category(),
     ai_visibility: category(),
+    accessibility: category(),
     stages,
   })
 
@@ -78,7 +80,7 @@ test('only verified score-eligible issues reduce score', () => {
       title: 'Verified issue',
       description: 'Counts against score.',
       plainEnglish: 'Counts against score.',
-      cursorPrompt: 'Fix it.',
+      fixPrompt: 'Fix it.',
       confidence: 'verified',
       scoreEligible: true,
     },
@@ -89,7 +91,7 @@ test('only verified score-eligible issues reduce score', () => {
       title: 'Likely issue',
       description: 'Must not count against score.',
       plainEnglish: 'Must not count against score.',
-      cursorPrompt: 'Investigate it.',
+      fixPrompt: 'Investigate it.',
       confidence: 'likely',
       scoreEligible: true,
     },

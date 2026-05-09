@@ -2,7 +2,6 @@ import * as cheerio from 'cheerio'
 import type { Issue } from '@/types/scan'
 import { evidence, withIssueMeta } from '@/lib/checks/issue-meta'
 import { T } from '@/lib/ai/issue-templates'
-import { fetchSafeResource, fetchWithHeadFallback } from '@/lib/checks/fetch-context'
 
 function parseJsonLdTypes(raw: string | null | undefined): string[] {
   if (!raw) return []
@@ -84,7 +83,7 @@ export async function runAIVisibilityChecks(
       title: 'No structured data (Schema.org)',
       description: 'No Schema.org markup found in JSON-LD or microdata form.',
       plainEnglish: 'AI assistants and search engines use structured data to understand what your product is. Without it, they have less reliable context.',
-      cursorPrompt: 'Add Schema.org markup for your product or organization in app metadata/layout so AI and search engines can identify the page correctly.',
+      fixPrompt: 'Add Schema.org markup for your product or organization in app metadata/layout so AI and search engines can identify the page correctly.',
       docsUrl: 'https://schema.org/docs/gs.html',
     }, 'ai-visibility', [evidence('selector', 'Schema.org markup', 'missing')]))
   }
@@ -109,7 +108,7 @@ export async function runAIVisibilityChecks(
       title: 'FAQ schema present but no visible FAQ section',
       description: 'FAQPage structured data found in the page, but no matching visible Q&A content was detected.',
       plainEnglish: 'Your page has FAQ structured data but no actual FAQ accordion or Q&A section. Google may penalise this as misleading markup.',
-      cursorPrompt: 'Either add a real visible FAQ accordion to the page that matches the schema, or remove the FAQPage schema from the head.',
+      fixPrompt: 'Either add a real visible FAQ accordion to the page that matches the schema, or remove the FAQPage schema from the head.',
       docsUrl: 'https://developers.google.com/search/docs/appearance/structured-data/faqpage',
     }, 'ai-visibility', [evidence('selector', 'FAQPage schema', 'present without visible Q&A content')]))
   }
@@ -122,7 +121,7 @@ export async function runAIVisibilityChecks(
       title: 'FAQ section found but no FAQ schema',
       description: 'A FAQ section was detected but FAQPage structured data was not found.',
       plainEnglish: 'You have a real FAQ section, but it is not marked up for machines. Adding FAQPage schema increases the chance of reuse in search and AI answers.',
-      cursorPrompt: 'Add FAQPage schema to match the visible questions and answers in your FAQ section.',
+      fixPrompt: 'Add FAQPage schema to match the visible questions and answers in your FAQ section.',
       docsUrl: 'https://developers.google.com/search/docs/appearance/structured-data/faqpage',
     }, 'ai-visibility', [evidence('selector', 'FAQ section', 'found without schema')]))
   }
@@ -148,7 +147,7 @@ export async function runAIVisibilityChecks(
       title: 'Heading hierarchy is broken',
       description: 'Headings skip levels (for example H1 → H3).',
       plainEnglish: 'The page outline skips heading levels. That makes machine parsing and assistive reading less reliable.',
-      cursorPrompt: 'Fix heading levels so the content outline moves sequentially without skipping levels.',
+      fixPrompt: 'Fix heading levels so the content outline moves sequentially without skipping levels.',
     }, 'ai-visibility', [evidence('text', 'Heading hierarchy', 'skipped level detected')]))
   }
 
@@ -161,13 +160,14 @@ export async function runAIVisibilityChecks(
       title: 'Not enough readable text content',
       description: `Only about ${wordCount} readable words found.`,
       plainEnglish: `This page has only about ${wordCount} readable words after ignoring scripts and styles. That may be too little context for AI systems and search engines.`,
-      cursorPrompt: 'Add more readable explanatory content for humans: what the product does, who it is for, and how it works.',
+      fixPrompt: 'Add more readable explanatory content for humans: what the product does, who it is for, and how it works.',
       value: `${wordCount} words`,
     }, 'ai-visibility', [evidence('count', 'Readable word count', wordCount)]))
   }
 
   let llmsTxtBody: string | null = null
   try {
+    const { fetchSafeResource } = await import('@/lib/checks/fetch-context')
     const llmsRes = await fetchSafeResource(`${origin}/llms.txt`, { signal: AbortSignal.timeout(2500) })
     if (!llmsRes.ok) {
       issues.push(withIssueMeta({
@@ -177,7 +177,7 @@ export async function runAIVisibilityChecks(
         title: 'No llms.txt file',
         description: 'No llms.txt was found.',
         plainEnglish: 'An llms.txt file can help AI systems understand which product pages and context to prefer.',
-        cursorPrompt: 'Create a public llms.txt file that lists the core product pages and a short product description.',
+        fixPrompt: 'Create a public llms.txt file that lists the core product pages and a short product description.',
         docsUrl: 'https://llmstxt.org',
       }, 'ai-visibility', [evidence('response', 'llms.txt status', llmsRes.status)]))
     } else {
@@ -191,7 +191,7 @@ export async function runAIVisibilityChecks(
       title: 'No llms.txt file',
       description: 'No llms.txt was found.',
       plainEnglish: 'An llms.txt file can help AI systems understand which product pages and context to prefer.',
-      cursorPrompt: 'Create a public llms.txt file that lists the core product pages and a short product description.',
+      fixPrompt: 'Create a public llms.txt file that lists the core product pages and a short product description.',
       docsUrl: 'https://llmstxt.org',
     }, 'ai-visibility'))
   }
@@ -210,7 +210,8 @@ export async function runAIVisibilityChecks(
   const aiCrawlers = ['GPTBot', 'ClaudeBot', 'PerplexityBot', 'CCBot', 'anthropic-ai']
   let robotsTxt: string | null = null
   try {
-    const robotsRes = await fetchSafeResource(`${origin}/robots.txt`, { signal: AbortSignal.timeout(2500) })
+    const { fetchSafeResource: fetchSafeResourceRobots } = await import('@/lib/checks/fetch-context')
+    const robotsRes = await fetchSafeResourceRobots(`${origin}/robots.txt`, { signal: AbortSignal.timeout(2500) })
     if (robotsRes.ok) {
       robotsTxt = await robotsRes.text()
       const blocked = aiCrawlers.filter(bot => parseRobotsBlock(robotsTxt!, bot))
@@ -222,7 +223,7 @@ export async function runAIVisibilityChecks(
           title: 'AI crawlers blocked in robots.txt',
           description: `Blocked: ${blocked.join(', ')}`,
           plainEnglish: `Your robots.txt blocks ${blocked.join(', ')}. That prevents some AI crawlers from using the site.`,
-          cursorPrompt: 'Update robots.txt so product pages are not fully disallowed for the AI crawlers you want to allow.',
+          fixPrompt: 'Update robots.txt so product pages are not fully disallowed for the AI crawlers you want to allow.',
           value: blocked.join(', '),
         }, 'ai-visibility', [evidence('text', 'Blocked AI crawlers', blocked.join(', '))]))
       }
@@ -245,6 +246,7 @@ export async function runAIVisibilityChecks(
   const hasSitemapInHead = !!$('link[rel="sitemap"]').attr('href')
   let hasSitemapFile = false
   try {
+    const { fetchWithHeadFallback } = await import('@/lib/checks/fetch-context')
     const sitemapResult = await fetchWithHeadFallback(`${origin}/sitemap.xml`, 2500)
     hasSitemapFile = sitemapResult.ok
   } catch {
@@ -259,7 +261,7 @@ export async function runAIVisibilityChecks(
       title: 'No sitemap.xml found',
       description: 'No sitemap.xml at /sitemap.xml and none referenced in the document.',
       plainEnglish: 'A sitemap helps crawlers discover the pages you want cited and indexed.',
-      cursorPrompt: 'Expose a sitemap.xml endpoint or static file that covers the important public pages.',
+      fixPrompt: 'Expose a sitemap.xml endpoint or static file that covers the important public pages.',
       docsUrl: 'https://nextjs.org/docs/app/api-reference/file-conventions/metadata/sitemap',
     }, 'ai-visibility', [evidence('selector', 'sitemap.xml', 'missing')]))
   }
@@ -279,7 +281,7 @@ export async function runAIVisibilityChecks(
       title: 'Weak brand or author entity signals',
       description: 'No About page, contact page, or Organization/Person schema was found.',
       plainEnglish: 'The site does not expose many signals that identify the people or organization behind it.',
-      cursorPrompt: 'Add stronger organization/person signals such as About, Contact, or Organization schema.',
+      fixPrompt: 'Add stronger organization/person signals such as About, Contact, or Organization schema.',
     }, 'ai-visibility', [evidence('text', 'Entity signals', 'missing about/contact/org schema')]))
   }
 
@@ -292,6 +294,119 @@ export async function runAIVisibilityChecks(
         'dom',
         [evidence('selector', 'schema.org/Person', 'missing')],
       ))
+    }
+  }
+
+  // ── geo-missing-org-sameas ──────────────────────────────
+  let hasOrgSchemaBlock = false
+  let orgHasSameAs = false
+
+  for (const block of jsonLdScripts) {
+    try {
+      const raw = $(block).html()
+      if (!raw) continue
+      const data = JSON.parse(raw)
+      const items = Array.isArray(data) ? data : [data]
+      for (const item of items) {
+        if (item?.['@type'] === 'Organization') {
+          hasOrgSchemaBlock = true
+          const sameAs = item?.sameAs
+          if (Array.isArray(sameAs) && sameAs.length > 0) orgHasSameAs = true
+        }
+      }
+    } catch { /* skip malformed JSON-LD */ }
+  }
+
+  if (includeLikely && hasOrgSchemaBlock && !orgHasSameAs) {
+    issues.push(withIssueMeta(
+      { ...T['geo-missing-org-sameas'] },
+      'ai-visibility',
+      [evidence('selector', 'Organization @type sameAs', 'missing')],
+    ))
+  }
+
+  // ── geo-missing-date-signal ─────────────────────────────
+  let hasDateInSchema = false
+  for (const block of jsonLdScripts) {
+    try {
+      const raw = $(block).html()
+      if (!raw) continue
+      const data = JSON.parse(raw)
+      const items = Array.isArray(data) ? data : [data]
+      for (const item of items) {
+        if (item?.datePublished || item?.dateModified) hasDateInSchema = true
+      }
+    } catch { /* skip */ }
+  }
+
+  const hasArticlePublishedTime =
+    !!$('meta[property="article:published_time"]').attr('content') ||
+    !!$('meta[property="article:modified_time"]').attr('content')
+
+  const hasTimeElement = $('body time[datetime]')
+    .toArray()
+    .some(el => {
+      const dt = $(el).attr('datetime')
+      return typeof dt === 'string' && dt.length >= 10
+    })
+
+  if (!hasDateInSchema && !hasArticlePublishedTime && !hasTimeElement) {
+    issues.push(withIssueMeta(
+      { ...T['geo-missing-date-signal'] },
+      'dom',
+      [evidence('selector', 'datePublished / article:published_time / time[datetime]', 'all absent')],
+    ))
+  }
+
+  // ── geo-no-question-headings ────────────────────────────
+  if (includeHeuristics) {
+    const questionPattern = /^(what|how|why|when|who|which|can|is|are|does|do|will|should|where)\b/i
+    const subheadings = $('h2, h3').toArray()
+
+    if (subheadings.length > 0) {
+      const hasQuestionHeading = subheadings.some(el => {
+        const text = $(el).text().trim()
+        return questionPattern.test(text) || text.endsWith('?')
+      })
+
+      if (!hasQuestionHeading) {
+        issues.push(withIssueMeta(
+          { ...T['geo-no-question-headings'] },
+          'dom',
+          [
+            evidence('count', 'H2/H3 headings found', subheadings.length),
+            evidence('selector', 'Question-format heading', 'none found'),
+          ],
+        ))
+      }
+    }
+  }
+
+  // ── geo-answer-first-paragraph ──────────────────────────
+  if (includeHeuristics) {
+    const bodyClone = $('body').clone()
+    bodyClone.find('nav, header, footer, aside, script, style, noscript').remove()
+
+    const firstMeaningfulP = bodyClone.find('p').toArray().find(el => {
+      const text = $(el).text().trim()
+      return text.split(/\s+/).length > 10
+    })
+
+    if (!firstMeaningfulP) {
+      issues.push(withIssueMeta(
+        { ...T['geo-answer-first-paragraph'] },
+        'dom',
+        [evidence('selector', 'First meaningful paragraph', 'not found')],
+      ))
+    } else {
+      const wordCount = $(firstMeaningfulP).text().trim().split(/\s+/).length
+      if (wordCount < 50) {
+        issues.push(withIssueMeta(
+          { ...T['geo-answer-first-paragraph'], value: `${wordCount} words` },
+          'dom',
+          [evidence('count', 'First paragraph word count', wordCount)],
+        ))
+      }
     }
   }
 

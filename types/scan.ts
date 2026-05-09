@@ -49,7 +49,7 @@ export interface Issue {
   title: string
   description: string
   plainEnglish: string
-  cursorPrompt: string
+  fixPrompt: string
   docsUrl?: string
   value?: string | number
   confidence?: IssueConfidence

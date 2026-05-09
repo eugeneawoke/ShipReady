@@ -349,7 +349,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
           title: 'Low Lighthouse accessibility score',
           description: `Accessibility score: ${a11yScore}/100`,
           plainEnglish: `Your site scores ${a11yScore}/100 for accessibility.`,
-          cursorPrompt: 'Fix the failing Lighthouse accessibility audits and improve semantic structure, labels, and contrast.',
+          fixPrompt: 'Fix the failing Lighthouse accessibility audits and improve semantic structure, labels, and contrast.',
           value: a11yScore,
         }, 'lighthouse', [evidence('metric', 'Accessibility score', a11yScore)]))
       }
@@ -494,7 +494,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
               if (!aiPrompt) return issue
               return {
                 ...issue,
-                cursorPrompt: aiPrompt.technical || issue.cursorPrompt,
+                fixPrompt: aiPrompt.technical || issue.fixPrompt,
               }
             })
           }

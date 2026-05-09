@@ -197,6 +197,25 @@ export async function runSEOChecks(
     }
   }
 
+  // ── seo-og-image-dimensions ─────────────────────────────
+  if (includeLikely) {
+    const ogImageUrl = $('meta[property="og:image"]').attr('content')
+    if (ogImageUrl) {
+      const ogWidth = $('meta[property="og:image:width"]').attr('content')
+      const ogHeight = $('meta[property="og:image:height"]').attr('content')
+      if (!ogWidth || !ogHeight) {
+        issues.push(withIssueMeta(
+          { ...T['seo-og-image-dimensions'] },
+          'dom',
+          [
+            evidence('selector', 'og:image', ogImageUrl.slice(0, 80)),
+            evidence('selector', 'og:image:width / og:image:height', 'missing'),
+          ],
+        ))
+      }
+    }
+  }
+
   if (!ogUrl) {
     issues.push(withIssueMeta({ ...T['missing-og-url'] }, 'dom', [evidence('selector', 'meta[property="og:url"]', 'missing')]))
   } else {

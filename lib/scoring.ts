@@ -128,7 +128,7 @@ export function buildPerformanceIssues(lh: LighthouseMetrics): Issue[] {
       title: 'Largest Contentful Paint is too slow',
       description: `LCP is ${(lh.lcp / 1000).toFixed(1)}s`,
       plainEnglish: `Your page takes ${(lh.lcp / 1000).toFixed(1)}s to show the main content. Google's target is under 2.5s.`,
-      cursorPrompt: 'Optimize Largest Contentful Paint: lazy load below-the-fold assets, prioritize the hero asset, and remove render-blocking work.',
+      fixPrompt: 'Optimize Largest Contentful Paint: lazy load below-the-fold assets, prioritize the hero asset, and remove render-blocking work.',
       value: `${(lh.lcp / 1000).toFixed(1)}s`,
     }, 'lighthouse', [evidence('metric', 'LCP', `${(lh.lcp / 1000).toFixed(1)}s`) ]))
   }
@@ -141,7 +141,7 @@ export function buildPerformanceIssues(lh: LighthouseMetrics): Issue[] {
       title: 'Layout shifts detected',
       description: `CLS score is ${lh.cls.toFixed(3)}`,
       plainEnglish: 'Your page layout shifts during load. This makes the page feel unstable and hurts Core Web Vitals.',
-      cursorPrompt: 'Reserve space for images and embeds, avoid injecting content above existing content, and stabilize font/layout loading.',
+      fixPrompt: 'Reserve space for images and embeds, avoid injecting content above existing content, and stabilize font/layout loading.',
       value: lh.cls.toFixed(3),
     }, 'lighthouse', [evidence('metric', 'CLS', lh.cls.toFixed(3))]))
   }
@@ -154,7 +154,7 @@ export function buildPerformanceIssues(lh: LighthouseMetrics): Issue[] {
       title: 'Interaction response is slow',
       description: `INP is ${lh.inp}ms`,
       plainEnglish: `Your page takes ${lh.inp}ms to react to interactions. Target is under 200ms.`,
-      cursorPrompt: 'Break up long tasks, defer non-critical work, and reduce main-thread blocking during interaction.',
+      fixPrompt: 'Break up long tasks, defer non-critical work, and reduce main-thread blocking during interaction.',
       value: `${lh.inp}ms`,
     }, 'lighthouse', [evidence('metric', 'INP', `${lh.inp}ms`) ]))
   }
@@ -167,7 +167,7 @@ export function buildPerformanceIssues(lh: LighthouseMetrics): Issue[] {
       title: 'First paint is slow',
       description: `FCP is ${(lh.fcp / 1000).toFixed(1)}s`,
       plainEnglish: `Your page takes ${(lh.fcp / 1000).toFixed(1)}s before users see anything. Target is under 1.8s.`,
-      cursorPrompt: 'Reduce render-blocking work, preload critical assets, and improve first response rendering.',
+      fixPrompt: 'Reduce render-blocking work, preload critical assets, and improve first response rendering.',
       value: `${(lh.fcp / 1000).toFixed(1)}s`,
     }, 'lighthouse', [evidence('metric', 'FCP', `${(lh.fcp / 1000).toFixed(1)}s`) ]))
   }
@@ -180,7 +180,7 @@ export function buildPerformanceIssues(lh: LighthouseMetrics): Issue[] {
       title: 'Low Lighthouse performance score',
       description: `Performance score: ${lh.performanceScore}/100`,
       plainEnglish: `Google rates your page ${lh.performanceScore}/100 for performance. This suggests users are paying a noticeable speed penalty.`,
-      cursorPrompt: 'Use the Lighthouse trace to remove top performance bottlenecks and improve the mobile score above 70.',
+      fixPrompt: 'Use the Lighthouse trace to remove top performance bottlenecks and improve the mobile score above 70.',
       value: lh.performanceScore,
     }, 'lighthouse', [evidence('metric', 'Performance score', lh.performanceScore)]))
   }

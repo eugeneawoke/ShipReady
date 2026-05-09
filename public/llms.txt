@@ -1,71 +1,100 @@
 # ShipReady
 
-> ShipReady is a pre-deploy site audit tool for web agencies and developers.
-> Scan any URL to get evidence-backed findings across performance, SEO, security,
-> mobile readiness, and AI visibility — with actionable fix prompts for Cursor,
-> Claude Code, and Windsurf.
+> ShipReady is a free website audit tool that shows you exactly why your site
+> isn't showing up in Google, ChatGPT, Claude, or Perplexity — and gives you
+> the exact fix for each issue. Scan any URL in 30 seconds. No signup required.
 
 ## Description
 
-ShipReady runs 35+ automated checks across five audit categories and produces
-a structured report with evidence-grounded confidence ratings: verified
-(deterministic from HTTP/HTML signals), likely (AI inference from clear signals),
+ShipReady runs 35+ automated checks across five audit categories and produces a
+structured report with evidence-grounded confidence ratings: verified (measured
+directly from HTTP/HTML signals), likely (strong heuristic with clear evidence),
 and heuristic (AI inference from ambiguous signals). Every finding includes the
-specific signal that triggered it, eliminating guesswork.
+specific signal that triggered it — no invented issues.
 
-The scan runs in two phases: a Fast Truth Pass (under 30 seconds) covering
-security headers, meta tags, robots.txt, and sitemap validity, followed by a
-Deep Pass using Lighthouse and AI enrichment to generate business-context-aware
-recommendations. Fix prompts are specific to the detected tech stack — a
-Shopify store gets Liquid file references; a Next.js app gets component-level
-instructions.
+The scan runs in two phases: a Fast Truth Pass (under 30 seconds) covering SEO
+metadata, security headers, robots.txt, and AI visibility signals, followed by a
+Deep Pass using real Lighthouse for Core Web Vitals and AI enrichment to generate
+fix prompts tailored to the detected tech stack. A Next.js app gets component-level
+instructions referencing actual files. A Shopify store gets Liquid file references.
 
-Primary audience: small web/dev agencies (1–15 people) who audit client sites
-before delivery. Secondary audience: SEO and marketing agencies adding AI
-visibility audits to their service offering.
+Primary audience: solo founders, indie hackers, and developers who want to know
+why their site isn't getting found — and need a ready-to-use fix. Secondary
+audience: web and SEO agencies auditing client sites before delivery.
 
 ## Author
 
-ShipReady — https://ship-ready.vercel.app
+ShipReady — https://shipready.app
 
-## Key concepts
+## Key Concepts
 
-- Verified / likely / heuristic confidence model
+- Verified / likely / heuristic confidence model (only verified issues affect score)
+- GEO (Generative Engine Optimization): optimization for ChatGPT, Claude, Perplexity, and Google AI Overview
+- AEO (Answer Engine Optimization): structuring content to be cited in AI-generated answers
 - Fast Truth Pass (under 30s) + Deep Pass (Lighthouse + AI enrichment)
-- Business Context Engine — auto-detects stack, business type, primary CTA
-- Evidence-backed findings with source attribution (no invented issues)
-- Fix prompts scoped to detected tech stack (Next.js, Shopify, WordPress, etc.)
+- Fix prompts tailored to detected tech stack (Next.js, Shopify, WordPress, etc.)
+
+## What ShipReady Checks
+
+### SEO
+Title tags, meta descriptions, canonical URLs, Open Graph tags, Twitter/X cards,
+sitemap.xml validity, robots.txt analysis, structured data (JSON-LD), noindex
+detection, image alt text, heading hierarchy, OG image dimensions, thin content.
+
+### AI Visibility (GEO / AEO)
+- llms.txt presence and validity
+- AI crawler access: GPTBot (ChatGPT), ClaudeBot / anthropic-ai (Claude AI), PerplexityBot
+- FAQ schema (FAQPage JSON-LD)
+- Organization sameAs entity links — connects brand to Knowledge Graph
+- Content date freshness signal (datePublished / dateModified / article:published_time)
+- Answer-first paragraph structure (first passage length for AI citation)
+- Question-format headings (H2/H3 starting with What, How, Why, etc.)
+- Author entity signal
+- Structured data types and completeness
+
+### Security
+HTTPS enforcement, HSTS header, Content-Security-Policy, X-Frame-Options,
+X-Content-Type-Options, Referrer-Policy, Permissions-Policy, SSL/TLS certificate
+validity, exposed .env file detection, third-party tracker audit.
+
+### Performance (via Lighthouse)
+LCP (Largest Contentful Paint), CLS (Cumulative Layout Shift), INP (Interaction
+to Next Paint), FCP (First Contentful Paint), overall performance score,
+accessibility score.
+
+### Mobile
+Viewport meta tag, favicon, Apple touch icon, web app manifest.
 
 ## FAQ
 
-Q: What does ShipReady check?
-A: Performance (Lighthouse LCP, CLS, INP, FCP), SEO (titles, meta descriptions,
-canonicals, sitemap, robots.txt, structured data), security (HTTP headers: HSTS,
-CSP, X-Frame-Options, Referrer-Policy, Permissions-Policy), mobile readiness
-(viewport, tap targets, font sizes, responsive layout), and AI visibility
-(llms.txt, AI crawler access, FAQ schema, author entity, structured data quality).
+Q: How do I make my website appear in ChatGPT, Claude, and Perplexity?
+A: AI search engines need three things: access (robots.txt must allow GPTBot,
+ClaudeBot, and PerplexityBot), structure (FAQ schema, Organization sameAs, and
+llms.txt help AI parse your content), and answer-first content (pages should
+answer their main question in the first 130-170 words). ShipReady's AI Visibility
+scan checks all of this automatically.
+
+Q: What is GEO and how is it different from SEO?
+A: SEO optimizes for clicks from search result pages. GEO (Generative Engine
+Optimization) optimizes for citations within AI-generated answers from ChatGPT,
+Claude, Perplexity, and Google AI Overview. Both matter in 2026 — AI search
+handles over 40% of information queries.
+
+Q: Is ShipReady free?
+A: Yes. 3 scans per month are free, no credit card required. Pro ($14/mo) adds
+unlimited scans, full AI fix prompts, PDF export, and weekly monitoring.
 
 Q: How long does a scan take?
-A: Initial findings appear in under 30 seconds (Fast Truth Pass). The full
-report with Lighthouse scores and AI fix prompts takes 1–3 minutes.
+A: Initial findings appear in under 30 seconds. The full report with Lighthouse
+scores and AI fix prompts takes 1-3 minutes.
 
-Q: What are verified, likely, and heuristic findings?
-A: Verified findings are extracted directly from HTTP responses or HTML without
-inference and always affect the score. Likely findings use AI with clear
-supporting signals. Heuristic findings are AI inference from ambiguous signals.
-Only verified and score-eligible findings affect the overall score.
-
-Q: Who is ShipReady for?
-A: Web and dev agencies auditing client sites before delivery, freelance
-developers doing pre-launch quality checks, and SEO agencies adding AI
-visibility auditing to their service offering.
-
-Q: What AI tools are the fix prompts designed for?
-A: Cursor, Claude Code, and Windsurf. Prompts reference specific files and
-configuration paths for the detected tech stack.
+Q: What fix prompts does ShipReady generate?
+A: Each issue gets a specific, ready-to-paste prompt with file paths and code
+examples for the detected tech stack. Prompts work with any AI assistant —
+Claude, ChatGPT, or any tool you paste text into.
 
 ## Pages
 
-- https://ship-ready.vercel.app/ — Homepage, run a free scan
-- https://ship-ready.vercel.app/pricing — Pricing plans
-- https://ship-ready.vercel.app/roadmap — Product roadmap
+- https://shipready.app/ — Homepage, run a free scan
+- https://shipready.app/pricing — Pricing plans (Free, Pro, Agency)
+- https://shipready.app/roadmap — Product roadmap

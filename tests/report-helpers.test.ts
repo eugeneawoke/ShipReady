@@ -16,7 +16,7 @@ function createIssue(overrides: Partial<Issue> = {}): Issue {
     title: 'Missing title',
     description: 'No title tag detected.',
     plainEnglish: 'Your page has no title tag.',
-    cursorPrompt: 'Add a title tag.',
+    fixPrompt: 'Add a title tag.',
     confidence: 'verified',
     scoreEligible: true,
     evidence: [{ kind: 'selector', label: 'title', value: 'missing' }],
@@ -59,6 +59,7 @@ function createResult(): ScanResult {
     security: categoryScore('security', [securityIssue]),
     mobile: categoryScore('mobile'),
     ai_visibility: categoryScore('ai_visibility'),
+    accessibility: categoryScore('accessibility'),
     providerData: {
       pagespeed: {
         source: 'google-pagespeed-insights',
