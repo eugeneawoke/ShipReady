@@ -131,6 +131,17 @@ const ru: AppMessages = {
     upgradeTitle: 'Откройте безлимитные сканы и AI-промпты',
     upgradeSubtitle: 'Обновитесь до Pro за $14/мес',
     upgradeCta: 'Обновиться',
+    betaAccess: {
+      eyebrow: 'Бета-доступ',
+      title: 'Ваш Beta Pro Pass активен',
+      subtitle: 'Сейчас у вас есть доступ {plan} по бета-программе.',
+      expiresLabel: 'Действует до',
+      noExpiry: 'Без даты окончания',
+      reasonLabel: 'Причина доступа',
+      referralComing: 'Реферальные ссылки скоро появятся для этого аккаунта. Бета-доступ уже активен.',
+      copy: 'Скопировать реферальную ссылку',
+      copied: 'Скопировано',
+    },
   },
   Monitoring: {
     ariaEnable: 'Включить еженедельный мониторинг для {domain}',

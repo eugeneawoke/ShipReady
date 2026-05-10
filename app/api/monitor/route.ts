@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
   if (guardResponse) return guardResponse
 
   const user = await getUserWithPlan()
-  if (!user || (user.plan !== 'pro' && user.plan !== 'agency')) {
+  if (!user || (user.effectivePlan !== 'pro' && user.effectivePlan !== 'agency')) {
     return NextResponse.json({ error: 'Upgrade required' }, { status: 403 })
   }
 
@@ -62,7 +62,7 @@ export async function DELETE(request: NextRequest) {
   if (guardResponse) return guardResponse
 
   const user = await getUserWithPlan()
-  if (!user || (user.plan !== 'pro' && user.plan !== 'agency')) {
+  if (!user || (user.effectivePlan !== 'pro' && user.effectivePlan !== 'agency')) {
     return NextResponse.json({ error: 'Upgrade required' }, { status: 403 })
   }
 

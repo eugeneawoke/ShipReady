@@ -17,7 +17,7 @@ export async function GET(
 ) {
   try {
     const user = await getUserWithPlan()
-    if (!user || (user.plan !== 'pro' && user.plan !== 'agency')) {
+    if (!user || (user.effectivePlan !== 'pro' && user.effectivePlan !== 'agency')) {
       return NextResponse.json({ error: 'Upgrade required' }, { status: 403 })
     }
 
@@ -42,7 +42,7 @@ export async function GET(
       // use raw url
     }
 
-    const whiteLabel = user.plan === 'agency' && request.nextUrl.searchParams.get('whiteLabel') === '1'
+    const whiteLabel = user.effectivePlan === 'agency' && request.nextUrl.searchParams.get('whiteLabel') === '1'
     const pdf = await generateReportPdf(result, { whiteLabel, domain })
 
     return new NextResponse(new Uint8Array(pdf), {

@@ -129,6 +129,17 @@ const en = {
     upgradeTitle: 'Unlock unlimited scans and AI prompts',
     upgradeSubtitle: 'Upgrade to Pro for $14/mo',
     upgradeCta: 'Upgrade',
+    betaAccess: {
+      eyebrow: 'Beta access',
+      title: 'Your Beta Pro Pass is active',
+      subtitle: 'You currently have {plan} access through the beta program.',
+      expiresLabel: 'Expires',
+      noExpiry: 'No expiry date',
+      reasonLabel: 'Access reason',
+      referralComing: 'Referral links are coming soon for this account. Your beta access is already active.',
+      copy: 'Copy referral link',
+      copied: 'Copied',
+    },
   },
   Monitoring: {
     ariaEnable: 'Enable weekly monitoring for {domain}',
