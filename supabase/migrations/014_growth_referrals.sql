@@ -12,6 +12,20 @@ alter table profiles
   add column if not exists plan_source text not null default 'manual',
   add column if not exists plan_expires_at timestamptz;
 
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'profiles_plan_source_check'
+      and conrelid = 'profiles'::regclass
+  ) then
+    alter table profiles
+      add constraint profiles_plan_source_check
+      check (plan_source in ('manual', 'billing', 'beta_grant', 'referral', 'promo'));
+  end if;
+end $$;
+
 create table if not exists growth_campaigns (
   id uuid primary key default gen_random_uuid(),
   code text not null unique check (code = lower(code) and code ~ '^[a-z0-9][a-z0-9._-]{0,63}$'),
@@ -66,7 +80,8 @@ create table if not exists beta_access_grants (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   campaign_id uuid references growth_campaigns(id) on delete set null,
-  plan text not null default 'pro' check (plan in ('pro', 'agency')),
+  referral_code_id uuid references referral_codes(id) on delete set null,
+  granted_plan text not null default 'pro' check (granted_plan in ('pro', 'agency')),
   reason text,
   starts_at timestamptz not null default now(),
   expires_at timestamptz,
@@ -109,6 +124,7 @@ create index if not exists growth_visits_referral_code_idx on growth_visits(refe
 create index if not exists beta_access_grants_created_at_idx on beta_access_grants(created_at);
 create index if not exists beta_access_grants_user_id_idx on beta_access_grants(user_id);
 create index if not exists beta_access_grants_campaign_id_idx on beta_access_grants(campaign_id);
+create index if not exists beta_access_grants_referral_code_id_idx on beta_access_grants(referral_code_id);
 create index if not exists beta_access_grants_active_idx on beta_access_grants(user_id, expires_at)
   where revoked_at is null;
 
@@ -124,6 +140,18 @@ alter table referral_codes enable row level security;
 alter table growth_visits enable row level security;
 alter table beta_access_grants enable row level security;
 alter table growth_events enable row level security;
+
+drop policy if exists "users can read own profile" on profiles;
+create policy "users can read own profile" on profiles
+  for select to authenticated
+  using ((select auth.uid()) is not null and id = (select auth.uid()));
+
+drop policy if exists "service role can update profiles" on profiles;
+drop policy if exists profiles_service_manage on profiles;
+create policy profiles_service_manage on profiles
+  for all to service_role
+  using (true)
+  with check (true);
 
 drop policy if exists growth_campaigns_service_manage on growth_campaigns;
 create policy growth_campaigns_service_manage on growth_campaigns
@@ -162,15 +190,9 @@ create policy beta_access_grants_service_manage on beta_access_grants
 drop policy if exists growth_events_authenticated_insert_own on growth_events;
 create policy growth_events_authenticated_insert_own on growth_events
   for insert to authenticated
-  with check (
-    ((select auth.uid()) is not null and user_id = (select auth.uid()))
-    or (user_id is null and anonymous_id is not null)
-  );
+  with check ((select auth.uid()) is not null and user_id = (select auth.uid()));
 
 drop policy if exists growth_events_anonymous_insert on growth_events;
-create policy growth_events_anonymous_insert on growth_events
-  for insert to anon
-  with check (user_id is null and anonymous_id is not null);
 
 drop policy if exists growth_events_service_manage on growth_events;
 create policy growth_events_service_manage on growth_events

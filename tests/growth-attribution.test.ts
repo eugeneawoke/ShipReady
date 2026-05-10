@@ -10,11 +10,11 @@ import {
 
 test('buildAttributionFromSearchParams keeps campaign and referral fields', () => {
   const params = new URLSearchParams({
-    utm_source: 'newsletter',
-    utm_medium: 'email',
-    utm_campaign: 'launch',
-    utm_content: 'hero',
-    utm_term: 'audit',
+    utm_source: ' Newsletter ',
+    utm_medium: 'Email',
+    utm_campaign: 'Launch',
+    utm_content: 'Hero.CTA',
+    utm_term: 'Audit_2026',
     ref: 'Partner-01',
     promo: 'BETA50',
     ignored: 'value',
@@ -24,10 +24,25 @@ test('buildAttributionFromSearchParams keeps campaign and referral fields', () =
     utm_source: 'newsletter',
     utm_medium: 'email',
     utm_campaign: 'launch',
-    utm_content: 'hero',
-    utm_term: 'audit',
+    utm_content: 'hero.cta',
+    utm_term: 'audit_2026',
     referral_code: 'partner-01',
     promo_code: 'beta50',
+  })
+})
+
+test('buildAttributionFromSearchParams rejects unsafe and oversized attribution fields', () => {
+  const params = new URLSearchParams({
+    utm_source: '../newsletter',
+    utm_medium: 'email/list',
+    utm_campaign: 'a'.repeat(65),
+    utm_content: 'Safe-Content',
+    ref: '../../partner',
+    promo: 'promo code',
+  })
+
+  assert.deepEqual(buildAttributionFromSearchParams(params), {
+    utm_content: 'safe-content',
   })
 })
 
@@ -55,13 +70,35 @@ test('isGrantActive respects starts_at, expires_at, and revoked_at', () => {
   assert.equal(isGrantActive({ revoked_at: '2026-05-10T00:00:00.000Z' }, now), false)
 })
 
-test('effectivePlanFromSources prefers agency, profile pro, active beta grant, then free', () => {
+test('effectivePlanFromSources prefers profile plans, agency grants, pro grants, then free', () => {
   const now = new Date('2026-05-10T12:00:00.000Z')
-  const activeGrant = { starts_at: '2026-05-01T00:00:00.000Z', expires_at: '2026-06-01T00:00:00.000Z' }
+  const activeProGrant = { granted_plan: 'pro' as const, starts_at: '2026-05-01T00:00:00.000Z', expires_at: '2026-06-01T00:00:00.000Z' }
+  const activeAgencyGrant = { granted_plan: 'agency' as const, starts_at: '2026-05-01T00:00:00.000Z', expires_at: '2026-06-01T00:00:00.000Z' }
+  const inactiveAgencyGrant = { granted_plan: 'agency' as const, revoked_at: '2026-05-02T00:00:00.000Z' }
 
-  assert.equal(effectivePlanFromSources({ profilePlan: 'agency', betaGrant: activeGrant, now }), 'agency')
-  assert.equal(effectivePlanFromSources({ profilePlan: 'pro', betaGrant: activeGrant, now }), 'pro')
-  assert.equal(effectivePlanFromSources({ profilePlan: 'free', betaGrant: activeGrant, now }), 'pro')
-  assert.equal(effectivePlanFromSources({ profilePlan: 'free', betaGrant: { revoked_at: '2026-05-02T00:00:00.000Z' }, now }), 'free')
-  assert.equal(effectivePlanFromSources({ profilePlan: null, betaGrant: null, now }), 'free')
+  assert.deepEqual(effectivePlanFromSources({ profilePlan: 'agency', grants: [activeProGrant], now }), {
+    plan: 'agency',
+    source: 'profile',
+    activeGrant: null,
+  })
+  assert.deepEqual(effectivePlanFromSources({ profilePlan: 'pro', grants: [activeAgencyGrant], now }), {
+    plan: 'pro',
+    source: 'profile',
+    activeGrant: null,
+  })
+  assert.deepEqual(effectivePlanFromSources({ profilePlan: 'free', grants: [activeProGrant, activeAgencyGrant], now }), {
+    plan: 'agency',
+    source: 'beta_grant',
+    activeGrant: activeAgencyGrant,
+  })
+  assert.deepEqual(effectivePlanFromSources({ profilePlan: 'free', grants: [activeProGrant, inactiveAgencyGrant], now }), {
+    plan: 'pro',
+    source: 'beta_grant',
+    activeGrant: activeProGrant,
+  })
+  assert.deepEqual(effectivePlanFromSources({ profilePlan: null, grants: [inactiveAgencyGrant], now }), {
+    plan: 'free',
+    source: 'free',
+    activeGrant: null,
+  })
 })

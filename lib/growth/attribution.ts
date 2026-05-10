@@ -11,17 +11,19 @@ export type AttributionPayload = {
 }
 
 export type GrantLike = {
+  granted_plan?: Exclude<Plan, 'free'> | null
   starts_at?: string | Date | null
   expires_at?: string | Date | null
   revoked_at?: string | Date | null
 }
 
-const CAMPAIGN_CODE_PATTERN = /^[a-z0-9][a-z0-9._-]{0,63}$/
-
-function cleanParam(value: string | null): string | undefined {
-  const trimmed = value?.trim()
-  return trimmed ? trimmed : undefined
+export type EffectivePlanResult = {
+  plan: Plan
+  source: 'profile' | 'beta_grant' | 'free'
+  activeGrant: GrantLike | null
 }
+
+const CAMPAIGN_CODE_PATTERN = /^[a-z0-9][a-z0-9._-]{0,63}$/
 
 function toDate(value: string | Date | null | undefined): Date | null {
   if (!value) return null
@@ -41,7 +43,7 @@ export function buildAttributionFromSearchParams(params: URLSearchParams): Attri
   const utmFields = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'] as const
 
   for (const field of utmFields) {
-    const value = cleanParam(params.get(field))
+    const value = normalizeCampaignCode(params.get(field))
     if (value) payload[field] = value
   }
 
@@ -69,11 +71,26 @@ export function isGrantActive(grant: GrantLike | null | undefined, now = new Dat
 
 export function effectivePlanFromSources(input: {
   profilePlan?: Plan | null
-  betaGrant?: GrantLike | null
+  grants?: GrantLike[] | null
   now?: Date
-}): Plan {
-  if (input.profilePlan === 'agency') return 'agency'
-  if (input.profilePlan === 'pro') return 'pro'
-  if (isGrantActive(input.betaGrant, input.now)) return 'pro'
-  return 'free'
+}): EffectivePlanResult {
+  if (input.profilePlan === 'agency') {
+    return { plan: 'agency', source: 'profile', activeGrant: null }
+  }
+  if (input.profilePlan === 'pro') {
+    return { plan: 'pro', source: 'profile', activeGrant: null }
+  }
+
+  const activeGrants = input.grants?.filter((grant) => isGrantActive(grant, input.now)) ?? []
+  const agencyGrant = activeGrants.find((grant) => grant.granted_plan === 'agency')
+  if (agencyGrant) {
+    return { plan: 'agency', source: 'beta_grant', activeGrant: agencyGrant }
+  }
+
+  const proGrant = activeGrants.find((grant) => !grant.granted_plan || grant.granted_plan === 'pro')
+  if (proGrant) {
+    return { plan: 'pro', source: 'beta_grant', activeGrant: proGrant }
+  }
+
+  return { plan: 'free', source: 'free', activeGrant: null }
 }
