@@ -70,6 +70,7 @@ test('isGrantActive respects starts_at, expires_at, and revoked_at', () => {
   assert.equal(isGrantActive({ revoked_at: '2026-05-10T00:00:00.000Z' }, now), false)
   assert.equal(isGrantActive({ starts_at: 'not-a-date' }, now), false)
   assert.equal(isGrantActive({ expires_at: 'not-a-date' }, now), false)
+  assert.equal(isGrantActive({ revoked_at: 'not-a-date' }, now), false)
 })
 
 test('effectivePlanFromSources prefers profile plans, agency grants, pro grants, then free', () => {

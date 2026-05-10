@@ -57,7 +57,9 @@ export function buildAttributionFromSearchParams(params: URLSearchParams): Attri
 
 export function isGrantActive(grant: GrantLike | null | undefined, now = new Date()): boolean {
   if (!grant) return false
-  if (grant.revoked_at && toDate(grant.revoked_at)) return false
+  const revokedAt = grant.revoked_at ? toDate(grant.revoked_at) : null
+  if (grant.revoked_at && !revokedAt) return false
+  if (revokedAt) return false
 
   const startsAt = grant.starts_at ? toDate(grant.starts_at) : null
   if (grant.starts_at && !startsAt) return false
