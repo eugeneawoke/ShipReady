@@ -1,54 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { parseAttributionCookie, type AttributionPayload } from '@/lib/growth/attribution'
 import { createClient, createServiceClient } from '@/lib/supabase'
 
 const ATTRIBUTION_COOKIE = 'sr_attr'
-const ATTRIBUTION_FIELDS = [
-  'utm_source',
-  'utm_medium',
-  'utm_campaign',
-  'utm_content',
-  'utm_term',
-  'referral_code',
-  'promo_code',
-] as const
 
-type AttributionField = (typeof ATTRIBUTION_FIELDS)[number]
-type AttributionPayload = Partial<Record<AttributionField, string>>
-
-function parseAttributionCookie(value: string | undefined): AttributionPayload {
-  if (!value) return {}
-
-  try {
-    const parsed: unknown = JSON.parse(decodeURIComponent(value))
-    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {}
-
-    const attribution: AttributionPayload = {}
-    for (const field of ATTRIBUTION_FIELDS) {
-      const fieldValue = (parsed as Record<string, unknown>)[field]
-      if (typeof fieldValue === 'string') attribution[field] = fieldValue
-    }
-    return attribution
-  } catch {
-    return {}
-  }
-}
-
-async function bindGrowthAttribution(userId: string, attribution: AttributionPayload) {
+async function bindGrowthAttribution(userId: string, attribution: AttributionPayload | null) {
+  if (!attribution) return
   if (Object.keys(attribution).length === 0) return
 
   const supabase = createServiceClient()
-  const { data: profile, error: selectError } = await supabase
-    .from('profiles')
-    .select('first_utm_source, first_utm_medium, first_utm_campaign, first_referral_code, first_promo_code')
-    .eq('id', userId)
-    .single()
-
-  if (selectError) {
-    console.error('[auth/callback] profile attribution read failed:', selectError.message)
-    return
-  }
-
-  const updates: Record<string, string> = {}
+  const lastUpdates: Record<string, string> = {}
   const mappings = [
     ['utm_source', 'first_utm_source', 'last_utm_source'],
     ['utm_medium', 'first_utm_medium', 'last_utm_medium'],
@@ -61,15 +22,24 @@ async function bindGrowthAttribution(userId: string, attribution: AttributionPay
     const value = attribution[field]
     if (!value) continue
 
-    if (!profile?.[firstColumn]) updates[firstColumn] = value
-    updates[lastColumn] = value
+    const { error: firstUpdateError } = await supabase
+      .from('profiles')
+      .update({ [firstColumn]: value })
+      .eq('id', userId)
+      .is(firstColumn, null)
+
+    if (firstUpdateError) {
+      console.error(`[auth/callback] ${firstColumn} attribution update failed:`, firstUpdateError.message)
+    }
+
+    lastUpdates[lastColumn] = value
   }
 
-  if (Object.keys(updates).length === 0) return
+  if (Object.keys(lastUpdates).length === 0) return
 
   const { error: updateError } = await supabase
     .from('profiles')
-    .update(updates)
+    .update(lastUpdates)
     .eq('id', userId)
 
   if (updateError) {

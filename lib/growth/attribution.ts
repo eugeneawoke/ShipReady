@@ -55,6 +55,35 @@ export function buildAttributionFromSearchParams(params: URLSearchParams): Attri
   return payload
 }
 
+export function parseAttributionCookie(value: string | null | undefined): AttributionPayload | null {
+  if (!value) return null
+
+  try {
+    const parsed: unknown = JSON.parse(decodeURIComponent(value))
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null
+
+    const input = parsed as Record<string, unknown>
+    const params = new URLSearchParams()
+    const utmFields = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'] as const
+
+    for (const field of utmFields) {
+      const value = input[field]
+      if (typeof value === 'string') params.set(field, value)
+    }
+
+    const referralCode = input.referral_code ?? input.ref
+    if (typeof referralCode === 'string') params.set('ref', referralCode)
+
+    const promoCode = input.promo_code ?? input.promo
+    if (typeof promoCode === 'string') params.set('promo', promoCode)
+
+    const attribution = buildAttributionFromSearchParams(params)
+    return Object.keys(attribution).length > 0 ? attribution : null
+  } catch {
+    return null
+  }
+}
+
 export function isGrantActive(grant: GrantLike | null | undefined, now = new Date()): boolean {
   if (!grant) return false
   const revokedAt = grant.revoked_at ? toDate(grant.revoked_at) : null

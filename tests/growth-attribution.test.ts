@@ -6,6 +6,7 @@ import {
   effectivePlanFromSources,
   isGrantActive,
   normalizeCampaignCode,
+  parseAttributionCookie,
 } from '../lib/growth/attribution'
 
 test('buildAttributionFromSearchParams keeps campaign and referral fields', () => {
@@ -55,6 +56,31 @@ test('normalizeCampaignCode accepts safe codes and rejects unsafe codes', () => 
   assert.equal(normalizeCampaignCode('../secret'), null)
   assert.equal(normalizeCampaignCode('promo/code'), null)
   assert.equal(normalizeCampaignCode('a'.repeat(65)), null)
+})
+
+test('parseAttributionCookie normalizes only supported safe attribution fields', () => {
+  const cookie = encodeURIComponent(JSON.stringify({
+    utm_source: ' LinkedIn ',
+    utm_medium: 'Social',
+    utm_campaign: '../unsafe',
+    utm_content: 'Launch.Post',
+    referral_code: 'Partner-01',
+    promo_code: 'promo code',
+    ignored: 'freeform',
+  }))
+
+  assert.deepEqual(parseAttributionCookie(cookie), {
+    utm_source: 'linkedin',
+    utm_medium: 'social',
+    utm_content: 'launch.post',
+    referral_code: 'partner-01',
+  })
+})
+
+test('parseAttributionCookie rejects invalid JSON and cookies without safe fields', () => {
+  assert.equal(parseAttributionCookie('%7Bbad-json'), null)
+  assert.equal(parseAttributionCookie(encodeURIComponent(JSON.stringify({ ignored: 'value' }))), null)
+  assert.equal(parseAttributionCookie(encodeURIComponent(JSON.stringify(['utm_source']))), null)
 })
 
 test('isGrantActive respects starts_at, expires_at, and revoked_at', () => {
