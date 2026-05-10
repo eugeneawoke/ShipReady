@@ -23,6 +23,56 @@ function getSupabase() {
 
 type Mode = 'signin' | 'signup' | 'reset'
 
+const ATTRIBUTION_COOKIE = 'sr_attr'
+const ATTRIBUTION_FIELDS = [
+  'utm_source',
+  'utm_medium',
+  'utm_campaign',
+  'utm_content',
+  'utm_term',
+  'referral_code',
+  'promo_code',
+] as const
+
+function readCookie(name: string): string | null {
+  const prefix = `${name}=`
+  const cookie = document.cookie
+    .split(';')
+    .map((value) => value.trim())
+    .find((value) => value.startsWith(prefix))
+
+  return cookie ? cookie.slice(prefix.length) : null
+}
+
+function readGrowthAttribution(): Record<string, string> | null {
+  try {
+    const raw = readCookie(ATTRIBUTION_COOKIE)
+    if (!raw) return null
+
+    const parsed: unknown = JSON.parse(decodeURIComponent(raw))
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null
+
+    const attribution: Record<string, string> = {}
+    for (const field of ATTRIBUTION_FIELDS) {
+      const value = (parsed as Record<string, unknown>)[field]
+      if (typeof value === 'string') attribution[field] = value
+    }
+
+    return Object.keys(attribution).length > 0 ? attribution : null
+  } catch {
+    return null
+  }
+}
+
+function trackGrowthEvent(eventName: string) {
+  fetch('/api/growth/event', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'same-origin',
+    body: JSON.stringify({ event_name: eventName }),
+  }).catch(() => {})
+}
+
 // ─── SVG helpers ─────────────────────────────────────────────────────────────
 
 function IconEye() {
@@ -119,11 +169,14 @@ export default function LoginPage() {
         setLoading(false)
         return
       }
+      const growthAttribution = readGrowthAttribution()
+      trackGrowthEvent('signup_started')
       const { error } = await getSupabase().auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+          data: growthAttribution ? { growth_attribution: growthAttribution } : undefined,
         },
       })
       setLoading(false)
