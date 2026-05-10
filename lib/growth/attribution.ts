@@ -25,8 +25,7 @@ export type EffectivePlanResult = {
 
 const CAMPAIGN_CODE_PATTERN = /^[a-z0-9][a-z0-9._-]{0,63}$/
 
-function toDate(value: string | Date | null | undefined): Date | null {
-  if (!value) return null
+function toDate(value: string | Date): Date | null {
   const date = value instanceof Date ? value : new Date(value)
   return Number.isNaN(date.getTime()) ? null : date
 }
@@ -58,12 +57,14 @@ export function buildAttributionFromSearchParams(params: URLSearchParams): Attri
 
 export function isGrantActive(grant: GrantLike | null | undefined, now = new Date()): boolean {
   if (!grant) return false
-  if (toDate(grant.revoked_at)) return false
+  if (grant.revoked_at && toDate(grant.revoked_at)) return false
 
-  const startsAt = toDate(grant.starts_at)
+  const startsAt = grant.starts_at ? toDate(grant.starts_at) : null
+  if (grant.starts_at && !startsAt) return false
   if (startsAt && startsAt > now) return false
 
-  const expiresAt = toDate(grant.expires_at)
+  const expiresAt = grant.expires_at ? toDate(grant.expires_at) : null
+  if (grant.expires_at && !expiresAt) return false
   if (expiresAt && expiresAt <= now) return false
 
   return true

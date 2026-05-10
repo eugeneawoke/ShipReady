@@ -34,6 +34,9 @@ create table if not exists growth_campaigns (
   utm_source text,
   utm_medium text,
   utm_campaign text,
+  default_plan text not null default 'pro' check (default_plan in ('free', 'pro', 'agency')),
+  grant_days integer not null default 30 check (grant_days > 0),
+  max_grants integer check (max_grants is null or max_grants > 0),
   starts_at timestamptz,
   expires_at timestamptz,
   is_active boolean not null default true,
@@ -49,6 +52,7 @@ create table if not exists referral_codes (
   campaign_id uuid references growth_campaigns(id) on delete set null,
   is_active boolean not null default true,
   max_uses integer check (max_uses is null or max_uses > 0),
+  grant_days integer check (grant_days is null or grant_days > 0),
   uses_count integer not null default 0 check (uses_count >= 0),
   expires_at timestamptz,
   created_at timestamptz not null default now()
@@ -82,7 +86,7 @@ create table if not exists beta_access_grants (
   campaign_id uuid references growth_campaigns(id) on delete set null,
   referral_code_id uuid references referral_codes(id) on delete set null,
   granted_plan text not null default 'pro' check (granted_plan in ('pro', 'agency')),
-  reason text,
+  grant_reason text not null,
   starts_at timestamptz not null default now(),
   expires_at timestamptz,
   revoked_at timestamptz,
@@ -188,10 +192,6 @@ create policy beta_access_grants_service_manage on beta_access_grants
   with check (true);
 
 drop policy if exists growth_events_authenticated_insert_own on growth_events;
-create policy growth_events_authenticated_insert_own on growth_events
-  for insert to authenticated
-  with check ((select auth.uid()) is not null and user_id = (select auth.uid()));
-
 drop policy if exists growth_events_anonymous_insert on growth_events;
 
 drop policy if exists growth_events_service_manage on growth_events;
