@@ -1,8 +1,10 @@
+import { randomUUID } from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireSameOriginJsonRequest } from '@/lib/server/request-guards'
 import { createClient, createServiceClient } from '@/lib/supabase'
 
 const ANONYMOUS_COOKIE = 'sr_aid'
+const ANONYMOUS_MAX_AGE = 60 * 60 * 24 * 180
 const EVENT_NAMES = new Set([
   'signup_started',
   'scan_started',
@@ -11,6 +13,10 @@ const EVENT_NAMES = new Set([
   'monitoring_enabled',
 ])
 const MAX_PROPERTIES_BYTES = 4096
+
+function randomAnonymousId(): string {
+  return globalThis.crypto?.randomUUID?.() ?? randomUUID()
+}
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false
@@ -55,7 +61,9 @@ export async function POST(request: NextRequest) {
     userId = null
   }
 
-  const anonymousId = request.cookies.get(ANONYMOUS_COOKIE)?.value ?? null
+  const existingAnonymousId = request.cookies.get(ANONYMOUS_COOKIE)?.value ?? null
+  const shouldCreateAnonymousId = !userId && !existingAnonymousId
+  const anonymousId = existingAnonymousId ?? (shouldCreateAnonymousId ? randomAnonymousId() : null)
   const supabase = createServiceClient()
   const { error } = await supabase
     .from('growth_events')
@@ -71,5 +79,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 
-  return NextResponse.json({ ok: true })
+  const response = NextResponse.json({ ok: true })
+
+  if (shouldCreateAnonymousId && anonymousId) {
+    response.cookies.set(ANONYMOUS_COOKIE, anonymousId, {
+      maxAge: ANONYMOUS_MAX_AGE,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+      httpOnly: true,
+    })
+  }
+
+  return response
 }
