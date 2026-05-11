@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-const UPDATED = 'April 27, 2026'
+const UPDATED = 'May 11, 2026'
 const EMAIL = 'egusakov74@gmail.com'
 
 export default async function TermsPage() {
@@ -77,9 +77,28 @@ export default async function TermsPage() {
 
           <Section title={isRu ? '5. Платные тарифы и биллинг' : '5. Paid plans & billing'}>
             <ul>
-              <li>{isRu ? 'После запуска платные тарифы будут оплачиваться через выбранного платёжного провайдера. Во время beta платный доступ может включаться вручную.' : 'Paid plans will be billed through the selected payment provider after paid launch. During beta, paid access may be enabled manually.'}</li>
-              <li>{isRu ? 'Вы можете отменить подписку в любой момент. Отмена вступает в силу в конце текущего платёжного периода.' : 'You may cancel at any time — no questions asked. Cancellation takes effect at the end of the current billing period.'}</li>
-              <li>{isRu ? 'Мы не предоставляем возвраты за частично использованные платёжные периоды, кроме случаев, когда это требуется законом.' : 'We do not offer refunds for partial billing periods, except where required by law.'}</li>
+              <li>
+                {isRu
+                  ? <>
+                      <strong className="text-[#F1F0EE]">Pro подписка:</strong> Доступны два варианта:
+                      <ul className="ml-4 mt-2 space-y-1">
+                        <li>Pro Месячно: $14 в месяц (автоматическое возобновление каждый месяц)</li>
+                        <li>Pro Годово: $140 в год (автоматическое возобновление каждый год)</li>
+                      </ul>
+                    </>
+                  : <>
+                      <strong className="text-[#F1F0EE]">Pro subscription:</strong> Two options are available:
+                      <ul className="ml-4 mt-2 space-y-1">
+                        <li>Pro Monthly: $14/month (auto-renews monthly)</li>
+                        <li>Pro Yearly: $140/year (auto-renews annually)</li>
+                      </ul>
+                    </>
+                }
+              </li>
+              <li>{isRu ? 'Отмена подписки. Вы можете отменить подписку в любой момент. Отмена вступает в силу в конце текущего платёжного периода. Возврат за частично использованные периоды по умолчанию не предоставляется.' : 'Cancellation. You may cancel at any time. Cancellation takes effect at the end of the current billing period. Refunds for partial periods are not provided by default.'}</li>
+              <li>{isRu ? 'Возвраты и спорные платежи обрабатываются в соответствии с политиками платёжного провайдера PayPro Global.' : 'Refunds and chargebacks are handled according to PayPro Global payment provider policies.'}</li>
+              <li>{isRu ? 'Agency план: доступен по индивидуальному соглашению. Функциональность и цены обсуждаются при запросе. За подробностями обратитесь к egusakov74@gmail.com.' : 'Agency plan: available by manual arrangement. Features and pricing are discussed on request. Contact egusakov74@gmail.com for details.'}</li>
+              <li>{isRu ? 'Beta Pro доступ: временный промо-доступ, предоставляемый во время beta-тестирования. Beta Pro grants не являются платными подписками, не связаны с биллингом и могут истечь или быть отменены в любой момент без уведомления.' : 'Beta Pro access: temporary promotional access granted during beta testing. Beta Pro grants are not paid subscriptions, are separate from billing, and may expire or be revoked at any time without notice.'}</li>
               <li>{isRu ? 'Цены могут меняться с уведомлением за 30 дней на email вашего аккаунта.' : 'Prices may change with 30 days advance notice to your account email.'}</li>
             </ul>
           </Section>
