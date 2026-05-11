@@ -680,6 +680,10 @@ const ru: AppMessages = {
       popular: 'Популярный',
       cancelAnytime: 'Отмена в любой момент',
       comingSoon: 'Скоро',
+      toggleMonthly: 'Ежемесячно',
+      toggleYearly: 'Ежегодно',
+      proYearlyPrice: '$140',
+      proYearlySavings: 'Сэкономить 17%',
       comparePlans: 'Сравнить все функции',
     },
     faq: {

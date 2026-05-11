@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase'
 import { SiteHeader } from '@/components/SiteHeader'
 import { CinematicFooter } from '@/components/ui/motion-footer'
 import { ScrollAnchorButton } from '@/components/ui/scroll-anchor-button'
+import { PricingCtas } from '@/components/pricing/PricingCtas'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('Metadata')
@@ -51,76 +52,6 @@ function Cell({ value, highlight }: { value: CellValue; highlight?: boolean }) {
     <span className={`text-[11px] font-mono text-center block leading-tight ${highlight ? 'text-[#a78bfa]' : 'text-[#8B8A85]'}`}>
       {value}
     </span>
-  )
-}
-
-// ─── plan strip ───────────────────────────────────────────────────────────────
-
-interface PlanStripProps {
-  tag: string
-  price: string
-  period: string | null
-  cta: string
-  ctaHref: string
-  highlight?: boolean
-  comingSoon?: boolean
-  popularLabel: string
-  comingSoonLabel: string
-  cancelLabel: string
-}
-
-function PlanStrip({ tag, price, period, cta, ctaHref, highlight, comingSoon, popularLabel, comingSoonLabel, cancelLabel }: PlanStripProps) {
-  return (
-    <div className={`relative flex flex-col items-center gap-3 px-5 py-5 pt-7 rounded-2xl border transition-colors ${
-      comingSoon
-        ? 'bg-[#161618] border-white/[0.04] opacity-60'
-        : highlight
-        ? 'bg-[#6E56CF]/[0.06] border-[#6E56CF]'
-        : 'bg-[#161618] border-white/[0.06] hover:border-white/[0.14]'
-    }`}>
-      {highlight && !comingSoon && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] bg-[#6E56CF] text-white px-3 py-1 rounded-full uppercase tracking-[0.1em] whitespace-nowrap font-medium">
-          {popularLabel}
-        </div>
-      )}
-      {comingSoon && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] bg-[#232328] text-[#8B8A85] border border-white/[0.10] px-3 py-1 rounded-full uppercase tracking-[0.1em] whitespace-nowrap font-medium">
-          {comingSoonLabel}
-        </div>
-      )}
-
-      <p className="text-[10px] text-[#5A5955] uppercase tracking-[0.15em] font-mono">{tag}</p>
-
-      <div className="flex items-baseline gap-1">
-        <span className="text-[34px] font-mono font-medium leading-none">{price}</span>
-        {period && <span className="text-[#8B8A85] text-sm">{period}</span>}
-      </div>
-
-      {comingSoon ? (
-        <Link
-          href="/roadmap"
-          className="block w-full py-2 rounded-xl text-sm font-medium text-center bg-[#1E1E21] border border-white/[0.06] text-[#5A5955] hover:text-[#8B8A85] transition-colors"
-        >
-          {comingSoonLabel} →
-        </Link>
-      ) : (
-        <>
-          <Link
-            href={ctaHref}
-            className={`block w-full py-2 rounded-xl text-sm font-medium text-center transition-colors ${
-              highlight
-                ? 'bg-[#6E56CF] text-white hover:bg-[#7C68D4]'
-                : 'bg-[#1E1E21] border border-white/[0.08] text-[#F1F0EE] hover:bg-[#232328]'
-            }`}
-          >
-            {cta}
-          </Link>
-          {period && (
-            <p className="text-[11px] text-[#5A5955]">{cancelLabel}</p>
-          )}
-        </>
-      )}
-    </div>
   )
 }
 
@@ -283,22 +214,18 @@ export default async function PricingPage() {
         </div>
 
         {/* plan strip */}
-        <div className="grid md:grid-cols-3 gap-3 mb-8">
-          {plans.map((plan) => (
-            <PlanStrip
-              key={plan.nameKey}
-              tag={plan.nameKey}
-              price={plan.price}
-              period={plan.period}
-              cta={plan.cta}
-              ctaHref={plan.highlight ? '/auth/login' : plan.coming ? '/roadmap' : '/'}
-              highlight={plan.highlight}
-              comingSoon={plan.coming}
-              popularLabel={tpricing('popular')}
-              comingSoonLabel={tpricing('comingSoon')}
-              cancelLabel={tpricing('cancelAnytime')}
-            />
-          ))}
+        <div className="mb-8">
+          <PricingCtas
+            isLoggedIn={!!user}
+            plans={plans}
+            popularLabel={tpricing('popular')}
+            comingSoonLabel={tpricing('comingSoon')}
+            cancelLabel={tpricing('cancelAnytime')}
+            toggleMonthly={tpricing('toggleMonthly')}
+            toggleYearly={tpricing('toggleYearly')}
+            proYearlyPrice={tpricing('proYearlyPrice')}
+            proYearlySavings={tpricing('proYearlySavings')}
+          />
         </div>
 
         {/* scroll invitation */}

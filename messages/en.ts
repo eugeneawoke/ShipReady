@@ -678,6 +678,10 @@ const en = {
       popular: 'Most popular',
       cancelAnytime: 'Cancel anytime',
       comingSoon: 'Coming soon',
+      toggleMonthly: 'Monthly',
+      toggleYearly: 'Yearly',
+      proYearlyPrice: '$140',
+      proYearlySavings: 'Save 17%',
       comparePlans: 'Compare all features',
     },
     faq: {
