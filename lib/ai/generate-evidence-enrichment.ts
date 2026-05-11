@@ -119,7 +119,7 @@ export async function generateEvidenceEnrichment(
 
   const completion = await client.chat.completions.create({
     model: process.env.OPENAI_SCAN_MODEL || DEFAULT_ENRICHMENT_MODEL,
-    max_tokens: 1200,
+    max_tokens: 2500,
     response_format: { type: 'json_object' },
     messages: [
       {
@@ -182,8 +182,9 @@ Rules:
       strategicRecommendations: normalizeStrategicRecommendations(parsed.strategicRecommendations),
     }
   } catch {
+    console.error('[ai] Failed to parse enrichment JSON. raw length:', raw.length, raw.slice(0, 120))
     return {
-      summary: raw,
+      summary: '',
       topPriorities: [],
       technicalPrompt: '',
       issuePrompts: {},
