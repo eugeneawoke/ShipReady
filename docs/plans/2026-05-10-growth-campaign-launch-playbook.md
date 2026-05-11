@@ -48,6 +48,16 @@ on conflict (code) do nothing;
 
 7. Перед публикацией открыть `/admin/growth` под email из `ADMIN_EMAILS` и убедиться, что видны блоки Overview, Channels, Campaigns, Referrals, Activation.
 
+## Legal Pre-Launch Checklist
+
+Before launching any paid traffic or broad campaigns, verify:
+
+- [ ] Privacy Policy updated to name PayPro Global as payment processor
+- [ ] Terms of Service defines Pro Monthly ($14/mo) and Pro Yearly ($140/yr) subscription terms
+- [ ] No "free forever" wording in any campaign copy or message templates
+- [ ] Beta access described as "temporary promotional Pro access" not "free Pro"
+- [ ] Live paid checkout tested end-to-end in sandbox before any paid traffic campaigns
+
 ## 1. Каналы и ссылки
 
 Все ссылки должны содержать `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`. `promo` или `ref` добавлять только когда это реально дает Beta Pro grant или партнерский трекинг.
