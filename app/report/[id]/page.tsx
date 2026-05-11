@@ -22,6 +22,7 @@ import {
   normalizeStrategicRecommendationsForDisplay,
   strategicTimeframeLabel,
 } from '@/lib/report/report-safety'
+import { effectivePlanFromSources, type Plan } from '@/lib/growth/attribution'
 
 function JumpingDots() {
   return (
@@ -129,6 +130,15 @@ const SCAN_GOAL_LABELS: Record<ScanGoal, string | null> = {
   general: null,
 }
 
+function trackGrowthEvent(eventName: string, properties?: Record<string, unknown>) {
+  fetch('/api/growth/event', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'same-origin',
+    body: JSON.stringify({ event_name: eventName, properties }),
+  }).catch(() => {})
+}
+
 function BusinessProfileBlock({ businessContext, scanGoal }: {
   businessContext?: BusinessContext | null
   scanGoal?: ScanGoal
@@ -231,6 +241,12 @@ const CATEGORIES: IssueCategory[] = ['performance', 'seo', 'security', 'mobile',
 const ACTIVE_SCAN_STATUSES: ScanStatus[] = ['pending', 'running', 'running_fast', 'running_deep', 'enriching', 'crawling']
 type StageState = 'done' | 'running' | 'pending' | 'unavailable' | 'partial' | 'failed'
 type ProgressStage = { id: string; title: string; state: StageState; detail: string }
+type BetaGrantRow = {
+  granted_plan: Exclude<Plan, 'free'> | null
+  starts_at: string | null
+  expires_at: string | null
+  revoked_at: string | null
+}
 
 function stageTone(state: StageState) {
   if (state === 'done') return 'border-[#3DDC84]/25 bg-[#3DDC84]/8 text-[#3DDC84]'
@@ -471,7 +487,17 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
         .select('plan')
         .eq('id', user.id)
         .single()
-      const userPlan = (profile?.plan ?? 'free') as 'free' | 'pro' | 'agency'
+      const { data: grants } = await supabase
+        .from('beta_access_grants')
+        .select('granted_plan, starts_at, expires_at, revoked_at')
+        .eq('user_id', user.id)
+        .is('revoked_at', null)
+        .order('created_at', { ascending: false })
+      const profilePlan = (profile?.plan ?? 'free') as Plan
+      const userPlan = effectivePlanFromSources({
+        profilePlan,
+        grants: grants as BetaGrantRow[] | null,
+      }).plan
       setPlan(userPlan)
       setIsPro(userPlan === 'pro' || userPlan === 'agency')
     })
@@ -649,6 +675,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
   async function handlePdfDownload() {
     if (!id || pdfState !== 'idle') return
 
+    trackGrowthEvent('pdf_export_clicked', { reportId: id })
     setPdfError(null)
     setPdfState('preparing')
 

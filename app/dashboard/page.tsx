@@ -8,6 +8,7 @@ import { getUserWithPlan } from '@/lib/auth'
 import { SignOutButton } from '@/components/auth/SignOutButton'
 import { ScanForm } from '@/components/landing/ScanForm'
 import { MonitoringToggle } from '@/components/dashboard/MonitoringToggle'
+import { BetaAccessPanel } from '@/components/dashboard/BetaAccessPanel'
 import { domainFromUrl } from '@/lib/monitoring/domains'
 import { SiteHeader } from '@/components/SiteHeader'
 
@@ -33,12 +34,22 @@ export default async function DashboardPage() {
     .select('domain, active, last_alerted_at')
     .eq('user_id', user.id)
 
+  const { data: referralCode } = await supabase
+    .from('referral_codes')
+    .select('code')
+    .eq('owner_user_id', user.id)
+    .eq('is_active', true)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
   const monitoringMap = new Map(
     (monitoredDomains ?? []).map((item) => [item.domain, item])
   )
 
-  const planLabel = user.plan === 'pro' ? t('plan.pro') : user.plan === 'agency' ? t('plan.agency') : t('plan.free')
-  const planColor = user.plan === 'free' ? 'text-[#8B8A85]' : 'text-[#3DDC84]'
+  const effectivePlan = user.effectivePlan
+  const planLabel = effectivePlan === 'pro' ? t('plan.pro') : effectivePlan === 'agency' ? t('plan.agency') : t('plan.free')
+  const planColor = effectivePlan === 'free' ? 'text-[#8B8A85]' : 'text-[#3DDC84]'
   const trackedScanCount = (scans ?? []).filter((scan) => {
     const domain = domainFromUrl(scan.url)
     return domain ? Boolean(monitoringMap.get(domain)?.active) : false
@@ -68,11 +79,19 @@ export default async function DashboardPage() {
         <div className="mb-10">
           <h1 className="text-2xl font-semibold tracking-tight mb-1">{t('title')}</h1>
           <p className="text-sm text-[#5A5955]">
-            {user.plan === 'free'
+            {effectivePlan === 'free'
               ? t('freeUsage', { used: user.scansThisMonth })
               : t('unlimited')}
           </p>
         </div>
+
+        {user.activeBetaGrant ? (
+          <BetaAccessPanel
+            activeBetaGrant={user.activeBetaGrant}
+            userId={user.id}
+            referralCode={referralCode?.code ?? null}
+          />
+        ) : null}
 
         {/* New scan form */}
         <div className="mb-10">
@@ -88,11 +107,11 @@ export default async function DashboardPage() {
           <div>
             <div className="mb-4 flex flex-col gap-2 rounded-xl border border-white/[0.06] bg-[#121214] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="text-sm text-[#8B8A85]">
-                {user.plan === 'free'
+                {effectivePlan === 'free'
                   ? t('monitorUpsell')
                   : t('monitoringSummary', { count: trackedScanCount })}
               </div>
-              {user.plan !== 'free' && trackedScanCount > 0 ? (
+              {effectivePlan !== 'free' && trackedScanCount > 0 ? (
                 <div className="text-xs font-mono text-[#3DDC84]">{t('monitoringActive')}</div>
               ) : null}
             </div>
@@ -128,7 +147,7 @@ export default async function DashboardPage() {
                     <MonitoringToggle
                       domain={domain}
                       enabled={monitored}
-                      canManage={user.plan === 'pro' || user.plan === 'agency'}
+                      canManage={effectivePlan === 'pro' || effectivePlan === 'agency'}
                     />
                   ) : null}
 
@@ -152,7 +171,7 @@ export default async function DashboardPage() {
         )}
 
         {/* Upgrade banner for free users */}
-        {user.plan === 'free' && (
+        {effectivePlan === 'free' && (
           <div className="mt-10 p-5 rounded-2xl bg-[#6E56CF]/10 border border-[#6E56CF]/25 flex items-center justify-between gap-4">
             <div>
               <p className="text-sm font-medium">{t('upgradeTitle')}</p>

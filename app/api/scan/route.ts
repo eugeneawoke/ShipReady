@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { waitUntil } from '@vercel/functions'
 import { isValidUrl, normalizeUrl } from '@/lib/utils'
 import { createClient, createServiceClient } from '@/lib/supabase'
-import { FREE_SCAN_LIMIT } from '@/lib/auth'
+import { FREE_SCAN_LIMIT, getUserWithPlan } from '@/lib/auth'
 import { assertSafeScanUrl } from '@/lib/server/url-safety'
 import { dispatchScanToRailway } from '@/lib/server/scanner-dispatch'
 import { requireSameOriginJsonRequest } from '@/lib/server/request-guards'
@@ -53,16 +53,9 @@ export async function POST(request: NextRequest) {
       const { data: { user } } = await userSupabase.auth.getUser()
       if (user) {
         userId = user.id
+        const userWithPlan = await getUserWithPlan()
 
-        const { data: profile } = await userSupabase
-          .from('profiles')
-          .select('plan')
-          .eq('id', user.id)
-          .single()
-
-        const plan = profile?.plan ?? 'free'
-
-        if (plan === 'free') {
+        if ((userWithPlan?.effectivePlan ?? 'free') === 'free') {
           const { count } = await userSupabase
             .from('scans')
             .select('id', { count: 'exact', head: true })

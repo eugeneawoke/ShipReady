@@ -9,6 +9,7 @@ import { useLocale, useMessages } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { ScanForm } from '@/components/landing/ScanForm'
 import { PricingSection } from '@/components/landing/PricingSection'
+import { AttributionTracker } from '@/components/growth/AttributionTracker'
 import { AnimatedGradientText } from '@/components/ui/animated-gradient-text'
 import { NumberTicker } from '@/components/ui/number-ticker'
 import { AnimatedShinyText } from '@/components/ui/animated-shiny-text'
@@ -169,6 +170,7 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE] overflow-x-hidden">
+      <AttributionTracker />
       <Nav t={t} lang={lang} setLang={handleSetLang} switching={isPending} languageAriaLabel={languageAriaLabel} />
       <HeroSection t={t} />
       <StatsBar t={t} />

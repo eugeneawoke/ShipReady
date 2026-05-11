@@ -18,6 +18,15 @@ function friendlyMessage(raw: string, t: ReturnType<typeof useTranslations<'Scan
   return key ? t(key) : raw
 }
 
+function trackGrowthEvent(eventName: string, properties?: Record<string, unknown>) {
+  fetch('/api/growth/event', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'same-origin',
+    body: JSON.stringify({ event_name: eventName, properties }),
+  }).catch(() => {})
+}
+
 export function useScanLauncher() {
   const t = useTranslations('ScanForm')
   const [loading, setLoading] = useState(false)
@@ -51,6 +60,7 @@ export function useScanLauncher() {
         loadingRef.current = false
         return
       }
+      trackGrowthEvent('scan_started', scanGoal ? { scanGoal } : undefined)
       router.push(`/scan/${data.id}`)
     } catch {
       setError({ msg: t('friendlyErrors.network'), showContact: true })

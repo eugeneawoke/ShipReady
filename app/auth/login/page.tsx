@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { BackButton } from '@/components/BackButton'
 import { SiteHeader } from '@/components/SiteHeader'
+import { parseAttributionCookie } from '@/lib/growth/attribution'
 
 // Lazy singleton — only created on first user action, not at module load time
 let _supabase: ReturnType<typeof createBrowserClient> | null = null
@@ -22,6 +23,27 @@ function getSupabase() {
 }
 
 type Mode = 'signin' | 'signup' | 'reset'
+
+const ATTRIBUTION_COOKIE = 'sr_attr'
+
+function readCookie(name: string): string | null {
+  const prefix = `${name}=`
+  const cookie = document.cookie
+    .split(';')
+    .map((value) => value.trim())
+    .find((value) => value.startsWith(prefix))
+
+  return cookie ? cookie.slice(prefix.length) : null
+}
+
+function trackGrowthEvent(eventName: string) {
+  fetch('/api/growth/event', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'same-origin',
+    body: JSON.stringify({ event_name: eventName }),
+  }).catch(() => {})
+}
 
 // ─── SVG helpers ─────────────────────────────────────────────────────────────
 
@@ -119,11 +141,14 @@ export default function LoginPage() {
         setLoading(false)
         return
       }
+      const growthAttribution = parseAttributionCookie(readCookie(ATTRIBUTION_COOKIE))
+      trackGrowthEvent('signup_started')
       const { error } = await getSupabase().auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+          data: growthAttribution ? { growth_attribution: growthAttribution } : undefined,
         },
       })
       setLoading(false)

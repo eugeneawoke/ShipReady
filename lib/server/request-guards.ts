@@ -23,10 +23,11 @@ function requestOrigin(request: NextRequest): string | null {
 
 function allowedOrigins(request: NextRequest): Set<string> {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '')
+  const localOrigins = process.env.NODE_ENV !== 'production' ? LOCAL_ORIGINS : []
   return new Set([
     ...(appUrl ? [appUrl] : []),
     ...(requestOrigin(request) ? [requestOrigin(request)!] : []),
-    ...LOCAL_ORIGINS,
+    ...localOrigins,
   ])
 }
 
