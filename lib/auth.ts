@@ -9,7 +9,7 @@ import {
   type Plan,
 } from '@/lib/growth/attribution'
 
-type PlanSource = 'profile' | 'beta_grant'
+type PlanSource = 'profile' | 'beta_grant' | 'billing'
 
 type BetaGrantRow = {
   id: string
@@ -28,6 +28,13 @@ export type ActiveBetaGrant = {
   startsAt: string
 }
 
+export type ActiveSubscription = {
+  id: string
+  planId: string
+  billingInterval: 'monthly' | 'yearly'
+  currentPeriodEnd: string
+}
+
 export interface UserWithPlan {
   id: string
   email: string
@@ -35,16 +42,17 @@ export interface UserWithPlan {
   effectivePlan: Plan
   planSource: PlanSource
   activeBetaGrant: ActiveBetaGrant | null
+  subscription?: ActiveSubscription | null
   scansThisMonth: number
 }
 
 export { resolveUserPlanAccess }
 
-export async function getEffectivePlanForUserId(userId: string): Promise<Pick<UserWithPlan, 'effectivePlan' | 'planSource' | 'activeBetaGrant'>> {
+export async function getEffectivePlanForUserId(userId: string): Promise<Pick<UserWithPlan, 'effectivePlan' | 'planSource' | 'activeBetaGrant' | 'subscription'>> {
   const supabase = createServiceClient()
   const now = new Date()
 
-  const [{ data: profile }, { data: grants }] = await Promise.all([
+  const [{ data: profile }, { data: grants }, { data: activeSub }] = await Promise.all([
     supabase
       .from('profiles')
       .select('plan')
@@ -56,13 +64,39 @@ export async function getEffectivePlanForUserId(userId: string): Promise<Pick<Us
       .eq('user_id', userId)
       .is('revoked_at', null)
       .order('created_at', { ascending: false }),
+    supabase
+      .from('subscriptions')
+      .select('id, plan_id, billing_interval, current_period_end, status')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .gt('current_period_end', now.toISOString())
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ])
 
-  return resolveUserPlanAccess(
-    (profile?.plan as Plan) || 'free',
-    grants as BetaGrantRow[] | null,
-    now,
-  )
+  if (activeSub) {
+    return {
+      effectivePlan: 'pro',
+      planSource: 'billing',
+      activeBetaGrant: null,
+      subscription: {
+        id: activeSub.id,
+        planId: activeSub.plan_id,
+        billingInterval: activeSub.billing_interval,
+        currentPeriodEnd: activeSub.current_period_end,
+      },
+    }
+  }
+
+  return {
+    ...resolveUserPlanAccess(
+      (profile?.plan as Plan) || 'free',
+      grants as BetaGrantRow[] | null,
+      now,
+    ),
+    subscription: null,
+  }
 }
 
 type ServiceClient = ReturnType<typeof createServiceClient>

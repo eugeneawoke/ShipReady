@@ -118,10 +118,8 @@ Fallback: локально в dev можно продолжать запуска
 - cron берёт только активные monitored domains
 - weekly rescan пишет `monitored_domain_id`, `baseline_scan_id`, `trigger='cron'` в `scans`
 
-### D-22: Payment provider TBD
-Решение: не фиксировать Lemon Squeezy как платёжный провайдер. На время private beta paid access может включаться вручную, а публичная монетизация должна быть подключена через другого провайдера после выбора доступного варианта.
-Почему: Lemon Squeezy не подходит для страны основателя. Документация, публичные тексты и roadmap не должны обещать или рекомендовать Lemon Squeezy.
-Последствие: billing webhook/checkout код должен быть перепроектирован provider-agnostic, когда будет выбран новый провайдер.
+### D-22: Payment provider TBD → заменено D-28
+Закрыто. Провайдер выбран — см. D-28 (PayPro Global).
 
 ### D-24: api_keys таблица использует key_hash + service role для валидации
 Решение: API ключи хранятся как `sha256(rawKey)` в поле `key_hash`. Route handlers, которые валидируют ключ по `key_hash`, используют Supabase **service role client** (bypasses RLS), а не anon/user клиент.
@@ -148,3 +146,14 @@ Fallback: локально в dev можно продолжать запуска
 Решение: таблица `team_members` с полями `owner_user_id`, `member_user_id`, `invite_token`, `invited_email`. "Команда" — это аккаунт Agency-владельца, без отдельного `teams` table. Accept через `POST /api/v1/teams/accept` с Bearer API-ключом приглашённого + токеном из письма.
 Почему: отдельная `teams` таблица нужна только при multi-owner setup. Для Agency (один владелец, до 5 мест) owner-centric model проще и не создаёт лишних join'ов. Приглашённые — разработчики с API-ключами, поэтому token+API-key accept достаточен для MVP.
 Последствие: team access check в `/api/v1/scan/:id` и `/api/v1/scan/:id/issues` смотрит в `team_members` по `owner_user_id` = scan owner и `member_user_id` = requester. Максимум 5 мест на Agency аккаунт проверяется при invite, не через DB constraint.
+
+### D-28: PayPro Global выбран как payment provider (Merchant of Record)
+Решение: PayPro Global — платёжный провайдер для Pro Monthly ($14/mo) и Pro Yearly ($140/yr). Agency план — только manual/контакт, без PayPro checkout в v1. Интеграция через hosted checkout + IPN webhook.
+Почему: Stripe требует юр. лицо, Lemon Squeezy не подходит для страны основателя. PayPro Global работает как MoR для Беларуси.
+Ключевые архитектурные решения:
+- PayPro webhook пишет только в `subscriptions` и `payment_events`. Никогда не трогает `beta_access_grants`, `profiles` или другие таблицы.
+- Effective plan вычисляется в момент чтения через `getEffectivePlanForUserId()` с приоритетом: paid sub > beta grant > profiles.plan.
+- Идемпотентность через `INSERT ON CONFLICT (provider, external_event_id, event_type) DO NOTHING`.
+- SHA256 SIGNATURE verification (без разделителя между полями). MD5 HASH fallback только в test mode.
+- Sandbox через `PAYPRO_SANDBOX=true` + `secret-key` параметр в checkout URL.
+Отклонено: хранение плана в `profiles.plan` при каждом webhook'е — нарушает независимость billing/beta систем.

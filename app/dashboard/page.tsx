@@ -43,6 +43,13 @@ export default async function DashboardPage() {
     .limit(1)
     .maybeSingle()
 
+  const { data: dbSubscription } = await supabase
+    .from('subscriptions')
+    .select('plan_id, billing_interval, current_period_end, status')
+    .eq('user_id', user.id)
+    .eq('provider', 'payproglobal')
+    .maybeSingle()
+
   const monitoringMap = new Map(
     (monitoredDomains ?? []).map((item) => [item.domain, item])
   )
@@ -92,6 +99,51 @@ export default async function DashboardPage() {
             referralCode={referralCode?.code ?? null}
           />
         ) : null}
+
+        {/* Billing status — only shown for users with a PayPro subscription record */}
+        {dbSubscription && (
+          <div className={`mb-6 p-5 rounded-2xl border ${
+            dbSubscription.status === 'payment_failed' || dbSubscription.status === 'suspended'
+              ? 'bg-[#FF4444]/[0.06] border-[#FF4444]/25'
+              : 'bg-[#161618] border-white/[0.06]'
+          }`}>
+            <p className="text-[10px] text-[#5A5955] uppercase tracking-[0.15em] font-mono mb-2">
+              {t('billing.eyebrow')}
+            </p>
+
+            {dbSubscription.status === 'active' && dbSubscription.current_period_end ? (
+              <div className="space-y-1.5">
+                <p className="text-sm text-[#F1F0EE]">
+                  {t('billing.renewsOn', {
+                    date: new Intl.DateTimeFormat(locale === 'ru' ? 'ru-RU' : 'en-US', {
+                      month: 'long', day: 'numeric', year: 'numeric',
+                    }).format(new Date(dbSubscription.current_period_end)),
+                  })}
+                </p>
+                <p className="text-xs text-[#5A5955]">
+                  {dbSubscription.billing_interval === 'yearly'
+                    ? t('billing.billingYearly')
+                    : t('billing.billingMonthly')}
+                  {' · '}
+                  {t('billing.cancelNote')}{' '}
+                  <a href="mailto:support@shipready.app" className="text-[#8B8A85] underline underline-offset-2 hover:text-[#F1F0EE]">
+                    {t('billing.cancelEmail')}
+                  </a>
+                </p>
+              </div>
+            ) : dbSubscription.status === 'payment_failed' ? (
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-[#FF6B6B]">{t('billing.paymentFailed')}</p>
+                <p className="text-xs text-[#8B8A85]">{t('billing.paymentFailedSub')}</p>
+              </div>
+            ) : dbSubscription.status === 'suspended' ? (
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-[#FF6B6B]">{t('billing.suspended')}</p>
+                <p className="text-xs text-[#8B8A85]">{t('billing.suspendedSub')}</p>
+              </div>
+            ) : null}
+          </div>
+        )}
 
         {/* New scan form */}
         <div className="mb-10">

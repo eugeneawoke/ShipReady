@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-const UPDATED = 'April 27, 2026'
+const UPDATED = 'May 11, 2026'
 const EMAIL = 'egusakov74@gmail.com'
 
 export default async function PrivacyPage() {
@@ -58,7 +58,7 @@ export default async function PrivacyPage() {
             <ul>
               <li><strong className="text-[#F1F0EE]">{isRu ? 'URL, которые вы отправляете' : 'URLs you submit'}</strong> {isRu ? '— чтобы запускать аудит. Мы не краулим и не храним содержимое ваших страниц сверх того, что необходимо для генерации отчёта.' : '— to run the audit. We do not crawl or store the content of your pages beyond what is needed to generate the report.'}</li>
               <li><strong className="text-[#F1F0EE]">{isRu ? 'Данные аккаунта' : 'Account data'}</strong> {isRu ? '— если вы регистрируетесь: ваш email, который обрабатывается через Supabase Auth (magic link и OAuth).' : '— if you sign up: your email address, provided via Supabase Auth (supports magic link and OAuth).'}</li>
-              <li><strong className="text-[#F1F0EE]">{isRu ? 'Платёжные данные' : 'Payment data'}</strong> {isRu ? '— будут обрабатываться выбранным платёжным провайдером после запуска платного тарифа. Мы не видим и не храним данные вашей карты.' : '— processed by the selected payment provider after paid launch. We never see or store your card details.'}</li>
+              <li><strong className="text-[#F1F0EE]">{isRu ? 'Платёжные данные' : 'Payment data'}</strong> {isRu ? '— обрабатываются PayPro Global (Merchant of Record). Мы не видим и не храним данные вашей карты.' : '— processed by PayPro Global (Merchant of Record). We never see or store your card details.'}</li>
               <li><strong className="text-[#F1F0EE]">{isRu ? 'Данные использования' : 'Usage data'}</strong> {isRu ? '— история сканов, связанная с аккаунтом: URL, оценки и время запуска.' : '— scan history linked to your account (URL, scores, timestamp).'}</li>
               <li><strong className="text-[#F1F0EE]">{isRu ? 'Технические данные' : 'Technical data'}</strong> {isRu ? '— стандартные серверные логи: IP-адрес, браузер, временные метки. Они хранятся до 30 дней.' : '— standard server logs (IP address, browser, timestamps) retained for up to 30 days.'}</li>
             </ul>
@@ -77,10 +77,24 @@ export default async function PrivacyPage() {
           <Section title={isRu ? '4. Сторонние сервисы' : '4. Third-party services'}>
             <ul>
               <li><strong className="text-[#F1F0EE]">Supabase</strong> {isRu ? '— база данных и аутентификация (EU region).' : '— database and authentication (EU region).'} <a href="https://supabase.com/privacy" className="text-[#6E56CF] hover:underline" target="_blank" rel="noopener noreferrer">{isRu ? 'Политика конфиденциальности' : 'Privacy policy'}</a>.</li>
-              <li><strong className="text-[#F1F0EE]">{isRu ? 'Платёжный провайдер' : 'Payment provider'}</strong> {isRu ? '— будет выбран до запуска платных тарифов.' : '— to be selected before paid launch.'}</li>
+              <li><strong className="text-[#F1F0EE]">PayPro Global</strong> {isRu ? '— обработка платежей и выставление счетов (Merchant of Record).' : '— payment processing and billing (Merchant of Record).'} <a href="https://payproglobal.com/privacy-policy" className="text-[#6E56CF] hover:underline" target="_blank" rel="noopener noreferrer">{isRu ? 'Политика конфиденциальности' : 'Privacy policy'}</a>.</li>
               <li><strong className="text-[#F1F0EE]">Vercel</strong> {isRu ? '— хостинг и edge functions.' : '— hosting and edge functions.'} <a href="https://vercel.com/legal/privacy-policy" className="text-[#6E56CF] hover:underline" target="_blank" rel="noopener noreferrer">{isRu ? 'Политика конфиденциальности' : 'Privacy policy'}</a>.</li>
               <li><strong className="text-[#F1F0EE]">OpenAI</strong> {isRu ? '— AI-enrichment отчётов и промпты для исправлений. URL и данные по issue могут отправляться для генерации промптов.' : '— AI-generated report enrichment and fix prompts. URLs and issue data are sent to generate prompts.'} <a href="https://openai.com/policies/privacy-policy/" className="text-[#6E56CF] hover:underline" target="_blank" rel="noopener noreferrer">{isRu ? 'Политика конфиденциальности' : 'Privacy policy'}</a>.</li>
             </ul>
+          </Section>
+
+          <Section title={isRu ? '4a. Платежи и PayPro Global' : '4a. Payment processing and PayPro Global'}>
+            {isRu ? (
+              <>
+                <p>PayPro Global действует как Merchant of Record и обрабатывает все платёжные данные и биллинговую информацию от вашего имени. Мы не храним номера карт, данные платёжных реквизитов или иные конфиденциальные платёжные информацию — всё это обрабатывается исключительно PayPro Global в соответствии с их политикой конфиденциальности.</p>
+                <p>Мы получаем webhook'и от PayPro Global с информацией о статусе подписки (оплачена, просрочена, отменена). Эта информация используется исключительно для предоставления или отзыва доступа к вашему аккаунту и платёжным функциям сервиса.</p>
+              </>
+            ) : (
+              <>
+                <p>PayPro Global acts as Merchant of Record and processes all payment and customer billing data on ShipReady's behalf. We do not store card numbers, payment credentials, or sensitive payment information — all payment processing is handled exclusively by PayPro Global in accordance with their privacy policy.</p>
+                <p>We receive webhooks from PayPro Global containing subscription status events (paid, overdue, cancelled). This information is used solely to grant or revoke access to your account and platform features.</p>
+              </>
+            )}
           </Section>
 
           <Section title={isRu ? '5. Cookies' : '5. Cookies'}>
