@@ -47,15 +47,6 @@ export function BetaAccessPanel({ activeBetaGrant, referralCode }: BetaAccessPan
     await navigator.clipboard.writeText(linkToCopy)
     setCopied(true)
     window.setTimeout(() => setCopied(false), 2000)
-
-    await fetch('/api/growth/event', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        event_name: 'referral_link_copied',
-        properties: { source: 'dashboard_beta_access', grantId: activeBetaGrant.id },
-      }),
-    }).catch(() => undefined)
   }
 
   return (
@@ -101,19 +92,23 @@ export function BetaAccessPanel({ activeBetaGrant, referralCode }: BetaAccessPan
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={copyReferralLink}
-          disabled={!displayReferralLink}
-          className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 text-sm font-medium transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3DDC84] ${
-            displayReferralLink
-              ? 'cursor-pointer border border-[#3DDC84]/25 bg-[#3DDC84] text-[#07110A] hover:bg-[#7BE39F]'
-              : 'cursor-not-allowed border border-white/[0.06] bg-white/[0.03] text-[#5A5955]'
-          }`}
-        >
-          {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-          <span>{copied ? t('copied') : t('copy')}</span>
-        </button>
+        {displayReferralLink ? (
+          <button
+            type="button"
+            onClick={copyReferralLink}
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#3DDC84]/25 bg-[#3DDC84] px-4 text-sm font-medium text-[#07110A] transition-all hover:bg-[#7BE39F] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3DDC84]"
+          >
+            {copied ? <Check aria-hidden="true" className="h-4 w-4" /> : <Copy aria-hidden="true" className="h-4 w-4" />}
+            <span aria-live="polite">{copied ? t('copied') : t('copy')}</span>
+          </button>
+        ) : (
+          <div
+            aria-live="polite"
+            className="rounded-xl border border-white/[0.06] bg-white/[0.03] px-4 py-3 text-sm leading-relaxed text-[#8B8A85] sm:max-w-56"
+          >
+            {t('referralComing')}
+          </div>
+        )}
       </div>
     </section>
   )
