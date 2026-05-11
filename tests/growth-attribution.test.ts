@@ -1,5 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 
 import {
   buildAttributionFromSearchParams,
@@ -7,6 +9,7 @@ import {
   isGrantActive,
   normalizeCampaignCode,
   parseAttributionCookie,
+  resolveUserPlanAccess,
 } from '../lib/growth/attribution'
 
 test('buildAttributionFromSearchParams keeps campaign and referral fields', () => {
@@ -130,4 +133,42 @@ test('effectivePlanFromSources prefers profile plans, agency grants, pro grants,
     source: 'free',
     activeGrant: null,
   })
+})
+
+test('resolveUserPlanAccess maps active beta grant details without importing server auth code', () => {
+  const now = new Date('2026-05-10T12:00:00.000Z')
+  const grant = {
+    id: 'grant-1',
+    granted_plan: 'pro' as const,
+    grant_reason: 'campaign:launch',
+    starts_at: '2026-05-01T00:00:00.000Z',
+    expires_at: '2026-06-01T00:00:00.000Z',
+    revoked_at: null,
+  }
+
+  assert.deepEqual(resolveUserPlanAccess('free', [grant], now), {
+    effectivePlan: 'pro',
+    planSource: 'beta_grant',
+    activeBetaGrant: {
+      id: 'grant-1',
+      grantedPlan: 'pro',
+      grantReason: 'campaign:launch',
+      startsAt: '2026-05-01T00:00:00.000Z',
+      expiresAt: '2026-06-01T00:00:00.000Z',
+    },
+  })
+})
+
+test('growth visit capture uses only server-only salts for IP hashing and resolves references before insert', () => {
+  const route = readFileSync(join(process.cwd(), 'app/api/growth/visit/route.ts'), 'utf8')
+
+  assert.match(route, /process\.env\.IP_HASH_SALT/)
+  assert.match(route, /process\.env\.SCANNER_SECRET/)
+  assert.doesNotMatch(route, /NEXT_PUBLIC_APP_URL/)
+  assert.doesNotMatch(route, /shipready-growth/)
+
+  assert.match(route, /\.from\('growth_campaigns'\)/)
+  assert.match(route, /\.from\('referral_codes'\)/)
+  assert.match(route, /campaign_id:/)
+  assert.match(route, /referral_code_id:/)
 })

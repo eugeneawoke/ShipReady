@@ -1,7 +1,8 @@
 import { createClient, createServiceClient } from '@/lib/supabase'
 import {
-  effectivePlanFromSources,
   normalizeCampaignCode,
+  resolveUserPlanAccess,
+  sanitizeAttributionObject,
   type AttributionPayload,
   type Plan,
 } from '@/lib/growth/attribution'
@@ -35,35 +36,7 @@ export interface UserWithPlan {
   scansThisMonth: number
 }
 
-export function resolveUserPlanAccess(
-  profilePlan: Plan,
-  grants: BetaGrantRow[] | null | undefined,
-  now = new Date(),
-): Pick<UserWithPlan, 'effectivePlan' | 'planSource' | 'activeBetaGrant'> {
-  const result = effectivePlanFromSources({
-    profilePlan,
-    grants,
-    now,
-  })
-
-  const activeGrant = result.source === 'beta_grant'
-    ? (result.activeGrant as BetaGrantRow | null)
-    : null
-
-  return {
-    effectivePlan: result.plan,
-    planSource: result.source === 'beta_grant' ? 'beta_grant' : 'profile',
-    activeBetaGrant: activeGrant
-      ? {
-          id: activeGrant.id,
-          grantedPlan: activeGrant.granted_plan ?? 'pro',
-          grantReason: activeGrant.grant_reason,
-          startsAt: activeGrant.starts_at,
-          expiresAt: activeGrant.expires_at ?? null,
-        }
-      : null,
-  }
-}
+export { resolveUserPlanAccess }
 
 export async function getEffectivePlanForUserId(userId: string): Promise<Pick<UserWithPlan, 'effectivePlan' | 'planSource' | 'activeBetaGrant'>> {
   const supabase = createServiceClient()
@@ -90,7 +63,130 @@ export async function getEffectivePlanForUserId(userId: string): Promise<Pick<Us
   )
 }
 
-async function maybeCreateBetaGrantForAttribution(userId: string, attribution: AttributionPayload) {
+type ServiceClient = ReturnType<typeof createServiceClient>
+
+type GrowthReferenceIds = {
+  campaignId: string | null
+  referralCodeId: string | null
+}
+
+type GrowthVisitRow = {
+  id: string
+  attribution: unknown
+  campaign_id: string | null
+  referral_code_id: string | null
+  utm_source: string | null
+  utm_medium: string | null
+  utm_campaign: string | null
+  utm_content: string | null
+  utm_term: string | null
+  referral_code: string | null
+  promo_code: string | null
+}
+
+type BindGrowthAttributionInput = {
+  anonymousId?: string | null
+  fallbackAttribution?: AttributionPayload | null
+}
+
+function hasAttribution(attribution: AttributionPayload | null): attribution is AttributionPayload {
+  return Boolean(attribution && Object.keys(attribution).length > 0)
+}
+
+function attributionFromVisit(visit: GrowthVisitRow): AttributionPayload | null {
+  const attribution: AttributionPayload = sanitizeAttributionObject(visit.attribution) ?? {}
+  const fields = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'referral_code', 'promo_code'] as const
+
+  for (const field of fields) {
+    const value = normalizeCampaignCode(visit[field])
+    if (value) attribution[field] = value
+  }
+
+  return hasAttribution(attribution) ? attribution : null
+}
+
+async function findActiveCampaignByCode(supabase: ServiceClient, code: string | null) {
+  if (!code) return null
+
+  const now = new Date().toISOString()
+  const { data, error } = await supabase
+    .from('growth_campaigns')
+    .select('id')
+    .eq('code', code)
+    .eq('is_active', true)
+    .or(`starts_at.is.null,starts_at.lte.${now}`)
+    .or(`expires_at.is.null,expires_at.gt.${now}`)
+    .maybeSingle()
+
+  if (error) {
+    console.error('[auth] campaign resolution failed:', error.message)
+    return null
+  }
+
+  return data?.id ?? null
+}
+
+async function findActiveCampaignById(supabase: ServiceClient, id: string | null) {
+  if (!id) return null
+
+  const now = new Date().toISOString()
+  const { data, error } = await supabase
+    .from('growth_campaigns')
+    .select('id')
+    .eq('id', id)
+    .eq('is_active', true)
+    .or(`starts_at.is.null,starts_at.lte.${now}`)
+    .or(`expires_at.is.null,expires_at.gt.${now}`)
+    .maybeSingle()
+
+  if (error) {
+    console.error('[auth] campaign resolution failed:', error.message)
+    return null
+  }
+
+  return data?.id ?? null
+}
+
+async function resolveGrowthReferenceIds(
+  supabase: ServiceClient,
+  attribution: AttributionPayload | null,
+): Promise<GrowthReferenceIds> {
+  if (!attribution) return { campaignId: null, referralCodeId: null }
+
+  const now = new Date().toISOString()
+  let campaignId: string | null = null
+  let referralCodeId: string | null = null
+  const referralCode = normalizeCampaignCode(attribution.referral_code)
+
+  if (referralCode) {
+    const { data, error } = await supabase
+      .from('referral_codes')
+      .select('id, campaign_id, max_uses, uses_count')
+      .eq('code', referralCode)
+      .eq('is_active', true)
+      .or(`expires_at.is.null,expires_at.gt.${now}`)
+      .maybeSingle()
+
+    if (error) {
+      console.error('[auth] referral resolution failed:', error.message)
+    } else if (data && (!data.max_uses || data.uses_count < data.max_uses)) {
+      referralCodeId = data.id
+      campaignId = await findActiveCampaignById(supabase, data.campaign_id)
+    }
+  }
+
+  if (!campaignId) {
+    campaignId = await findActiveCampaignByCode(supabase, normalizeCampaignCode(attribution.promo_code))
+  }
+
+  if (!campaignId) {
+    campaignId = await findActiveCampaignByCode(supabase, normalizeCampaignCode(attribution.utm_campaign))
+  }
+
+  return { campaignId, referralCodeId }
+}
+
+async function maybeCreateBetaGrantForServerVisit(userId: string, attribution: AttributionPayload) {
   const supabase = createServiceClient() as unknown as {
     rpc: (
       fn: 'grant_beta_access_from_growth_attribution',
@@ -115,11 +211,11 @@ async function maybeCreateBetaGrantForAttribution(userId: string, attribution: A
   }
 }
 
-export async function bindGrowthAttributionForUser(userId: string, attribution: AttributionPayload | null) {
-  if (!attribution) return
-  if (Object.keys(attribution).length === 0) return
-
-  const supabase = createServiceClient()
+async function updateProfileAttribution(
+  supabase: ServiceClient,
+  userId: string,
+  attribution: AttributionPayload,
+) {
   const lastUpdates: Record<string, string> = {}
   const mappings = [
     ['utm_source', 'first_utm_source', 'last_utm_source'],
@@ -157,7 +253,98 @@ export async function bindGrowthAttributionForUser(userId: string, attribution: 
     }
   }
 
-  await maybeCreateBetaGrantForAttribution(userId, attribution)
+}
+
+async function bindAnonymousGrowthRowsToUser(
+  supabase: ServiceClient,
+  userId: string,
+  anonymousId: string,
+) {
+  const [{ error: visitsError }, { error: eventsError }] = await Promise.all([
+    supabase
+      .from('growth_visits')
+      .update({ user_id: userId })
+      .eq('anonymous_id', anonymousId)
+      .is('user_id', null),
+    supabase
+      .from('growth_events')
+      .update({ user_id: userId })
+      .eq('anonymous_id', anonymousId)
+      .is('user_id', null),
+  ])
+
+  if (visitsError) console.error('[auth] growth visit user binding failed:', visitsError.message)
+  if (eventsError) console.error('[auth] growth event user binding failed:', eventsError.message)
+}
+
+async function resolveAndStoreVisitReferences(supabase: ServiceClient, visits: GrowthVisitRow[]) {
+  for (const visit of visits) {
+    const attribution = attributionFromVisit(visit)
+    const references = await resolveGrowthReferenceIds(supabase, attribution)
+    const updates: Record<string, string> = {}
+
+    if (!visit.campaign_id && references.campaignId) updates.campaign_id = references.campaignId
+    if (!visit.referral_code_id && references.referralCodeId) updates.referral_code_id = references.referralCodeId
+    if (Object.keys(updates).length === 0) continue
+
+    const { error } = await supabase
+      .from('growth_visits')
+      .update(updates)
+      .eq('id', visit.id)
+
+    if (error) {
+      console.error('[auth] growth visit reference update failed:', error.message)
+    }
+  }
+}
+
+export async function bindGrowthAttributionForUser(userId: string, input: BindGrowthAttributionInput) {
+  const supabase = createServiceClient()
+  const anonymousId = input.anonymousId?.trim() || null
+  const fallbackAttribution = input.fallbackAttribution ?? null
+  let serverVisitAttribution: AttributionPayload | null = null
+  let foundServerVisit = false
+
+  if (anonymousId) {
+    await bindAnonymousGrowthRowsToUser(supabase, userId, anonymousId)
+
+    const { data: visits, error } = await supabase
+      .from('growth_visits')
+      .select(`
+        id,
+        attribution,
+        campaign_id,
+        referral_code_id,
+        utm_source,
+        utm_medium,
+        utm_campaign,
+        utm_content,
+        utm_term,
+        referral_code,
+        promo_code
+      `)
+      .eq('anonymous_id', anonymousId)
+      .order('created_at', { ascending: false })
+      .limit(20)
+
+    if (error) {
+      console.error('[auth] growth visit lookup failed:', error.message)
+    } else if (visits && visits.length > 0) {
+      foundServerVisit = true
+      await resolveAndStoreVisitReferences(supabase, visits as GrowthVisitRow[])
+      serverVisitAttribution = attributionFromVisit(visits[0] as GrowthVisitRow)
+    }
+  }
+
+  if (hasAttribution(serverVisitAttribution)) {
+    await updateProfileAttribution(supabase, userId, serverVisitAttribution)
+    await maybeCreateBetaGrantForServerVisit(userId, serverVisitAttribution)
+    return
+  }
+
+  if (hasAttribution(fallbackAttribution) && !foundServerVisit) {
+    await updateProfileAttribution(supabase, userId, fallbackAttribution)
+  }
 }
 
 export async function getUserWithPlan(): Promise<UserWithPlan | null> {

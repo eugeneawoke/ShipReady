@@ -11,10 +11,28 @@ export type AttributionPayload = {
 }
 
 export type GrantLike = {
+  id?: string
+  grant_reason?: string
   granted_plan?: Exclude<Plan, 'free'> | null
   starts_at?: string | Date | null
   expires_at?: string | Date | null
   revoked_at?: string | Date | null
+}
+
+export type PlanSource = 'profile' | 'beta_grant'
+
+export type ActiveBetaGrant = {
+  id: string
+  grantedPlan: 'pro' | 'agency'
+  grantReason: string
+  expiresAt: string | null
+  startsAt: string
+}
+
+export type ResolvedPlanAccess = {
+  effectivePlan: Plan
+  planSource: PlanSource
+  activeBetaGrant: ActiveBetaGrant | null
 }
 
 export type EffectivePlanResult = {
@@ -84,6 +102,28 @@ export function parseAttributionCookie(value: string | null | undefined): Attrib
   }
 }
 
+export function sanitizeAttributionObject(value: unknown): AttributionPayload | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null
+
+  const input = value as Record<string, unknown>
+  const params = new URLSearchParams()
+  const utmFields = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'] as const
+
+  for (const field of utmFields) {
+    const fieldValue = input[field]
+    if (typeof fieldValue === 'string') params.set(field, fieldValue)
+  }
+
+  const referralCode = input.referral_code ?? input.ref
+  if (typeof referralCode === 'string') params.set('ref', referralCode)
+
+  const promoCode = input.promo_code ?? input.promo
+  if (typeof promoCode === 'string') params.set('promo', promoCode)
+
+  const attribution = buildAttributionFromSearchParams(params)
+  return Object.keys(attribution).length > 0 ? attribution : null
+}
+
 export function isGrantActive(grant: GrantLike | null | undefined, now = new Date()): boolean {
   if (!grant) return false
   const revokedAt = grant.revoked_at ? toDate(grant.revoked_at) : null
@@ -125,4 +165,38 @@ export function effectivePlanFromSources(input: {
   }
 
   return { plan: 'free', source: 'free', activeGrant: null }
+}
+
+export function resolveUserPlanAccess(
+  profilePlan: Plan,
+  grants: GrantLike[] | null | undefined,
+  now = new Date(),
+): ResolvedPlanAccess {
+  const result = effectivePlanFromSources({
+    profilePlan,
+    grants,
+    now,
+  })
+
+  const activeGrant = result.source === 'beta_grant'
+    ? result.activeGrant
+    : null
+
+  return {
+    effectivePlan: result.plan,
+    planSource: result.source === 'beta_grant' ? 'beta_grant' : 'profile',
+    activeBetaGrant: activeGrant
+      ? {
+          id: activeGrant.id ?? '',
+          grantedPlan: activeGrant.granted_plan ?? 'pro',
+          grantReason: activeGrant.grant_reason ?? '',
+          startsAt: activeGrant.starts_at instanceof Date
+            ? activeGrant.starts_at.toISOString()
+            : activeGrant.starts_at ?? '',
+          expiresAt: activeGrant.expires_at instanceof Date
+            ? activeGrant.expires_at.toISOString()
+            : activeGrant.expires_at ?? null,
+        }
+      : null,
+  }
 }

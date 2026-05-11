@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-import { resolveUserPlanAccess } from '../lib/auth'
+import { resolveUserPlanAccess } from '../lib/growth/attribution'
 
 test('resolveUserPlanAccess returns beta grant details when a free profile has an active grant', () => {
   const now = new Date('2026-05-10T12:00:00.000Z')
@@ -57,4 +57,18 @@ test('growth grant issuance is delegated to the transactional database function'
   assert.match(migration, /uses_count\s*=\s*uses_count\s*\+\s*1/i)
   assert.match(auth, /\.rpc\('grant_beta_access_from_growth_attribution'/)
   assert.doesNotMatch(auth, /\.from\('beta_access_grants'\)\s*\n\s*\.insert\(/)
+})
+
+test('auth callback cannot grant from client-controlled attribution fallback', () => {
+  const root = process.cwd()
+  const auth = readFileSync(join(root, 'lib/auth.ts'), 'utf8')
+  const callback = readFileSync(join(root, 'app/auth/callback/route.ts'), 'utf8')
+
+  assert.match(callback, /const ANONYMOUS_COOKIE = 'sr_aid'/)
+  assert.match(callback, /request\.cookies\.get\(ANONYMOUS_COOKIE\)/)
+  assert.doesNotMatch(callback, /bindGrowthAttributionForUser\(\s*user\.id,[\s\S]*parseAttributionCookie/)
+
+  assert.match(auth, /fallbackAttribution/)
+  assert.match(auth, /maybeCreateBetaGrantForServerVisit/)
+  assert.doesNotMatch(auth, /maybeCreateBetaGrantForAttribution\(userId,\s*attribution\)/)
 })

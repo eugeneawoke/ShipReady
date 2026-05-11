@@ -1,6 +1,10 @@
 import { createHash, randomUUID } from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
-import { buildAttributionFromSearchParams, normalizeCampaignCode } from '@/lib/growth/attribution'
+import {
+  buildAttributionFromSearchParams,
+  normalizeCampaignCode,
+  type AttributionPayload,
+} from '@/lib/growth/attribution'
 import { requireSameOriginJsonRequest } from '@/lib/server/request-guards'
 import { createServiceClient } from '@/lib/supabase'
 
@@ -11,6 +15,12 @@ const ATTRIBUTION_MAX_AGE = 60 * 60 * 24 * 30
 const MAX_TEXT_LENGTH = 1024
 
 type AttributionInput = Record<string, unknown>
+type ServiceClient = ReturnType<typeof createServiceClient>
+
+type GrowthReferenceIds = {
+  campaignId: string | null
+  referralCodeId: string | null
+}
 
 function randomAnonymousId(): string {
   return globalThis.crypto?.randomUUID?.() ?? randomUUID()
@@ -48,17 +58,97 @@ function sanitizeAttribution(value: unknown) {
   return buildAttributionFromSearchParams(params)
 }
 
-function getClientIp(request: NextRequest): string {
+function getClientIp(request: NextRequest): string | null {
   return (
     request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
     request.headers.get('x-real-ip') ||
-    'unknown'
+    null
   )
 }
 
-function hashIp(ip: string): string {
-  const salt = process.env.SCANNER_SECRET || process.env.NEXT_PUBLIC_APP_URL || 'shipready-growth'
+function hashIp(ip: string | null): string | null {
+  const salt = process.env.IP_HASH_SALT || process.env.SCANNER_SECRET
+  if (!salt || !ip) return null
   return createHash('sha256').update(`${salt}:${ip}`).digest('hex')
+}
+
+async function findActiveCampaignByCode(supabase: ServiceClient, code: string | null) {
+  if (!code) return null
+
+  const now = new Date().toISOString()
+  const { data, error } = await supabase
+    .from('growth_campaigns')
+    .select('id')
+    .eq('code', code)
+    .eq('is_active', true)
+    .or(`starts_at.is.null,starts_at.lte.${now}`)
+    .or(`expires_at.is.null,expires_at.gt.${now}`)
+    .maybeSingle()
+
+  if (error) {
+    console.error('[growth/visit] campaign resolution failed:', error.message)
+    return null
+  }
+
+  return data?.id ?? null
+}
+
+async function findActiveCampaignById(supabase: ServiceClient, id: string | null) {
+  if (!id) return null
+
+  const now = new Date().toISOString()
+  const { data, error } = await supabase
+    .from('growth_campaigns')
+    .select('id')
+    .eq('id', id)
+    .eq('is_active', true)
+    .or(`starts_at.is.null,starts_at.lte.${now}`)
+    .or(`expires_at.is.null,expires_at.gt.${now}`)
+    .maybeSingle()
+
+  if (error) {
+    console.error('[growth/visit] campaign resolution failed:', error.message)
+    return null
+  }
+
+  return data?.id ?? null
+}
+
+async function resolveGrowthReferenceIds(
+  supabase: ServiceClient,
+  attribution: AttributionPayload,
+): Promise<GrowthReferenceIds> {
+  const now = new Date().toISOString()
+  let campaignId: string | null = null
+  let referralCodeId: string | null = null
+  const referralCode = normalizeCampaignCode(attribution.referral_code)
+
+  if (referralCode) {
+    const { data, error } = await supabase
+      .from('referral_codes')
+      .select('id, campaign_id, max_uses, uses_count')
+      .eq('code', referralCode)
+      .eq('is_active', true)
+      .or(`expires_at.is.null,expires_at.gt.${now}`)
+      .maybeSingle()
+
+    if (error) {
+      console.error('[growth/visit] referral resolution failed:', error.message)
+    } else if (data && (!data.max_uses || data.uses_count < data.max_uses)) {
+      referralCodeId = data.id
+      campaignId = await findActiveCampaignById(supabase, data.campaign_id)
+    }
+  }
+
+  if (!campaignId) {
+    campaignId = await findActiveCampaignByCode(supabase, normalizeCampaignCode(attribution.promo_code))
+  }
+
+  if (!campaignId) {
+    campaignId = await findActiveCampaignByCode(supabase, normalizeCampaignCode(attribution.utm_campaign))
+  }
+
+  return { campaignId, referralCodeId }
 }
 
 export async function POST(request: NextRequest) {
@@ -79,10 +169,13 @@ export async function POST(request: NextRequest) {
   const userAgent = safeString(request.headers.get('user-agent'), 1024)
 
   const supabase = createServiceClient()
+  const references = await resolveGrowthReferenceIds(supabase, attribution)
   const { error } = await supabase
     .from('growth_visits')
     .insert({
       anonymous_id: anonymousId,
+      campaign_id: references.campaignId,
+      referral_code_id: references.referralCodeId,
       landing_path: landingPath,
       referrer,
       ...attribution,
