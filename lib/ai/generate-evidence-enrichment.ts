@@ -119,7 +119,7 @@ export async function generateEvidenceEnrichment(
 
   const completion = await client.chat.completions.create({
     model: process.env.OPENAI_SCAN_MODEL || DEFAULT_ENRICHMENT_MODEL,
-    max_tokens: 2500,
+    max_tokens: 3500,
     response_format: { type: 'json_object' },
     messages: [
       {
@@ -171,6 +171,9 @@ Rules:
     ],
   })
 
+  if (completion.choices[0]?.finish_reason === 'length') {
+    console.warn('[ai] Enrichment response hit token limit — consider raising max_tokens or reducing prompt size.')
+  }
   const raw = completion.choices[0]?.message?.content ?? '{}'
   try {
     const parsed = JSON.parse(raw)
