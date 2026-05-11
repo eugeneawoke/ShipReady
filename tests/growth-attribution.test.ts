@@ -9,6 +9,7 @@ import {
   isGrantActive,
   normalizeCampaignCode,
   parseAttributionCookie,
+  selectGrowthAttributionBinding,
   resolveUserPlanAccess,
 } from '../lib/growth/attribution'
 
@@ -171,4 +172,48 @@ test('growth visit capture uses only server-only salts for IP hashing and resolv
   assert.match(route, /\.from\('referral_codes'\)/)
   assert.match(route, /campaign_id:/)
   assert.match(route, /referral_code_id:/)
+  assert.match(route, /createClient/)
+  assert.match(route, /auth\.getUser\(\)/)
+  assert.match(route, /user_id: userId/)
+})
+
+test('selectGrowthAttributionBinding separates first, last, and latest grantable server visits', () => {
+  const selection = selectGrowthAttributionBinding([
+    {
+      created_at: '2026-05-10T12:00:00.000Z',
+      attribution: { utm_campaign: 'later-nongrant' },
+      utm_campaign: 'later-nongrant',
+    },
+    {
+      created_at: '2026-05-10T10:00:00.000Z',
+      attribution: { promo_code: 'current-promo' },
+      campaign_id: 'campaign-current',
+      promo_code: 'current-promo',
+    },
+    {
+      created_at: '2026-05-10T09:00:00.000Z',
+      attribution: { utm_source: 'newsletter' },
+      utm_source: 'newsletter',
+    },
+  ])
+
+  assert.deepEqual(selection.firstTouchAttribution, { utm_source: 'newsletter' })
+  assert.deepEqual(selection.lastTouchAttribution, { utm_campaign: 'later-nongrant' })
+  assert.deepEqual(selection.grantAttribution, { promo_code: 'current-promo' })
+  assert.equal(selection.hasServerVisits, true)
+})
+
+test('selectGrowthAttributionBinding reports server visits even without usable attribution', () => {
+  const selection = selectGrowthAttributionBinding([
+    {
+      created_at: '2026-05-10T12:00:00.000Z',
+      attribution: { utm_campaign: '../unsafe' },
+      utm_campaign: '../unsafe',
+    },
+  ])
+
+  assert.equal(selection.firstTouchAttribution, null)
+  assert.equal(selection.lastTouchAttribution, null)
+  assert.equal(selection.grantAttribution, null)
+  assert.equal(selection.hasServerVisits, true)
 })

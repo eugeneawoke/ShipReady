@@ -10,6 +10,27 @@ export type AttributionPayload = {
   promo_code?: string
 }
 
+export type GrowthAttributionBindingVisit = {
+  created_at?: string | Date | null
+  attribution?: unknown
+  campaign_id?: string | null
+  referral_code_id?: string | null
+  utm_source?: string | null
+  utm_medium?: string | null
+  utm_campaign?: string | null
+  utm_content?: string | null
+  utm_term?: string | null
+  referral_code?: string | null
+  promo_code?: string | null
+}
+
+export type GrowthAttributionBindingSelection = {
+  firstTouchAttribution: AttributionPayload | null
+  lastTouchAttribution: AttributionPayload | null
+  grantAttribution: AttributionPayload | null
+  hasServerVisits: boolean
+}
+
 export type GrantLike = {
   id?: string
   grant_reason?: string
@@ -122,6 +143,47 @@ export function sanitizeAttributionObject(value: unknown): AttributionPayload | 
 
   const attribution = buildAttributionFromSearchParams(params)
   return Object.keys(attribution).length > 0 ? attribution : null
+}
+
+export function attributionFromBindingVisit(visit: GrowthAttributionBindingVisit): AttributionPayload | null {
+  const attribution: AttributionPayload = sanitizeAttributionObject(visit.attribution) ?? {}
+  const fields = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'referral_code', 'promo_code'] as const
+
+  for (const field of fields) {
+    const value = normalizeCampaignCode(visit[field])
+    if (value) attribution[field] = value
+  }
+
+  return Object.keys(attribution).length > 0 ? attribution : null
+}
+
+function visitTime(visit: GrowthAttributionBindingVisit): number {
+  if (!visit.created_at) return 0
+  const date = toDate(visit.created_at)
+  return date?.getTime() ?? 0
+}
+
+function isGrantableServerVisit(visit: GrowthAttributionBindingVisit): boolean {
+  return Boolean(visit.campaign_id || visit.referral_code_id)
+}
+
+export function selectGrowthAttributionBinding(
+  visits: GrowthAttributionBindingVisit[] | null | undefined,
+): GrowthAttributionBindingSelection {
+  const sortedVisits = [...(visits ?? [])].sort((a, b) => visitTime(a) - visitTime(b))
+  const attributedVisits = sortedVisits
+    .map((visit) => ({ visit, attribution: attributionFromBindingVisit(visit) }))
+    .filter((entry): entry is { visit: GrowthAttributionBindingVisit; attribution: AttributionPayload } => (
+      Object.keys(entry.attribution ?? {}).length > 0
+    ))
+  const grantableVisits = attributedVisits.filter(({ visit }) => isGrantableServerVisit(visit))
+
+  return {
+    firstTouchAttribution: attributedVisits[0]?.attribution ?? null,
+    lastTouchAttribution: attributedVisits.at(-1)?.attribution ?? null,
+    grantAttribution: grantableVisits.at(-1)?.attribution ?? null,
+    hasServerVisits: Boolean(visits?.length),
+  }
 }
 
 export function isGrantActive(grant: GrantLike | null | undefined, now = new Date()): boolean {

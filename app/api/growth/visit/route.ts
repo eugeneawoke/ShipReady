@@ -6,7 +6,7 @@ import {
   type AttributionPayload,
 } from '@/lib/growth/attribution'
 import { requireSameOriginJsonRequest } from '@/lib/server/request-guards'
-import { createServiceClient } from '@/lib/supabase'
+import { createClient, createServiceClient } from '@/lib/supabase'
 
 const ANONYMOUS_COOKIE = 'sr_aid'
 const ATTRIBUTION_COOKIE = 'sr_attr'
@@ -151,6 +151,44 @@ async function resolveGrowthReferenceIds(
   return { campaignId, referralCodeId }
 }
 
+async function getCurrentUserId(): Promise<string | null> {
+  try {
+    const supabase = await createClient()
+    const { data: { user }, error } = await supabase.auth.getUser()
+    if (error) {
+      console.error('[growth/visit] auth user lookup failed:', error.message)
+      return null
+    }
+
+    return user?.id ?? null
+  } catch (error) {
+    console.error('[growth/visit] auth user lookup failed:', error)
+    return null
+  }
+}
+
+async function bindRecentAnonymousGrowthRowsToUser(
+  supabase: ServiceClient,
+  userId: string,
+  anonymousId: string,
+) {
+  const [{ error: visitsError }, { error: eventsError }] = await Promise.all([
+    supabase
+      .from('growth_visits')
+      .update({ user_id: userId })
+      .eq('anonymous_id', anonymousId)
+      .is('user_id', null),
+    supabase
+      .from('growth_events')
+      .update({ user_id: userId })
+      .eq('anonymous_id', anonymousId)
+      .is('user_id', null),
+  ])
+
+  if (visitsError) console.error('[growth/visit] anonymous visit binding failed:', visitsError.message)
+  if (eventsError) console.error('[growth/visit] anonymous event binding failed:', eventsError.message)
+}
+
 export async function POST(request: NextRequest) {
   const guardResponse = requireSameOriginJsonRequest(request)
   if (guardResponse) return guardResponse
@@ -169,11 +207,17 @@ export async function POST(request: NextRequest) {
   const userAgent = safeString(request.headers.get('user-agent'), 1024)
 
   const supabase = createServiceClient()
+  const userId = await getCurrentUserId()
+  if (userId) {
+    await bindRecentAnonymousGrowthRowsToUser(supabase, userId, anonymousId)
+  }
+
   const references = await resolveGrowthReferenceIds(supabase, attribution)
   const { error } = await supabase
     .from('growth_visits')
     .insert({
       anonymous_id: anonymousId,
+      user_id: userId,
       campaign_id: references.campaignId,
       referral_code_id: references.referralCodeId,
       landing_path: landingPath,

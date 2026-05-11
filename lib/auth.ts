@@ -2,8 +2,10 @@ import { createClient, createServiceClient } from '@/lib/supabase'
 import {
   normalizeCampaignCode,
   resolveUserPlanAccess,
-  sanitizeAttributionObject,
+  attributionFromBindingVisit,
+  selectGrowthAttributionBinding,
   type AttributionPayload,
+  type GrowthAttributionBindingSelection,
   type Plan,
 } from '@/lib/growth/attribution'
 
@@ -72,6 +74,7 @@ type GrowthReferenceIds = {
 
 type GrowthVisitRow = {
   id: string
+  created_at: string | null
   attribution: unknown
   campaign_id: string | null
   referral_code_id: string | null
@@ -91,18 +94,6 @@ type BindGrowthAttributionInput = {
 
 function hasAttribution(attribution: AttributionPayload | null): attribution is AttributionPayload {
   return Boolean(attribution && Object.keys(attribution).length > 0)
-}
-
-function attributionFromVisit(visit: GrowthVisitRow): AttributionPayload | null {
-  const attribution: AttributionPayload = sanitizeAttributionObject(visit.attribution) ?? {}
-  const fields = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'referral_code', 'promo_code'] as const
-
-  for (const field of fields) {
-    const value = normalizeCampaignCode(visit[field])
-    if (value) attribution[field] = value
-  }
-
-  return hasAttribution(attribution) ? attribution : null
 }
 
 async function findActiveCampaignByCode(supabase: ServiceClient, code: string | null) {
@@ -214,9 +205,11 @@ async function maybeCreateBetaGrantForServerVisit(userId: string, attribution: A
 async function updateProfileAttribution(
   supabase: ServiceClient,
   userId: string,
-  attribution: AttributionPayload,
+  selection: Pick<GrowthAttributionBindingSelection, 'firstTouchAttribution' | 'lastTouchAttribution'>,
 ) {
   const lastUpdates: Record<string, string> = {}
+  const firstAttribution = selection.firstTouchAttribution
+  const lastAttribution = selection.lastTouchAttribution
   const mappings = [
     ['utm_source', 'first_utm_source', 'last_utm_source'],
     ['utm_medium', 'first_utm_medium', 'last_utm_medium'],
@@ -226,20 +219,22 @@ async function updateProfileAttribution(
   ] as const
 
   for (const [field, firstColumn, lastColumn] of mappings) {
-    const value = attribution[field]
-    if (!value) continue
+    const firstValue = firstAttribution?.[field]
+    const lastValue = lastAttribution?.[field]
 
-    const { error: firstUpdateError } = await supabase
-      .from('profiles')
-      .update({ [firstColumn]: value })
-      .eq('id', userId)
-      .is(firstColumn, null)
+    if (firstValue) {
+      const { error: firstUpdateError } = await supabase
+        .from('profiles')
+        .update({ [firstColumn]: firstValue })
+        .eq('id', userId)
+        .is(firstColumn, null)
 
-    if (firstUpdateError) {
-      console.error(`[auth] ${firstColumn} attribution update failed:`, firstUpdateError.message)
+      if (firstUpdateError) {
+        console.error(`[auth] ${firstColumn} attribution update failed:`, firstUpdateError.message)
+      }
     }
 
-    lastUpdates[lastColumn] = value
+    if (lastValue) lastUpdates[lastColumn] = lastValue
   }
 
   if (Object.keys(lastUpdates).length > 0) {
@@ -279,13 +274,16 @@ async function bindAnonymousGrowthRowsToUser(
 
 async function resolveAndStoreVisitReferences(supabase: ServiceClient, visits: GrowthVisitRow[]) {
   for (const visit of visits) {
-    const attribution = attributionFromVisit(visit)
+    const attribution = attributionFromBindingVisit(visit)
     const references = await resolveGrowthReferenceIds(supabase, attribution)
     const updates: Record<string, string> = {}
 
     if (!visit.campaign_id && references.campaignId) updates.campaign_id = references.campaignId
     if (!visit.referral_code_id && references.referralCodeId) updates.referral_code_id = references.referralCodeId
     if (Object.keys(updates).length === 0) continue
+
+    if (updates.campaign_id) visit.campaign_id = updates.campaign_id
+    if (updates.referral_code_id) visit.referral_code_id = updates.referral_code_id
 
     const { error } = await supabase
       .from('growth_visits')
@@ -312,6 +310,7 @@ export async function bindGrowthAttributionForUser(userId: string, input: BindGr
       .from('growth_visits')
       .select(`
         id,
+        created_at,
         attribution,
         campaign_id,
         referral_code_id,
@@ -325,25 +324,33 @@ export async function bindGrowthAttributionForUser(userId: string, input: BindGr
       `)
       .eq('anonymous_id', anonymousId)
       .order('created_at', { ascending: false })
-      .limit(20)
+      .limit(50)
 
     if (error) {
       console.error('[auth] growth visit lookup failed:', error.message)
     } else if (visits && visits.length > 0) {
-      foundServerVisit = true
       await resolveAndStoreVisitReferences(supabase, visits as GrowthVisitRow[])
-      serverVisitAttribution = attributionFromVisit(visits[0] as GrowthVisitRow)
+      const selection = selectGrowthAttributionBinding(visits as GrowthVisitRow[])
+      foundServerVisit = selection.hasServerVisits
+
+      if (hasAttribution(selection.firstTouchAttribution) || hasAttribution(selection.lastTouchAttribution)) {
+        await updateProfileAttribution(supabase, userId, selection)
+      }
+
+      serverVisitAttribution = selection.grantAttribution
     }
   }
 
   if (hasAttribution(serverVisitAttribution)) {
-    await updateProfileAttribution(supabase, userId, serverVisitAttribution)
     await maybeCreateBetaGrantForServerVisit(userId, serverVisitAttribution)
     return
   }
 
   if (hasAttribution(fallbackAttribution) && !foundServerVisit) {
-    await updateProfileAttribution(supabase, userId, fallbackAttribution)
+    await updateProfileAttribution(supabase, userId, {
+      firstTouchAttribution: fallbackAttribution,
+      lastTouchAttribution: fallbackAttribution,
+    })
   }
 }
 
