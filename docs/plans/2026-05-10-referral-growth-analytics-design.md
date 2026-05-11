@@ -75,34 +75,41 @@ First-touch attribution не перезаписывается после пер�
 ```sql
 create table growth_campaigns (
   id uuid primary key default gen_random_uuid(),
-  slug text unique not null,
+  code text unique not null,
   name text not null,
-  source text,
-  medium text,
+  description text,
+  utm_source text,
+  utm_medium text,
+  utm_campaign text,
   default_plan text check (default_plan in ('free', 'pro', 'agency')) default 'pro',
   grant_days integer not null default 30,
   max_grants integer,
   starts_at timestamptz,
-  ends_at timestamptz,
-  active boolean not null default true,
+  expires_at timestamptz,
+  is_active boolean not null default true,
+  metadata jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now()
 );
 
 create table referral_codes (
   id uuid primary key default gen_random_uuid(),
   code text unique not null,
-  owner_user_id uuid references auth.users(id) on delete set null,
+  owner_user_id uuid not null references auth.users(id) on delete cascade,
   campaign_id uuid references growth_campaigns(id) on delete set null,
   grant_days integer,
   max_uses integer,
-  active boolean not null default true,
+  uses_count integer not null default 0,
+  expires_at timestamptz,
+  is_active boolean not null default true,
   created_at timestamptz not null default now()
 );
 
 create table growth_visits (
   id uuid primary key default gen_random_uuid(),
-  anonymous_id text not null,
+  anonymous_id text,
   user_id uuid references auth.users(id) on delete set null,
+  campaign_id uuid references growth_campaigns(id) on delete set null,
+  referral_code_id uuid references referral_codes(id) on delete set null,
   landing_path text,
   referrer text,
   utm_source text,
@@ -114,6 +121,7 @@ create table growth_visits (
   promo_code text,
   user_agent text,
   ip_hash text,
+  attribution jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now()
 );
 
@@ -127,15 +135,19 @@ create table beta_access_grants (
   starts_at timestamptz not null default now(),
   expires_at timestamptz,
   revoked_at timestamptz,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  created_by uuid references auth.users(id) on delete set null
 );
 
 create table growth_events (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references auth.users(id) on delete set null,
   anonymous_id text,
+  visit_id uuid references growth_visits(id) on delete set null,
+  campaign_id uuid references growth_campaigns(id) on delete set null,
+  referral_code_id uuid references referral_codes(id) on delete set null,
   event_name text not null,
-  properties jsonb not null default '{}'::jsonb,
+  event_properties jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now()
 );
 ```
@@ -148,10 +160,12 @@ alter table profiles
   add column if not exists first_utm_medium text,
   add column if not exists first_utm_campaign text,
   add column if not exists first_referral_code text,
+  add column if not exists first_promo_code text,
   add column if not exists last_utm_source text,
   add column if not exists last_utm_medium text,
   add column if not exists last_utm_campaign text,
   add column if not exists last_referral_code text,
+  add column if not exists last_promo_code text,
   add column if not exists plan_source text default 'manual',
   add column if not exists plan_expires_at timestamptz;
 ```
