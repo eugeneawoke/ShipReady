@@ -214,6 +214,18 @@ const en = {
       copy: 'Copy referral link',
       copied: 'Copied',
     },
+    billing: {
+      eyebrow: 'Subscription',
+      renewsOn: 'Your Pro plan renews on {date}',
+      billingMonthly: 'Monthly',
+      billingYearly: 'Yearly',
+      paymentFailed: 'Payment failed — please update your payment method',
+      paymentFailedSub: 'Your Pro access may be suspended until payment is resolved.',
+      suspended: 'Subscription suspended',
+      suspendedSub: 'Your Pro access is on hold. Contact support to reactivate.',
+      cancelNote: 'To cancel your subscription, email',
+      cancelEmail: 'support@shipready.app',
+    },
   },
   Monitoring: {
     ariaEnable: 'Enable weekly monitoring for {domain}',

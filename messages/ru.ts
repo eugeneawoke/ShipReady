@@ -216,6 +216,18 @@ const ru: AppMessages = {
       copy: 'Скопировать реферальную ссылку',
       copied: 'Скопировано',
     },
+    billing: {
+      eyebrow: 'Подписка',
+      renewsOn: 'Pro-план продлится {date}',
+      billingMonthly: 'Ежемесячно',
+      billingYearly: 'Ежегодно',
+      paymentFailed: 'Ошибка оплаты — обновите способ оплаты',
+      paymentFailedSub: 'Доступ Pro может быть приостановлен до решения проблемы с оплатой.',
+      suspended: 'Подписка приостановлена',
+      suspendedSub: 'Доступ Pro заморожен. Свяжитесь с поддержкой для восстановления.',
+      cancelNote: 'Для отмены подписки напишите на',
+      cancelEmail: 'support@shipready.app',
+    },
   },
   Monitoring: {
     ariaEnable: 'Включить еженедельный мониторинг для {domain}',
