@@ -199,3 +199,203 @@ create policy growth_events_service_manage on growth_events
   for all to service_role
   using (true)
   with check (true);
+
+create or replace function grant_beta_access_from_growth_attribution(
+  p_user_id uuid,
+  p_campaign_slug text default null,
+  p_referral_code text default null,
+  p_promo_code text default null
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_campaign_input text;
+  v_referral_input text;
+  v_promo_input text;
+  v_campaign growth_campaigns%rowtype;
+  v_referral referral_codes%rowtype;
+  v_referral_id uuid := null;
+  v_existing_grant_id uuid;
+  v_active_grants integer;
+  v_grant_days integer;
+  v_grant_reason text;
+  v_new_grant_id uuid;
+begin
+  if p_user_id is null then
+    return null;
+  end if;
+
+  v_campaign_input := lower(trim(coalesce(p_campaign_slug, '')));
+  v_referral_input := lower(trim(coalesce(p_referral_code, '')));
+  v_promo_input := lower(trim(coalesce(p_promo_code, '')));
+
+  if v_campaign_input !~ '^[a-z0-9][a-z0-9._-]{0,63}$' then
+    v_campaign_input := null;
+  end if;
+  if v_referral_input !~ '^[a-z0-9][a-z0-9._-]{0,63}$' then
+    v_referral_input := null;
+  end if;
+  if v_promo_input !~ '^[a-z0-9][a-z0-9._-]{0,63}$' then
+    v_promo_input := null;
+  end if;
+
+  if v_campaign_input is null and v_referral_input is null and v_promo_input is null then
+    return null;
+  end if;
+
+  perform pg_advisory_xact_lock(hashtext('growth_grant_user'), hashtext(p_user_id::text));
+
+  if v_referral_input is not null then
+    select *
+      into v_referral
+      from referral_codes
+      where code = v_referral_input
+        and is_active = true
+        and (expires_at is null or expires_at > now())
+      for update;
+
+    if found
+      and v_referral.campaign_id is not null
+      and (v_referral.max_uses is null or v_referral.uses_count < v_referral.max_uses)
+    then
+      select *
+        into v_campaign
+        from growth_campaigns
+        where id = v_referral.campaign_id
+          and is_active = true
+          and default_plan in ('pro', 'agency')
+          and (starts_at is null or starts_at <= now())
+          and (expires_at is null or expires_at > now())
+        for update;
+
+      if found then
+        v_referral_id := v_referral.id;
+        v_grant_days := coalesce(v_referral.grant_days, v_campaign.grant_days);
+        v_grant_reason := 'referral:' || v_referral.code;
+      end if;
+    end if;
+  end if;
+
+  if v_campaign.id is null and v_promo_input is not null then
+    select *
+      into v_campaign
+      from growth_campaigns
+      where code = v_promo_input
+        and is_active = true
+        and default_plan in ('pro', 'agency')
+        and (starts_at is null or starts_at <= now())
+        and (expires_at is null or expires_at > now())
+      for update;
+
+    if found then
+      v_grant_days := v_campaign.grant_days;
+      v_grant_reason := 'promo:' || v_campaign.code;
+    end if;
+  end if;
+
+  if v_campaign.id is null and v_campaign_input is not null then
+    select *
+      into v_campaign
+      from growth_campaigns
+      where code = v_campaign_input
+        and is_active = true
+        and default_plan in ('pro', 'agency')
+        and (starts_at is null or starts_at <= now())
+        and (expires_at is null or expires_at > now())
+      for update;
+
+    if found then
+      v_grant_days := v_campaign.grant_days;
+      v_grant_reason := 'campaign:' || v_campaign.code;
+    end if;
+  end if;
+
+  if v_campaign.id is null then
+    return null;
+  end if;
+
+  perform pg_advisory_xact_lock(hashtext('growth_grant_campaign'), hashtext(v_campaign.id::text));
+  if v_referral_id is not null then
+    perform pg_advisory_xact_lock(hashtext('growth_grant_referral'), hashtext(v_referral_id::text));
+  end if;
+
+  select id
+    into v_existing_grant_id
+    from beta_access_grants
+    where user_id = p_user_id
+      and campaign_id = v_campaign.id
+      and revoked_at is null
+      and starts_at <= now()
+      and (expires_at is null or expires_at > now())
+      and (
+        (v_referral_id is null and referral_code_id is null)
+        or referral_code_id = v_referral_id
+      )
+    order by created_at desc
+    limit 1;
+
+  if v_existing_grant_id is not null then
+    return v_existing_grant_id;
+  end if;
+
+  if v_referral_id is not null then
+    select *
+      into v_referral
+      from referral_codes
+      where id = v_referral_id
+      for update;
+
+    if v_referral.max_uses is not null and v_referral.uses_count >= v_referral.max_uses then
+      return null;
+    end if;
+  end if;
+
+  if v_campaign.max_grants is not null then
+    select count(*)::integer
+      into v_active_grants
+      from beta_access_grants
+      where campaign_id = v_campaign.id
+        and revoked_at is null
+        and starts_at <= now()
+        and (expires_at is null or expires_at > now());
+
+    if v_active_grants >= v_campaign.max_grants then
+      return null;
+    end if;
+  end if;
+
+  insert into beta_access_grants (
+    user_id,
+    campaign_id,
+    referral_code_id,
+    granted_plan,
+    grant_reason,
+    starts_at,
+    expires_at
+  )
+  values (
+    p_user_id,
+    v_campaign.id,
+    v_referral_id,
+    v_campaign.default_plan,
+    v_grant_reason,
+    now(),
+    now() + make_interval(days => v_grant_days)
+  )
+  returning id into v_new_grant_id;
+
+  if v_referral_id is not null then
+    update referral_codes
+      set uses_count = uses_count + 1
+      where id = v_referral_id;
+  end if;
+
+  return v_new_grant_id;
+end;
+$$;
+
+revoke all on function grant_beta_access_from_growth_attribution(uuid, text, text, text) from public;
+grant execute on function grant_beta_access_from_growth_attribution(uuid, text, text, text) to service_role;

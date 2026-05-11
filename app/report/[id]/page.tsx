@@ -484,7 +484,6 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
         .eq('user_id', user.id)
         .is('revoked_at', null)
         .order('created_at', { ascending: false })
-        .limit(20)
       const profilePlan = (profile?.plan ?? 'free') as Plan
       const userPlan = effectivePlanFromSources({
         profilePlan,

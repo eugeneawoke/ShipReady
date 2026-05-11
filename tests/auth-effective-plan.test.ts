@@ -1,5 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 
 import { resolveUserPlanAccess } from '../lib/auth'
 
@@ -42,4 +44,17 @@ test('resolveUserPlanAccess keeps paid profile plan as the source over grants', 
     planSource: 'profile',
     activeBetaGrant: null,
   })
+})
+
+test('growth grant issuance is delegated to the transactional database function', () => {
+  const root = process.cwd()
+  const migration = readFileSync(join(root, 'supabase/migrations/014_growth_referrals.sql'), 'utf8')
+  const auth = readFileSync(join(root, 'lib/auth.ts'), 'utf8')
+
+  assert.match(migration, /create or replace function grant_beta_access_from_growth_attribution/i)
+  assert.match(migration, /security definer/i)
+  assert.match(migration, /pg_advisory_xact_lock/i)
+  assert.match(migration, /uses_count\s*=\s*uses_count\s*\+\s*1/i)
+  assert.match(auth, /\.rpc\('grant_beta_access_from_growth_attribution'/)
+  assert.doesNotMatch(auth, /\.from\('beta_access_grants'\)\s*\n\s*\.insert\(/)
 })
