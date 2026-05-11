@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound, redirect } from 'next/navigation'
-import { getTranslations } from 'next-intl/server'
+import { getLocale, getTranslations } from 'next-intl/server'
 import { SiteHeader } from '@/components/SiteHeader'
 import { createClient, createServiceClient } from '@/lib/supabase'
 
@@ -48,6 +48,7 @@ type ReferralRow = {
 
 type GrantRow = {
   id: string
+  user_id: string | null
   campaign_id: string | null
   referral_code_id: string | null
   revoked_at: string | null
@@ -77,33 +78,37 @@ function parseAdminEmails(value: string | undefined): Set<string> {
   )
 }
 
-function formatNumber(value: number): string {
-  return new Intl.NumberFormat('en-US').format(value)
+function formatNumber(value: number, locale: string): string {
+  return new Intl.NumberFormat(locale).format(value)
 }
 
-function formatDate(value: string | null): string {
-  if (!value) return 'No expiry'
-  return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(value))
+function formatPercent(value: number, locale: string): string {
+  return new Intl.NumberFormat(locale, { maximumFractionDigits: 1, style: 'percent' }).format(value)
 }
 
-function emptyLabel(value: string | null | undefined): string {
-  return value?.trim() || 'Unknown'
+function formatDate(value: string | null, locale: string, noExpiryLabel: string): string {
+  if (!value) return noExpiryLabel
+  return new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(value))
+}
+
+function emptyLabel(value: string | null | undefined, fallback: string): string {
+  return value?.trim() || fallback
 }
 
 function increment(map: Map<string, number>, key: string, amount = 1) {
   map.set(key, (map.get(key) ?? 0) + amount)
 }
 
-function groupVisitsBySource(visits: GrowthVisitRow[]) {
+function groupVisitsBySource(visits: GrowthVisitRow[], labels: { unknown: string; mixed: string }) {
   const rows = new Map<string, { source: string; visits: number; campaign: string }>()
 
   for (const visit of visits) {
-    const source = emptyLabel(visit.utm_source)
-    const current = rows.get(source) ?? { source, visits: 0, campaign: 'Mixed' }
+    const source = emptyLabel(visit.utm_source, labels.unknown)
+    const current = rows.get(source) ?? { source, visits: 0, campaign: labels.mixed }
     current.visits += 1
-    if (current.campaign === 'Mixed' && visit.utm_campaign) current.campaign = visit.utm_campaign
-    if (current.campaign !== 'Mixed' && visit.utm_campaign && current.campaign !== visit.utm_campaign) {
-      current.campaign = 'Mixed'
+    if (current.campaign === labels.mixed && visit.utm_campaign) current.campaign = visit.utm_campaign
+    if (current.campaign !== labels.mixed && visit.utm_campaign && current.campaign !== visit.utm_campaign) {
+      current.campaign = labels.mixed
     }
     rows.set(source, current)
   }
@@ -137,7 +142,34 @@ function countByNullableId<T extends { campaign_id?: string | null; referral_cod
   return counts
 }
 
-function activationMetrics(events: GrowthEventRow[], scans: ScanRow[], monitoredDomains: MonitoredDomainRow[]) {
+function countDistinctGrantUsersByReferral(grants: GrantRow[]) {
+  const usersByReferral = new Map<string, Set<string>>()
+
+  for (const grant of grants) {
+    if (!grant.referral_code_id || !grant.user_id) continue
+    const users = usersByReferral.get(grant.referral_code_id) ?? new Set<string>()
+    users.add(grant.user_id)
+    usersByReferral.set(grant.referral_code_id, users)
+  }
+
+  return new Map(Array.from(usersByReferral, ([referralId, users]) => [referralId, users.size]))
+}
+
+function activationMetrics(
+  events: GrowthEventRow[],
+  scans: ScanRow[],
+  monitoredDomains: MonitoredDomainRow[],
+  labels: {
+    firstCompletedScan: string
+    firstCompletedScanNote: string
+    secondCompletedScan: string
+    secondCompletedScanNote: string
+    pdfExportIntent: string
+    pdfExportIntentNote: string
+    monitoringEnabled: string
+    monitoringEnabledNote: string
+  },
+) {
   const eventCountMap = eventCounts(events)
   const scansByUser = new Map<string, number>()
 
@@ -155,18 +187,18 @@ function activationMetrics(events: GrowthEventRow[], scans: ScanRow[], monitored
   ).size
 
   return [
-    { label: 'First completed scan', value: firstScanUsers, note: 'Users with at least one completed scan in recent scan sample.' },
-    { label: 'Second completed scan', value: secondScanUsers, note: 'Users with at least two completed scans in recent scan sample.' },
-    { label: 'PDF export intent', value: eventCountMap.get('pdf_export_clicked') ?? 0, note: 'Tracked growth event count in recent event sample.' },
-    { label: 'Monitoring enabled', value: activeMonitoringUsers, note: 'Users with active monitored domains in recent domain sample.' },
+    { label: labels.firstCompletedScan, value: firstScanUsers, note: labels.firstCompletedScanNote },
+    { label: labels.secondCompletedScan, value: secondScanUsers, note: labels.secondCompletedScanNote },
+    { label: labels.pdfExportIntent, value: eventCountMap.get('pdf_export_clicked') ?? 0, note: labels.pdfExportIntentNote },
+    { label: labels.monitoringEnabled, value: activeMonitoringUsers, note: labels.monitoringEnabledNote },
   ]
 }
 
-function Card({ label, value, note }: { label: string; value: number; note: string }) {
+function Card({ label, value, note, locale }: { label: string; value: number; note: string; locale: string }) {
   return (
     <div className="rounded-2xl border border-white/[0.08] bg-[#151517] p-5">
       <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8B8A85]">{label}</p>
-      <p className="mt-3 text-3xl font-semibold tracking-tight text-[#F1F0EE]">{formatNumber(value)}</p>
+      <p className="mt-3 text-3xl font-semibold tracking-tight text-[#F1F0EE]">{formatNumber(value, locale)}</p>
       <p className="mt-2 text-sm leading-6 text-[#A7A59F]">{note}</p>
     </div>
   )
@@ -210,6 +242,7 @@ function Td({ children }: { children: React.ReactNode }) {
 
 export default async function AdminGrowthPage() {
   const t = await getTranslations('AdminGrowth')
+  const locale = await getLocale()
   const userSupabase = await createClient()
   const {
     data: { user },
@@ -267,7 +300,7 @@ export default async function AdminGrowthPage() {
       .limit(REFERRAL_LIMIT),
     serviceSupabase
       .from('beta_access_grants')
-      .select('id, campaign_id, referral_code_id, revoked_at, starts_at, expires_at, created_at')
+      .select('id, user_id, campaign_id, referral_code_id, revoked_at, starts_at, expires_at, created_at')
       .order('created_at', { ascending: false })
       .limit(RECENT_LIMIT),
     serviceSupabase
@@ -289,11 +322,19 @@ export default async function AdminGrowthPage() {
   const grants = (grantsResult.data ?? []) as GrantRow[]
   const scans = (scansResult.data ?? []) as ScanRow[]
   const monitoredDomains = (monitoredDomainsResult.data ?? []) as MonitoredDomainRow[]
-  const eventCountMap = eventCounts(events)
   const campaignGrantCounts = countByNullableId(grants, 'campaign_id')
-  const referralGrantCounts = countByNullableId(grants, 'referral_code_id')
-  const visitSources = groupVisitsBySource(visits)
-  const activationRows = activationMetrics(events, scans, monitoredDomains)
+  const referralActivatedCounts = countDistinctGrantUsersByReferral(grants)
+  const visitSources = groupVisitsBySource(visits, { unknown: t('labels.unknown'), mixed: t('labels.mixed') })
+  const activationRows = activationMetrics(events, scans, monitoredDomains, {
+    firstCompletedScan: t('activation.firstCompletedScan'),
+    firstCompletedScanNote: t('activation.firstCompletedScanNote'),
+    secondCompletedScan: t('activation.secondCompletedScan'),
+    secondCompletedScanNote: t('activation.secondCompletedScanNote'),
+    pdfExportIntent: t('activation.pdfExportIntent'),
+    pdfExportIntentNote: t('activation.pdfExportIntentNote'),
+    monitoringEnabled: t('activation.monitoringEnabled'),
+    monitoringEnabledNote: t('activation.monitoringEnabledNote'),
+  })
   const queryErrors = [
     visitsCountResult.error,
     eventsCountResult.error,
@@ -332,10 +373,10 @@ export default async function AdminGrowthPage() {
         ) : null}
 
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <Card label={t('overview.visits')} value={visitsCountResult.count ?? 0} note={t('overview.total')} />
-          <Card label={t('overview.events')} value={eventsCountResult.count ?? 0} note={t('overview.total')} />
-          <Card label={t('overview.activeGrants')} value={activeGrantsResult.count ?? activeGrantCount(grants, now)} note={t('overview.activeNow')} />
-          <Card label={t('overview.completedScans')} value={completedScansCountResult.count ?? 0} note={t('overview.total')} />
+          <Card label={t('overview.visits')} value={visitsCountResult.count ?? 0} note={t('overview.total')} locale={locale} />
+          <Card label={t('overview.events')} value={eventsCountResult.count ?? 0} note={t('overview.total')} locale={locale} />
+          <Card label={t('overview.activeGrants')} value={activeGrantsResult.count ?? activeGrantCount(grants, now)} note={t('overview.activeNow')} locale={locale} />
+          <Card label={t('overview.completedScans')} value={completedScansCountResult.count ?? 0} note={t('overview.total')} locale={locale} />
         </section>
 
         <Section title={t('channels.title')} subtitle={t('channels.subtitle', { limit: RECENT_LIMIT })}>
@@ -345,8 +386,7 @@ export default async function AdminGrowthPage() {
                 <Th>{t('channels.source')}</Th>
                 <Th>{t('channels.campaign')}</Th>
                 <Th>{t('channels.visits')}</Th>
-                <Th>{t('channels.signups')}</Th>
-                <Th>{t('channels.completedScans')}</Th>
+                <Th>{t('channels.visitShare')}</Th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.06]">
@@ -354,18 +394,17 @@ export default async function AdminGrowthPage() {
                 <tr key={row.source}>
                   <Td>{row.source}</Td>
                   <Td>{row.campaign}</Td>
-                  <Td>{formatNumber(row.visits)}</Td>
-                  <Td>{formatNumber(eventCountMap.get('signup_started') ?? 0)} <span className="text-[#8B8A85]">{t('channels.unattributed')}</span></Td>
-                  <Td>{formatNumber(completedScansCountResult.count ?? 0)} <span className="text-[#8B8A85]">{t('channels.unattributed')}</span></Td>
+                  <Td>{formatNumber(row.visits, locale)}</Td>
+                  <Td>{formatPercent(visits.length ? row.visits / visits.length : 0, locale)}</Td>
                 </tr>
               )) : (
-                <tr><Td>{t('empty')}</Td><Td>-</Td><Td>0</Td><Td>0</Td><Td>0</Td></tr>
+                <tr><Td>{t('empty')}</Td><Td>-</Td><Td>0</Td><Td>{formatPercent(0, locale)}</Td></tr>
               )}
             </tbody>
           </Table>
         </Section>
 
-        <Section title={t('campaigns.title')} subtitle={t('campaigns.subtitle', { limit: RECENT_LIMIT })}>
+        <Section title={t('campaigns.title')} subtitle={t('campaigns.subtitle', { campaignLimit: CAMPAIGN_LIMIT, grantLimit: RECENT_LIMIT })}>
           <Table>
             <thead className="bg-white/[0.03]">
               <tr>
@@ -381,9 +420,9 @@ export default async function AdminGrowthPage() {
                 <tr key={campaign.id}>
                   <Td>{campaign.code}</Td>
                   <Td><StatusPill>{campaign.is_active ? t('status.active') : t('status.inactive')}</StatusPill></Td>
-                  <Td>{formatNumber(campaign.grant_days)}</Td>
-                  <Td>{campaign.max_grants === null ? t('unlimited') : formatNumber(campaign.max_grants)}</Td>
-                  <Td>{formatNumber(campaignGrantCounts.get(campaign.id) ?? 0)}</Td>
+                  <Td>{formatNumber(campaign.grant_days, locale)}</Td>
+                  <Td>{campaign.max_grants === null ? t('unlimited') : formatNumber(campaign.max_grants, locale)}</Td>
+                  <Td>{formatNumber(campaignGrantCounts.get(campaign.id) ?? 0, locale)}</Td>
                 </tr>
               )) : (
                 <tr><Td>{t('empty')}</Td><Td>-</Td><Td>-</Td><Td>-</Td><Td>0</Td></tr>
@@ -392,7 +431,7 @@ export default async function AdminGrowthPage() {
           </Table>
         </Section>
 
-        <Section title={t('referrals.title')} subtitle={t('referrals.subtitle', { limit: REFERRAL_LIMIT })}>
+        <Section title={t('referrals.title')} subtitle={t('referrals.subtitle', { referralLimit: REFERRAL_LIMIT, grantLimit: RECENT_LIMIT })}>
           <Table>
             <thead className="bg-white/[0.03]">
               <tr>
@@ -400,7 +439,7 @@ export default async function AdminGrowthPage() {
                 <Th>{t('referrals.usage')}</Th>
                 <Th>{t('referrals.owner')}</Th>
                 <Th>{t('referrals.status')}</Th>
-                <Th>{t('referrals.grants')}</Th>
+                <Th>{t('referrals.expires')}</Th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.06]">
@@ -418,10 +457,13 @@ export default async function AdminGrowthPage() {
                 return (
                   <tr key={referral.id}>
                     <Td>{referral.code}</Td>
-                    <Td>{formatNumber(referral.uses_count)} / {referral.max_uses === null ? t('unlimited') : formatNumber(referral.max_uses)}</Td>
+                    <Td>
+                      {formatNumber(referral.uses_count, locale)} / {formatNumber(referralActivatedCounts.get(referral.id) ?? 0, locale)}
+                      <span className="text-[#8B8A85]"> {t('referrals.usageHint')}</span>
+                    </Td>
                     <Td>{referral.owner_user_id ? t('referrals.ownerLinked') : t('referrals.ownerMissing')}</Td>
                     <Td><StatusPill>{status}</StatusPill></Td>
-                    <Td>{formatNumber(referralGrantCounts.get(referral.id) ?? 0)} <span className="text-[#8B8A85]">{formatDate(referral.expires_at)}</span></Td>
+                    <Td>{formatDate(referral.expires_at, locale, t('labels.noExpiry'))}</Td>
                   </tr>
                 )
               }) : (
@@ -434,7 +476,7 @@ export default async function AdminGrowthPage() {
         <Section title={t('activation.title')} subtitle={t('activation.subtitle', { limit: RECENT_LIMIT })}>
           <div className="grid gap-4 md:grid-cols-2">
             {activationRows.map((row) => (
-              <Card key={row.label} label={row.label} value={row.value} note={row.note} />
+              <Card key={row.label} label={row.label} value={row.value} note={row.note} locale={locale} />
             ))}
           </div>
         </Section>
