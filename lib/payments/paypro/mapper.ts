@@ -60,7 +60,7 @@ export function parseIpnPayload(body: Record<string, string>): PayProIpnPayload 
     ipnTypeName: body['IPN_TYPE_NAME'] ?? '',
     customerId: body['CUSTOMER_ID'] ?? '',
     customerEmail: body['CUSTOMER_EMAIL'] ?? '',
-    subscriptionId: body['SUBSCRIPTION_ID'] ?? null,
+    subscriptionId: body['SUBSCRIPTION_ID'] || null,
     subscriptionStatusId: parseOptionalInt(body['SUBSCRIPTION_STATUS_ID']),
     subscriptionNextChargeDate: parseOptionalDate(body['SUBSCRIPTION_NEXT_CHARGE_DATE']),
     productId: body['PRODUCT_ID'] ?? '',
