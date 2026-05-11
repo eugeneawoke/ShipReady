@@ -3,6 +3,7 @@
 
 export const CHECKOUT_BASE = 'https://store.payproglobal.com/checkout'
 export const PAYPRO_API_BASE = 'https://store.payproglobal.com/api'
+export const PAYPRO_PROVIDER = 'payproglobal'
 
 export interface PayProPlan {
   id: string

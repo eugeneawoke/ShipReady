@@ -38,6 +38,7 @@ export function PricingCtas({
 }: PricingCtasProps) {
   const [billing, setBilling] = useState<'monthly' | 'yearly'>('monthly')
   const [loading, setLoading] = useState(false)
+  const [checkoutError, setCheckoutError] = useState<string | null>(null)
   const router = useRouter()
 
   async function handleProCheckout() {
@@ -47,6 +48,7 @@ export function PricingCtas({
     }
 
     setLoading(true)
+    setCheckoutError(null)
     try {
       const planId = billing === 'yearly' ? 'pro_yearly' : 'pro_monthly'
       const res = await fetch('/api/payments/paypro/create-checkout', {
@@ -56,10 +58,12 @@ export function PricingCtas({
       })
       const data = await res.json() as { url?: string; error?: string }
       if (!res.ok || !data.url) {
-        console.error('Checkout error:', data.error)
+        setCheckoutError('Could not start checkout. Please try again or contact support.')
         return
       }
       window.location.href = data.url
+    } catch {
+      setCheckoutError('Could not start checkout. Please try again or contact support.')
     } finally {
       setLoading(false)
     }
@@ -99,6 +103,11 @@ export function PricingCtas({
           </button>
         </div>
       </div>
+
+      {/* Checkout error */}
+      {checkoutError && (
+        <p className="text-center text-sm text-[#FF6B6B] px-4">{checkoutError}</p>
+      )}
 
       {/* Plan cards */}
       <div className="grid md:grid-cols-3 gap-3">

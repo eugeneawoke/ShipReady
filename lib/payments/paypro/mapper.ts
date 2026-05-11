@@ -37,7 +37,13 @@ export function parseIpnPayload(body: Record<string, string>): PayProIpnPayload 
   if (rawCustomFields) {
     try {
       const params = new URLSearchParams(rawCustomFields)
-      userId = params.get('x-user-id')
+      const raw = params.get('x-user-id')
+      // Validate as UUID before accepting as a DB foreign key
+      if (raw && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(raw)) {
+        userId = raw
+      } else if (raw) {
+        console.warn('[paypro-mapper] x-user-id is not a valid UUID, ignoring:', raw)
+      }
     } catch {
       // malformed custom fields — leave userId null
     }

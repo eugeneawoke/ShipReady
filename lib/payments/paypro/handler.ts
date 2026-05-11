@@ -1,5 +1,5 @@
 import type { PayProIpnPayload } from './mapper'
-import { getPlanByProductId } from './config'
+import { getPlanByProductId, PAYPRO_PROVIDER } from './config'
 import { createServiceClient } from '@/lib/supabase'
 
 type SubscriptionStatus =
@@ -27,28 +27,24 @@ async function upsertSubscription(
     throw new Error('Missing user ID in IPN payload')
   }
 
+  // Reject unknown products — never silently upgrade to a default plan.
   const plan = getPlanByProductId(payload.productId)
   if (!plan) {
-    console.warn(
-      `[paypro] Unknown productId "${payload.productId}" — falling back to pro_monthly`,
-    )
+    throw new Error(`Unknown PayPro productId "${payload.productId}" — cannot determine plan tier`)
   }
-  const planId = plan?.id ?? 'pro_monthly'
-  const billingInterval = plan?.interval ?? 'monthly'
 
   const supabase = createServiceClient()
 
   const baseRow: Record<string, unknown> = {
     user_id: payload.userId,
-    provider: 'paypro',
-    plan_id: planId,
-    billing_interval: billingInterval,
+    provider: PAYPRO_PROVIDER,
+    plan_id: plan.id,
+    billing_interval: plan.interval,
     status,
     updated_at: new Date().toISOString(),
   }
 
   if (isNewOrder) {
-    // Full upsert for new orders and trials
     baseRow.external_subscription_id = payload.subscriptionId
     baseRow.external_order_id = payload.orderId
     baseRow.external_customer_id = payload.customerId
@@ -58,24 +54,16 @@ async function upsertSubscription(
       baseRow.current_period_end = payload.subscriptionNextChargeDate.toISOString()
     }
   } else if (isRenewal) {
-    // Renewals: only update status and period_end — don't overwrite period_start or order_id
+    // Renewals: extend period_end and update plan_id/billing_interval in case plan changed.
+    // Do NOT overwrite period_start, external_order_id, or external_customer_id.
     baseRow.current_period_end = payload.subscriptionNextChargeDate
       ? payload.subscriptionNextChargeDate.toISOString()
       : undefined
-    // Remove keys we don't want to overwrite
-    delete baseRow.billing_interval
-  } else if (status === 'active') {
-    // Charge succeed / renewed (non-initial)
-    baseRow.external_subscription_id = payload.subscriptionId
-    baseRow.external_order_id = payload.orderId
-    baseRow.external_customer_id = payload.customerId
-    baseRow.external_product_id = payload.productId
-    if (payload.subscriptionNextChargeDate) {
-      baseRow.current_period_end = payload.subscriptionNextChargeDate.toISOString()
-    }
+  } else {
+    // Status-only update (payment_failed, suspended, terminated, refunded, chargedback).
+    // plan_id and billing_interval are already in baseRow to keep them consistent.
   }
 
-  // Remove undefined values so Supabase doesn't try to set them
   const row = Object.fromEntries(
     Object.entries(baseRow).filter(([, v]) => v !== undefined),
   )
@@ -136,7 +124,7 @@ export async function handlePayProEvent(payload: PayProIpnPayload): Promise<void
       await upsertSubscription(payload, { status: 'chargedback' })
       break
 
-    // Log-only events: OrderPending(5), TrialStart(14), SubscriptionCreated(15), SubscriptionUpdated(21)
+    // Log-only: OrderPartiallyRefunded(5), TrialStart(14), SubscriptionCreated(15), SubscriptionPaymentInfoChanged(21)
     case 5:
     case 14:
     case 15:
@@ -145,8 +133,6 @@ export async function handlePayProEvent(payload: PayProIpnPayload): Promise<void
       break
 
     default:
-      console.warn(
-        `[paypro] Unknown IPN type ID ${ipnTypeId} (${ipnTypeName}) — no DB write`,
-      )
+      console.warn(`[paypro] Unknown IPN type ID ${ipnTypeId} (${ipnTypeName}) — no DB write`)
   }
 }

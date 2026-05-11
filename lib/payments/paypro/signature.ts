@@ -1,4 +1,5 @@
-import { createHash } from 'crypto'
+import { createHash, timingSafeEqual } from 'crypto'
+import { isSandboxMode } from './config'
 
 interface SignatureFields {
   ORDER_ID: string
@@ -11,9 +12,18 @@ interface SignatureFields {
 }
 
 interface HashFields {
-  ORDER_ID: string
-  TEST_MODE: string
   HASH: string
+}
+
+function timingSafeHexEqual(a: string, b: string): boolean {
+  try {
+    const bufA = Buffer.from(a.toLowerCase(), 'hex')
+    const bufB = Buffer.from(b.toLowerCase(), 'hex')
+    if (bufA.length !== bufB.length) return false
+    return timingSafeEqual(bufA, bufB)
+  } catch {
+    return false
+  }
 }
 
 // Verifies the PayPro SIGNATURE field using SHA256.
@@ -33,24 +43,22 @@ export function verifyPayProSignature(
     fields.IPN_TYPE_NAME
 
   const expected = createHash('sha256').update(raw).digest('hex')
-  return expected.toLowerCase() === fields.SIGNATURE.toLowerCase()
+  return timingSafeHexEqual(expected, fields.SIGNATURE)
 }
 
 // Verifies the PayPro HASH field using MD5.
-// For test orders (TEST_MODE=true or TEST_MODE=1), hash is always md5("1").
-export function verifyPayProHash(
-  fields: HashFields,
-  validationKey: string
-): boolean {
-  const isTest = fields.TEST_MODE === 'true' || fields.TEST_MODE === '1'
-
-  const raw = isTest ? '1' : fields.ORDER_ID + validationKey
-  const expected = createHash('md5').update(raw).digest('hex')
-  return expected.toLowerCase() === fields.HASH.toLowerCase()
+// ONLY accepted in sandbox mode (PAYPRO_SANDBOX=true).
+// In test mode: hash is always md5("1") = c4ca4238a0b923820dcc509a6f75849b.
+export function verifyPayProHash(fields: HashFields): boolean {
+  if (!isSandboxMode()) return false
+  const expected = createHash('md5').update('1').digest('hex')
+  return timingSafeHexEqual(expected, fields.HASH)
 }
 
-// Combined check: returns true if SIGNATURE verifies, or (fallback) if HASH verifies.
-// Prefers SIGNATURE; accepts HASH as fallback for test mode compatibility.
+// Verifies an incoming IPN request.
+// SHA256 SIGNATURE is always attempted first.
+// MD5 HASH fallback is only accepted when running in sandbox mode.
+// Returns false (→ 401) if neither check passes.
 export function verifyIpnRequest(
   body: Record<string, string>,
   validationKey: string
@@ -69,16 +77,14 @@ export function verifyIpnRequest(
     if (verifyPayProSignature(signatureFields, validationKey)) {
       return true
     }
+    // SIGNATURE was present but invalid — reject immediately; don't fall through to HASH.
+    return false
   }
 
-  const hashFields: HashFields = {
-    ORDER_ID: body['ORDER_ID'] ?? '',
-    TEST_MODE: body['TEST_MODE'] ?? '',
-    HASH: body['HASH'] ?? '',
-  }
-
-  if (hashFields.HASH) {
-    return verifyPayProHash(hashFields, validationKey)
+  // No SIGNATURE field — try HASH only in sandbox mode.
+  const hash = body['HASH'] ?? ''
+  if (hash && isSandboxMode()) {
+    return verifyPayProHash({ HASH: hash })
   }
 
   return false
