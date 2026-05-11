@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase'
 import { dispatchScanToRailway } from '@/lib/server/scanner-dispatch'
+import { getEffectivePlanForUserId } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
   // Verify this is a legitimate Vercel Cron request
@@ -38,8 +39,15 @@ export async function GET(request: NextRequest) {
 
   // Queue new scans
   let count = 0
+  let skippedFree = 0
   for (const monitoredDomain of monitoredDomains as Array<{ id: string; user_id: string; domain: string; last_scan_id: string | null }>) {
     if (runningDomainIds.has(monitoredDomain.id)) continue
+
+    const { effectivePlan } = await getEffectivePlanForUserId(monitoredDomain.user_id)
+    if (effectivePlan === 'free') {
+      skippedFree++
+      continue
+    }
 
     const { data } = await supabase
       .from('scans')
@@ -65,5 +73,5 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.json({ rescanned: count })
+  return NextResponse.json({ rescanned: count, skippedFree })
 }

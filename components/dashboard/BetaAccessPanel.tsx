@@ -81,6 +81,9 @@ export function BetaAccessPanel({ activeBetaGrant, referralCode }: BetaAccessPan
             <p className="text-[10px] font-mono uppercase tracking-[0.16em] text-[#6F6E69]">{t('reasonLabel')}</p>
             <p className="mt-1 text-sm text-[#8B8A85]">{activeBetaGrant.grantReason}</p>
           </div>
+          <p className="rounded-xl border border-[#3DDC84]/15 bg-[#3DDC84]/[0.06] px-3 py-2 text-xs leading-relaxed text-[#A8D6AA]">
+            {t('whyItMatters')}
+          </p>
           {displayReferralLink ? (
             <p className="break-all rounded-xl border border-white/[0.06] bg-[#0E0E0F]/60 px-3 py-2 text-xs text-[#8B8A85]">
               {displayReferralLink}
@@ -106,7 +109,7 @@ export function BetaAccessPanel({ activeBetaGrant, referralCode }: BetaAccessPan
             aria-live="polite"
             className="rounded-xl border border-white/[0.06] bg-white/[0.03] px-4 py-3 text-sm leading-relaxed text-[#8B8A85] sm:max-w-56"
           >
-            {t('referralComing')}
+            {t('referralUnavailable')}
           </div>
         )}
       </div>

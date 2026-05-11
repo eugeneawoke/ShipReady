@@ -29,6 +29,7 @@ import {
   markProviderState,
   reserveProviderCall,
 } from '@/lib/scan/guardrails'
+import { getEffectivePlanForUserId } from '@/lib/auth'
 
 async function safeTask<T>(
   task: Promise<T> | (() => Promise<T>),
@@ -80,13 +81,8 @@ async function getPlanForScan(scanId: string): Promise<ScanPlan> {
 
   if (!data?.user_id) return 'free'
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('plan')
-    .eq('id', data.user_id)
-    .single()
-
-  return (profile?.plan ?? 'free') as ScanPlan
+  const { effectivePlan } = await getEffectivePlanForUserId(data.user_id)
+  return effectivePlan as ScanPlan
 }
 
 async function maybeSendMonitoringAlert(scanId: string, result: ScanResult): Promise<void> {
