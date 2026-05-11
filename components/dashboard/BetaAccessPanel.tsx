@@ -11,6 +11,15 @@ type BetaAccessPanelProps = {
   referralCode?: string | null
 }
 
+function trackGrowthEvent(eventName: string, properties?: Record<string, unknown>) {
+  fetch('/api/growth/event', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'same-origin',
+    body: JSON.stringify({ event_name: eventName, properties }),
+  }).catch(() => {})
+}
+
 export function BetaAccessPanel({ activeBetaGrant, referralCode }: BetaAccessPanelProps) {
   const t = useTranslations('Dashboard.betaAccess')
   const locale = useLocale()
@@ -45,6 +54,7 @@ export function BetaAccessPanel({ activeBetaGrant, referralCode }: BetaAccessPan
     const linkToCopy = absoluteReferralLink()
     if (!linkToCopy) return
     await navigator.clipboard.writeText(linkToCopy)
+    trackGrowthEvent('referral_link_copied')
     setCopied(true)
     window.setTimeout(() => setCopied(false), 2000)
   }

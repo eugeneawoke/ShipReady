@@ -14,6 +14,11 @@ const CAMPAIGN_LIMIT = 100
 const REFERRAL_LIMIT = 100
 
 type GrowthVisitRow = {
+  id: string
+  anonymous_id: string | null
+  user_id: string | null
+  campaign_id: string | null
+  referral_code_id: string | null
   utm_source: string | null
   utm_campaign: string | null
   created_at: string
@@ -21,6 +26,11 @@ type GrowthVisitRow = {
 
 type GrowthEventRow = {
   event_name: string
+  user_id: string | null
+  anonymous_id: string | null
+  visit_id: string | null
+  campaign_id: string | null
+  referral_code_id: string | null
   created_at: string
 }
 
@@ -57,16 +67,15 @@ type GrantRow = {
   created_at: string
 }
 
-type ScanRow = {
-  user_id: string | null
-  status: string | null
-  created_at: string
-}
-
-type MonitoredDomainRow = {
-  user_id: string | null
-  active: boolean | null
-  created_at: string
+type ChannelActivationRow = {
+  key: string
+  source: string
+  campaign: string
+  visits: number
+  signupStarted: number
+  scanStarted: number
+  pdfClicks: number
+  monitoringEnabled: number
 }
 
 function parseAdminEmails(value: string | undefined): Set<string> {
@@ -82,10 +91,6 @@ function formatNumber(value: number, locale: string): string {
   return new Intl.NumberFormat(locale).format(value)
 }
 
-function formatPercent(value: number, locale: string): string {
-  return new Intl.NumberFormat(locale, { maximumFractionDigits: 1, style: 'percent' }).format(value)
-}
-
 function formatDate(value: string | null, locale: string, noExpiryLabel: string): string {
   if (!value) return noExpiryLabel
   return new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(value))
@@ -99,27 +104,84 @@ function increment(map: Map<string, number>, key: string, amount = 1) {
   map.set(key, (map.get(key) ?? 0) + amount)
 }
 
-function groupVisitsBySource(visits: GrowthVisitRow[], labels: { unknown: string; mixed: string }) {
-  const rows = new Map<string, { source: string; visits: number; campaign: string }>()
+function channelKeyFromVisit(visit: GrowthVisitRow, labels: { unknown: string }): string {
+  const source = emptyLabel(visit.utm_source, labels.unknown)
+  const campaign = emptyLabel(visit.utm_campaign, labels.unknown)
+  return `${source}\u0000${campaign}`
+}
+
+function emptyChannelRow(key: string, source: string, campaign: string): ChannelActivationRow {
+  return {
+    key,
+    source,
+    campaign,
+    visits: 0,
+    signupStarted: 0,
+    scanStarted: 0,
+    pdfClicks: 0,
+    monitoringEnabled: 0,
+  }
+}
+
+function rememberReferenceChannelKey(map: Map<string, string | null>, referenceId: string, channelKey: string) {
+  if (!map.has(referenceId)) {
+    map.set(referenceId, channelKey)
+    return
+  }
+
+  if (map.get(referenceId) !== channelKey) {
+    map.set(referenceId, null)
+  }
+}
+
+function groupChannelActivation(
+  visits: GrowthVisitRow[],
+  events: GrowthEventRow[],
+  labels: { unknown: string },
+): ChannelActivationRow[] {
+  const rows = new Map<string, ChannelActivationRow>()
+  const visitChannelKeys = new Map<string, string>()
+  const campaignChannelKeys = new Map<string, string | null>()
+  const referralChannelKeys = new Map<string, string | null>()
 
   for (const visit of visits) {
     const source = emptyLabel(visit.utm_source, labels.unknown)
-    const current = rows.get(source) ?? { source, visits: 0, campaign: labels.mixed }
-    current.visits += 1
-    if (current.campaign === labels.mixed && visit.utm_campaign) current.campaign = visit.utm_campaign
-    if (current.campaign !== labels.mixed && visit.utm_campaign && current.campaign !== visit.utm_campaign) {
-      current.campaign = labels.mixed
-    }
-    rows.set(source, current)
+    const campaign = emptyLabel(visit.utm_campaign, labels.unknown)
+    const key = channelKeyFromVisit(visit, labels)
+    const row = rows.get(key) ?? emptyChannelRow(key, source, campaign)
+    row.visits += 1
+    rows.set(key, row)
+    visitChannelKeys.set(visit.id, key)
+    if (visit.campaign_id) rememberReferenceChannelKey(campaignChannelKeys, visit.campaign_id, key)
+    if (visit.referral_code_id) rememberReferenceChannelKey(referralChannelKeys, visit.referral_code_id, key)
   }
 
-  return Array.from(rows.values()).sort((a, b) => b.visits - a.visits)
-}
+  for (const event of events) {
+    const key = event.visit_id
+      ? visitChannelKeys.get(event.visit_id)
+      : event.referral_code_id
+        ? referralChannelKeys.get(event.referral_code_id)
+        : event.campaign_id
+          ? campaignChannelKeys.get(event.campaign_id)
+          : undefined
 
-function eventCounts(events: GrowthEventRow[]) {
-  const counts = new Map<string, number>()
-  for (const event of events) increment(counts, event.event_name)
-  return counts
+    if (!key) continue
+
+    const row = rows.get(key)
+    if (!row) continue
+
+    if (event.event_name === 'signup_started') row.signupStarted += 1
+    if (event.event_name === 'scan_started') row.scanStarted += 1
+    if (event.event_name === 'pdf_export_clicked') row.pdfClicks += 1
+    if (event.event_name === 'monitoring_enabled') row.monitoringEnabled += 1
+  }
+
+  return Array.from(rows.values()).sort((a, b) => {
+    const activationDelta =
+      (b.signupStarted + b.scanStarted + b.pdfClicks + b.monitoringEnabled) -
+      (a.signupStarted + a.scanStarted + a.pdfClicks + a.monitoringEnabled)
+    return activationDelta || b.visits - a.visits
+  })
 }
 
 function activeGrantCount(grants: GrantRow[], now: Date): number {
@@ -153,45 +215,6 @@ function countDistinctGrantUsersByReferral(grants: GrantRow[]) {
   }
 
   return new Map(Array.from(usersByReferral, ([referralId, users]) => [referralId, users.size]))
-}
-
-function activationMetrics(
-  events: GrowthEventRow[],
-  scans: ScanRow[],
-  monitoredDomains: MonitoredDomainRow[],
-  labels: {
-    firstCompletedScan: string
-    firstCompletedScanNote: string
-    secondCompletedScan: string
-    secondCompletedScanNote: string
-    pdfExportIntent: string
-    pdfExportIntentNote: string
-    monitoringEnabled: string
-    monitoringEnabledNote: string
-  },
-) {
-  const eventCountMap = eventCounts(events)
-  const scansByUser = new Map<string, number>()
-
-  for (const scan of scans) {
-    if (!scan.user_id || scan.status !== 'done') continue
-    increment(scansByUser, scan.user_id)
-  }
-
-  const firstScanUsers = Array.from(scansByUser.values()).filter((count) => count >= 1).length
-  const secondScanUsers = Array.from(scansByUser.values()).filter((count) => count >= 2).length
-  const activeMonitoringUsers = new Set(
-    monitoredDomains
-      .filter((domain) => domain.active && domain.user_id)
-      .map((domain) => domain.user_id as string),
-  ).size
-
-  return [
-    { label: labels.firstCompletedScan, value: firstScanUsers, note: labels.firstCompletedScanNote },
-    { label: labels.secondCompletedScan, value: secondScanUsers, note: labels.secondCompletedScanNote },
-    { label: labels.pdfExportIntent, value: eventCountMap.get('pdf_export_clicked') ?? 0, note: labels.pdfExportIntentNote },
-    { label: labels.monitoringEnabled, value: activeMonitoringUsers, note: labels.monitoringEnabledNote },
-  ]
 }
 
 function Card({ label, value, note, locale }: { label: string; value: number; note: string; locale: string }) {
@@ -266,8 +289,6 @@ export default async function AdminGrowthPage() {
     campaignsResult,
     referralsResult,
     grantsResult,
-    scansResult,
-    monitoredDomainsResult,
   ] = await Promise.all([
     serviceSupabase.from('growth_visits').select('id', { count: 'exact', head: true }),
     serviceSupabase.from('growth_events').select('id', { count: 'exact', head: true }),
@@ -280,12 +301,12 @@ export default async function AdminGrowthPage() {
     serviceSupabase.from('scans').select('id', { count: 'exact', head: true }).eq('status', 'done'),
     serviceSupabase
       .from('growth_visits')
-      .select('utm_source, utm_campaign, created_at')
+      .select('id, anonymous_id, user_id, campaign_id, referral_code_id, utm_source, utm_campaign, created_at')
       .order('created_at', { ascending: false })
       .limit(RECENT_LIMIT),
     serviceSupabase
       .from('growth_events')
-      .select('event_name, created_at')
+      .select('event_name, user_id, anonymous_id, visit_id, campaign_id, referral_code_id, created_at')
       .order('created_at', { ascending: false })
       .limit(RECENT_LIMIT),
     serviceSupabase
@@ -303,16 +324,6 @@ export default async function AdminGrowthPage() {
       .select('id, user_id, campaign_id, referral_code_id, revoked_at, starts_at, expires_at, created_at')
       .order('created_at', { ascending: false })
       .limit(RECENT_LIMIT),
-    serviceSupabase
-      .from('scans')
-      .select('user_id, status, created_at')
-      .order('created_at', { ascending: false })
-      .limit(RECENT_LIMIT),
-    serviceSupabase
-      .from('monitored_domains')
-      .select('user_id, active, created_at')
-      .order('created_at', { ascending: false })
-      .limit(RECENT_LIMIT),
   ])
 
   const visits = (visitsResult.data ?? []) as GrowthVisitRow[]
@@ -320,21 +331,9 @@ export default async function AdminGrowthPage() {
   const campaigns = (campaignsResult.data ?? []) as CampaignRow[]
   const referrals = (referralsResult.data ?? []) as ReferralRow[]
   const grants = (grantsResult.data ?? []) as GrantRow[]
-  const scans = (scansResult.data ?? []) as ScanRow[]
-  const monitoredDomains = (monitoredDomainsResult.data ?? []) as MonitoredDomainRow[]
   const campaignGrantCounts = countByNullableId(grants, 'campaign_id')
   const referralActivatedCounts = countDistinctGrantUsersByReferral(grants)
-  const visitSources = groupVisitsBySource(visits, { unknown: t('labels.unknown'), mixed: t('labels.mixed') })
-  const activationRows = activationMetrics(events, scans, monitoredDomains, {
-    firstCompletedScan: t('activation.firstCompletedScan'),
-    firstCompletedScanNote: t('activation.firstCompletedScanNote'),
-    secondCompletedScan: t('activation.secondCompletedScan'),
-    secondCompletedScanNote: t('activation.secondCompletedScanNote'),
-    pdfExportIntent: t('activation.pdfExportIntent'),
-    pdfExportIntentNote: t('activation.pdfExportIntentNote'),
-    monitoringEnabled: t('activation.monitoringEnabled'),
-    monitoringEnabledNote: t('activation.monitoringEnabledNote'),
-  })
+  const channelActivationRows = groupChannelActivation(visits, events, { unknown: t('labels.unknown') })
   const queryErrors = [
     visitsCountResult.error,
     eventsCountResult.error,
@@ -345,8 +344,6 @@ export default async function AdminGrowthPage() {
     campaignsResult.error,
     referralsResult.error,
     grantsResult.error,
-    scansResult.error,
-    monitoredDomainsResult.error,
   ].filter(Boolean)
 
   return (
@@ -386,19 +383,25 @@ export default async function AdminGrowthPage() {
                 <Th>{t('channels.source')}</Th>
                 <Th>{t('channels.campaign')}</Th>
                 <Th>{t('channels.visits')}</Th>
-                <Th>{t('channels.visitShare')}</Th>
+                <Th>{t('channels.signups')}</Th>
+                <Th>{t('channels.scanStarted')}</Th>
+                <Th>{t('channels.pdfClicks')}</Th>
+                <Th>{t('channels.monitoringEnabled')}</Th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.06]">
-              {visitSources.length ? visitSources.map((row) => (
-                <tr key={row.source}>
+              {channelActivationRows.length ? channelActivationRows.map((row) => (
+                <tr key={row.key}>
                   <Td>{row.source}</Td>
                   <Td>{row.campaign}</Td>
                   <Td>{formatNumber(row.visits, locale)}</Td>
-                  <Td>{formatPercent(visits.length ? row.visits / visits.length : 0, locale)}</Td>
+                  <Td>{formatNumber(row.signupStarted, locale)}</Td>
+                  <Td>{formatNumber(row.scanStarted, locale)}</Td>
+                  <Td>{formatNumber(row.pdfClicks, locale)}</Td>
+                  <Td>{formatNumber(row.monitoringEnabled, locale)}</Td>
                 </tr>
               )) : (
-                <tr><Td>{t('empty')}</Td><Td>-</Td><Td>0</Td><Td>{formatPercent(0, locale)}</Td></tr>
+                <tr><Td>{t('empty')}</Td><Td>-</Td><Td>0</Td><Td>0</Td><Td>0</Td><Td>0</Td><Td>0</Td></tr>
               )}
             </tbody>
           </Table>
@@ -471,14 +474,6 @@ export default async function AdminGrowthPage() {
               )}
             </tbody>
           </Table>
-        </Section>
-
-        <Section title={t('activation.title')} subtitle={t('activation.subtitle', { limit: RECENT_LIMIT })}>
-          <div className="grid gap-4 md:grid-cols-2">
-            {activationRows.map((row) => (
-              <Card key={row.label} label={row.label} value={row.value} note={row.note} locale={locale} />
-            ))}
-          </div>
         </Section>
       </main>
     </div>

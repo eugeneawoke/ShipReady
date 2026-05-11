@@ -130,6 +130,15 @@ const SCAN_GOAL_LABELS: Record<ScanGoal, string | null> = {
   general: null,
 }
 
+function trackGrowthEvent(eventName: string, properties?: Record<string, unknown>) {
+  fetch('/api/growth/event', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'same-origin',
+    body: JSON.stringify({ event_name: eventName, properties }),
+  }).catch(() => {})
+}
+
 function BusinessProfileBlock({ businessContext, scanGoal }: {
   businessContext?: BusinessContext | null
   scanGoal?: ScanGoal
@@ -666,6 +675,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
   async function handlePdfDownload() {
     if (!id || pdfState !== 'idle') return
 
+    trackGrowthEvent('pdf_export_clicked', { reportId: id })
     setPdfError(null)
     setPdfState('preparing')
 

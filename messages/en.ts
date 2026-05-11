@@ -50,11 +50,14 @@ const en = {
     },
     channels: {
       title: 'Channels',
-      subtitle: 'Attributable visit metrics by UTM source from the latest {limit} visit rows. Signups and completed scans stay in overview/activation because they are not currently attributable to UTM source.',
+      subtitle: 'Linked visits and activation events by UTM source/campaign from the latest {limit} rows. Unlinked events are not allocated to channels.',
       source: 'UTM source',
       campaign: 'Campaign',
       visits: 'Visits (recent sample)',
-      visitShare: 'Visit share (sample)',
+      signups: 'Signup starts',
+      scanStarted: 'Scans started',
+      pdfClicks: 'PDF clicks',
+      monitoringEnabled: 'Monitoring enabled',
     },
     campaigns: {
       title: 'Campaigns',

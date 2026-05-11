@@ -14,6 +14,12 @@ const EVENT_NAMES = new Set([
 ])
 const MAX_PROPERTIES_BYTES = 4096
 
+type LatestVisit = {
+  id: string
+  campaign_id: string | null
+  referral_code_id: string | null
+}
+
 function randomAnonymousId(): string {
   return globalThis.crypto?.randomUUID?.() ?? randomUUID()
 }
@@ -34,6 +40,28 @@ function sanitizeProperties(value: unknown): Record<string, unknown> {
   } catch {
     return {}
   }
+}
+
+async function findLatestVisitForAnonymousId(
+  supabase: ReturnType<typeof createServiceClient>,
+  anonymousId: string | null,
+): Promise<LatestVisit | null> {
+  if (!anonymousId) return null
+
+  const { data, error } = await supabase
+    .from('growth_visits')
+    .select('id, campaign_id, referral_code_id')
+    .eq('anonymous_id', anonymousId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (error) {
+    console.error('[growth/event] visit linkage lookup failed:', error.message)
+    return null
+  }
+
+  return data as LatestVisit | null
 }
 
 export async function POST(request: NextRequest) {
@@ -65,11 +93,15 @@ export async function POST(request: NextRequest) {
   const shouldCreateAnonymousId = !userId && !existingAnonymousId
   const anonymousId = existingAnonymousId ?? (shouldCreateAnonymousId ? randomAnonymousId() : null)
   const supabase = createServiceClient()
+  const latestVisit = await findLatestVisitForAnonymousId(supabase, anonymousId)
   const { error } = await supabase
     .from('growth_events')
     .insert({
       user_id: userId,
       anonymous_id: anonymousId,
+      visit_id: latestVisit?.id ?? null,
+      campaign_id: latestVisit?.campaign_id ?? null,
+      referral_code_id: latestVisit?.referral_code_id ?? null,
       event_name: eventName,
       event_properties: sanitizeProperties(body.properties),
     })

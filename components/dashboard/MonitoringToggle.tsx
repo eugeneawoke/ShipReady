@@ -11,6 +11,15 @@ interface MonitoringToggleProps {
   canManage: boolean
 }
 
+function trackGrowthEvent(eventName: string, properties?: Record<string, unknown>) {
+  fetch('/api/growth/event', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'same-origin',
+    body: JSON.stringify({ event_name: eventName, properties }),
+  }).catch(() => {})
+}
+
 export function MonitoringToggle({ domain, enabled, canManage }: MonitoringToggleProps) {
   const router = useRouter()
   const t = useTranslations('Monitoring')
@@ -41,6 +50,7 @@ export function MonitoringToggle({ domain, enabled, canManage }: MonitoringToggl
       }
 
       setIsEnabled(nextEnabled)
+      if (nextEnabled) trackGrowthEvent('monitoring_enabled')
       router.refresh()
     } catch (error) {
       console.error('[monitoring] toggle failed', error)
