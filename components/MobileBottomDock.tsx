@@ -63,6 +63,9 @@ function LogOutIcon({ size }: { size: number }) {
   )
 }
 
+// --- Singleton Supabase client (module-level, avoids multiple GoTrue instances) ---
+const supabase = createBrowserClient()
+
 // --- Component ---
 
 type NavItem = {
@@ -79,8 +82,6 @@ export default function MobileBottomDock() {
   const [isSignedIn, setIsSignedIn] = useState(false)
 
   useEffect(() => {
-    const supabase = createBrowserClient()
-
     supabase.auth.getSession().then(({ data }) => {
       setIsSignedIn(!!data.session)
     })
@@ -95,7 +96,6 @@ export default function MobileBottomDock() {
   }, [])
 
   async function handleSignOut() {
-    const supabase = createBrowserClient()
     await supabase.auth.signOut()
     router.push('/')
   }
