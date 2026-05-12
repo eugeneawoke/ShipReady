@@ -25,6 +25,7 @@ export function RoadmapMobileMenu({ labels }: RoadmapMobileMenuProps) {
   return (
     <div className="md:hidden">
       <button
+        type="button"
         onClick={() => setOpen(true)}
         aria-label="Open navigation menu"
         className="flex items-center justify-center w-9 h-9 rounded-lg text-[#8B8A85] hover:text-[#F1F0EE] hover:bg-white/[0.06] transition-colors"

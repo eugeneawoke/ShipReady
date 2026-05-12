@@ -4,6 +4,7 @@ import { getLocale } from 'next-intl/server'
 import { ArrowLeft } from 'lucide-react'
 import { SiteHeader } from '@/components/SiteHeader'
 import { CinematicFooter } from '@/components/ui/motion-footer'
+import { MobileDockSpacer } from '@/components/navigation/MobileDockSpacer'
 
 export const metadata: Metadata = {
   title: 'Methodology — ShipReady',
@@ -203,7 +204,7 @@ export default async function MethodologyPage() {
         </div>
       </main>
 
-      <div aria-hidden="true" className="h-36 md:hidden" />
+      <MobileDockSpacer />
       <CinematicFooter />
     </div>
   )

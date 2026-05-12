@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { waitUntil } from '@vercel/functions'
+import { waitUntil, ipAddress } from '@vercel/functions'
 import { isValidUrl, normalizeUrl } from '@/lib/utils'
 import { createClient, createServiceClient, hasSupabaseServiceConfig } from '@/lib/supabase'
 import { FREE_SCAN_LIMIT, getUserWithPlan } from '@/lib/auth'
@@ -21,11 +21,7 @@ function startOfCurrentMonth(): string {
 }
 
 function getClientIp(request: NextRequest): string {
-  return (
-    request.headers.get('x-forwarded-for')?.split(',')[0].trim() ??
-    request.headers.get('x-real-ip') ??
-    'unknown'
-  )
+  return ipAddress(request) ?? 'unknown'
 }
 
 export async function POST(request: NextRequest) {

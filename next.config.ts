@@ -24,7 +24,6 @@ const securityHeaders = [
       'usb=()',
     ].join(', '),
   },
-  // CSP is set per-request in middleware.ts with a nonce (no unsafe-inline in script-src)
 ]
 
 const nextConfig: NextConfig = {

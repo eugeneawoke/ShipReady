@@ -16,6 +16,7 @@ import { AnimatedShinyText } from '@/components/ui/animated-shiny-text'
 import { DotPattern } from '@/components/ui/dot-pattern'
 import { SpotlightCard } from '@/components/ui/spotlight-card'
 import { SiteBrandLink } from '@/components/SiteHeader'
+import { MobileDockSpacer } from '@/components/navigation/MobileDockSpacer'
 import { localeCookieName } from '@/lib/i18n'
 import type { AppMessages } from '@/messages/en'
 import MobileNavSheet from '@/components/MobileNavSheet'
@@ -193,7 +194,7 @@ export default function LandingPage() {
       <FAQSection t={t} />
       <BottomCTA t={t} />
       {/* Spacer so dock doesn't clip the footer's clip-path container on mobile */}
-      <div aria-hidden="true" className="h-36 md:hidden" />
+      <MobileDockSpacer />
       <CinematicFooter />
     </div>
   )
@@ -384,7 +385,6 @@ function HeroSection({ t }: { t: Translations }) {
       <div className="relative z-10 mx-auto w-full max-w-3xl overflow-visible">
         <h1
           className="hero-1 text-[28px] sm:text-[46px] md:text-[68px] font-semibold leading-[1.1] tracking-[-0.02em] break-words"
-          style={{ fontFamily: 'var(--font-syne)' }}
         >
           {t.hero.h1a}
           <span className="block mt-1">

@@ -108,6 +108,7 @@ export default function MobileBottomDock() {
     if (!client) return
     await client.auth.signOut()
     router.push('/')
+    router.refresh()
   }
 
   const items: NavItem[] = [

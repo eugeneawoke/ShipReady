@@ -6,6 +6,7 @@ import { SiteHeader } from '@/components/SiteHeader'
 import { CinematicFooter } from '@/components/ui/motion-footer'
 import { ScrollAnchorButton } from '@/components/ui/scroll-anchor-button'
 import { PricingCtas } from '@/components/pricing/PricingCtas'
+import { MobileDockSpacer } from '@/components/navigation/MobileDockSpacer'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('Metadata')
@@ -346,7 +347,7 @@ export default async function PricingPage() {
 
       </main>
 
-      <div aria-hidden="true" className="h-36 md:hidden" />
+      <MobileDockSpacer />
       <CinematicFooter scanHref="/" pricingHref="/pricing" />
     </div>
   )

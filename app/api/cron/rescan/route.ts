@@ -4,10 +4,8 @@ import { dispatchScanToRailway } from '@/lib/server/scanner-dispatch'
 import { getEffectivePlanForUserId } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
-  // Verify this is a legitimate Vercel Cron request
   const authHeader = request.headers.get('authorization')
-  const isVercelCron = request.headers.get('x-vercel-cron') === '1'
-  if (!isVercelCron || authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

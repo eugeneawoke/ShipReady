@@ -43,8 +43,17 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  const userSupabase = await createClient()
-  const { data: { user } } = await userSupabase.auth.getUser()
+
+  // Resolve the authenticated user; treat auth failure as unauthenticated
+  let user: { id: string } | null = null
+  try {
+    const userSupabase = await createClient()
+    const { data: { user: u } } = await userSupabase.auth.getUser()
+    user = u
+  } catch {
+    // Auth service unavailable — treat as anonymous
+  }
+
   const supabase = createServiceClient()
 
   const { data, error } = await supabase
@@ -57,7 +66,9 @@ export async function GET(
     return NextResponse.json({ error: 'Scan not found' }, { status: 404 })
   }
 
-  if (data.user_id && data.user_id !== user?.id) {
+  // If the scan belongs to a specific user, only that user may read it.
+  // An auth failure when the scan is private means we must not reveal it.
+  if (data.user_id && (!user || data.user_id !== user.id)) {
     return NextResponse.json({ error: 'Scan not found' }, { status: 404 })
   }
 
