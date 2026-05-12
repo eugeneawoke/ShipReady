@@ -102,6 +102,15 @@ const IconBot = () => (
   </svg>
 )
 
+const IconAccessibility = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none"/>
+    <path d="M9 9h6"/>
+    <path d="M12 9v5"/>
+    <path d="M9 21l3-7 3 7"/>
+  </svg>
+)
+
 const IconChevron = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="m6 9 6 6 6-6"/>
@@ -138,11 +147,12 @@ const fadeUp = (delay = 0) => ({
 // ─── feature meta ─────────────────────────────────────────────────────────────
 
 const FEATURE_META = [
-  { Icon: IconZap,    color: '#FF8C42' },
-  { Icon: IconSearch, color: '#4A9EFF' },
-  { Icon: IconShield, color: '#FF4444' },
-  { Icon: IconPhone,  color: '#3DDC84' },
-  { Icon: IconBot,    color: '#A78BFA' },
+  { Icon: IconZap,           color: '#FF8C42' },
+  { Icon: IconSearch,        color: '#4A9EFF' },
+  { Icon: IconShield,        color: '#FF4444' },
+  { Icon: IconPhone,         color: '#3DDC84' },
+  { Icon: IconBot,           color: '#A78BFA' },
+  { Icon: IconAccessibility, color: '#22D3EE' },
 ]
 
 // ─── page ─────────────────────────────────────────────────────────────────────
@@ -640,24 +650,22 @@ function FeaturesSection({ t }: { t: Translations }) {
               <motion.div
                 key={f.title}
                 {...fadeUp(i * 0.09)}
-                className={`group relative p-6 rounded-2xl bg-[#161618] border border-white/[0.06] hover:border-white/[0.10] transition-all overflow-hidden${i === 4 ? ' md:col-span-2' : ''}`}
+                className="group relative p-6 rounded-2xl bg-[#161618] border border-white/[0.06] hover:border-white/[0.10] transition-all overflow-hidden"
               >
                 {/* Category color glow on hover */}
                 <div
                   className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-2xl"
                   style={{ background: `radial-gradient(circle at 10% 10%, ${color}18 0%, transparent 65%)` }}
                 />
-                <div className={`relative z-10 ${i === 4 ? 'md:flex md:gap-8 md:items-start' : ''}`}>
-                  <div className={i === 4 ? 'md:flex-1' : ''}>
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="p-2 rounded-xl" style={{ background: `${color}16`, color }}>
-                        <Icon />
-                      </div>
-                      <h3 className="font-semibold tracking-tight">{f.title}</h3>
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 rounded-xl" style={{ background: `${color}16`, color }}>
+                      <Icon />
                     </div>
-                    <p className="text-sm text-[#8B8A85] mb-5 leading-relaxed">{f.desc}</p>
+                    <h3 className="font-semibold tracking-tight">{f.title}</h3>
                   </div>
-                  <div className={`flex flex-wrap gap-1.5 ${i === 4 ? 'md:flex-1 md:mb-0 mb-0' : ''}`}>
+                  <p className="text-sm text-[#8B8A85] mb-5 leading-relaxed">{f.desc}</p>
+                  <div className="flex flex-wrap gap-1.5">
                     {f.checks.map(check => (
                       <span key={check} className="text-[11px] px-2 py-0.5 rounded-md bg-[#1E1E21] border border-white/[0.06] text-[#5A5955] font-mono">
                         {check}
