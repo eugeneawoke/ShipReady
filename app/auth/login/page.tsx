@@ -2,22 +2,19 @@
 
 import Image from 'next/image'
 import { useState } from 'react'
-import { createBrowserClient } from '@supabase/ssr'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { BackButton } from '@/components/BackButton'
 import { SiteHeader } from '@/components/SiteHeader'
 import { parseAttributionCookie } from '@/lib/growth/attribution'
+import { createBrowserClient } from '@/lib/supabase-browser'
 
 // Lazy singleton — only created on first user action, not at module load time
 let _supabase: ReturnType<typeof createBrowserClient> | null = null
 function getSupabase() {
   if (!_supabase) {
-    _supabase = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    )
+    _supabase = createBrowserClient()
   }
   return _supabase
 }
@@ -116,7 +113,13 @@ export default function LoginPage() {
 
   async function handleGoogle() {
     setError(null)
-    const { error } = await getSupabase().auth.signInWithOAuth({
+    const supabase = getSupabase()
+    if (!supabase) {
+      setError(t('errors.authUnavailable'))
+      return
+    }
+
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
@@ -129,6 +132,13 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
     setError(null)
+    const supabase = getSupabase()
+
+    if (!supabase) {
+      setError(t('errors.authUnavailable'))
+      setLoading(false)
+      return
+    }
 
     if (mode === 'signup') {
       if (password.length < 8) {
@@ -143,7 +153,7 @@ export default function LoginPage() {
       }
       const growthAttribution = parseAttributionCookie(readCookie(ATTRIBUTION_COOKIE))
       trackGrowthEvent('signup_started')
-      const { error } = await getSupabase().auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -156,13 +166,13 @@ export default function LoginPage() {
       setDone(true)
 
     } else if (mode === 'signin') {
-      const { error } = await getSupabase().auth.signInWithPassword({ email, password })
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
       setLoading(false)
       if (error) { setError(t('errors.incorrectCredentials')); return }
       router.push('/dashboard')
 
     } else if (mode === 'reset') {
-      const { error } = await getSupabase().auth.resetPasswordForEmail(email, {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
       })
       setLoading(false)

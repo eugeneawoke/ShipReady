@@ -1,4 +1,4 @@
-import { createClient, createServiceClient } from '@/lib/supabase'
+import { createClient, createServiceClient, hasSupabaseConfig } from '@/lib/supabase'
 import {
   normalizeCampaignCode,
   resolveUserPlanAccess,
@@ -389,6 +389,8 @@ export async function bindGrowthAttributionForUser(userId: string, input: BindGr
 }
 
 export async function getUserWithPlan(): Promise<UserWithPlan | null> {
+  if (!hasSupabaseConfig()) return null
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null

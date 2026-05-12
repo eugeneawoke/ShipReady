@@ -193,7 +193,7 @@ export default function LandingPage() {
       <FAQSection t={t} />
       <BottomCTA t={t} />
       {/* Spacer so dock doesn't clip the footer's clip-path container on mobile */}
-      <div aria-hidden="true" className="h-20 md:hidden" />
+      <div aria-hidden="true" className="h-36 md:hidden" />
       <CinematicFooter />
     </div>
   )
@@ -232,6 +232,7 @@ function Nav({ t, lang, setLang, switching, languageAriaLabel }: { t: Translatio
   }, [])
 
   return (
+    <>
     <nav className="fixed top-0 inset-x-0 z-50 border-b border-white/[0.06] bg-[#0E0E0F]/80 backdrop-blur-md">
       <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
         {/* left */}
@@ -346,20 +347,21 @@ function Nav({ t, lang, setLang, switching, languageAriaLabel }: { t: Translatio
         </div>
       </div>
 
-      <MobileNavSheet
-        open={menuOpen}
-        onClose={() => setMenuOpen(false)}
-        labels={{
-          howItWorks: t.nav.howItWorks,
-          seeReport: t.nav.seeReport,
-          whatWeCheck: t.nav.whatWeCheck,
-          faq: t.nav.faq,
-          pricing: t.nav.pricing,
-          methodology: t.nav.methodology,
-        }}
-        onScrollTo={smoothScrollTo}
-      />
     </nav>
+    <MobileNavSheet
+      open={menuOpen}
+      onClose={() => setMenuOpen(false)}
+      labels={{
+        howItWorks: t.nav.howItWorks,
+        seeReport: t.nav.seeReport,
+        whatWeCheck: t.nav.whatWeCheck,
+        faq: t.nav.faq,
+        pricing: t.nav.pricing,
+        methodology: t.nav.methodology,
+      }}
+      onScrollTo={smoothScrollTo}
+    />
+    </>
   )
 }
 
@@ -367,7 +369,7 @@ function Nav({ t, lang, setLang, switching, languageAriaLabel }: { t: Translatio
 
 function HeroSection({ t }: { t: Translations }) {
   return (
-    <section className="relative pt-36 pb-28 px-6 text-center overflow-hidden min-h-[680px] flex flex-col justify-center">
+    <section id="scan" className="relative flex min-h-[680px] flex-col justify-center overflow-hidden px-6 pb-24 pt-32 text-center sm:pb-28 sm:pt-36">
       {/* WebGL domain-warped FBM noise shader */}
       <HeroNoise className="z-0" />
       {/* Particles on top of noise */}
@@ -379,7 +381,7 @@ function HeroSection({ t }: { t: Translations }) {
         size={0.4}
         staticity={60}
       />
-      <div className="w-full max-w-3xl mx-auto relative z-10 overflow-hidden">
+      <div className="relative z-10 mx-auto w-full max-w-3xl overflow-visible">
         <h1
           className="hero-1 text-[28px] sm:text-[46px] md:text-[68px] font-semibold leading-[1.1] tracking-[-0.02em] break-words"
           style={{ fontFamily: 'var(--font-syne)' }}

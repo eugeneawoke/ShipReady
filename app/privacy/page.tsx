@@ -87,11 +87,11 @@ export default async function PrivacyPage() {
             {isRu ? (
               <>
                 <p>PayPro Global действует как Merchant of Record и обрабатывает все платёжные данные и биллинговую информацию от вашего имени. Мы не храним номера карт, данные платёжных реквизитов или иные конфиденциальные платёжные информацию — всё это обрабатывается исключительно PayPro Global в соответствии с их политикой конфиденциальности.</p>
-                <p>Мы получаем webhook'и от PayPro Global с информацией о статусе подписки (оплачена, просрочена, отменена). Эта информация используется исключительно для предоставления или отзыва доступа к вашему аккаунту и платёжным функциям сервиса.</p>
+                <p>Мы получаем webhook&apos;и от PayPro Global с информацией о статусе подписки (оплачена, просрочена, отменена). Эта информация используется исключительно для предоставления или отзыва доступа к вашему аккаунту и платёжным функциям сервиса.</p>
               </>
             ) : (
               <>
-                <p>PayPro Global acts as Merchant of Record and processes all payment and customer billing data on ShipReady's behalf. We do not store card numbers, payment credentials, or sensitive payment information — all payment processing is handled exclusively by PayPro Global in accordance with their privacy policy.</p>
+                <p>PayPro Global acts as Merchant of Record and processes all payment and customer billing data on ShipReady&apos;s behalf. We do not store card numbers, payment credentials, or sensitive payment information — all payment processing is handled exclusively by PayPro Global in accordance with their privacy policy.</p>
                 <p>We receive webhooks from PayPro Global containing subscription status events (paid, overdue, cancelled). This information is used solely to grant or revoke access to your account and platform features.</p>
               </>
             )}

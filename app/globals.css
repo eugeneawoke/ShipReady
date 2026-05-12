@@ -73,9 +73,9 @@
 
 @theme inline {
   /* Fonts */
-  --font-sans:    var(--font-space-grotesk), system-ui, sans-serif;
-  --font-mono:    var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
-  --font-heading: var(--font-syne), system-ui, sans-serif;
+  --font-sans:    var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono:    var(--font-geist-mono), monospace;
+  --font-heading: var(--font-geist-sans), system-ui, sans-serif;
 
   /* Background palette */
   --color-bg-primary:   #0E0E0F;
@@ -233,7 +233,7 @@ html {
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  font-family: var(--font-space-grotesk), system-ui, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

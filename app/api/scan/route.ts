@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { waitUntil } from '@vercel/functions'
 import { isValidUrl, normalizeUrl } from '@/lib/utils'
-import { createClient, createServiceClient } from '@/lib/supabase'
+import { createClient, createServiceClient, hasSupabaseServiceConfig } from '@/lib/supabase'
 import { FREE_SCAN_LIMIT, getUserWithPlan } from '@/lib/auth'
 import { assertSafeScanUrl } from '@/lib/server/url-safety'
 import { dispatchScanToRailway } from '@/lib/server/scanner-dispatch'
@@ -44,6 +44,14 @@ export async function POST(request: NextRequest) {
 
     const url = normalizeUrl(raw)
     await assertSafeScanUrl(url)
+
+    if (!hasSupabaseServiceConfig()) {
+      return NextResponse.json(
+        { error: 'Supabase is not configured for this local environment' },
+        { status: 503 }
+      )
+    }
+
     const supabase = createServiceClient()
 
     // Check auth and rate-limit free tier

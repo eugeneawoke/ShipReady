@@ -109,8 +109,8 @@ export function ScanForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className={`w-full ${compact ? '' : 'max-w-[560px] mx-auto'} ${className}`}>
-      <div className={`flex gap-2 ${compact ? 'h-10' : 'h-[52px]'}`}>
+    <form onSubmit={handleSubmit} className={`w-full min-w-0 ${compact ? '' : 'max-w-[560px] mx-auto'} ${className}`}>
+      <div className={`flex min-w-0 gap-2 ${compact ? 'h-10' : 'h-auto min-[430px]:h-[52px] flex-col min-[430px]:flex-row'}`}>
         <input
           type="text"
           value={url}
@@ -118,14 +118,16 @@ export function ScanForm({
           placeholder={t('placeholder')}
           disabled={loading}
           autoFocus={autoFocus}
-          className={`flex-1 h-full rounded-lg font-mono bg-[#161618] border border-white/10 text-[#F1F0EE] placeholder:text-[#5A5955] focus:outline-none focus:border-white/20 disabled:opacity-50 transition-colors ${
+          className={`min-w-0 rounded-lg border border-white/10 bg-[#161618] font-mono text-[#F1F0EE] placeholder:text-[#5A5955] transition-colors focus:border-white/20 focus:outline-none disabled:opacity-50 ${
+            compact ? 'h-full flex-1' : 'h-[52px] w-full flex-none min-[430px]:h-full min-[430px]:flex-1'
+          } ${
             compact ? 'px-3 text-sm' : 'px-4 text-base sm:text-sm'
           }`}
         />
         <button
           type="submit"
           disabled={loading || !url.trim()}
-          className={`${compact ? 'px-4' : 'px-6'} h-full rounded-lg bg-[#6E56CF] text-white text-sm font-medium hover:bg-[#7C68D4] disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-2 shrink-0`}
+          className={`${compact ? 'h-full px-4' : 'h-[52px] w-full px-5 min-[430px]:h-full min-[430px]:w-auto min-[430px]:px-6'} flex shrink-0 items-center justify-center gap-2 rounded-lg bg-[#6E56CF] text-sm font-medium text-white transition-colors hover:bg-[#7C68D4] disabled:cursor-not-allowed disabled:opacity-40`}
         >
           {loading ? (
             <><Loader2 className="w-4 h-4 animate-spin" />{t('scanning')}</>

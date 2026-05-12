@@ -1,18 +1,17 @@
 'use client'
 
-import { createBrowserClient } from '@supabase/ssr'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import { createBrowserClient } from '@/lib/supabase-browser'
 
 export function SignOutButton() {
   const router = useRouter()
   const t = useTranslations('Dashboard')
 
   async function signOut() {
-    const supabase = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    )
+    const supabase = createBrowserClient()
+    if (!supabase) return
+
     await supabase.auth.signOut()
     router.push('/')
     router.refresh()

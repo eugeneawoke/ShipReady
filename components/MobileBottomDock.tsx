@@ -63,8 +63,13 @@ function LogOutIcon({ size }: { size: number }) {
   )
 }
 
-// --- Singleton Supabase client (module-level, avoids multiple GoTrue instances) ---
-const supabase = createBrowserClient()
+// --- Lazy singleton Supabase client (avoids multiple GoTrue instances) ---
+let supabase: ReturnType<typeof createBrowserClient> | null = null
+
+function getSupabase() {
+  if (!supabase) supabase = createBrowserClient()
+  return supabase
+}
 
 // --- Component ---
 
@@ -82,11 +87,14 @@ export default function MobileBottomDock() {
   const [isSignedIn, setIsSignedIn] = useState(false)
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
+    const client = getSupabase()
+    if (!client) return
+
+    client.auth.getSession().then(({ data }) => {
       setIsSignedIn(!!data.session)
     })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = client.auth.onAuthStateChange((_event, session) => {
       setIsSignedIn(!!session)
     })
 
@@ -96,7 +104,9 @@ export default function MobileBottomDock() {
   }, [])
 
   async function handleSignOut() {
-    await supabase.auth.signOut()
+    const client = getSupabase()
+    if (!client) return
+    await client.auth.signOut()
     router.push('/')
   }
 

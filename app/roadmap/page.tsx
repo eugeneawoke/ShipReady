@@ -164,7 +164,7 @@ export default async function RoadmapPage() {
         </div>
       </main>
 
-      <div aria-hidden="true" className="h-20 md:hidden" />
+      <div aria-hidden="true" className="h-36 md:hidden" />
       <CinematicFooter scanHref="/#cta" pricingHref="/#pricing" />
     </div>
   )

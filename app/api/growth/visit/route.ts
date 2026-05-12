@@ -6,7 +6,7 @@ import {
   type AttributionPayload,
 } from '@/lib/growth/attribution'
 import { requireSameOriginJsonRequest } from '@/lib/server/request-guards'
-import { createClient, createServiceClient } from '@/lib/supabase'
+import { createClient, createServiceClient, hasSupabaseServiceConfig } from '@/lib/supabase'
 
 const ANONYMOUS_COOKIE = 'sr_aid'
 const ATTRIBUTION_COOKIE = 'sr_attr'
@@ -205,6 +205,29 @@ export async function POST(request: NextRequest) {
   const landingPath = safeString(body.landingPath)
   const referrer = safeString(body.referrer, 2048)
   const userAgent = safeString(request.headers.get('user-agent'), 1024)
+
+  if (!hasSupabaseServiceConfig()) {
+    const response = NextResponse.json({ ok: true })
+    const secure = process.env.NODE_ENV === 'production'
+
+    response.cookies.set(ANONYMOUS_COOKIE, anonymousId, {
+      maxAge: ANONYMOUS_MAX_AGE,
+      sameSite: 'lax',
+      secure,
+      path: '/',
+      httpOnly: true,
+    })
+
+    response.cookies.set(ATTRIBUTION_COOKIE, encodeURIComponent(JSON.stringify(attribution)), {
+      maxAge: ATTRIBUTION_MAX_AGE,
+      sameSite: 'lax',
+      secure,
+      path: '/',
+      httpOnly: false,
+    })
+
+    return response
+  }
 
   const supabase = createServiceClient()
   const userId = await getCurrentUserId()

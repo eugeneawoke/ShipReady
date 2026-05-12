@@ -164,6 +164,7 @@ const en = {
       passwordTooShort: 'Password must be at least 8 characters',
       passwordMismatch: 'Passwords do not match',
       incorrectCredentials: 'Incorrect email or password',
+      authUnavailable: 'Authentication is not configured for this local environment.',
     },
     done: {
       checkEmail: 'Check your email',
@@ -241,6 +242,8 @@ const en = {
   Report: {
     share: 'Share',
     copied: 'Copied!',
+    actions: 'Actions',
+    closeActions: 'Close actions',
     dashboard: 'Dashboard',
     newScan: 'New scan',
     rescan: 'Rescan',

@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase'
+import { createServiceClient, hasSupabaseServiceConfig } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
+  if (!hasSupabaseServiceConfig()) {
+    return NextResponse.json({ scansCount: 0 }, { status: 200 })
+  }
+
   const supabase = createServiceClient()
   const { count, error } = await supabase
     .from('scans')

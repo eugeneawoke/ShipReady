@@ -166,6 +166,7 @@ const ru: AppMessages = {
       passwordTooShort: 'Пароль должен содержать минимум 8 символов',
       passwordMismatch: 'Пароли не совпадают',
       incorrectCredentials: 'Неверный email или пароль',
+      authUnavailable: 'Авторизация не настроена для этого локального окружения.',
     },
     done: {
       checkEmail: 'Проверьте почту',
@@ -243,6 +244,8 @@ const ru: AppMessages = {
   Report: {
     share: 'Поделиться',
     copied: 'Скопировано!',
+    actions: 'Действия',
+    closeActions: 'Закрыть действия',
     dashboard: 'К дашборду',
     newScan: 'Новый скан',
     rescan: 'Пересканировать',
