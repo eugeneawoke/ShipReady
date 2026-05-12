@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { createBrowserClient } from '@/lib/supabase-browser'
 
@@ -53,6 +53,16 @@ function UserIcon({ size }: { size: number }) {
   )
 }
 
+function LogOutIcon({ size }: { size: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <polyline points="16 17 21 12 16 7" />
+      <line x1="21" y1="12" x2="9" y2="12" />
+    </svg>
+  )
+}
+
 // --- Component ---
 
 type NavItem = {
@@ -65,6 +75,7 @@ type NavItem = {
 
 export default function MobileBottomDock() {
   const pathname = usePathname()
+  const router = useRouter()
   const [isSignedIn, setIsSignedIn] = useState(false)
 
   useEffect(() => {
@@ -83,9 +94,11 @@ export default function MobileBottomDock() {
     }
   }, [])
 
-  const accountItem: NavItem = isSignedIn
-    ? { label: 'Account', href: '/dashboard', icon: <UserIcon size={22} />, matchPaths: ['/dashboard'] }
-    : { label: 'Sign In', href: '/auth/login', icon: <UserIcon size={22} />, matchPaths: ['/auth/login'] }
+  async function handleSignOut() {
+    const supabase = createBrowserClient()
+    await supabase.auth.signOut()
+    router.push('/')
+  }
 
   const items: NavItem[] = [
     {
@@ -112,7 +125,6 @@ export default function MobileBottomDock() {
       icon: <TagIcon size={22} />,
       matchPaths: ['/pricing'],
     },
-    accountItem,
   ]
 
   function isActive(item: NavItem): boolean {
@@ -165,6 +177,35 @@ export default function MobileBottomDock() {
             </Link>
           )
         })}
+
+        {isSignedIn ? (
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={handleSignOut}
+            aria-label="Sign Out"
+            className="flex flex-col items-center gap-0.5 min-w-[52px] bg-transparent border-0 cursor-pointer"
+            style={{ color: '#8B8A85' }}
+          >
+            <LogOutIcon size={22} />
+            <span className="text-[10px] leading-none font-medium">Sign Out</span>
+          </motion.button>
+        ) : (
+          <Link
+            href="/auth/login"
+            className="flex flex-col items-center gap-0.5 min-w-[52px]"
+            aria-label="Sign In"
+            aria-current={pathname.startsWith('/auth/login') ? 'page' : undefined}
+          >
+            <motion.div
+              whileTap={{ scale: 0.9 }}
+              className="flex flex-col items-center gap-0.5"
+              style={{ color: pathname.startsWith('/auth/login') ? '#6E56CF' : '#8B8A85' }}
+            >
+              <UserIcon size={22} />
+              <span className="text-[10px] leading-none font-medium">Sign In</span>
+            </motion.div>
+          </Link>
+        )}
       </div>
     </nav>
   )
