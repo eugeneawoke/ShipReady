@@ -31,19 +31,16 @@ export default function MobileNavSheet({
 }: MobileNavSheetProps) {
   const sheetRef = useRef<HTMLDivElement>(null)
 
+  // iOS-safe scroll lock: position:fixed prevents the "page jumps to top" bug
+  // that occurs with overflow:hidden alone on Mobile Safari
   useEffect(() => {
     if (open) {
-      document.body.style.overflow = 'hidden'
-      return () => { document.body.style.overflow = '' }
-    }
-  }, [open])
-
-  useEffect(() => {
-    if (open) {
-      const first = sheetRef.current?.querySelector<HTMLElement>(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-      )
-      first?.focus()
+      const scrollY = window.scrollY
+      document.body.style.cssText = `overflow: hidden; position: fixed; top: -${scrollY}px; width: 100%;`
+      return () => {
+        document.body.style.cssText = ''
+        window.scrollTo(0, scrollY)
+      }
     }
   }, [open])
 

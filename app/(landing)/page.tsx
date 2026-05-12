@@ -379,9 +379,9 @@ function HeroSection({ t }: { t: Translations }) {
         size={0.4}
         staticity={60}
       />
-      <div className="max-w-3xl mx-auto relative z-10">
+      <div className="w-full max-w-3xl mx-auto relative z-10 overflow-hidden">
         <h1
-          className="hero-1 text-[34px] sm:text-[46px] md:text-[68px] font-semibold leading-[1.0] tracking-[-0.03em]"
+          className="hero-1 text-[28px] sm:text-[46px] md:text-[68px] font-semibold leading-[1.1] tracking-[-0.02em] break-words"
           style={{ fontFamily: 'var(--font-syne)' }}
         >
           {t.hero.h1a}
@@ -390,14 +390,14 @@ function HeroSection({ t }: { t: Translations }) {
               colorFrom="#6E56CF"
               colorTo="#a78bfa"
               speed={2}
-              className="text-[34px] sm:text-[46px] md:text-[68px] font-semibold leading-[1.0] tracking-[-0.03em]"
+              className="text-[28px] sm:text-[46px] md:text-[68px] font-semibold leading-[1.1] tracking-[-0.02em]"
             >
               {t.hero.h1b}
             </AnimatedGradientText>
           </span>
         </h1>
 
-        <p className="hero-2 mt-6 text-lg text-[#8B8A85] max-w-xl mx-auto leading-relaxed">
+        <p className="hero-2 mt-5 text-base text-[#8B8A85] max-w-xl mx-auto leading-relaxed">
           {t.hero.sub}
         </p>
 
