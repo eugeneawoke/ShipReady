@@ -67,6 +67,7 @@ export async function generateMetadata(): Promise<Metadata> {
     icons: {
       apple: '/logo.svg',
     },
+    manifest: '/manifest.json',
     metadataBase: new URL(appUrl),
   }
 }
