@@ -3,7 +3,10 @@ import { Syne, Space_Grotesk, JetBrains_Mono } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages, getTranslations } from 'next-intl/server'
 import { headers } from 'next/headers'
+import dynamic from 'next/dynamic'
 import './globals.css'
+
+const MobileBottomDock = dynamic(() => import('@/components/MobileBottomDock'), { ssr: false })
 
 const syne = Syne({
   subsets: ['latin'],
@@ -164,10 +167,11 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteSchema) }}
         />
       </head>
-      <body className="min-h-full flex flex-col bg-[#0E0E0F] text-[#F1F0EE] antialiased">
+      <body className="min-h-full flex flex-col bg-[#0E0E0F] text-[#F1F0EE] antialiased pb-20 md:pb-0">
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}
         </NextIntlClientProvider>
+        <MobileBottomDock />
       </body>
     </html>
   )
