@@ -518,6 +518,7 @@ function ReportPreviewSection({ t }: { t: Translations }) {
     { name: t.features.items[2].title, score: 63, color: '#FF4444', icon: '🛡️' },
     { name: t.features.items[3].title, score: 91, color: '#3DDC84', icon: '📱' },
     { name: t.features.items[4].title, score: 46, color: '#A78BFA', icon: '🤖' },
+    { name: t.features.items[5].title, score: 82, color: '#22D3EE', icon: '♿' },
   ] as const
 
   return (
