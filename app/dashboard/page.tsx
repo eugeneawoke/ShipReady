@@ -77,7 +77,7 @@ export default async function DashboardPage() {
 
       <div className="max-w-4xl mx-auto px-6 py-12">
         <div className="mb-8">
-          <Link href="/" className="flex items-center gap-1.5 text-sm text-[#8B8A85] transition-colors hover:text-[#F1F0EE]">
+          <Link href="/" className="flex items-center gap-1.5 text-sm text-[#8B8A85] transition-colors hover:text-[#F1F0EE] min-h-[44px]">
             <ArrowLeft className="h-4 w-4" />
             <span>{tCommon('back')}</span>
           </Link>
@@ -186,7 +186,7 @@ export default async function DashboardPage() {
                       {scan.url}
                     </p>
                     <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-[#5A5955]">
-                      <span>{date}</span>
+                      <span className="hidden sm:inline">{date}</span>
                       {domain ? (
                         <span className="rounded-full border border-white/[0.08] bg-white/[0.03] px-2 py-0.5 text-[#8B8A85]">
                           {domain}

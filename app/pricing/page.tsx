@@ -209,7 +209,7 @@ export default async function PricingPage() {
         {/* hero */}
         <div className="text-center mb-14">
           <p className="text-[11px] text-[#6E56CF] uppercase tracking-[0.15em] font-mono mb-3">{tpricing('eyebrow')}</p>
-          <h1 className="text-[40px] font-semibold tracking-[-0.03em] mb-3">{tpricing('title')}</h1>
+          <h1 className="text-3xl sm:text-[40px] font-semibold tracking-[-0.03em] mb-3">{tpricing('title')}</h1>
           <p className="text-[#8B8A85] text-sm max-w-sm mx-auto leading-relaxed">{tpricing('sub')}</p>
         </div>
 
@@ -246,7 +246,8 @@ export default async function PricingPage() {
             {tp('tableHeading')}
           </h2>
 
-          <div className="rounded-2xl border border-white/[0.06] overflow-hidden">
+          <div className="overflow-x-auto scrollbar-hide">
+          <div className="rounded-2xl border border-white/[0.06] overflow-hidden min-w-[520px]">
             <div className="grid grid-cols-[1fr_88px_88px_88px] bg-[#161618] border-b border-white/[0.08] px-5 py-3">
               <div />
               <div className="text-center text-[11px] text-[#5A5955] uppercase tracking-[0.12em] font-mono">{col.free}</div>
@@ -285,6 +286,7 @@ export default async function PricingPage() {
                 })}
               </div>
             ))}
+          </div>
           </div>
         </div>
 
