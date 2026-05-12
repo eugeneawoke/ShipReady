@@ -2,8 +2,9 @@
 
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useTranslations } from 'next-intl'
-import { ChevronDown, Share2, Check, Copy, Lock, FileDown, Loader2, Plus, RefreshCw, ArrowLeft } from 'lucide-react'
+import { ChevronDown, Share2, Check, Copy, Lock, FileDown, Loader2, Plus, RefreshCw, ArrowLeft, Menu, X } from 'lucide-react'
 import { ReportSkeleton } from '@/components/report/ReportSkeleton'
 import { ScoreRing } from '@/components/report/ScoreRing'
 import { CategoryCard } from '@/components/report/CategoryCard'
@@ -459,6 +460,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
   const [pdfState, setPdfState] = useState<'idle' | 'preparing' | 'downloading'>('idle')
   const [pdfError, setPdfError] = useState<string | null>(null)
   const [newScanOpen, setNewScanOpen] = useState(false)
+  const [reportActionsOpen, setReportActionsOpen] = useState(false)
   const [pollVersion, setPollVersion] = useState(0)
   const [retryingMeasurement, setRetryingMeasurement] = useState(false)
   const [retryError, setRetryError] = useState<string | null>(null)
@@ -474,11 +476,33 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
   }, [t])
 
   useEffect(() => {
+    if (!reportActionsOpen) return
+
+    const previousHtmlOverflow = document.documentElement.style.overflow
+    const previousBodyOverflow = document.body.style.overflow
+    document.documentElement.style.overflow = 'hidden'
+    document.body.style.overflow = 'hidden'
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setReportActionsOpen(false)
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.documentElement.style.overflow = previousHtmlOverflow
+      document.body.style.overflow = previousBodyOverflow
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [reportActionsOpen])
+
+  useEffect(() => {
     params.then(p => setId(p.id))
   }, [params])
 
   useEffect(() => {
     const supabase = createBrowserClient()
+    if (!supabase) return
+
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return
       setIsLoggedIn(true)
@@ -731,6 +755,88 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
       : pdfState === 'downloading'
         ? t('pdf.downloading')
         : (plan === 'agency' ? t('pdf.whiteLabel') : t('pdf.label'))
+  const reportActionsSheet = reportActionsOpen ? (
+    <>
+      <button
+        type="button"
+        className="fixed inset-0 z-40 cursor-default bg-black/50 backdrop-blur-sm sm:hidden"
+        aria-label={t('closeActions')}
+        onClick={() => setReportActionsOpen(false)}
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={t('actions')}
+        className="fixed inset-x-0 top-0 z-50 box-border max-h-[calc(100vh-4rem)] overflow-y-auto rounded-b-2xl border-b border-white/[0.08] bg-[#161618] px-5 shadow-[0_24px_80px_rgba(0,0,0,0.45)] sm:hidden"
+        style={{ paddingTop: 'calc(0.75rem + env(safe-area-inset-top))', paddingBottom: '1rem' }}
+      >
+        <div className="mb-3 flex min-h-10 items-center justify-between">
+          <div>
+            <p className="text-sm font-semibold text-[#F1F0EE]">{t('actions')}</p>
+            <p className="mt-0.5 max-w-[260px] truncate text-xs font-mono text-[#8B8A85]">{domain}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setReportActionsOpen(false)}
+            aria-label={t('closeActions')}
+            className="flex h-10 w-10 items-center justify-center rounded-lg text-[#8B8A85] transition-colors hover:bg-white/[0.04] hover:text-[#F1F0EE]"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="grid gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              setReportActionsOpen(false)
+              setNewScanOpen(true)
+            }}
+            className="flex min-h-12 items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-left text-sm text-[#F1F0EE] transition-colors hover:bg-white/[0.05]"
+          >
+            <Plus className="h-4 w-4 text-[#A78BFA]" />
+            <span>{t('newScan')}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setReportActionsOpen(false)
+              void handleRescan()
+            }}
+            disabled={rescanLoading || isScanActive}
+            className="flex min-h-12 items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-left text-sm text-[#F1F0EE] transition-colors hover:bg-white/[0.05] disabled:cursor-not-allowed disabled:opacity-45"
+          >
+            {rescanLoading ? <Loader2 className="h-4 w-4 animate-spin text-[#A78BFA]" /> : <RefreshCw className="h-4 w-4 text-[#A78BFA]" />}
+            <span>{rescanLoading ? t('rescanning') : t('rescan')}</span>
+          </button>
+          {isPro ? (
+            <button
+              type="button"
+              onClick={() => {
+                setReportActionsOpen(false)
+                void handlePdfDownload()
+              }}
+              disabled={pdfBusy}
+              className="flex min-h-12 items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-left text-sm text-[#F1F0EE] transition-colors hover:bg-white/[0.05] disabled:cursor-wait disabled:opacity-60"
+            >
+              {pdfBusy ? <Loader2 className="h-4 w-4 animate-spin text-[#A78BFA]" /> : <FileDown className="h-4 w-4 text-[#A78BFA]" />}
+              <span>{pdfLabel}</span>
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => {
+              setReportActionsOpen(false)
+              handleShare()
+            }}
+            className="flex min-h-12 items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-left text-sm text-[#F1F0EE] transition-colors hover:bg-white/[0.05]"
+          >
+            {shareLabel === t('copied') ? <Check className="h-4 w-4 text-[#3DDC84]" /> : <Share2 className="h-4 w-4 text-[#A78BFA]" />}
+            <span>{shareLabel}</span>
+          </button>
+        </div>
+      </div>
+    </>
+  ) : null
 
   return (
     <div
@@ -748,7 +854,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
             onClick={() => setNewScanOpen(open => !open)}
             aria-expanded={newScanOpen}
             aria-label="Start a new scan"
-            className={`relative flex items-center gap-1.5 text-xs border px-3 py-1.5 rounded-lg transition-all shrink-0 cursor-pointer print:hidden ${
+            className={`relative hidden items-center gap-1.5 text-xs border px-3 py-1.5 rounded-lg transition-all shrink-0 cursor-pointer print:hidden sm:flex ${
               newScanOpen
                 ? 'text-[#F1F0EE] bg-[#1A1625] border-[#6E56CF]/35'
                 : 'text-[#8B8A85] hover:text-[#F1F0EE] bg-[#161618] border-white/6'
@@ -763,7 +869,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
             disabled={rescanLoading || isScanActive}
             aria-busy={rescanLoading}
             aria-label="Rescan this URL"
-            className={`relative flex items-center gap-1.5 text-xs border px-3 py-1.5 rounded-lg transition-all shrink-0 print:hidden ${
+            className={`relative hidden items-center gap-1.5 text-xs border px-3 py-1.5 rounded-lg transition-all shrink-0 print:hidden sm:flex ${
               rescanLoading || isScanActive
                 ? 'cursor-not-allowed border-white/6 bg-[#161618] text-[#5A5955]'
                 : 'cursor-pointer border-white/6 bg-[#161618] text-[#8B8A85] hover:text-[#F1F0EE]'
@@ -783,7 +889,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
               disabled={pdfBusy}
               aria-busy={pdfBusy}
               aria-label="Download PDF report"
-              className={`group relative flex items-center gap-2 text-xs px-3 py-1.5 rounded-lg border transition-all shrink-0 print:hidden ${
+              className={`group relative hidden items-center gap-2 text-xs px-3 py-1.5 rounded-lg border transition-all shrink-0 print:hidden sm:flex ${
                 pdfBusy
                   ? 'cursor-wait border-[#6E56CF]/35 bg-[#1A1625] text-[#F1F0EE] shadow-[0_0_0_1px_rgba(110,86,207,0.08)]'
                   : 'cursor-pointer border-white/6 bg-[#161618] text-[#8B8A85] hover:text-[#F1F0EE] hover:border-[#6E56CF]/25 hover:bg-[#19171F]'
@@ -812,7 +918,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
           <button
             onClick={handleShare}
             aria-label="Copy share link"
-            className={`relative flex items-center gap-1.5 text-xs border px-3 py-1.5 rounded-lg transition-all shrink-0 cursor-pointer print:hidden ${
+            className={`relative hidden items-center gap-1.5 text-xs border px-3 py-1.5 rounded-lg transition-all shrink-0 cursor-pointer print:hidden sm:flex ${
               shareLabel === t('copied')
                 ? 'text-[#F1F0EE] bg-[#112419] border-[#3DDC84]/35 shadow-[0_0_0_1px_rgba(61,220,132,0.08)]'
                 : 'text-[#8B8A85] hover:text-[#F1F0EE] bg-[#161618] border-white/6'
@@ -833,6 +939,16 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
               <span className="hidden sm:inline">{shareLabel}</span>
             </span>
           </button>
+          <button
+            type="button"
+            onClick={() => setReportActionsOpen(true)}
+            aria-expanded={reportActionsOpen}
+            aria-label={t('actions')}
+            className="ml-auto flex min-h-11 items-center gap-2 rounded-lg border border-white/[0.08] bg-[#161618] px-3 py-2 text-sm font-medium text-[#F1F0EE] transition-colors hover:bg-white/[0.04] sm:hidden print:hidden"
+          >
+            <Menu className="h-4 w-4 text-[#A78BFA]" />
+            <span>{t('actions')}</span>
+          </button>
         </div>
         {newScanOpen && (
           <div className="border-t border-white/6 bg-[#0E0E0F]/95 px-4 py-3 print:hidden">
@@ -842,6 +958,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
           </div>
         )}
       </header>
+      {typeof document !== 'undefined' && reportActionsSheet ? createPortal(reportActionsSheet, document.body) : null}
 
       <main className="max-w-4xl mx-auto px-6 py-10 pb-24 md:pb-10 space-y-10">
         <div>

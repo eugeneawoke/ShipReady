@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireSameOriginJsonRequest } from '@/lib/server/request-guards'
-import { createClient, createServiceClient } from '@/lib/supabase'
+import { createClient, createServiceClient, hasSupabaseServiceConfig } from '@/lib/supabase'
 
 const ANONYMOUS_COOKIE = 'sr_aid'
 const ANONYMOUS_MAX_AGE = 60 * 60 * 24 * 180
@@ -92,6 +92,21 @@ export async function POST(request: NextRequest) {
   const existingAnonymousId = request.cookies.get(ANONYMOUS_COOKIE)?.value ?? null
   const shouldCreateAnonymousId = !userId && !existingAnonymousId
   const anonymousId = existingAnonymousId ?? (shouldCreateAnonymousId ? randomAnonymousId() : null)
+
+  if (!hasSupabaseServiceConfig()) {
+    const response = NextResponse.json({ ok: true })
+    if (shouldCreateAnonymousId && anonymousId) {
+      response.cookies.set(ANONYMOUS_COOKIE, anonymousId, {
+        maxAge: ANONYMOUS_MAX_AGE,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+        httpOnly: true,
+      })
+    }
+    return response
+  }
+
   const supabase = createServiceClient()
   const latestVisit = await findLatestVisitForAnonymousId(supabase, anonymousId)
   const { error } = await supabase

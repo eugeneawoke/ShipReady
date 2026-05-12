@@ -405,13 +405,13 @@ export function CinematicFooter({
           </div>
 
           {/* Bottom bar */}
-          <div className="relative z-20 w-full pb-20 md:pb-8 px-6 md:px-12 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="relative z-20 flex w-full flex-col items-center justify-between gap-3 px-6 pb-52 md:flex-row md:gap-6 md:px-12 md:pb-8">
 
-            <div className="text-[#5A5955] text-[10px] md:text-xs font-semibold tracking-widest uppercase order-2 md:order-1">
+            <div className="order-3 text-[#5A5955] text-[10px] font-semibold uppercase tracking-widest md:order-1 md:text-xs">
               © {new Date().getFullYear()} ShipReady · {t.allRightsReserved}
             </div>
 
-            <div className="sr-glass-pill px-6 py-3 rounded-full flex items-center gap-2 order-1 md:order-2 cursor-default">
+            <div className="sr-glass-pill order-1 flex items-center gap-2 rounded-full px-6 py-3 md:order-2 cursor-default">
               <span className="text-[#5A5955] text-[10px] md:text-xs font-bold uppercase tracking-widest">{t.craftedWith}</span>
               <span className="sr-footer-heartbeat text-sm md:text-base text-[#FF4444]">❤</span>
               <span className="text-[#5A5955] text-[10px] md:text-xs font-bold uppercase tracking-widest">{t.by}</span>
@@ -428,7 +428,7 @@ export function CinematicFooter({
             <MagneticButton
               as="button"
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="w-12 h-12 rounded-full sr-glass-pill flex items-center justify-center text-[#8B8A85] hover:text-[#F1F0EE] group order-3"
+              className="order-2 flex h-12 w-12 items-center justify-center rounded-full sr-glass-pill text-[#8B8A85] hover:text-[#F1F0EE] group md:order-3"
             >
               <svg className="w-5 h-5 transform group-hover:-translate-y-1.5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />

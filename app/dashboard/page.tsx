@@ -179,44 +179,45 @@ export default async function DashboardPage() {
               return (
                 <div
                   key={scan.id}
-                  className="flex items-center gap-4 rounded-xl border border-white/[0.06] bg-[#161618] p-4 transition-colors hover:border-white/[0.12]"
+                  className="flex flex-col gap-3 rounded-xl border border-white/[0.06] bg-[#161618] p-4 transition-colors hover:border-white/[0.12] sm:flex-row sm:items-center sm:gap-4"
                 >
-                  <Link href={`/report/${scan.id}`} className="min-w-0 flex-1 group">
-                    <p className="truncate text-sm font-medium transition-colors group-hover:text-[#F1F0EE]">
-                      {scan.url}
-                    </p>
-                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-[#5A5955]">
-                      <span className="hidden sm:inline">{date}</span>
-                      {domain ? (
-                        <span className="rounded-full border border-white/[0.08] bg-white/[0.03] px-2 py-0.5 text-[#8B8A85]">
-                          {domain}
-                        </span>
+                  <div className="flex min-w-0 items-center gap-4 sm:flex-1">
+                    <Link href={`/report/${scan.id}`} className="min-w-0 flex-1 group">
+                      <p className="truncate text-sm font-medium transition-colors group-hover:text-[#F1F0EE]">
+                        {scan.url}
+                      </p>
+                      <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-[#5A5955]">
+                        <span className="hidden sm:inline">{date}</span>
+                        {domain ? (
+                          <span className="rounded-full border border-white/[0.08] bg-white/[0.03] px-2 py-0.5 text-[#8B8A85]">
+                            {domain}
+                          </span>
+                        ) : null}
+                      </div>
+                    </Link>
+
+                    <Link href={`/report/${scan.id}`} className="ml-auto flex shrink-0 items-center gap-4 group">
+                      {scan.status === 'done' && score !== null ? (
+                        <span className={`text-sm font-semibold font-mono ${scoreColor}`}>{score}</span>
+                      ) : ['running', 'running_fast', 'running_deep', 'enriching', 'pending'].includes(scan.status) ? (
+                        <span className="text-xs text-[#8B8A85]">{t('scanning')}</span>
+                      ) : scan.status === 'error' ? (
+                        <span className="text-xs text-[#FF6B6B]">{t('error')}</span>
                       ) : null}
-                    </div>
-                  </Link>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[#5A5955] transition-colors group-hover:text-[#8B8A85]">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                      </svg>
+                    </Link>
+                  </div>
 
                   {domain ? (
-                    <div className="hidden sm:block">
-                      <MonitoringToggle
-                        domain={domain}
-                        enabled={monitored}
-                        canManage={effectivePlan === 'pro' || effectivePlan === 'agency'}
-                      />
-                    </div>
+                    <MonitoringToggle
+                      domain={domain}
+                      enabled={monitored}
+                      canManage={effectivePlan === 'pro' || effectivePlan === 'agency'}
+                      className="w-full sm:w-auto"
+                    />
                   ) : null}
-
-                  <Link href={`/report/${scan.id}`} className="ml-auto flex items-center gap-4 shrink-0 group">
-                    {scan.status === 'done' && score !== null ? (
-                      <span className={`text-sm font-semibold font-mono ${scoreColor}`}>{score}</span>
-                    ) : ['running', 'running_fast', 'running_deep', 'enriching', 'pending'].includes(scan.status) ? (
-                      <span className="text-xs text-[#8B8A85]">{t('scanning')}</span>
-                    ) : scan.status === 'error' ? (
-                      <span className="text-xs text-[#FF6B6B]">{t('error')}</span>
-                    ) : null}
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[#5A5955] transition-colors group-hover:text-[#8B8A85]">
-                      <path d="M5 12h14M12 5l7 7-7 7" />
-                    </svg>
-                  </Link>
                 </div>
               )
             })}

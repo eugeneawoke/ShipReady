@@ -185,15 +185,42 @@ export default async function PricingPage() {
 
       <SiteHeader
         sticky
-        right={
+        mobileNavItems={[
+          { label: tnav('howItWorks'), href: '/#how-it-works' },
+          { label: tnav('pricing'), href: '/pricing' },
+          { label: tnav('roadmap'), href: '/roadmap' },
+          { label: tnav('methodology'), href: '/methodology' },
+        ]}
+        mobileActions={
           user ? (
-            <Link href="/dashboard" className="text-sm px-4 py-1.5 rounded-lg bg-[#6E56CF] text-white hover:bg-[#7C68D4] transition-colors font-medium">
+            <Link href="/dashboard" className="flex min-h-11 items-center justify-center rounded-lg bg-[#6E56CF] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#7C68D4]">
               {tnav('dashboard')}
             </Link>
           ) : (
-            <Link href="/auth/login" className="text-sm px-4 py-1.5 rounded-lg border border-white/[0.08] text-[#F1F0EE] hover:bg-[#161618] transition-colors">
-              {tnav('signIn')}
+            <>
+              <Link href="/auth/login?mode=signup" className="flex min-h-11 items-center justify-center rounded-lg bg-[#6E56CF] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#7C68D4]">
+                {tnav('getStarted')}
+              </Link>
+              <Link href="/auth/login" className="flex min-h-11 items-center justify-center rounded-lg border border-white/[0.08] px-4 py-2 text-sm text-[#F1F0EE] transition-colors hover:bg-white/[0.04]">
+                {tnav('signIn')}
+              </Link>
+            </>
+          )
+        }
+        right={
+          user ? (
+            <Link href="/dashboard" className="hidden text-sm px-4 py-1.5 rounded-lg bg-[#6E56CF] text-white hover:bg-[#7C68D4] transition-colors font-medium md:inline-flex">
+              {tnav('dashboard')}
             </Link>
+          ) : (
+            <div className="hidden items-center gap-2 md:flex">
+              <Link href="/auth/login" className="text-sm px-4 py-1.5 rounded-lg border border-white/[0.08] text-[#F1F0EE] hover:bg-[#161618] transition-colors">
+                {tnav('signIn')}
+              </Link>
+              <Link href="/auth/login?mode=signup" className="text-sm px-4 py-1.5 rounded-lg bg-[#6E56CF] text-white hover:bg-[#7C68D4] transition-colors font-medium">
+                {tnav('getStarted')}
+              </Link>
+            </div>
           )
         }
       >
@@ -319,7 +346,7 @@ export default async function PricingPage() {
 
       </main>
 
-      <div aria-hidden="true" className="h-20 md:hidden" />
+      <div aria-hidden="true" className="h-36 md:hidden" />
       <CinematicFooter scanHref="/" pricingHref="/pricing" />
     </div>
   )

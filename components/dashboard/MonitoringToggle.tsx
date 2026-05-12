@@ -9,6 +9,7 @@ interface MonitoringToggleProps {
   domain: string
   enabled: boolean
   canManage: boolean
+  className?: string
 }
 
 function trackGrowthEvent(eventName: string, properties?: Record<string, unknown>) {
@@ -20,7 +21,7 @@ function trackGrowthEvent(eventName: string, properties?: Record<string, unknown
   }).catch(() => {})
 }
 
-export function MonitoringToggle({ domain, enabled, canManage }: MonitoringToggleProps) {
+export function MonitoringToggle({ domain, enabled, canManage, className = '' }: MonitoringToggleProps) {
   const router = useRouter()
   const t = useTranslations('Monitoring')
   const [isEnabled, setIsEnabled] = useState(enabled)
@@ -61,14 +62,14 @@ export function MonitoringToggle({ domain, enabled, canManage }: MonitoringToggl
   }
 
   return (
-    <div className="flex flex-col items-end gap-1.5">
+    <div className={`flex flex-col items-stretch gap-1.5 sm:items-end ${className}`.trim()}>
       <button
         type="button"
         role="switch"
         aria-checked={isEnabled}
         disabled={!canManage || pending}
         onClick={toggle}
-        className={`group inline-flex min-h-11 items-center gap-3 rounded-full border px-3 py-2 text-left transition-all disabled:cursor-not-allowed disabled:opacity-40 ${
+        className={`group inline-flex min-h-11 w-full items-center justify-between gap-3 rounded-full border px-3 py-2 text-left transition-all disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto ${
           isEnabled
             ? 'border-[#3DDC84]/25 bg-[#3DDC84]/10 shadow-[0_0_0_1px_rgba(61,220,132,0.05)]'
             : 'border-white/[0.08] bg-white/[0.03] hover:border-white/[0.14] hover:bg-white/[0.05]'
@@ -108,7 +109,7 @@ export function MonitoringToggle({ domain, enabled, canManage }: MonitoringToggl
         </div>
       </button>
 
-      {error ? <p className="max-w-[220px] text-right text-[11px] text-[#FF6B6B]">{error}</p> : null}
+      {error ? <p className="max-w-[220px] text-left text-[11px] text-[#FF6B6B] sm:text-right">{error}</p> : null}
     </div>
   )
 }
