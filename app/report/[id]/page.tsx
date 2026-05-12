@@ -747,6 +747,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
             type="button"
             onClick={() => setNewScanOpen(open => !open)}
             aria-expanded={newScanOpen}
+            aria-label="Start a new scan"
             className={`relative flex items-center gap-1.5 text-xs border px-3 py-1.5 rounded-lg transition-all shrink-0 cursor-pointer print:hidden ${
               newScanOpen
                 ? 'text-[#F1F0EE] bg-[#1A1625] border-[#6E56CF]/35'
@@ -761,6 +762,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
             onClick={handleRescan}
             disabled={rescanLoading || isScanActive}
             aria-busy={rescanLoading}
+            aria-label="Rescan this URL"
             className={`relative flex items-center gap-1.5 text-xs border px-3 py-1.5 rounded-lg transition-all shrink-0 print:hidden ${
               rescanLoading || isScanActive
                 ? 'cursor-not-allowed border-white/6 bg-[#161618] text-[#5A5955]'
@@ -780,6 +782,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
               onClick={handlePdfDownload}
               disabled={pdfBusy}
               aria-busy={pdfBusy}
+              aria-label="Download PDF report"
               className={`group relative flex items-center gap-2 text-xs px-3 py-1.5 rounded-lg border transition-all shrink-0 print:hidden ${
                 pdfBusy
                   ? 'cursor-wait border-[#6E56CF]/35 bg-[#1A1625] text-[#F1F0EE] shadow-[0_0_0_1px_rgba(110,86,207,0.08)]'
@@ -808,6 +811,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
           )}
           <button
             onClick={handleShare}
+            aria-label="Copy share link"
             className={`relative flex items-center gap-1.5 text-xs border px-3 py-1.5 rounded-lg transition-all shrink-0 cursor-pointer print:hidden ${
               shareLabel === t('copied')
                 ? 'text-[#F1F0EE] bg-[#112419] border-[#3DDC84]/35 shadow-[0_0_0_1px_rgba(61,220,132,0.08)]'
@@ -965,7 +969,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
         {/* Category tabs — screen only */}
         <section>
           <div className="print:hidden">
-            <div className="flex border-b border-white/6 mb-6 overflow-x-auto scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
+            <div className="flex border-b border-white/6 mb-6 overflow-x-auto scrollbar-hide">
               {CATEGORIES.map(cat => {
                 const score = results[cat].score
                 const isActive = activeCategory === cat
