@@ -843,7 +843,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
         )}
       </header>
 
-      <main className="max-w-4xl mx-auto px-6 py-10 space-y-10">
+      <main className="max-w-4xl mx-auto px-6 py-10 pb-24 md:pb-10 space-y-10">
         <div>
           <Link
             href={isLoggedIn ? '/dashboard' : '/'}

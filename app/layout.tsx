@@ -165,7 +165,7 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteSchema) }}
         />
       </head>
-      <body className="min-h-full flex flex-col bg-[#0E0E0F] text-[#F1F0EE] antialiased pb-20 md:pb-0">
+      <body className="min-h-full flex flex-col bg-[#0E0E0F] text-[#F1F0EE] antialiased">
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}
         </NextIntlClientProvider>

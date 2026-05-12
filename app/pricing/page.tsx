@@ -319,6 +319,7 @@ export default async function PricingPage() {
 
       </main>
 
+      <div aria-hidden="true" className="h-20 md:hidden" />
       <CinematicFooter scanHref="/" pricingHref="/pricing" />
     </div>
   )

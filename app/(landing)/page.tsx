@@ -192,9 +192,9 @@ export default function LandingPage() {
       <PricingSection />
       <FAQSection t={t} />
       <BottomCTA t={t} />
-      <div className="mb-20 md:mb-0">
-        <CinematicFooter />
-      </div>
+      {/* Spacer so dock doesn't clip the footer's clip-path container on mobile */}
+      <div aria-hidden="true" className="h-20 md:hidden" />
+      <CinematicFooter />
     </div>
   )
 }

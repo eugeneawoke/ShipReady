@@ -4,6 +4,7 @@ import { getLocale, getMessages, getTranslations } from 'next-intl/server'
 import { ArrowLeft, CheckCircle2, Circle, Clock } from 'lucide-react'
 import { SiteHeader } from '@/components/SiteHeader'
 import { CinematicFooter } from '@/components/ui/motion-footer'
+import { RoadmapMobileMenu } from '@/components/RoadmapMobileMenu'
 import type { AppMessages } from '@/messages/en'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -33,35 +34,63 @@ export default async function RoadmapPage() {
     planned: { label: t.statuses.planned, color: '#5A5955', Icon: Circle },
   }
 
+  const navLabels = {
+    howItWorks: messages.Landing.nav.howItWorks,
+    seeReport: messages.Landing.nav.seeReport,
+    whatWeCheck: messages.Landing.nav.whatWeCheck,
+    faq: messages.Landing.nav.faq,
+    pricing: messages.Landing.nav.pricing,
+    methodology: messages.Landing.nav.methodology,
+  }
+
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE]">
       <SiteHeader
         sticky
         right={(
-          <div className="flex items-center gap-4 text-xs text-[#5A5955]">
-            {(['done', 'in-progress', 'planned'] as PhaseStatus[]).map(s => {
-              const { label, color, Icon } = statusMeta[s]
-              return (
-                <span key={s} className="flex items-center gap-1.5">
-                  <Icon className="w-3 h-3" style={{ color }} />
-                  {label}
-                </span>
-              )
-            })}
+          <div className="flex items-center gap-3">
+            {/* Status legend — desktop only, would overflow on mobile */}
+            <div className="hidden sm:flex items-center gap-4 text-xs text-[#5A5955]">
+              {(['done', 'in-progress', 'planned'] as PhaseStatus[]).map(s => {
+                const { label, color, Icon } = statusMeta[s]
+                return (
+                  <span key={s} className="flex items-center gap-1.5">
+                    <Icon className="w-3 h-3" style={{ color }} />
+                    {label}
+                  </span>
+                )
+              })}
+            </div>
+            {/* Hamburger — mobile only */}
+            <RoadmapMobileMenu labels={navLabels} />
           </div>
         )}
       />
 
-      <main className="max-w-3xl mx-auto px-6 py-16">
-        <div className="mb-8">
-          <Link href="/" className="flex items-center gap-1.5 text-sm text-[#8B8A85] transition-colors hover:text-[#F1F0EE]">
+      <main className="max-w-3xl mx-auto px-6 py-12 pb-20 md:pb-16">
+        <div className="mb-8 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-1.5 text-sm text-[#8B8A85] transition-colors hover:text-[#F1F0EE] min-h-[44px]">
             <ArrowLeft className="h-4 w-4" />
             <span>{locale === 'ru' ? 'Назад' : 'Back'}</span>
           </Link>
         </div>
+
+        {/* Status legend — mobile (below Back, above title) */}
+        <div className="flex sm:hidden items-center gap-4 text-xs text-[#5A5955] mb-6">
+          {(['done', 'in-progress', 'planned'] as PhaseStatus[]).map(s => {
+            const { label, color, Icon } = statusMeta[s]
+            return (
+              <span key={s} className="flex items-center gap-1.5">
+                <Icon className="w-3 h-3" style={{ color }} />
+                {label}
+              </span>
+            )
+          })}
+        </div>
+
         <div className="mb-14">
           <p className="text-[11px] text-[#6E56CF] uppercase tracking-[0.15em] mb-3 font-mono">{t.title}</p>
-          <h1 className="text-[36px] font-medium tracking-tight mb-3">{t.heading}</h1>
+          <h1 className="text-[28px] sm:text-[36px] font-medium tracking-tight mb-3">{t.heading}</h1>
           <p className="text-[#8B8A85] text-sm leading-relaxed max-w-lg">
             {t.intro}{' '}
             {t.featureRequest}{' '}
@@ -135,6 +164,7 @@ export default async function RoadmapPage() {
         </div>
       </main>
 
+      <div aria-hidden="true" className="h-20 md:hidden" />
       <CinematicFooter scanHref="/#cta" pricingHref="/#pricing" />
     </div>
   )

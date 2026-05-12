@@ -203,6 +203,7 @@ export default async function MethodologyPage() {
         </div>
       </main>
 
+      <div aria-hidden="true" className="h-20 md:hidden" />
       <CinematicFooter />
     </div>
   )
