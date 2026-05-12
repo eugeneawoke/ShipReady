@@ -18,6 +18,7 @@ import { SpotlightCard } from '@/components/ui/spotlight-card'
 import { SiteBrandLink } from '@/components/SiteHeader'
 import { localeCookieName } from '@/lib/i18n'
 import type { AppMessages } from '@/messages/en'
+import MobileNavSheet from '@/components/MobileNavSheet'
 
 // Heavy decorative components — lazy-loaded so they don't block initial hydration / LCP
 // Components return JSX.Element (not ReactNode) — cast required for next/dynamic with React 19 strict types
@@ -191,7 +192,9 @@ export default function LandingPage() {
       <PricingSection />
       <FAQSection t={t} />
       <BottomCTA t={t} />
-      <CinematicFooter />
+      <div className="mb-20 md:mb-0">
+        <CinematicFooter />
+      </div>
     </div>
   )
 }
@@ -200,6 +203,7 @@ export default function LandingPage() {
 
 function Nav({ t, lang, setLang, switching, languageAriaLabel }: { t: Translations; lang: Lang; setLang: (l: Lang) => void; switching: boolean; languageAriaLabel: string }) {
   const [langOpen, setLangOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
   const langRef = useRef<HTMLDivElement>(null)
   const [userEmail, setUserEmail] = useState<string | null>(null)
 
@@ -305,28 +309,56 @@ function Nav({ t, lang, setLang, switching, languageAriaLabel }: { t: Translatio
             )}
           </div>
 
+          {/* Desktop auth buttons — hidden on mobile (dock handles page-level mobile navigation; sheet handles section scrolling) */}
           {userEmail ? (
             <a
               href="/dashboard"
-              className="text-sm px-4 py-1.5 rounded-lg bg-[#6E56CF] text-white hover:bg-[#7C68D4] transition-colors font-medium whitespace-nowrap"
+              className="hidden md:inline-flex text-sm px-4 py-1.5 rounded-lg bg-[#6E56CF] text-white hover:bg-[#7C68D4] transition-colors font-medium whitespace-nowrap"
             >
               {t.nav.dashboard}
             </a>
           ) : (
             <>
-              <a href="/auth/login" className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors hidden sm:block whitespace-nowrap">
+              <a href="/auth/login" className="hidden md:block text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors whitespace-nowrap">
                 {t.nav.signIn}
               </a>
               <a
                 href="/auth/login?mode=signup"
-                className="text-sm px-4 py-1.5 rounded-lg bg-[#6E56CF] text-white hover:bg-[#7C68D4] transition-colors font-medium whitespace-nowrap"
+                className="hidden md:inline-flex text-sm px-4 py-1.5 rounded-lg bg-[#6E56CF] text-white hover:bg-[#7C68D4] transition-colors font-medium whitespace-nowrap"
               >
                 {t.nav.getStarted}
               </a>
             </>
           )}
+
+          {/* Hamburger — mobile only */}
+          <button
+            onClick={() => setMenuOpen(true)}
+            className="md:hidden p-2 text-[#8B8A85] hover:text-[#F1F0EE] transition-colors"
+            aria-label="Open navigation menu"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 6h16"/>
+              <path d="M4 12h16"/>
+              <path d="M4 18h16"/>
+            </svg>
+          </button>
         </div>
       </div>
+
+      <MobileNavSheet
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        labels={{
+          howItWorks: t.nav.howItWorks,
+          seeReport: t.nav.seeReport,
+          whatWeCheck: t.nav.whatWeCheck,
+          faq: t.nav.faq,
+          pricing: t.nav.pricing,
+          methodology: t.nav.methodology,
+        }}
+        onScrollTo={smoothScrollTo}
+      />
     </nav>
   )
 }
@@ -349,7 +381,7 @@ function HeroSection({ t }: { t: Translations }) {
       />
       <div className="max-w-3xl mx-auto relative z-10">
         <h1
-          className="hero-1 text-[52px] md:text-[68px] font-semibold leading-[1.0] tracking-[-0.03em]"
+          className="hero-1 text-[34px] sm:text-[46px] md:text-[68px] font-semibold leading-[1.0] tracking-[-0.03em]"
           style={{ fontFamily: 'var(--font-syne)' }}
         >
           {t.hero.h1a}
@@ -358,7 +390,7 @@ function HeroSection({ t }: { t: Translations }) {
               colorFrom="#6E56CF"
               colorTo="#a78bfa"
               speed={2}
-              className="text-[52px] md:text-[68px] font-semibold leading-[1.0] tracking-[-0.03em]"
+              className="text-[34px] sm:text-[46px] md:text-[68px] font-semibold leading-[1.0] tracking-[-0.03em]"
             >
               {t.hero.h1b}
             </AnimatedGradientText>
@@ -369,7 +401,7 @@ function HeroSection({ t }: { t: Translations }) {
           {t.hero.sub}
         </p>
 
-        <div className="hero-3 mt-10">
+        <div className="hero-3 mt-10 w-full">
           <ScanForm />
           <p className="mt-3 text-xs text-[#5A5955]">{t.hero.noSignup}</p>
         </div>
@@ -747,7 +779,7 @@ function AIPromptsSection({ t }: { t: Translations }) {
             </span>
           </div>
           <div className="p-5 relative z-10">
-            <pre className="text-[11px] font-mono text-[#E8C77D] leading-relaxed whitespace-pre-wrap">{t.ai.promptText}</pre>
+            <pre className="text-[11px] font-mono text-[#E8C77D] leading-relaxed whitespace-pre-wrap overflow-x-auto">{t.ai.promptText}</pre>
           </div>
           <div className="px-4 py-3 border-t border-white/[0.06] flex items-center gap-3 relative z-10">
             <button
@@ -803,7 +835,7 @@ function FAQSection({ t }: { t: Translations }) {
               <div key={i} className={i > 0 ? 'border-t border-white/[0.06]' : ''}>
                 <button
                   onClick={() => setOpenIndex(isOpen ? null : i)}
-                  className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left cursor-pointer group"
+                  className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left cursor-pointer group min-h-[44px]"
                   aria-expanded={isOpen}
                 >
                   <span className="text-sm font-medium text-[#F1F0EE] group-hover:text-white transition-colors leading-snug">

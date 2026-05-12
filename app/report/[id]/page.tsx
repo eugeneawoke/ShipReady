@@ -739,7 +739,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
     >
       {/* Nav */}
       <header className="sticky top-0 z-10 bg-[#0E0E0F]/90 backdrop-blur-md border-b border-white/6">
-        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center gap-3">
+        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center gap-2 min-w-0">
           <SiteBrandLink className="shrink-0" />
           <span className="text-[#5A5955] text-sm">/</span>
           <span className="text-sm text-[#8B8A85] font-mono truncate flex-1">{domain}</span>
@@ -747,6 +747,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
             type="button"
             onClick={() => setNewScanOpen(open => !open)}
             aria-expanded={newScanOpen}
+            aria-label="Start a new scan"
             className={`relative flex items-center gap-1.5 text-xs border px-3 py-1.5 rounded-lg transition-all shrink-0 cursor-pointer print:hidden ${
               newScanOpen
                 ? 'text-[#F1F0EE] bg-[#1A1625] border-[#6E56CF]/35'
@@ -761,6 +762,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
             onClick={handleRescan}
             disabled={rescanLoading || isScanActive}
             aria-busy={rescanLoading}
+            aria-label="Rescan this URL"
             className={`relative flex items-center gap-1.5 text-xs border px-3 py-1.5 rounded-lg transition-all shrink-0 print:hidden ${
               rescanLoading || isScanActive
                 ? 'cursor-not-allowed border-white/6 bg-[#161618] text-[#5A5955]'
@@ -780,6 +782,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
               onClick={handlePdfDownload}
               disabled={pdfBusy}
               aria-busy={pdfBusy}
+              aria-label="Download PDF report"
               className={`group relative flex items-center gap-2 text-xs px-3 py-1.5 rounded-lg border transition-all shrink-0 print:hidden ${
                 pdfBusy
                   ? 'cursor-wait border-[#6E56CF]/35 bg-[#1A1625] text-[#F1F0EE] shadow-[0_0_0_1px_rgba(110,86,207,0.08)]'
@@ -795,8 +798,8 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
                 ) : (
                   <FileDown className="w-3.5 h-3.5" />
                 )}
-                <span>{pdfLabel}</span>
-                <span className={`rounded-full border px-1.5 py-0.5 text-[10px] uppercase tracking-[0.16em] transition-colors ${
+                <span className="hidden sm:inline">{pdfLabel}</span>
+                <span className={`hidden sm:inline rounded-full border px-1.5 py-0.5 text-[10px] uppercase tracking-[0.16em] transition-colors ${
                   pdfBusy
                     ? 'border-[#6E56CF]/40 bg-[#231C34] text-[#C7BCFF]'
                     : 'border-white/8 bg-white/[0.03] text-[#6F6E69]'
@@ -808,6 +811,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
           )}
           <button
             onClick={handleShare}
+            aria-label="Copy share link"
             className={`relative flex items-center gap-1.5 text-xs border px-3 py-1.5 rounded-lg transition-all shrink-0 cursor-pointer print:hidden ${
               shareLabel === t('copied')
                 ? 'text-[#F1F0EE] bg-[#112419] border-[#3DDC84]/35 shadow-[0_0_0_1px_rgba(61,220,132,0.08)]'
@@ -826,7 +830,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
               ) : (
                 <Share2 className="w-3.5 h-3.5" />
               )}
-              {shareLabel}
+              <span className="hidden sm:inline">{shareLabel}</span>
             </span>
           </button>
         </div>
@@ -965,7 +969,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
         {/* Category tabs — screen only */}
         <section>
           <div className="print:hidden">
-            <div className="flex border-b border-white/6 mb-6 overflow-x-auto">
+            <div className="flex border-b border-white/6 mb-6 overflow-x-auto scrollbar-hide">
               {CATEGORIES.map(cat => {
                 const score = results[cat].score
                 const isActive = activeCategory === cat
