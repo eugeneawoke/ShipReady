@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 
 interface MobileNavSheetProps {
@@ -29,10 +29,48 @@ export default function MobileNavSheet({
   labels,
   onScrollTo,
 }: MobileNavSheetProps) {
+  const sheetRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden'
+      return () => { document.body.style.overflow = '' }
+    }
+  }, [open])
+
+  useEffect(() => {
+    if (open) {
+      const first = sheetRef.current?.querySelector<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      )
+      first?.focus()
+    }
+  }, [open])
+
   useEffect(() => {
     if (!open) return
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') onClose()
+      if (event.key === 'Escape') {
+        onClose()
+        return
+      }
+      if (event.key === 'Tab') {
+        const focusable = Array.from(
+          sheetRef.current?.querySelectorAll<HTMLElement>(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          ) ?? []
+        )
+        if (focusable.length === 0) return
+        const first = focusable[0]
+        const last = focusable[focusable.length - 1]
+        if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault()
+          first.focus()
+        } else if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault()
+          last.focus()
+        }
+      }
     }
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
@@ -70,6 +108,7 @@ export default function MobileNavSheet({
           {/* Sheet */}
           <motion.div
             key="sheet"
+            ref={sheetRef}
             role="dialog"
             aria-modal="true"
             aria-label="Navigation menu"
@@ -89,8 +128,6 @@ export default function MobileNavSheet({
                 <button
                   key={item.selector}
                   onClick={() => handleScrollTo(item.selector)}
-                  // eslint-disable-next-line jsx-a11y/no-autofocus
-                  autoFocus={index === 0}
                   className={`w-full text-left px-6 py-4 text-base text-[#F1F0EE] ${
                     index < scrollItems.length - 1
                       ? 'border-b border-white/[0.05]'

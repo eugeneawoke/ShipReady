@@ -309,7 +309,7 @@ function Nav({ t, lang, setLang, switching, languageAriaLabel }: { t: Translatio
             )}
           </div>
 
-          {/* Desktop auth buttons — hidden on mobile (dock handles mobile navigation) */}
+          {/* Desktop auth buttons — hidden on mobile (dock handles page-level mobile navigation; sheet handles section scrolling) */}
           {userEmail ? (
             <a
               href="/dashboard"
