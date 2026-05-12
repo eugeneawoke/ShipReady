@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 
 interface MobileNavSheetProps {
@@ -28,6 +29,15 @@ export default function MobileNavSheet({
   labels,
   onScrollTo,
 }: MobileNavSheetProps) {
+  useEffect(() => {
+    if (!open) return
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [open, onClose])
+
   const scrollItems: ScrollItem[] = [
     { label: labels.howItWorks, selector: '#how-it-works' },
     { label: labels.seeReport, selector: '#preview' },
@@ -53,11 +63,16 @@ export default function MobileNavSheet({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
+            aria-hidden="true"
+            tabIndex={-1}
           />
 
           {/* Sheet */}
           <motion.div
             key="sheet"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Navigation menu"
             className="fixed bottom-0 inset-x-0 z-50 bg-[#161618] rounded-t-2xl border-t border-white/[0.08]"
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
@@ -74,6 +89,8 @@ export default function MobileNavSheet({
                 <button
                   key={item.selector}
                   onClick={() => handleScrollTo(item.selector)}
+                  // eslint-disable-next-line jsx-a11y/no-autofocus
+                  autoFocus={index === 0}
                   className={`w-full text-left px-6 py-4 text-base text-[#F1F0EE] ${
                     index < scrollItems.length - 1
                       ? 'border-b border-white/[0.05]'
