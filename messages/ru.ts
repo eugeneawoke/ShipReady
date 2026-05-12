@@ -5,7 +5,7 @@ const ru: AppMessages = {
     appTitle: 'ShipReady',
     appDescription: 'Аудит сайтов, который понимает бизнес вашего клиента.',
     layoutTitle: 'ShipReady - Аудит сайтов, который понимает бизнес вашего клиента.',
-    layoutDescription: '35+ автоматических проверок по производительности, SEO, безопасности, мобильности и AI visibility. Получайте evidence-based промпты для исправлений, готовые для любого AI-инструмента.',
+    layoutDescription: '55+ автоматических проверок по производительности, SEO, безопасности, мобильности и AI visibility. Получайте evidence-based промпты для исправлений, готовые для любого AI-инструмента.',
     pricingTitle: 'Тарифы - ShipReady',
     pricingDescription: 'Простые и прозрачные тарифы ShipReady для соло-фаундеров и команд.',
     roadmapTitle: 'Роадмэп - ShipReady',
@@ -320,6 +320,7 @@ const ru: AppMessages = {
       security: 'Безопасность',
       mobile: 'Мобильность',
       ai_visibility: 'AI visibility',
+      accessibility: 'Доступность',
     },
   },
   ReportSkeleton: {
@@ -329,6 +330,7 @@ const ru: AppMessages = {
       'Security headers и SSL',
       'Mobile и viewport checks',
       'AI visibility и structured data',
+      'Доступность и проверки WCAG',
     ],
     status: {
       runningFast: 'Запускаем быстрые truth-checks...',
@@ -372,13 +374,15 @@ const ru: AppMessages = {
       security: 'Безопасность',
       mobile: 'Мобильность',
       ai_visibility: 'AI visibility',
+      accessibility: 'Доступность',
     },
     descriptions: {
-      performance: 'Скорость страницы, Core Web Vitals и доступность по данным Lighthouse',
+      performance: 'Скорость страницы и Core Web Vitals по данным Lighthouse',
       seo: 'Поисковая видимость, meta-теги и то, как ссылки выглядят при шаринге',
       security: 'HTTPS-конфиг, HTTP security headers, SSL-сертификат и утечки секретов',
-      mobile: 'Mobile viewport, favicon и иконка для home screen',
+      mobile: 'Mobile viewport, favicon, веб-манифест и иконка для home screen',
       ai_visibility: 'Видимость в ChatGPT, Perplexity и Google AI Overview',
+      accessibility: 'Поддержка скринридеров, клавиатурная навигация, ARIA-атрибуты и базовые проверки WCAG',
     },
     scoreLabels: {
       excellent: 'Отлично',
@@ -512,7 +516,7 @@ const ru: AppMessages = {
         subtitle: 'Полный audit-движок уже работает',
         status: 'done',
         items: [
-          '35+ проверок: производительность, SEO, безопасность, мобильность, доступность и AI-видимость',
+          '55+ проверок: производительность, SEO, безопасность, мобильность, доступность и AI-видимость',
           'Быстрые честные проверки сначала, глубокий Lighthouse-анализ — следом',
           'Честный scoring — только подтверждённые проблемы влияют на оценку',
           'Многостраничный обход (BFS crawl) для тарифов Pro и Agency',
@@ -622,8 +626,8 @@ const ru: AppMessages = {
       worksWithExamples: 'v0, Bolt, Lovable и другие',
     },
     stats: [
-      { value: '35+', label: 'автоматических проверок' },
-      { value: '5', label: 'категорий' },
+      { value: '55+', label: 'автоматических проверок' },
+      { value: '6', label: 'категорий' },
       { value: '', label: 'сайтов проверено' },
       { value: 'AI', label: 'промпт на каждую проблему' },
     ],
@@ -632,7 +636,7 @@ const ru: AppMessages = {
       title: 'Три шага до готовности к релизу',
       steps: [
         { step: '01', emoji: '1', title: 'Вставьте URL', desc: 'Любой live URL. Vercel, Netlify или свой домен. Никакой настройки и расширений не нужно.' },
-        { step: '02', emoji: '2', title: '35+ проверок', desc: 'Сначала идут быстрые truth-checks, затем подключается более глубокий анализ производительности и шумных эвристик.' },
+        { step: '02', emoji: '2', title: '55+ проверок', desc: 'Сначала идут быстрые truth-checks, затем подключается более глубокий анализ производительности и шумных эвристик.' },
         { step: '03', emoji: '3', title: 'Получите AI-промпты', desc: 'У каждой проблемы есть понятное объяснение и готовый промпт, который можно использовать в любом AI-инструменте для кода.' },
       ],
     },
@@ -654,14 +658,15 @@ const ru: AppMessages = {
     },
     features: {
       eyebrow: 'Что проверяем',
-      title: '35+ проверок по 5 категориям',
+      title: '55+ проверок по 6 категориям',
       sub: 'Всё, что действительно важно перед выходом в прод.',
       items: [
-        { title: 'Производительность', desc: 'Реальный Lighthouse mobile в headless-браузере. Core Web Vitals, суммарный балл производительности и accessibility score.', checks: ['LCP < 2.5с', 'CLS < 0.1', 'INP < 200мс', 'FCP < 1.8с', 'Performance score', 'Accessibility score'] },
+        { title: 'Производительность', desc: 'Реальный Lighthouse mobile в headless-браузере. Core Web Vitals и суммарный балл производительности.', checks: ['LCP < 2.5с', 'CLS < 0.1', 'INP < 200мс', 'FCP < 1.8с', 'Performance score'] },
         { title: 'SEO и соцсети', desc: 'Полный аудит meta-тегов. OG, Twitter cards, canonical, robots.txt, sitemap, structured data.', checks: ['Title и description', 'OG image и tags', 'Canonical URL', 'Sitemap.xml', 'Twitter card'] },
-        { title: 'Безопасность', desc: '10 security-checks: HTTPS, HTTP headers, валидность SSL, открытые .env файлы, обнаружение API-ключей, смешанный контент.', checks: ['CSP header', 'HSTS', 'X-Frame-Options', 'SSL/TLS cert', 'Открытый .env'] },
-        { title: 'Мобильность', desc: 'Viewport meta тег, favicon и Apple touch icon. Гарантирует корректный рендер и отображение на экране iOS и Android.', checks: ['Viewport meta', 'Favicon', 'Apple touch icon'] },
+        { title: 'Безопасность', desc: '15 security-checks: HTTPS, HTTP headers, валидность SSL, открытые .env файлы, обнаружение API-ключей, смешанный контент, трекеры и приватность.', checks: ['CSP header', 'HSTS', 'X-Frame-Options', 'SSL/TLS cert', 'Открытый .env'] },
+        { title: 'Мобильность', desc: 'Viewport meta тег, favicon, Apple touch icon, веб-манифест и кликабельные номера. Гарантирует корректный рендер и отображение на экране iOS и Android.', checks: ['Viewport meta', 'Favicon', 'Apple touch icon', 'Веб-манифест', 'Ссылки на тел.'] },
         { title: 'AI visibility', desc: 'AEO + GEO checks: Schema.org, FAQ schema, llms.txt, доступ AI crawler-ов, sitemap и author entity.', checks: ['Schema.org JSON-LD', 'llms.txt', 'AI crawlers', 'Sitemap.xml', 'FAQ schema'] },
+        { title: 'Доступность', desc: '5 статических проверок для скринридеров, клавиатурной навигации и базовых требований WCAG. Lighthouse также измеряет общий accessibility score.', checks: ['Alt-текст изображений', 'Метки форм', 'Метки кнопок', 'Skip navigation', 'Атрибут lang'] },
       ],
     },
     ai: {

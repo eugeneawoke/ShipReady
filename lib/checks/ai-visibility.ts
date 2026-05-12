@@ -285,18 +285,6 @@ export async function runAIVisibilityChecks(
     }, 'ai-visibility', [evidence('text', 'Entity signals', 'missing about/contact/org schema')]))
   }
 
-  if (includeLikely) {
-    const allSchemaTypes = jsonLdScripts.flatMap(el => parseJsonLdTypes($(el).html()))
-    const hasPerson = allSchemaTypes.some(t => t === 'Person')
-    if (!hasPerson) {
-      issues.push(withIssueMeta(
-        { ...T['missing-author-entity'] },
-        'dom',
-        [evidence('selector', 'schema.org/Person', 'missing')],
-      ))
-    }
-  }
-
   // ── geo-missing-org-sameas ──────────────────────────────
   let hasOrgSchemaBlock = false
   let orgHasSameAs = false

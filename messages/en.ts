@@ -318,6 +318,7 @@ const en = {
       security: 'Security',
       mobile: 'Mobile',
       ai_visibility: 'AI Visibility',
+      accessibility: 'Accessibility',
     },
   },
   ReportSkeleton: {
@@ -327,6 +328,7 @@ const en = {
       'Security headers and SSL',
       'Mobile and viewport checks',
       'AI visibility and structured data',
+      'Accessibility and WCAG checks',
     ],
     status: {
       runningFast: 'Running fast truth checks...',
@@ -370,13 +372,15 @@ const en = {
       security: 'Security',
       mobile: 'Mobile',
       ai_visibility: 'AI Visibility',
+      accessibility: 'Accessibility',
     },
     descriptions: {
-      performance: 'Page speed, Core Web Vitals, and accessibility measured by Lighthouse',
+      performance: 'Page speed and Core Web Vitals measured by Lighthouse',
       seo: 'Search discoverability, meta tags, and how your links look when shared',
       security: 'HTTPS config, HTTP security headers, SSL certificate, and exposed credentials',
-      mobile: 'Mobile viewport, favicon, and home screen icon',
+      mobile: 'Mobile viewport, favicon, web manifest, and home screen icon',
       ai_visibility: 'Findability in ChatGPT, Claude, Perplexity, and Google AI Overview',
+      accessibility: 'Screen reader support, keyboard navigation, ARIA labels, and WCAG-based checks',
     },
     scoreLabels: {
       excellent: 'Excellent',
@@ -510,7 +514,7 @@ const en = {
         subtitle: 'Full audit engine is shipped',
         status: 'done',
         items: [
-          '35+ checks across performance, SEO, security, mobile, accessibility, and AI visibility',
+          '55+ checks across performance, SEO, security, mobile, accessibility, and AI visibility',
           'Fast truth checks first, deep Lighthouse analysis second',
           'Honest scoring — only verified issues affect your score',
           'Multi-page BFS crawl for Pro and Agency',
@@ -620,8 +624,8 @@ const en = {
       worksWithExamples: 'v0, Bolt, Lovable and more',
     },
     stats: [
-      { value: '35+', label: 'automated checks' },
-      { value: '5', label: 'categories covered' },
+      { value: '55+', label: 'automated checks' },
+      { value: '6', label: 'categories covered' },
       { value: '', label: 'sites scanned' },
       { value: 'AI', label: 'fix prompt per issue' },
     ],
@@ -630,7 +634,7 @@ const en = {
       title: 'Three steps to ship-ready',
       steps: [
         { step: '01', emoji: '1', title: 'Paste your URL', desc: 'Drop any live URL. Vercel, Netlify, or a custom domain. No setup or browser extension needed.' },
-        { step: '02', emoji: '2', title: '35+ checks run', desc: 'Fast truth checks run first, then deeper analysis follows for performance and noisier heuristics.' },
+        { step: '02', emoji: '2', title: '55+ checks run', desc: 'Fast truth checks run first, then deeper analysis follows for performance and noisier heuristics.' },
         { step: '03', emoji: '3', title: 'Get AI fix prompts', desc: 'Each issue has a plain-English explanation and one ready-to-paste prompt you can use in any AI coding tool.' },
       ],
     },
@@ -652,14 +656,15 @@ const en = {
     },
     features: {
       eyebrow: 'What we check',
-      title: '35+ checks across 5 categories',
+      title: '55+ checks across 6 categories',
       sub: 'Every check that matters before your app goes live.',
       items: [
-        { title: 'Performance', desc: 'Real Lighthouse mobile run in a headless browser. Core Web Vitals, composite performance score, and accessibility score.', checks: ['LCP < 2.5s', 'CLS < 0.1', 'INP < 200ms', 'FCP < 1.8s', 'Performance score', 'Accessibility score'] },
+        { title: 'Performance', desc: 'Real Lighthouse mobile run in a headless browser. Core Web Vitals and composite performance score.', checks: ['LCP < 2.5s', 'CLS < 0.1', 'INP < 200ms', 'FCP < 1.8s', 'Performance score'] },
         { title: 'SEO & Social', desc: 'Complete meta audit. OG tags, Twitter cards, canonical, robots.txt, sitemap, structured data.', checks: ['Title & description', 'OG image & tags', 'Canonical URL', 'Sitemap.xml', 'Twitter card'] },
-        { title: 'Security', desc: '10 security checks: HTTPS, HTTP headers, SSL cert validity, exposed .env files, API key detection, mixed content.', checks: ['CSP header', 'HSTS', 'X-Frame-Options', 'SSL/TLS cert', 'Exposed .env'] },
-        { title: 'Mobile', desc: 'Viewport meta tag, favicon, and Apple touch icon. Ensures correct rendering and home screen appearance on iOS and Android.', checks: ['Viewport meta', 'Favicon', 'Apple touch icon'] },
+        { title: 'Security', desc: '15 security checks: HTTPS, HTTP headers, SSL cert validity, exposed .env files, API key detection, mixed content, trackers, and privacy.', checks: ['CSP header', 'HSTS', 'X-Frame-Options', 'SSL/TLS cert', 'Exposed .env'] },
+        { title: 'Mobile', desc: 'Viewport meta tag, favicon, Apple touch icon, web manifest, and clickable phone numbers. Ensures correct rendering and home screen appearance.', checks: ['Viewport meta', 'Favicon', 'Apple touch icon', 'Web manifest', 'Phone links'] },
         { title: 'AI Visibility', desc: 'GEO + AEO audit: checks whether ChatGPT, Claude, Perplexity, and Google AI Overview can find, parse, and cite your site. Covers llms.txt, AI crawlers, structured data, question headings, and answer-first signals.', checks: ['Schema.org JSON-LD', 'llms.txt', 'AI crawlers', 'FAQ schema', 'Answer-first signal', 'Date freshness', 'Org entity'] },
+        { title: 'Accessibility', desc: '5 static checks for screen readers, keyboard navigation, and WCAG basics. Lighthouse also measures an overall accessibility score.', checks: ['Images alt text', 'Form labels', 'Button labels', 'Skip navigation', 'Lang attribute'] },
       ],
     },
     ai: {

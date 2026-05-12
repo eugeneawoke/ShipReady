@@ -117,10 +117,10 @@ AI receives compact evidence and existing findings. It generates in one call:
 - `summary`
 - `topPriorities`
 - `technicalPrompt` — code-file level detail, for Cursor / Windsurf / Claude Code
-- `vibePrompt` — higher-level, for Bolt / Lovable / v0 / Replit
-- `issuePrompts` — per-issue `{ technical, vibe }` used to populate individual `cursorPrompt`/`boltPrompt` fields internally (not shown as separate block in UI)
+- `issuePrompts` — per-issue `{ technical }` used to populate individual issue `fixPrompt` fields
+- `strategicRecommendations` — timeframe-bucketed strategic actions
 
-**UI "Fix everything" block shows one prompt.** Selection logic: `aiVibePrompt` preferred → `aiTechnicalPrompt` fallback if vibePrompt is weak → deterministic fallback if both are weak. No tool selector or tab bar.
+**UI "Fix everything" block shows `technicalPrompt`** with a deterministic fallback if AI enrichment did not run. No tool selector or tab bar.
 
 Rules:
 
