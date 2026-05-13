@@ -56,6 +56,8 @@ async function safeTask<T>(
   }
 }
 
+const TERMINAL_STATUSES = ['done', 'error']
+
 async function saveScan(
   scanId: string,
   status: string,
@@ -67,8 +69,13 @@ async function saveScan(
     updated_at: new Date().toISOString(),
   }
   if (result) payload.results = result
-  const { error } = await supabase.from('scans').update(payload).eq('id', scanId)
+  const { error, count } = await supabase
+    .from('scans')
+    .update(payload)
+    .eq('id', scanId)
+    .not('status', 'in', `(${TERMINAL_STATUSES.join(',')})`)
   if (error) console.error('[checks] Failed to save scan state:', error)
+  else if (count === 0) console.warn(`[checks] saveScan no-op: scan ${scanId} already in terminal status, attempted status=${status}`)
 }
 
 async function getPlanForScan(scanId: string): Promise<ScanPlan> {
@@ -323,7 +330,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
     }
 
     const [lighthouseResult, linksResult, seoDeep, aiVisibilityDeep] = await Promise.all([
-      safeTask(() => runLighthouse(finalUrl), 0, 'lighthouse'),
+      safeTask(() => runLighthouse(finalUrl), 210_000, 'lighthouse'),
       safeTask(runLinksCheck(finalUrl, fetchContext.html), 12_000, 'links'),
       safeTask(runSEOChecks(finalUrl, fetchContext.html), 10_000, 'seo-deep'),
       safeTask(runAIVisibilityChecks(finalUrl, fetchContext.html), 10_000, 'ai-visibility-deep'),

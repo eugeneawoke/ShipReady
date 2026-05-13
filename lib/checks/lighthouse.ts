@@ -29,7 +29,7 @@ interface LighthouseRunProfile {
   label: 'mobile-full' | 'mobile-performance-fallback'
 }
 
-const DEFAULT_LIGHTHOUSE_TIMEOUT_MS = 240_000
+const DEFAULT_LIGHTHOUSE_TIMEOUT_MS = 90_000
 const LIGHTHOUSE_QUEUE_KEY = Symbol.for('shipready.lighthouseQueue')
 
 const LIGHTHOUSE_PRIMARY_PROFILE: LighthouseRunProfile = {
@@ -104,7 +104,10 @@ async function withLighthouseSlot<T>(task: () => Promise<T>): Promise<T> {
     releaseSlot = resolve
   }))
 
-  await previous
+  await Promise.race([
+    previous,
+    new Promise<void>(resolve => setTimeout(resolve, 240_000)),
+  ])
   const waitMs = Date.now() - queuedAt
   if (waitMs > 1000) {
     console.info(`[lighthouse] acquired scanner slot after waitMs=${waitMs}`)

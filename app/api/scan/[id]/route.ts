@@ -9,7 +9,7 @@ const STALE_SCAN_MS_BY_STATUS: Record<string, number> = {
   pending: 3 * 60 * 1000,
   running: 3 * 60 * 1000,
   running_fast: 3 * 60 * 1000,
-  running_deep: 15 * 60 * 1000,
+  running_deep: 8 * 60 * 1000,
   enriching: 4 * 60 * 1000,
 }
 
