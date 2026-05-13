@@ -1,5 +1,6 @@
 import { createHash, randomUUID } from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
+import { ipAddress } from '@vercel/functions'
 import {
   buildAttributionFromSearchParams,
   normalizeCampaignCode,
@@ -59,16 +60,12 @@ function sanitizeAttribution(value: unknown) {
 }
 
 function getClientIp(request: NextRequest): string | null {
-  return (
-    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-    request.headers.get('x-real-ip') ||
-    null
-  )
+  return ipAddress(request) ?? null
 }
 
 function hashIp(ip: string | null): string | null {
-  const salt = process.env.IP_HASH_SALT || process.env.SCANNER_SECRET
-  if (!salt || !ip) return null
+  const salt = process.env.IP_HASH_SALT ?? ''
+  if (!ip) return null
   return createHash('sha256').update(`${salt}:${ip}`).digest('hex')
 }
 
@@ -245,7 +242,13 @@ export async function POST(request: NextRequest) {
       referral_code_id: references.referralCodeId,
       landing_path: landingPath,
       referrer,
-      ...attribution,
+      utm_source: attribution.utm_source ?? null,
+      utm_medium: attribution.utm_medium ?? null,
+      utm_campaign: attribution.utm_campaign ?? null,
+      utm_content: attribution.utm_content ?? null,
+      utm_term: attribution.utm_term ?? null,
+      referral_code: attribution.referral_code ?? null,
+      promo_code: attribution.promo_code ?? null,
       attribution,
       user_agent: userAgent,
       ip_hash: hashIp(getClientIp(request)),

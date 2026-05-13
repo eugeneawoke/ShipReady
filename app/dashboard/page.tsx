@@ -75,7 +75,7 @@ export default async function DashboardPage() {
         )}
       />
 
-      <div className="max-w-4xl mx-auto px-6 py-12 pb-20 md:pb-12">
+      <div className="max-w-4xl mx-auto px-6 pt-12 pb-20 md:pb-12">
         <div className="mb-8">
           <Link href="/" className="flex items-center gap-1.5 text-sm text-[#8B8A85] transition-colors hover:text-[#F1F0EE] min-h-[44px]">
             <ArrowLeft className="h-4 w-4" />

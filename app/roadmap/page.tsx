@@ -5,6 +5,7 @@ import { ArrowLeft, CheckCircle2, Circle, Clock } from 'lucide-react'
 import { SiteHeader } from '@/components/SiteHeader'
 import { CinematicFooter } from '@/components/ui/motion-footer'
 import { RoadmapMobileMenu } from '@/components/RoadmapMobileMenu'
+import { MobileDockSpacer } from '@/components/navigation/MobileDockSpacer'
 import type { AppMessages } from '@/messages/en'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -164,7 +165,7 @@ export default async function RoadmapPage() {
         </div>
       </main>
 
-      <div aria-hidden="true" className="h-36 md:hidden" />
+      <MobileDockSpacer />
       <CinematicFooter scanHref="/#cta" pricingHref="/#pricing" />
     </div>
   )

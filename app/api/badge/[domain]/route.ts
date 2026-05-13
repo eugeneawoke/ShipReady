@@ -35,7 +35,8 @@ export async function GET(
     .limit(1)
     .single()
 
-  const score = (data?.results as ScanResult | null)?.totalScore ?? 0
+  const rawScore = (data?.results as ScanResult | null)?.totalScore ?? 0
+  const score = Math.max(0, Math.min(100, Math.round(Number(rawScore) || 0)))
 
   return badgeSvg(score)
 }
