@@ -18,12 +18,15 @@
 
 ## Продуктовые решения (зафиксированы)
 
-- **Главный моат:** AI fix prompts — cursorPrompt + boltPrompt для каждого issue. Никто из конкурентов не делает.
-- **Позиционирование:** НЕ generic website checker. Именно для vibe-coded apps (Cursor/Bolt/Lovable/v0).
-- **Tagline:** "Paste your Vercel URL. Get a ship-ready report in 30 seconds."
+- **Главный моат:** AI fix prompts (tool-agnostic) для каждого issue + evidence-based confidence model.
+- **Позиционирование:** Free website audit — "Find out why your site isn't getting found."
+  Аудитория: solo founders, разработчики, агентства и все кто хочет появляться
+  в Google, ChatGPT, Claude, Codex, Gemini, Perplexity. Tool-agnostic fix prompts.
+- **Tagline:** "Know why your site isn't getting found. Fix it."
 - **Дизайн-референс:** Framer. Тёмный (#0E0E0F), data-first, Geist + Geist Mono, акцент #6E56CF.
 - **Paywall механика:** blur на AI prompts для free — самый конвертирующий момент апсейла.
-- **Конкурент #1:** Cheeeck.com — только что запустился, нет AI prompts, нет RU, нет vibe-позиционирования.
+- **Ключевой дифференциатор:** AI visibility как отдельная категория (ChatGPT, Claude, Gemini,
+  Perplexity, Google AI Overview) + SEO + Security + evidence-based confidence model (verified/likely/heuristic).
 
 ---
 
@@ -46,8 +49,9 @@
 | ShipSecure | Security headers | Всё остальное |
 | Lighthouse | Perf+SEO+A11y, бесплатно | Security, OG preview, AI |
 | Aikido | Enterprise SAST/DAST | Для indie, без setup |
+| sitepravo.ru | Юридический аудит (РФ, ФЗ-152, ПДн) | Другая ниша, не конкурент |
 
-**Наша ниша:** AI fix prompts + RU/EN + vibe-native + beautiful report = никто.
+**Наша ниша:** AI visibility + SEO + Security audit + evidence-based report + fix prompts (tool-agnostic) + RU/EN = сильная дифференциация.
 
 ---
 

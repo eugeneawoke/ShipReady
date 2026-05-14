@@ -9,7 +9,8 @@
 ## Beta launch blockers
 
 - [ ] Запушить локальный `main` в GitHub: сейчас local ahead of `origin/main`.
-- [ ] Применить production Supabase migrations: `001`–`009`, включая `008_monitoring.sql` и `009_badge_opt_in.sql`.
+- [ ] Применить production Supabase migrations: `001`–`015` (включая PayPro billing и growth tables).
+  - Критично: миграции `014` (beta_access_grants, growth_campaigns, RPC) и `015` (subscriptions, payment_events) обязательны для работы биллинга и кампаний.
 - [ ] Убедиться, что Supabase Auth JWT expiry сохранён как `1800` секунд.
 - [ ] Задать/проверить production env в Vercel и Railway:
   - `NEXT_PUBLIC_APP_URL`
@@ -22,11 +23,18 @@
   - `RAILWAY_SCANNER_URL`
   - `SCANNER_SECRET`
   - `RESEND_API_KEY` и `RESEND_FROM_EMAIL`, если email alerts включаются в beta
+  - `PAYPRO_VALIDATION_KEY` — из Store Settings → General → Integration
+  - `PAYPRO_SECRET_KEY` — то же значение (для sandbox checkout URL)
+  - `PAYPRO_VENDOR_ID` — из Account Settings → Business Info
+  - `PAYPRO_SANDBOX` — `"false"` в production
+  - `PAYPRO_PRODUCT_PRO_MONTHLY` — integer Product ID из PayPro dashboard
+  - `PAYPRO_PRODUCT_PRO_YEARLY` — integer Product ID из PayPro dashboard
+- [ ] Создать продукты в PayPro dashboard: Pro Monthly ($14/mo) и Pro Yearly ($140/yr). Получить Product IDs.
+- [ ] Настроить IPN URL в PayPro Store Settings: `https://[domain]/api/payments/paypro/webhook` (заблокировано на домен).
 - [ ] Пополнить OpenAI billing и проверить, что новый production scan сохраняет:
   - `aiSummary`
   - `topPriorities`
   - `aiTechnicalPrompt`
-  - `aiVibePrompt`
   - per-issue prompt overrides
 - [ ] Прогнать production smoke test:
   - landing scan → report
@@ -35,6 +43,8 @@
   - stalled/error state не крутится бесконечно
   - PDF export для вручную включённого `pro/agency`
   - monitoring toggle для вручную включённого `pro/agency`
+  - sandbox checkout → подписка создана → план = pro в dashboard
+  - 14-day trial: `/signup?promo=14day-trial` → beta_access_grants запись создана → план = pro
 - [ ] Подготовить feedback path для beta users: email/support text/dashboard CTA.
 
 ## Done in code
@@ -53,7 +63,7 @@
 - [x] Report UI shows confidence/evidence and measurement warnings.
 - [x] AI evidence enrichment via `generate-evidence-enrichment.ts`.
 - [x] Pro/Agency wow insights via `generate-wow-insights.ts`.
-- [x] Global technical/vibe fix prompts.
+- [x] Global technical fix prompts (single `aiTechnicalPrompt`).
 - [x] Per-issue expandable prompts in `IssueCard`.
 - [x] PDF export route for `pro/agency`.
 - [x] Weekly monitoring schema, dashboard toggle, cron rescan, email alert pipeline.
@@ -62,24 +72,30 @@
 - [x] Same-origin JSON guard for state-changing API routes.
 - [x] Baseline security headers.
 - [x] Public badge access is opt-in via `badge_enabled = false` default.
-- [x] Payment provider reset to TBD; Lemon Squeezy removed from active code/docs.
+- [x] Lemon Squeezy removed; PayPro Global selected as payment provider (D-28).
+- [x] PayPro checkout + IPN webhook + SHA256 signature verification.
+- [x] Subscriptions table + payment_events audit log (migration 015).
+- [x] Effective plan logic: paid subscription > beta_access_grant > profiles.plan.
+- [x] Growth/referrals infrastructure: campaigns, referral codes, beta_access_grants, RPC (migration 014).
+- [x] API key authentication + rate limiting (`/api/v1/scan`).
 
 ## Not required for private beta
 
-- [ ] Выбор нового payment provider.
-- [ ] Public paid launch.
-- [ ] Automated checkout/webhook billing.
-- [ ] Dedicated scanner outbound firewall/proxy.
-- [ ] Agency/team workflows.
-- [ ] API access.
-- [ ] GitHub Action / CI integration.
+- [ ] Subscription management UI (cancel, renewal date, payment status).
+- [ ] Payment failure / dunning emails.
+- [ ] Agency/team workflows (UI).
 - [ ] Multi-page crawl.
+- [ ] GitHub Action / CI integration.
+- [ ] Dedicated scanner outbound firewall/proxy.
 
 ## Post-beta next
 
 - [ ] Собрать p50/p95/p99 scan duration и failure rate by phase.
 - [ ] Улучшить onboarding в отчёте: объяснить `verified / likely / heuristic / unavailable`.
 - [ ] Проверить Resend sender domain и end-to-end email alerts.
-- [ ] Выбрать payment provider и спроектировать provider-agnostic checkout/webhook.
+- [ ] Subscription management UI: статус, дата renewal, кнопка отмены через PayPro Customer Portal.
 - [ ] Добавить share tokens для authenticated reports.
 - [ ] Запланировать scanner outbound firewall/proxy hardening перед широким публичным запуском.
+- [ ] IP whitelisting для PayPro REST API (если понадобятся исходящие API вызовы к PayPro).
+- [ ] Blog / Knowledge Base: SEO-статьи по темам аудита (безопасность, AI visibility, SEO, performance).
+- [ ] Report Comparison: сравнение двух сканов одного домена (diff по категориям, issues, score).
