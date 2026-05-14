@@ -517,7 +517,7 @@ const en = {
         subtitle: 'Full audit engine is shipped',
         status: 'done',
         items: [
-          '55+ checks across performance, SEO, security, mobile, accessibility, and AI visibility',
+          '60+ checks across performance, SEO, security, mobile, accessibility, and AI visibility',
           'Fast truth checks first, deep Lighthouse analysis second',
           'Honest scoring — only verified issues affect your score',
           'Multi-page BFS crawl for Pro and Agency',
@@ -627,7 +627,7 @@ const en = {
       worksWithExamples: 'v0, Bolt, Lovable and more',
     },
     stats: [
-      { value: '55+', label: 'automated checks' },
+      { value: '60+', label: 'automated checks' },
       { value: '6', label: 'categories covered' },
       { value: '', label: 'sites scanned' },
       { value: 'AI', label: 'fix prompt per issue' },
@@ -637,7 +637,7 @@ const en = {
       title: 'Three steps to ship-ready',
       steps: [
         { step: '01', emoji: '1', title: 'Paste your URL', desc: 'Drop any live URL. Vercel, Netlify, or a custom domain. No setup or browser extension needed.' },
-        { step: '02', emoji: '2', title: '55+ checks run', desc: 'Fast truth checks run first, then deeper analysis follows for performance and noisier heuristics.' },
+        { step: '02', emoji: '2', title: '60+ checks run', desc: 'Fast truth checks run first, then deeper analysis follows for performance and noisier heuristics.' },
         { step: '03', emoji: '3', title: 'Get AI fix prompts', desc: 'Each issue has a plain-English explanation and one ready-to-paste prompt you can use in any AI coding tool.' },
       ],
     },
@@ -659,7 +659,7 @@ const en = {
     },
     features: {
       eyebrow: 'What we check',
-      title: '55+ checks across 6 categories',
+      title: '60+ checks across 6 categories',
       sub: 'Every check that matters before your app goes live.',
       items: [
         { title: 'Performance', desc: 'Real Lighthouse mobile run in a headless browser. Core Web Vitals and composite performance score.', checks: ['LCP < 2.5s', 'CLS < 0.1', 'INP < 200ms', 'FCP < 1.8s', 'Performance score'] },
