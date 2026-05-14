@@ -83,3 +83,5 @@
 - [ ] Выбрать payment provider и спроектировать provider-agnostic checkout/webhook.
 - [ ] Добавить share tokens для authenticated reports.
 - [ ] Запланировать scanner outbound firewall/proxy hardening перед широким публичным запуском.
+- [ ] Blog / Knowledge Base: SEO-статьи по темам аудита (безопасность, AI visibility, SEO, performance).
+- [ ] Report Comparison: сравнение двух сканов одного домена (diff по категориям, issues, score).

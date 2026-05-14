@@ -22,15 +22,17 @@ After a completed change, update the relevant doc instead of leaving stale plans
 
 ## Product
 
-ShipReady is a pre-deploy quality gate for vibe-coded apps.
+ShipReady is a free website audit tool. Paste a URL — get a clear report on why
+Google, ChatGPT, Claude, Codex, Gemini, and Perplexity can't find your site,
+and the exact steps to fix it.
 
 User flow:
 
 1. User submits a URL.
 2. ShipReady scans performance, SEO, security, mobile readiness, and AI visibility.
-3. Report shows verified facts, likely/heuristic observations, unavailable measurements, and fix prompts for AI coding tools.
+3. Report shows verified facts, likely/heuristic observations, unavailable measurements, and fix prompts.
 
-Audience: indie hackers, vibe coders, solo founders.
+Audience: solo founders, developers, web agencies, and anyone who wants their site found online.
 Current operating phase: **Private Beta Readiness**.
 
 ---

@@ -17,11 +17,22 @@
       "Bash(grep -E '`$')",
       "Bash(grep -v '`,$')",
       "Bash(node -e \"const l = require\\('lucide-react'\\); console.log\\('Accessibility' in l\\)\")",
-      "Bash(mkdir -p /Users/eugene.gusakov/Documents/self-projects/ShipReady/lib/api && mkdir -p /Users/eugene.gusakov/Documents/self-projects/ShipReady/app/api/v1/scan/\\\\[id\\\\]/issues)"
+      "Bash(mkdir -p /Users/eugene.gusakov/Documents/self-projects/ShipReady/lib/api && mkdir -p /Users/eugene.gusakov/Documents/self-projects/ShipReady/app/api/v1/scan/\\\\[id\\\\]/issues)",
+      "Bash(mkdir -p /Users/eugene.gusakov/Documents/self-projects/ShipReady/app/api/v1/teams/members/\\\\[memberId\\\\] && mkdir -p /Users/eugene.gusakov/Documents/self-projects/ShipReady/app/api/v1/teams/accept)",
+      "Bash(git checkout *)",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(python3 /Users/eugene.gusakov/.claude/skills/ui-ux-pro-max/scripts/search.py \"pricing page saas dark conversion\" --design-system)",
+      "Bash(python3 /Users/eugene.gusakov/.claude/skills/ui-ux-pro-max/scripts/search.py \"scroll invitation cta anchor pricing conversion\" --domain ux)",
+      "Bash(python3 /Users/eugene.gusakov/.claude/skills/ui-ux-pro-max/scripts/search.py \"animation scroll indicator chevron bounce arrow\" --domain ux)",
+      "Bash(git merge *)",
+      "Bash(node -e \"const p = require\\('/Users/eugene.gusakov/Documents/self-projects/ShipReady/node_modules/@supabase/ssr/package.json'\\); console.log\\(p.version\\)\")",
+      "Bash(node -e \"const m = require\\('/Users/eugene.gusakov/Documents/self-projects/ShipReady/messages/en.json'\\); console.log\\(JSON.stringify\\(m.Roadmap, null, 2\\)\\)\")",
+      "Bash(node -e \"const m = require\\('/Users/eugene.gusakov/Documents/self-projects/ShipReady/messages/ru.json'\\); console.log\\(JSON.stringify\\(m.Roadmap, null, 2\\)\\)\")"
     ],
     "additionalDirectories": [
       "/Users/eugene.gusakov/Documents/Obsidian Vault/ship",
-      "/Users/eugene.gusakov/Documents/self-projects/ShipReady/app/api/v1/scan/[id]"
+      "/Users/eugene.gusakov/Documents/self-projects/ShipReady/app/api/v1/scan/[id]",
+      "/Users/eugene.gusakov/Documents/self-projects/ShipReady/app/api/v1/teams/members"
     ]
   }
 }
