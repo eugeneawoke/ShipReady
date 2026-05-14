@@ -15,13 +15,14 @@ interface UpsertOptions {
   status: SubscriptionStatus
   isNewOrder?: boolean
   isRenewal?: boolean
+  isTrialConversion?: boolean
 }
 
 async function upsertSubscription(
   payload: PayProIpnPayload,
   options: UpsertOptions,
 ): Promise<void> {
-  const { status, isNewOrder = false, isRenewal = false } = options
+  const { status, isNewOrder = false, isRenewal = false, isTrialConversion = false } = options
 
   if (!payload.userId) {
     throw new Error('Missing user ID in IPN payload')
@@ -53,6 +54,9 @@ async function upsertSubscription(
     if (payload.subscriptionNextChargeDate) {
       baseRow.current_period_end = payload.subscriptionNextChargeDate.toISOString()
     }
+    if (isTrialConversion) {
+      baseRow.trial_end = new Date().toISOString()
+    }
   } else if (isRenewal) {
     // Renewals: extend period_end and update plan_id/billing_interval in case plan changed.
     // Do NOT overwrite period_start, external_order_id, or external_customer_id.
@@ -81,10 +85,14 @@ export async function handlePayProEvent(payload: PayProIpnPayload): Promise<void
   const { ipnTypeId, ipnTypeName } = payload
 
   switch (ipnTypeId) {
-    // OrderCharged, TrialCharge → new subscription
+    // OrderCharged → new subscription
     case 1:
-    case 13:
       await upsertSubscription(payload, { status: 'active', isNewOrder: true })
+      break
+
+    // TrialCharge → trial converted to paid; mark trial_end for analytics
+    case 13:
+      await upsertSubscription(payload, { status: 'active', isNewOrder: true, isTrialConversion: true })
       break
 
     // SubscriptionChargeSucceed, SubscriptionRenewed → renewal

@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { BackButton } from '@/components/BackButton'
 import { SiteHeader } from '@/components/SiteHeader'
+import { AttributionTracker } from '@/components/growth/AttributionTracker'
 import { parseAttributionCookie } from '@/lib/growth/attribution'
 import { createBrowserClient } from '@/lib/supabase-browser'
 
@@ -183,6 +184,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE] flex flex-col">
+      <AttributionTracker />
       <SiteHeader
         right={(
           <div className="text-[11px] text-[#5A5955] font-mono">
