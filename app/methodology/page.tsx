@@ -8,7 +8,7 @@ import { MobileDockSpacer } from '@/components/navigation/MobileDockSpacer'
 
 export const metadata: Metadata = {
   title: 'Methodology — ShipReady',
-  description: 'How ShipReady checks your site: 5 categories, evidence-based confidence model, and honest measurement states.',
+  description: 'How ShipReady checks your site: 6 categories, evidence-based confidence model, and honest measurement states.',
 }
 
 const CATEGORIES = [
@@ -41,6 +41,12 @@ const CATEGORIES = [
     color: '#A78BFA',
     name: 'AI Visibility',
     desc: 'GEO + AEO audit: checks whether ChatGPT, Claude, Perplexity, and Google AI Overview can find, parse, and cite your site. Covers llms.txt and ai.txt, AI crawler permissions in robots.txt, Schema.org JSON-LD entity signals, FAQ markup, answer-first content structure, date freshness, and organization entity clarity.',
+  },
+  {
+    icon: '♿',
+    color: '#FF9F43',
+    name: 'Accessibility',
+    desc: 'DOM-level a11y audit: images missing alt attributes, form inputs and buttons without accessible labels, missing lang attribute on the html element, and absent skip-navigation links. Paired with the Lighthouse accessibility score for a combined static + runtime view.',
   },
 ]
 
@@ -117,7 +123,7 @@ export default async function MethodologyPage() {
 
         {/* 5 Categories */}
         <section className="mb-16">
-          <h2 className="text-xl font-semibold mb-6 tracking-tight">5 categories, 35+ checks</h2>
+          <h2 className="text-xl font-semibold mb-6 tracking-tight">6 categories, 60+ checks</h2>
           <div className="space-y-4">
             {CATEGORIES.map(cat => (
               <div
