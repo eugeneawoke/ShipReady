@@ -138,7 +138,13 @@ export function PricingSection() {
                 </a>
               ) : (
                 <button
-                  onClick={() => { if (!plan.highlight) smoothScrollTo('#cta') }}
+                  onClick={() => {
+                    if (plan.highlight) {
+                      window.location.href = '/auth/login?redirect=/pricing'
+                    } else {
+                      smoothScrollTo('#cta')
+                    }
+                  }}
                   className={`w-full py-2.5 rounded-xl text-sm font-medium transition-colors cursor-pointer ${
                     plan.highlight
                       ? 'bg-[#6E56CF] text-white hover:bg-[#7C68D4]'
