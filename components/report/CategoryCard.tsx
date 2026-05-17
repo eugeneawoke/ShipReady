@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import React from 'react'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useMessages } from 'next-intl'
 import { Zap, Search, Shield, Smartphone, Bot, Accessibility, ChevronDown } from 'lucide-react'
 import type { CategoryScore, IssueCategory } from '@/types/scan'
 import { getPassedChecksForIssues } from '@/lib/report/check-catalog'
@@ -28,8 +28,12 @@ interface CategoryCardProps {
   data: CategoryScore
 }
 
+type IssueDesc = { title?: string; plainEnglish?: string }
+
 export function CategoryCard({ category, data }: CategoryCardProps) {
   const t = useTranslations('CategoryCard')
+  const messages = useMessages()
+  const issueDescriptions = (messages.IssueDescriptions as Record<string, IssueDesc>) ?? {}
   const [expanded, setExpanded] = useState(true)
   const [passedOpen, setPassedOpen] = useState(false)
   const Icon = ICONS[category]
@@ -138,9 +142,9 @@ export function CategoryCard({ category, data }: CategoryCardProps) {
                       <span className="text-[10px] font-mono text-[#8B8A85]">· {issue.value}</span>
                     )}
                   </div>
-                  <p className="text-sm text-[#F1F0EE]">{issue.title}</p>
+                  <p className="text-sm text-[#F1F0EE]">{issueDescriptions[issue.id]?.title ?? issue.title}</p>
                   {issue.plainEnglish && (
-                    <p className="text-xs text-[#5A5955] mt-1 leading-relaxed">{issue.plainEnglish}</p>
+                    <p className="text-xs text-[#5A5955] mt-1 leading-relaxed">{issueDescriptions[issue.id]?.plainEnglish ?? issue.plainEnglish}</p>
                   )}
                 </button>
               ))}
