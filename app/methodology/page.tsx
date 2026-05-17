@@ -1,100 +1,52 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { getLocale } from 'next-intl/server'
+import { getTranslations } from 'next-intl/server'
 import { ArrowLeft } from 'lucide-react'
 import { SiteHeader } from '@/components/SiteHeader'
 import { CinematicFooter } from '@/components/ui/motion-footer'
 import { MobileDockSpacer } from '@/components/navigation/MobileDockSpacer'
 
-export const metadata: Metadata = {
-  title: 'Methodology — ShipReady',
-  description: 'How ShipReady checks your site: 6 categories, evidence-based confidence model, and honest measurement states.',
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('Metadata')
+  return {
+    title: t('methodologyTitle'),
+    description: t('methodologyDescription'),
+  }
 }
 
-const CATEGORIES = [
-  {
-    icon: '⚡',
-    color: '#F5C518',
-    name: 'Performance',
-    desc: 'A real Lighthouse mobile run inside a headless Chromium browser on Railway. We measure Core Web Vitals (LCP, CLS, INP, FCP), composite performance score, and accessibility score. No synthetic shortcuts — the same engine Google uses.',
-  },
-  {
-    icon: '🔍',
-    color: '#4A9EFF',
-    name: 'SEO & Social',
-    desc: 'Complete meta audit: title and description length, Open Graph image and tags, Twitter/X card, canonical URL, robots.txt directives, sitemap presence, and Schema.org structured data. Covers what search engines and social platforms read before your content.',
-  },
-  {
-    icon: '🛡️',
-    color: '#FF4444',
-    name: 'Security',
-    desc: '10 security checks including HTTPS enforcement, Content-Security-Policy, HSTS, X-Frame-Options, X-Content-Type-Options, SSL/TLS certificate validity, exposed .env files, and API key patterns in HTML. Surfaces the headers and files attackers look for first.',
-  },
-  {
-    icon: '📱',
-    color: '#3DDC84',
-    name: 'Mobile',
-    desc: 'Viewport meta tag configuration, favicon presence (for browser tabs), and Apple touch icon (for iOS home screen). These three checks determine whether your site renders and identifies correctly across every device.',
-  },
-  {
-    icon: '🤖',
-    color: '#A78BFA',
-    name: 'AI Visibility',
-    desc: 'GEO + AEO audit: checks whether ChatGPT, Claude, Perplexity, and Google AI Overview can find, parse, and cite your site. Covers llms.txt and ai.txt, AI crawler permissions in robots.txt, Schema.org JSON-LD entity signals, FAQ markup, answer-first content structure, date freshness, and organization entity clarity.',
-  },
-  {
-    icon: '♿',
-    color: '#FF9F43',
-    name: 'Accessibility',
-    desc: 'DOM-level a11y audit: images missing alt attributes, form inputs and buttons without accessible labels, missing lang attribute on the html element, and absent skip-navigation links. Paired with the Lighthouse accessibility score for a combined static + runtime view.',
-  },
-]
+const CATEGORY_META: Record<string, { icon: string; color: string }> = {
+  performance: { icon: '⚡', color: '#F5C518' },
+  seo: { icon: '🔍', color: '#4A9EFF' },
+  security: { icon: '🛡️', color: '#FF4444' },
+  mobile: { icon: '📱', color: '#3DDC84' },
+  ai: { icon: '🤖', color: '#A78BFA' },
+  accessibility: { icon: '♿', color: '#FF9F43' },
+}
 
-const CONFIDENCE_LEVELS = [
-  {
-    label: 'Verified',
-    color: '#3DDC84',
-    bg: 'rgba(61,220,132,0.08)',
-    border: 'rgba(61,220,132,0.2)',
-    desc: 'Confirmed by direct measurement or HTTP response. This finding is a fact. Verified issues are score-eligible.',
-  },
-  {
-    label: 'Likely',
-    color: '#F5C518',
-    bg: 'rgba(245,197,24,0.08)',
-    border: 'rgba(245,197,24,0.2)',
-    desc: 'Strongly indicated by evidence but not directly confirmed. Shown so you can investigate — not counted in your score.',
-  },
-  {
-    label: 'Heuristic',
-    color: '#8B8A85',
-    bg: 'rgba(139,138,133,0.08)',
-    border: 'rgba(139,138,133,0.2)',
-    desc: 'Pattern-based observation. May or may not apply to your specific setup. Useful context, not a hard verdict.',
-  },
-]
+const CATEGORY_KEYS = ['performance', 'seo', 'security', 'mobile', 'ai', 'accessibility'] as const
+type CategoryKey = typeof CATEGORY_KEYS[number]
 
-const MEASUREMENT_STATES = [
-  {
-    label: 'Measured',
-    color: '#3DDC84',
-    desc: 'The check ran and produced a result. You can trust this finding.',
-  },
-  {
-    label: 'Partial',
-    color: '#F5C518',
-    desc: 'The check ran but some data was unavailable (e.g. Lighthouse timed out on a slow server). Result is shown but flagged.',
-  },
-  {
-    label: 'Unavailable',
-    color: '#5A5955',
-    desc: 'The check could not run — network block, timeout, or scanner limitation. We show this explicitly. A failed measurement never appears as a pass.',
-  },
-]
+const CONFIDENCE_META: Record<string, { color: string; bg: string; border: string }> = {
+  verified: { color: '#3DDC84', bg: 'rgba(61,220,132,0.08)', border: 'rgba(61,220,132,0.2)' },
+  likely: { color: '#F5C518', bg: 'rgba(245,197,24,0.08)', border: 'rgba(245,197,24,0.2)' },
+  heuristic: { color: '#8B8A85', bg: 'rgba(139,138,133,0.08)', border: 'rgba(139,138,133,0.2)' },
+}
+
+const CONFIDENCE_KEYS = ['verified', 'likely', 'heuristic'] as const
+type ConfidenceKey = typeof CONFIDENCE_KEYS[number]
+
+const MEASUREMENT_META: Record<string, { color: string }> = {
+  measured: { color: '#3DDC84' },
+  partial: { color: '#F5C518' },
+  unavailable: { color: '#5A5955' },
+}
+
+const MEASUREMENT_KEYS = ['measured', 'partial', 'unavailable'] as const
+type MeasurementKey = typeof MEASUREMENT_KEYS[number]
 
 export default async function MethodologyPage() {
-  const locale = await getLocale()
-  const backLabel = locale === 'ru' ? 'На главную' : 'Back to home'
+  const t = await getTranslations('Methodology')
+  const tCommon = await getTranslations('Common')
 
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE]">
@@ -104,108 +56,131 @@ export default async function MethodologyPage() {
         <div className="mb-10">
           <Link href="/" className="flex items-center gap-1.5 text-sm text-[#8B8A85] transition-colors hover:text-[#F1F0EE]">
             <ArrowLeft className="h-4 w-4" />
-            <span>{backLabel}</span>
+            <span>{tCommon('back')}</span>
           </Link>
         </div>
 
         {/* Hero */}
         <div className="mb-16">
           <div className="inline-flex items-center gap-2 mb-4 text-[11px] font-mono uppercase tracking-[0.15em] text-[#6E56CF]">
-            Methodology
+            {t('eyebrow')}
           </div>
           <h1 className="text-[40px] font-semibold tracking-[-0.03em] leading-[1.05] mb-4">
-            How ShipReady checks your site
+            {t('title')}
           </h1>
           <p className="text-[#8B8A85] leading-relaxed text-base max-w-2xl">
-            Every finding is backed by evidence. We tell you what we measured, what we inferred, and what we couldn&apos;t reach — because a failed check should never look like a pass.
+            {t('subtitle')}
           </p>
         </div>
 
-        {/* 5 Categories */}
+        {/* Categories */}
         <section className="mb-16">
-          <h2 className="text-xl font-semibold mb-6 tracking-tight">6 categories, 60+ checks</h2>
+          <h2 className="text-xl font-semibold mb-6 tracking-tight">{t('categories.heading')}</h2>
           <div className="space-y-4">
-            {CATEGORIES.map(cat => (
-              <div
-                key={cat.name}
-                className="rounded-2xl border border-white/[0.06] bg-[#161618] p-6"
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <span className="text-xl">{cat.icon}</span>
-                  <h3 className="font-semibold tracking-tight" style={{ color: cat.color }}>{cat.name}</h3>
+            {CATEGORY_KEYS.map((key: CategoryKey) => {
+              const meta = CATEGORY_META[key]
+              return (
+                <div
+                  key={key}
+                  className="rounded-2xl border border-white/[0.06] bg-[#161618] p-6"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="text-xl">{meta.icon}</span>
+                    <h3 className="font-semibold tracking-tight" style={{ color: meta.color }}>
+                      {t(`categories.${key}.name` as `categories.${CategoryKey}.name`)}
+                    </h3>
+                  </div>
+                  <p className="text-sm text-[#8B8A85] leading-relaxed">
+                    {t(`categories.${key}.desc` as `categories.${CategoryKey}.desc`)}
+                  </p>
                 </div>
-                <p className="text-sm text-[#8B8A85] leading-relaxed">{cat.desc}</p>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </section>
 
         {/* Confidence model */}
         <section className="mb-16">
-          <h2 className="text-xl font-semibold mb-2 tracking-tight">Confidence model</h2>
+          <h2 className="text-xl font-semibold mb-2 tracking-tight">{t('confidence.heading')}</h2>
           <p className="text-sm text-[#8B8A85] mb-6 leading-relaxed">
-            Not every finding can be confirmed with equal certainty. ShipReady labels every issue so you know how much weight to give it.
+            {t('confidence.subtitle')}
           </p>
           <div className="space-y-3">
-            {CONFIDENCE_LEVELS.map(level => (
-              <div
-                key={level.label}
-                className="rounded-xl p-4 flex items-start gap-4"
-                style={{ background: level.bg, border: `1px solid ${level.border}` }}
-              >
-                <span
-                  className="shrink-0 mt-0.5 text-[11px] font-mono px-2 py-0.5 rounded-full font-medium"
-                  style={{ color: level.color, background: `${level.color}18`, border: `1px solid ${level.color}30` }}
+            {CONFIDENCE_KEYS.map((key: ConfidenceKey) => {
+              const meta = CONFIDENCE_META[key]
+              return (
+                <div
+                  key={key}
+                  className="rounded-xl p-4 flex items-start gap-4"
+                  style={{ background: meta.bg, border: `1px solid ${meta.border}` }}
                 >
-                  {level.label}
-                </span>
-                <p className="text-sm text-[#8B8A85] leading-relaxed">{level.desc}</p>
-              </div>
-            ))}
+                  <span
+                    className="shrink-0 mt-0.5 text-[11px] font-mono px-2 py-0.5 rounded-full font-medium"
+                    style={{ color: meta.color, background: `${meta.color}18`, border: `1px solid ${meta.color}30` }}
+                  >
+                    {t(`confidence.${key}.label` as `confidence.${ConfidenceKey}.label`)}
+                  </span>
+                  <p className="text-sm text-[#8B8A85] leading-relaxed">
+                    {t(`confidence.${key}.desc` as `confidence.${ConfidenceKey}.desc`)}
+                  </p>
+                </div>
+              )
+            })}
           </div>
         </section>
 
         {/* Scoring */}
         <section className="mb-16">
-          <h2 className="text-xl font-semibold mb-2 tracking-tight">How scoring works</h2>
+          <h2 className="text-xl font-semibold mb-2 tracking-tight">{t('scoring.heading')}</h2>
           <p className="text-sm text-[#8B8A85] leading-relaxed mb-4">
-            The overall score (0–100) reflects only <strong className="text-[#F1F0EE]">verified, score-eligible</strong> findings. Likely and heuristic issues are shown for context but do not silently penalise your score.
+            {t('scoring.intro')}
           </p>
           <div className="rounded-2xl border border-white/[0.06] bg-[#161618] p-6 space-y-3 text-sm text-[#8B8A85] leading-relaxed">
-            <p>Each verified issue carries a severity weight (critical, high, medium, low). The score starts at 100 and deductions are applied per issue. Category scores follow the same logic within their domain.</p>
-            <p>A score of 70+ is considered <span className="text-[#7BC67E]">Good</span>. 50–69 is <span className="text-[#F5C518]">Needs work</span>. Below 50 is <span className="text-[#FF4444]">Critical</span>.</p>
+            <p>{t('scoring.detail')}</p>
+            <p>
+              {t('scoring.rangeGood')} <span className="text-[#7BC67E]">{t('scoring.good')}</span>.{' '}
+              {t('scoring.rangeMid')} <span className="text-[#F5C518]">{t('scoring.needsWork')}</span>.{' '}
+              {t('scoring.rangeLow')} <span className="text-[#FF4444]">{t('scoring.critical')}</span>.
+            </p>
           </div>
         </section>
 
         {/* Measurement states */}
         <section className="mb-16">
-          <h2 className="text-xl font-semibold mb-2 tracking-tight">Measurement states</h2>
+          <h2 className="text-xl font-semibold mb-2 tracking-tight">{t('measurement.heading')}</h2>
           <p className="text-sm text-[#8B8A85] mb-6 leading-relaxed">
-            Heavy checks (Lighthouse, SSL, DNS) may not complete for every site. We surface the state so you always know what was actually measured.
+            {t('measurement.subtitle')}
           </p>
           <div className="space-y-3">
-            {MEASUREMENT_STATES.map(state => (
-              <div
-                key={state.label}
-                className="rounded-xl border border-white/[0.06] bg-[#161618] p-4 flex items-start gap-4"
-              >
-                <span
-                  className="shrink-0 mt-0.5 w-2 h-2 rounded-full mt-1.5"
-                  style={{ background: state.color }}
-                />
-                <div>
-                  <p className="text-sm font-medium mb-1" style={{ color: state.color }}>{state.label}</p>
-                  <p className="text-sm text-[#8B8A85] leading-relaxed">{state.desc}</p>
+            {MEASUREMENT_KEYS.map((key: MeasurementKey) => {
+              const meta = MEASUREMENT_META[key]
+              return (
+                <div
+                  key={key}
+                  className="rounded-xl border border-white/[0.06] bg-[#161618] p-4 flex items-start gap-4"
+                >
+                  <span
+                    className="shrink-0 w-2 h-2 rounded-full mt-1.5"
+                    style={{ background: meta.color }}
+                  />
+                  <div>
+                    <p className="text-sm font-medium mb-1" style={{ color: meta.color }}>
+                      {t(`measurement.${key}.label` as `measurement.${MeasurementKey}.label`)}
+                    </p>
+                    <p className="text-sm text-[#8B8A85] leading-relaxed">
+                      {t(`measurement.${key}.desc` as `measurement.${MeasurementKey}.desc`)}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </section>
 
         <div className="pt-4 border-t border-white/[0.06] text-sm text-[#5A5955]">
-          Have a question about a specific check?{' '}
+          {t('contact.question')}{' '}
           <a href="https://t.me/eugenegusakov" target="_blank" rel="noopener noreferrer" className="text-[#6E56CF] hover:underline">
-            Ask on Telegram
+            {t('contact.link')}
           </a>
         </div>
       </main>

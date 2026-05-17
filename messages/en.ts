@@ -13,6 +13,8 @@ const en = {
     termsTitle: 'Terms of Service - ShipReady',
     termsDescription: 'Terms and conditions for using ShipReady.',
     notFoundTitle: '404 - ShipReady',
+    methodologyTitle: 'Methodology — ShipReady',
+    methodologyDescription: 'How ShipReady checks your site: 6 categories, evidence-based confidence model, and honest measurement states.',
   },
   LanguageSwitcher: {
     ariaLabel: 'Switch language',
@@ -779,6 +781,90 @@ const en = {
         craftedWith: 'Crafted with',
         by: 'by',
       },
+    },
+  },
+  Methodology: {
+    eyebrow: 'Methodology',
+    title: 'How ShipReady checks your site',
+    subtitle: "Every finding is backed by evidence. We tell you what we measured, what we inferred, and what we couldn't reach — because a failed check should never look like a pass.",
+
+    categories: {
+      heading: '6 categories, 60+ checks',
+      performance: {
+        name: 'Performance',
+        desc: 'A real Lighthouse mobile run inside a headless Chromium browser on Railway. We measure Core Web Vitals (LCP, CLS, INP, FCP), composite performance score, and accessibility score. No synthetic shortcuts — the same engine Google uses.',
+      },
+      seo: {
+        name: 'SEO & Social',
+        desc: 'Complete meta audit: title and description length, Open Graph image and tags, Twitter/X card, canonical URL, robots.txt directives, sitemap presence, and Schema.org structured data. Covers what search engines and social platforms read before your content.',
+      },
+      security: {
+        name: 'Security',
+        desc: '10 security checks including HTTPS enforcement, Content-Security-Policy, HSTS, X-Frame-Options, X-Content-Type-Options, SSL/TLS certificate validity, exposed .env files, and API key patterns in HTML. Surfaces the headers and files attackers look for first.',
+      },
+      mobile: {
+        name: 'Mobile',
+        desc: 'Viewport meta tag configuration, favicon presence (for browser tabs), and Apple touch icon (for iOS home screen). These three checks determine whether your site renders and identifies correctly across every device.',
+      },
+      ai: {
+        name: 'AI Visibility',
+        desc: 'GEO + AEO audit: checks whether ChatGPT, Claude, Perplexity, and Google AI Overview can find, parse, and cite your site. Covers llms.txt and ai.txt, AI crawler permissions in robots.txt, Schema.org JSON-LD entity signals, FAQ markup, answer-first content structure, date freshness, and organization entity clarity.',
+      },
+      accessibility: {
+        name: 'Accessibility',
+        desc: 'DOM-level a11y audit: images missing alt attributes, form inputs and buttons without accessible labels, missing lang attribute on the html element, and absent skip-navigation links. Paired with the Lighthouse accessibility score for a combined static + runtime view.',
+      },
+    },
+
+    confidence: {
+      heading: 'Confidence model',
+      subtitle: 'Not every finding can be confirmed with equal certainty. ShipReady labels every issue so you know how much weight to give it.',
+      verified: {
+        label: 'Verified',
+        desc: 'Confirmed by direct measurement or HTTP response. This finding is a fact. Verified issues are score-eligible.',
+      },
+      likely: {
+        label: 'Likely',
+        desc: 'Strongly indicated by evidence but not directly confirmed. Shown so you can investigate — not counted in your score.',
+      },
+      heuristic: {
+        label: 'Heuristic',
+        desc: 'Pattern-based observation. May or may not apply to your specific setup. Useful context, not a hard verdict.',
+      },
+    },
+
+    scoring: {
+      heading: 'How scoring works',
+      intro: 'The overall score (0–100) reflects only verified, score-eligible findings. Likely and heuristic issues are shown for context but do not silently penalise your score.',
+      detail: 'Each verified issue carries a severity weight (critical, high, medium, low). The score starts at 100 and deductions are applied per issue. Category scores follow the same logic within their domain.',
+      good: 'Good',
+      needsWork: 'Needs work',
+      critical: 'Critical',
+      rangeGood: '70+ is considered',
+      rangeMid: '50–69 is',
+      rangeLow: 'Below 50 is',
+    },
+
+    measurement: {
+      heading: 'Measurement states',
+      subtitle: 'Heavy checks (Lighthouse, SSL, DNS) may not complete for every site. We surface the state so you always know what was actually measured.',
+      measured: {
+        label: 'Measured',
+        desc: 'The check ran and produced a result. You can trust this finding.',
+      },
+      partial: {
+        label: 'Partial',
+        desc: 'The check ran but some data was unavailable (e.g. Lighthouse timed out on a slow server). Result is shown but flagged.',
+      },
+      unavailable: {
+        label: 'Unavailable',
+        desc: 'The check could not run — network block, timeout, or scanner limitation. We show this explicitly. A failed measurement never appears as a pass.',
+      },
+    },
+
+    contact: {
+      question: 'Have a question about a specific check?',
+      link: 'Ask on Telegram',
     },
   },
 }
