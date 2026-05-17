@@ -171,7 +171,7 @@ async function finalizeMonitoredDomain(scanId: string): Promise<void> {
   }
 }
 
-export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanGoal): Promise<void> {
+export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanGoal, userLocale?: string): Promise<void> {
   const startedAt = Date.now()
   let currentStatus: ScanStatus = 'running_fast'
   let currentStages = updateScanStage(buildDefaultScanStages(), 'fast', {
@@ -460,7 +460,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
 
       if (aiBudgetReservation.allowed) {
         const enrichment = await safeTask(
-          generateEvidenceEnrichment(result, businessContext, scanGoal),
+          generateEvidenceEnrichment(result, businessContext, scanGoal, userLocale),
           35_000,
           'ai-enrichment',
         )

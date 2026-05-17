@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
     const raw = body.url as string
     const scanGoal = (['sales', 'leads', 'traffic', 'visibility', 'general'] as const)
       .includes(body.scanGoal) ? body.scanGoal as ScanGoal : null
+    const userLocale = request.cookies.get('shipready-locale')?.value === 'ru' ? 'ru' : undefined
 
     if (!raw || !isValidUrl(normalizeUrl(raw))) {
       return NextResponse.json({ error: 'Invalid URL' }, { status: 400 })
@@ -118,7 +119,7 @@ export async function POST(request: NextRequest) {
       // Delegate to Railway scanner — use waitUntil so Vercel keeps the function
       // alive until Railway acknowledges (Railway responds 202 immediately)
       waitUntil(
-        dispatchScanToRailway(data.id, url, scanGoal ?? undefined).catch(async (err) => {
+        dispatchScanToRailway(data.id, url, scanGoal ?? undefined, userLocale).catch(async (err) => {
           console.error(`[scan] Railway fetch failed: ${err}`)
           await supabase.from('scans').update({ status: 'error' }).eq('id', data.id)
         })
@@ -128,7 +129,7 @@ export async function POST(request: NextRequest) {
       setTimeout(async () => {
         try {
           const { runAllChecks } = await import('@/lib/checks/index')
-          await runAllChecks(url, data.id, scanGoal ?? undefined)
+          await runAllChecks(url, data.id, scanGoal ?? undefined, userLocale)
         } catch {
           // runAllChecks marks the scan as 'error' internally
         }

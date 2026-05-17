@@ -5,6 +5,7 @@ export async function dispatchScanToRailway(
   scanId: string,
   url: string,
   scanGoal?: ScanGoal,
+  userLocale?: string,
 ): Promise<void> {
   const railwayUrl = process.env.RAILWAY_SCANNER_URL
   const scannerSecret = process.env.SCANNER_SECRET
@@ -19,7 +20,7 @@ export async function dispatchScanToRailway(
       'Content-Type': 'application/json',
       Authorization: `Bearer ${scannerSecret}`,
     },
-    body: JSON.stringify({ url, scanId, scanGoal }),
+    body: JSON.stringify({ url, scanId, scanGoal, userLocale }),
   })
 
   if (!response.ok) {

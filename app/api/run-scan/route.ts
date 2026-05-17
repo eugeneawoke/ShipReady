@@ -16,12 +16,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  let url: string, scanId: string, scanGoal: ScanGoal | undefined
+  let url: string, scanId: string, scanGoal: ScanGoal | undefined, userLocale: string | undefined
   try {
     const body = await request.json()
     url = body.url
     scanId = body.scanId
     scanGoal = VALID_GOALS.includes(body.scanGoal) ? body.scanGoal : undefined
+    userLocale = body.userLocale === 'ru' ? 'ru' : undefined
   } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
   // Respond immediately — Railway is a persistent server so the Promise
   // continues running after the response is sent (unlike Vercel serverless)
   const { runAllChecks } = await import('@/lib/checks/index')
-  runAllChecks(url, scanId, scanGoal).catch((e: unknown) => {
+  runAllChecks(url, scanId, scanGoal, userLocale).catch((e: unknown) => {
     console.error('run-scan background error:', e)
   })
 
