@@ -11,6 +11,7 @@ import { CategoryCard } from '@/components/report/CategoryCard'
 import { IssueCard } from '@/components/report/IssueCard'
 import { ScanForm, useScanLauncher } from '@/components/landing/ScanForm'
 import { SiteBrandLink } from '@/components/SiteHeader'
+import { LanguageSwitcher } from '@/components/i18n/LanguageSwitcher'
 import type { Scan, Issue, IssueCategory, ScanResult, ScanStage, ScanStatus, BusinessContext, ScanGoal } from '@/types/scan'
 import { createBrowserClient } from '@/lib/supabase-browser'
 import {
@@ -21,7 +22,6 @@ import {
 } from '@/lib/report/report-helpers'
 import {
   normalizeStrategicRecommendationsForDisplay,
-  strategicTimeframeLabel,
 } from '@/lib/report/report-safety'
 import { effectivePlanFromSources, type Plan } from '@/lib/growth/attribution'
 
@@ -144,6 +144,7 @@ function BusinessProfileBlock({ businessContext, scanGoal }: {
   businessContext?: BusinessContext | null
   scanGoal?: ScanGoal
 }) {
+  const t = useTranslations('Report')
   const isHighConfidence = businessContext != null && businessContext.businessType !== 'other'
 
   return (
@@ -192,8 +193,8 @@ function BusinessProfileBlock({ businessContext, scanGoal }: {
         </div>
       ) : (
         <div className="space-y-1">
-          <p className="text-sm text-[#8B8A85]">Site type could not be determined confidently.</p>
-          <p className="text-xs text-[#5A5955]">Recommendations are general.</p>
+          <p className="text-sm text-[#8B8A85]">{t('strategicRec.noContext')}</p>
+          <p className="text-xs text-[#5A5955]">{t('strategicRec.noContextSub')}</p>
         </div>
       )}
     </div>
@@ -203,6 +204,7 @@ function BusinessProfileBlock({ businessContext, scanGoal }: {
 function StrategicRecommendationsBlock({ recommendations }: {
   recommendations?: ScanResult['strategicRecommendations']
 }) {
+  const t = useTranslations('Report')
   const safeRecommendations = normalizeStrategicRecommendationsForDisplay(recommendations)
 
   if (!safeRecommendations.length) return null
@@ -210,16 +212,18 @@ function StrategicRecommendationsBlock({ recommendations }: {
   return (
     <section className="rounded-xl border border-[#4A9EFF]/18 bg-[#101922] px-4 py-4">
       <div className="mb-3">
-        <p className="text-[10px] uppercase tracking-[0.12em] text-[#8B8A85] font-mono">Strategic recommendations</p>
+        <p className="text-[10px] uppercase tracking-[0.12em] text-[#8B8A85] font-mono">
+          {t('strategicRec.heading')}
+        </p>
         <p className="mt-1 text-xs text-[#6F6E69]">
-          Non-score guidance based on the findings, business context, and scan goal.
+          {t('strategicRec.subtitle')}
         </p>
       </div>
       <div className="space-y-3">
         {safeRecommendations.map((item, index) => (
           <div key={`${item.timeframe}-${item.title}-${index}`} className="rounded-lg border border-white/6 bg-white/[0.03] p-3">
             <span className="inline-flex rounded-full border border-[#4A9EFF]/20 bg-[#4A9EFF]/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-[#A9D1FF]">
-              {strategicTimeframeLabel(item.timeframe)}
+              {t(`strategicRec.timeframes.${item.timeframe}` as 'strategicRec.timeframes.now')}
             </span>
             <h3 className="mt-2 text-sm font-medium text-[#F1F0EE]">{item.title}</h3>
             <p className="mt-1 text-sm leading-relaxed text-[#8B8A85]">{item.body}</p>
@@ -849,6 +853,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
           <SiteBrandLink className="shrink-0" />
           <span className="text-[#5A5955] text-sm">/</span>
           <span className="text-sm text-[#8B8A85] font-mono truncate flex-1">{domain}</span>
+          <LanguageSwitcher />
           <button
             type="button"
             onClick={() => setNewScanOpen(open => !open)}

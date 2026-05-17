@@ -323,6 +323,17 @@ const en = {
       ai_visibility: 'AI Visibility',
       accessibility: 'Accessibility',
     },
+    strategicRec: {
+      heading: 'Strategic recommendations',
+      subtitle: 'Non-score guidance based on the findings, business context, and scan goal.',
+      noContext: 'Site type could not be determined confidently.',
+      noContextSub: 'Recommendations are general.',
+      timeframes: {
+        now: 'Now',
+        next_2_weeks: 'Next 2 weeks',
+        next_month: 'Next month',
+      },
+    },
   },
   ReportSkeleton: {
     steps: [

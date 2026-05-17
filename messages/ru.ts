@@ -325,6 +325,17 @@ const ru: AppMessages = {
       ai_visibility: 'AI visibility',
       accessibility: 'Доступность',
     },
+    strategicRec: {
+      heading: 'Стратегические рекомендации',
+      subtitle: 'Рекомендации, основанные на результатах сканирования, бизнес-контексте и цели.',
+      noContext: 'Тип сайта не удалось определить с достаточной уверенностью.',
+      noContextSub: 'Рекомендации носят общий характер.',
+      timeframes: {
+        now: 'Сейчас',
+        next_2_weeks: 'Следующие 2 недели',
+        next_month: 'Следующий месяц',
+      },
+    },
   },
   ReportSkeleton: {
     steps: [
