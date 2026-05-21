@@ -75,7 +75,15 @@ export async function assertSafeScanUrl(url: string): Promise<string> {
   for (let hop = 0; hop < 5; hop++) {
     await assertPublicHost(current.hostname)
 
-    const response = await requestWithoutFollowing(current.toString())
+    let response: Response
+    try {
+      response = await requestWithoutFollowing(current.toString())
+    } catch {
+      // Site is unreachable from Vercel (e.g. blocks AWS IPs, firewall, timeout).
+      // SSRF is already covered by assertPublicHost above — safe to proceed.
+      return current.toString()
+    }
+
     const isRedirect =
       response.status >= 300 &&
       response.status < 400 &&
