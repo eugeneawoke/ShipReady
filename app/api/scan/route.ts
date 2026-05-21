@@ -140,7 +140,8 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ id: data.id }, { status: 202 })
-  } catch {
+  } catch (err) {
+    console.error('[scan] POST handler error:', err)
     return NextResponse.json({ error: 'Bad request' }, { status: 400 })
   }
 }
