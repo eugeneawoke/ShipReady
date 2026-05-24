@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useLocale, useMessages } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { ScanForm } from '@/components/landing/ScanForm'
+import { ModePicker } from '@/components/landing/ModePicker'
 import { PricingSection } from '@/components/landing/PricingSection'
 import { AttributionTracker } from '@/components/growth/AttributionTracker'
 import { AnimatedGradientText } from '@/components/ui/animated-gradient-text'
@@ -185,6 +186,7 @@ export default function LandingPage() {
       <AttributionTracker />
       <Nav t={t} lang={lang} setLang={handleSetLang} switching={isPending} languageAriaLabel={languageAriaLabel} />
       <HeroSection t={t} />
+      <ModePicker />
       <StatsBar t={t} />
       <HowItWorksSection t={t} />
       <ReportPreviewSection t={t} />
@@ -240,23 +242,14 @@ function Nav({ t, lang, setLang, switching, languageAriaLabel }: { t: Translatio
         <div className="flex items-center gap-8">
           <SiteBrandLink />
           <div className="hidden md:flex items-center gap-5">
+            <Link href="/seo" className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors whitespace-nowrap">SEO</Link>
+            <Link href="/security" className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors whitespace-nowrap">Security</Link>
+            <Link href="/ai-visibility" className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors whitespace-nowrap">AI</Link>
             <button
               onClick={() => smoothScrollTo('#how-it-works')}
               className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors whitespace-nowrap cursor-pointer"
             >
               {t.nav.howItWorks}
-            </button>
-            <button
-              onClick={() => smoothScrollTo('#preview')}
-              className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors whitespace-nowrap cursor-pointer"
-            >
-              {t.nav.seeReport}
-            </button>
-            <button
-              onClick={() => smoothScrollTo('#features')}
-              className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors whitespace-nowrap cursor-pointer"
-            >
-              {t.nav.whatWeCheck}
             </button>
             <button
               onClick={() => smoothScrollTo('#faq')}
@@ -270,12 +263,6 @@ function Nav({ t, lang, setLang, switching, languageAriaLabel }: { t: Translatio
             >
               {t.nav.pricing}
             </button>
-            <Link
-              href="/methodology"
-              className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors whitespace-nowrap"
-            >
-              {t.nav.methodology}
-            </Link>
           </div>
         </div>
 
@@ -354,11 +341,8 @@ function Nav({ t, lang, setLang, switching, languageAriaLabel }: { t: Translatio
       onClose={() => setMenuOpen(false)}
       labels={{
         howItWorks: t.nav.howItWorks,
-        seeReport: t.nav.seeReport,
-        whatWeCheck: t.nav.whatWeCheck,
         faq: t.nav.faq,
         pricing: t.nav.pricing,
-        methodology: t.nav.methodology,
       }}
       onScrollTo={smoothScrollTo}
     />

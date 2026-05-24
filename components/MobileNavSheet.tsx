@@ -10,11 +10,8 @@ interface MobileNavSheetProps {
   onClose: () => void
   labels: {
     howItWorks: string
-    seeReport: string
-    whatWeCheck: string
     faq: string
     pricing: string
-    methodology: string
   }
   onScrollTo: (selector: string) => void
 }
@@ -81,8 +78,6 @@ export default function MobileNavSheet({
 
   const scrollItems: ScrollItem[] = [
     { label: labels.howItWorks, selector: '#how-it-works' },
-    { label: labels.seeReport, selector: '#preview' },
-    { label: labels.whatWeCheck, selector: '#features' },
     { label: labels.faq, selector: '#faq' },
     { label: labels.pricing, selector: '#pricing' },
   ]
@@ -144,14 +139,12 @@ export default function MobileNavSheet({
                 </button>
               ))}
 
-              {/* Methodology — real page link */}
-              <Link
-                href="/methodology"
-                onClick={onClose}
-                className="block min-h-12 px-6 py-4 text-base text-[#F1F0EE] transition-colors hover:bg-white/[0.04]"
-              >
-                {labels.methodology}
-              </Link>
+              {/* Focused audit modes */}
+              <div className="border-t border-white/[0.05] mt-1 pt-1">
+                <Link href="/seo" onClick={onClose} className="block min-h-12 px-6 py-4 text-base text-[#8B8A85] transition-colors hover:bg-white/[0.04] hover:text-[#F1F0EE]">SEO Audit</Link>
+                <Link href="/security" onClick={onClose} className="block min-h-12 px-6 py-4 text-base text-[#8B8A85] transition-colors hover:bg-white/[0.04] hover:text-[#F1F0EE]">Security Audit</Link>
+                <Link href="/ai-visibility" onClick={onClose} className="block min-h-12 px-6 py-4 text-base text-[#8B8A85] transition-colors hover:bg-white/[0.04] hover:text-[#F1F0EE]">AI Visibility Audit</Link>
+              </div>
             </nav>
           </motion.div>
         </>
