@@ -10,6 +10,8 @@ import { ScoreRing } from '@/components/report/ScoreRing'
 import { CategoryCard } from '@/components/report/CategoryCard'
 import { IssueCard } from '@/components/report/IssueCard'
 import { SecurityAlertBanner } from '@/components/report/SecurityAlertBanner'
+import { SupportingCategoryChips } from '@/components/report/SupportingCategoryChips'
+import { ArtifactBlock } from '@/components/report/ArtifactBlock'
 import { ScanForm, useScanLauncher } from '@/components/landing/ScanForm'
 import { SiteBrandLink } from '@/components/SiteHeader'
 import { LanguageSwitcher } from '@/components/i18n/LanguageSwitcher'
@@ -243,6 +245,20 @@ const SEVERITY_ORDER: Record<string, number> = {
 }
 
 const CATEGORIES: IssueCategory[] = ['performance', 'seo', 'security', 'mobile', 'ai_visibility', 'accessibility']
+
+function getCategoryOrder(scanGoal: ScanGoal | undefined): IssueCategory[] {
+  switch (scanGoal) {
+    case 'seo':
+      return ['seo', 'performance', 'mobile', 'security', 'ai_visibility', 'accessibility']
+    case 'security':
+      return ['security', 'seo', 'performance', 'mobile', 'ai_visibility', 'accessibility']
+    case 'ai_visibility':
+      return ['ai_visibility', 'seo', 'security', 'performance', 'mobile', 'accessibility']
+    default:
+      return ['seo', 'security', 'performance', 'mobile', 'ai_visibility', 'accessibility']
+  }
+}
+
 const ACTIVE_SCAN_STATUSES: ScanStatus[] = ['pending', 'running', 'running_fast', 'running_deep', 'enriching', 'crawling']
 type StageState = 'done' | 'running' | 'pending' | 'unavailable' | 'partial' | 'failed'
 type ProgressStage = { id: string; title: string; state: StageState; detail: string }
@@ -1093,7 +1109,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
         <section>
           <div className="print:hidden">
             <div className="flex border-b border-white/6 mb-6 overflow-x-auto scrollbar-hide">
-              {CATEGORIES.map(cat => {
+              {getCategoryOrder(results.scanGoal).map(cat => {
                 const score = results[cat].score
                 const isActive = activeCategory === cat
                 return (
@@ -1115,7 +1131,46 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
                 )
               })}
             </div>
+
+            {/* AI Platform Readiness grid — shown when AI Visibility tab is active */}
+            {activeCategory === 'ai_visibility' && results.aiPlatformReadiness && (
+              <div className="mb-4 overflow-hidden rounded-xl border border-white/[0.08]">
+                <div className="border-b border-white/[0.06] px-4 py-2.5">
+                  <span className="text-xs font-medium text-[#8B8A85]">AI Platform Readiness</span>
+                </div>
+                <div className="grid grid-cols-2 gap-px bg-white/[0.04] sm:grid-cols-4">
+                  {[
+                    { key: 'chatgpt', label: 'ChatGPT' },
+                    { key: 'claude', label: 'Claude' },
+                    { key: 'perplexity', label: 'Perplexity' },
+                    { key: 'googleAI', label: 'Google AI' },
+                  ].map(({ key, label }) => {
+                    const status = results.aiPlatformReadiness![key as keyof typeof results.aiPlatformReadiness]
+                    const colorMap = {
+                      blocked: { text: 'text-red-400', bg: 'bg-red-500/10 text-red-400' },
+                      partial: { text: 'text-yellow-400', bg: 'bg-yellow-500/10 text-yellow-400' },
+                      ready: { text: 'text-green-400', bg: 'bg-green-500/10 text-green-400' },
+                    }
+                    const icons = { blocked: '✗', partial: '~', ready: '✓' }
+                    const colors = colorMap[status]
+                    return (
+                      <div key={key} className="flex flex-col items-center gap-1 bg-[#0E0E0F] px-4 py-3">
+                        <span className={`text-lg font-bold ${colors.text}`}>{icons[status]}</span>
+                        <span className="text-xs text-[#8B8A85]">{label}</span>
+                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${colors.bg}`}>{status}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
             <CategoryCard category={activeCategory} data={results[activeCategory]} />
+
+            {/* Supporting category chips — shown when scan was focused (not full) */}
+            {results.scanGoal && results.scanGoal !== 'full' && (
+              <SupportingCategoryChips result={results} primaryGoal={results.scanGoal} />
+            )}
           </div>
 
           {/* Print only — all categories stacked */}
@@ -1137,6 +1192,36 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
             isReady={isFinalReport}
           />
         </section>
+
+        {/* Generated artifacts — hidden in print */}
+        {isFinalReport && results.generatedArtifacts && (
+          <section className="print:hidden space-y-2">
+            <h2 className="text-sm font-medium text-[#F1F0EE]">Generated for you</h2>
+            {results.generatedArtifacts.llmsTxt && (
+              <ArtifactBlock
+                title="Generated llms.txt"
+                filename="llms.txt"
+                content={results.generatedArtifacts.llmsTxt}
+              />
+            )}
+            {results.generatedArtifacts.schemaOrgJson && (
+              <ArtifactBlock
+                title="Generated Schema.org markup"
+                filename="schema.json"
+                language="json"
+                content={results.generatedArtifacts.schemaOrgJson}
+              />
+            )}
+            {results.generatedArtifacts.securityHeadersNextJs && (
+              <ArtifactBlock
+                title="Security headers — Next.js"
+                filename="next.config.js"
+                language="javascript"
+                content={results.generatedArtifacts.securityHeadersNextJs}
+              />
+            )}
+          </section>
+        )}
 
         {/* All issues */}
         {activeIssues.length > 0 && (

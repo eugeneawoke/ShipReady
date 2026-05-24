@@ -90,16 +90,18 @@ export function ScanForm({
   compact = false,
   autoFocus = false,
   className = '',
+  defaultScanGoal,
 }: {
   initialUrl?: string
   submitLabel?: string
   compact?: boolean
   autoFocus?: boolean
   className?: string
+  defaultScanGoal?: string
 }) {
   const t = useTranslations('ScanForm')
   const [url, setUrl] = useState(initialUrl)
-  const [scanGoal, setScanGoal] = useState<string>('')
+  const [scanGoal, setScanGoal] = useState<string>(defaultScanGoal ?? '')
   const { loading, error, launchScan } = useScanLauncher()
 
   async function handleSubmit(e: React.FormEvent) {
