@@ -160,6 +160,13 @@ export interface ScanProcessingIssue {
   staleAgeSeconds: number
 }
 
+export interface GeneratedArtifacts {
+  llmsTxt?: string
+  schemaOrgJson?: string
+  securityHeadersNextJs?: string
+  securityHeadersNginx?: string
+}
+
 export interface ScanResult {
   url: string
   scannedAt: string
@@ -190,6 +197,7 @@ export interface ScanResult {
   businessContext?: BusinessContext | null
   scanGoal?: ScanGoal
   processingIssue?: ScanProcessingIssue
+  generatedArtifacts?: GeneratedArtifacts
 }
 
 export interface Scan {
