@@ -26,7 +26,6 @@ export const CHECK_CATALOG: Record<IssueCategory, CheckCatalogEntry[]> = {
     { id: 'missing-og-description', name: 'Open Graph description present', detail: 'Shared links expose a usable social preview description.' },
     { id: 'missing-og-image', name: 'Open Graph image present', detail: 'Shared links expose an image for richer previews.' },
     { id: 'og-image-invalid', name: 'Open Graph image is accessible', detail: 'The OG image URL returns a fetchable image response.' },
-    { id: 'missing-twitter-card', name: 'Twitter/X card present', detail: 'The page defines card metadata for X/Twitter link previews.' },
     { id: 'placeholder-text', name: 'No placeholder text detected', detail: 'Visible copy looks intentional instead of leftover scaffolding.' },
     { id: 'broken-links', name: 'No broken internal links detected', detail: 'Discovered internal links resolve successfully.' },
   ],
@@ -47,7 +46,6 @@ export const CHECK_CATALOG: Record<IssueCategory, CheckCatalogEntry[]> = {
     { id: 'missing-viewport', name: 'Viewport meta tag present', detail: 'Mobile browsers receive an explicit responsive viewport setting.' },
     { id: 'blocking-viewport', name: 'Viewport allows user scaling', detail: 'The page does not block browser zoom for accessibility.' },
     { id: 'missing-favicon', name: 'Favicon present', detail: 'Browsers can fetch a tab icon for the site.' },
-    { id: 'missing-touch-icon', name: 'Apple touch icon present', detail: 'iOS devices can save a recognizable home-screen icon.' },
   ],
   ai_visibility: [
     { id: 'missing-schema-org', name: 'Schema.org structured data present', detail: 'The page publishes machine-readable structured data.' },

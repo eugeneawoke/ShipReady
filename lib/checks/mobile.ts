@@ -19,10 +19,6 @@ export async function runMobileChecks(html: string): Promise<Issue[]> {
     issues.push(withIssueMeta({ ...T['missing-favicon'] }, 'dom', [evidence('selector', 'link[rel*=icon]', 'missing')]))
   }
 
-  if (!$('link[rel="apple-touch-icon"]').length) {
-    issues.push(withIssueMeta({ ...T['missing-touch-icon'] }, 'dom', [evidence('selector', 'link[rel="apple-touch-icon"]', 'missing')]))
-  }
-
   if (!$('link[rel="manifest"]').length) {
     issues.push(withIssueMeta(
       { ...T['missing-web-manifest'] },

@@ -308,28 +308,6 @@ Or use app/opengraph-image.tsx with next/og for dynamic generation.`,
     docsUrl: 'https://developers.facebook.com/tools/debug/',
   },
 
-  'missing-twitter-card': {
-    id: 'missing-twitter-card',
-    category: 'seo',
-    severity: 'low',
-    title: 'Twitter/X card meta tag missing',
-    description: 'No twitter:card meta tag found.',
-    plainEnglish:
-      'Without this tag, Twitter/X may not show a rich link preview when your URL is shared. Links without rich cards get significantly less engagement.',
-    fixPrompt: `Add Twitter card meta tags in my Next.js app:
-In app/layout.tsx or the page file:
-export const metadata: Metadata = {
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Your Page Title',
-    description: 'Your description',
-    images: ['/og-image.png'],
-    // creator: '@yourhandle', // optional
-  },
-}`,
-    docsUrl: 'https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/abouts-cards',
-  },
-
   'placeholder-text': {
     id: 'placeholder-text',
     category: 'seo',
@@ -356,18 +334,6 @@ export const metadata: Metadata = {
     description: 'Meta description is either too short (<100 chars) or too long (>165 chars).',
     plainEnglish: 'Your meta description is either too short (under 100 chars) or too long (over 165 chars). Google typically shows 100–165 characters. Too short leaves value on the table; too long gets cut off with "…".',
     fixPrompt: 'Update the meta description to be between 120–160 characters. In Next.js, update the `description` field in `generateMetadata()`. Aim for: keyword-rich first 120 characters, compelling CTA in the last 30.',
-  },
-
-  'missing-twitter-image': {
-    id: 'missing-twitter-image',
-    category: 'seo',
-    severity: 'medium',
-    confidence: 'verified',
-    scoreEligible: true,
-    title: 'Twitter/X card declares summary_large_image but no twitter:image is set',
-    description: 'twitter:card is summary_large_image but no twitter:image meta tag was found.',
-    plainEnglish: 'Your page uses `twitter:card = summary_large_image` but provides no `twitter:image` URL. Twitter/X will show a blank card. Set the image or downgrade the card type.',
-    fixPrompt: 'In Next.js `generateMetadata()`, add `twitter: { card: "summary_large_image", images: ["/og.png"] }`. Create a 1200×630 PNG at `public/og.png` as the default OG image.',
   },
 
   'canonical-mismatch': {
@@ -416,18 +382,6 @@ export const metadata: Metadata = {
     description: 'The og:url hostname does not match the page hostname.',
     plainEnglish: 'Your share preview says the page belongs to a different domain than the one visitors are on. That creates inconsistent social previews and indexing signals.',
     fixPrompt: 'Set `openGraph.url` to the same production domain used by the canonical URL. In Next.js, normalize `NEXT_PUBLIC_APP_URL` once and reuse it for canonical and Open Graph URL generation.',
-  },
-
-  'og-url-double-slash': {
-    id: 'og-url-double-slash',
-    category: 'seo',
-    severity: 'high',
-    confidence: 'verified',
-    scoreEligible: true,
-    title: 'Open Graph URL contains a double-slash path',
-    description: 'The og:url value contains a malformed double-slash in the path.',
-    plainEnglish: 'Your Open Graph URL has an extra slash in the path. Social platforms may cache or display the wrong page URL.',
-    fixPrompt: 'Normalize the base URL before building `openGraph.url`. In Next.js, strip trailing slash from `NEXT_PUBLIC_APP_URL` before adding route paths.',
   },
 
   'sensitive-page-indexable': {
@@ -500,18 +454,6 @@ export const metadata: Metadata = {
     description: 'WebApplication or SoftwareApplication JSON-LD is present but lacks the operatingSystem field.',
     plainEnglish: 'Your WebApplication or SoftwareApplication structured data is missing the `operatingSystem` field. Google requires this for Software rich results in search.',
     fixPrompt: 'Add `operatingSystem: "Web"` to your WebApplication JSON-LD schema. In Next.js, update the schema object in `app/layout.tsx` that contains `"@type": "WebApplication"`.',
-  },
-
-  'sitemap-double-slash': {
-    id: 'sitemap-double-slash',
-    category: 'seo',
-    severity: 'high',
-    confidence: 'verified',
-    scoreEligible: true,
-    title: 'Sitemap URL in robots.txt has a double-slash',
-    description: 'The Sitemap: line in robots.txt contains a malformed URL with a double-slash after the protocol.',
-    plainEnglish: 'The Sitemap: line in your robots.txt contains a malformed URL with a double-slash (e.g. `//sitemap.xml`). Googlebot cannot process this URL, so your sitemap is effectively invisible.',
-    fixPrompt: 'The root cause is `NEXT_PUBLIC_APP_URL` ending with a trailing slash. Fix: (1) Remove the trailing slash from `NEXT_PUBLIC_APP_URL` in your Vercel environment variables, (2) Add `.replace(/\\/$/, "")` when using this env var to build URLs in `app/robots.ts` and `app/sitemap.ts`.',
   },
 
   'thin-llms-txt': {
@@ -971,27 +913,6 @@ content="width=device-width, initial-scale=1"`,
    }
 4. Generate all sizes from your logo using realfavicongenerator.net`,
     docsUrl: 'https://nextjs.org/docs/app/api-reference/file-conventions/metadata/app-icons',
-  },
-
-  'missing-touch-icon': {
-    id: 'missing-touch-icon',
-    category: 'mobile',
-    severity: 'low',
-    title: 'Apple touch icon missing',
-    description: 'No <link rel="apple-touch-icon"> tag found.',
-    plainEnglish:
-      "When iPhone or iPad users save your site to their home screen, there's no proper icon — iOS will use a screenshot instead, which looks terrible. Adding this takes 5 minutes.",
-    fixPrompt: `Add Apple touch icon in my Next.js app:
-1. Create a 180×180px PNG image (your logo on a solid background)
-2. Save as public/apple-touch-icon.png
-3. In app/layout.tsx metadata:
-   export const metadata: Metadata = {
-     icons: {
-       apple: [{ url: '/apple-touch-icon.png', sizes: '180x180' }],
-     },
-   }
-Or place the file at app/apple-icon.png — Next.js handles it automatically.`,
-    docsUrl: 'https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariWebContent/ConfiguringWebApplications/ConfiguringWebApplications.html',
   },
 
   'missing-web-manifest': {

@@ -221,13 +221,6 @@ export async function runSEOChecks(
   } else {
     const parsedOgUrl = parsePageUrl(ogUrl, url)
     if (parsedOgUrl) {
-      if (hasDoubleSlashPath(parsedOgUrl)) {
-        issues.push(withIssueMeta(
-          { ...T['og-url-double-slash'], value: parsedOgUrl.toString() },
-          'dom',
-          [evidence('text', 'og:url', parsedOgUrl.toString())],
-        ))
-      }
       const pageHostname = new URL(url).hostname
       if (parsedOgUrl.hostname !== pageHostname) {
         issues.push(withIssueMeta(
@@ -237,20 +230,6 @@ export async function runSEOChecks(
         ))
       }
     }
-  }
-
-  const twitterCard = $('meta[name="twitter:card"]').attr('content')
-  if (!twitterCard) {
-    issues.push(withIssueMeta({ ...T['missing-twitter-card'] }, 'dom', [evidence('selector', 'meta[name="twitter:card"]', 'missing')]))
-  }
-
-  const twitterImage = $('meta[name="twitter:image"]').attr('content') || $('meta[name="twitter:image:src"]').attr('content')
-  if (twitterCard === 'summary_large_image' && !twitterImage) {
-    issues.push(withIssueMeta(
-      { ...T['missing-twitter-image'] },
-      'dom',
-      [evidence('text', 'twitter:card', twitterCard), evidence('selector', 'meta[name="twitter:image"]', 'missing')],
-    ))
   }
 
   const body = $('body').clone()
@@ -366,20 +345,6 @@ export async function runSEOChecks(
       const robotsRes = await fetchSafeResource(`${origin}/robots.txt`, { signal: AbortSignal.timeout(3000) })
       if (robotsRes.ok) {
         const robotsText = await robotsRes.text()
-        const sitemapMatch = robotsText.match(/^Sitemap:\s*(.+)$/im)
-        if (sitemapMatch) {
-          const sitemapUrl = sitemapMatch[1].trim()
-          if (sitemapUrl.includes('//') && !sitemapUrl.startsWith('//')) {
-            const afterProtocol = sitemapUrl.replace(/^https?:\/\//, '')
-            if (afterProtocol.includes('//')) {
-              issues.push(withIssueMeta(
-                { ...T['sitemap-double-slash'], value: sitemapUrl },
-                'http',
-                [evidence('text', 'Sitemap URL in robots.txt', sitemapUrl)],
-              ))
-            }
-          }
-        }
         const robotsPagePath = new URL(url).pathname
         if (isPathDisallowedByRobots(robotsText, robotsPagePath)) {
           issues.push(withIssueMeta(
