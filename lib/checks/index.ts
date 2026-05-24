@@ -358,6 +358,34 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
         }, 'lighthouse', [evidence('metric', 'Accessibility score', a11yScore)]))
       }
     }
+    const mobileIssues = mobileFast.ok ? [...mobileFast.value] : []
+    if (lighthouseResult.ok) {
+      const lh = lighthouseResult.value
+      if (lh.tapTargets !== null && lh.tapTargets !== undefined && lh.tapTargets < 0.9) {
+        mobileIssues.push(withIssueMeta({
+          id: 'small-tap-targets',
+          category: 'mobile',
+          severity: 'medium',
+          title: 'Tap targets are too small for mobile',
+          description: 'Some tappable elements are smaller than 48×48px.',
+          plainEnglish: 'Buttons and links are too small to tap reliably on mobile devices.',
+          fixPrompt: 'Increase the size of all interactive elements to at least 48×48 pixels on mobile breakpoints.',
+          value: Math.round(lh.tapTargets * 100),
+        }, 'lighthouse', [evidence('metric', 'Tap targets score', Math.round(lh.tapTargets * 100))]))
+      }
+      if (lh.fontSizeIssues) {
+        mobileIssues.push(withIssueMeta({
+          id: 'mobile-font-too-small',
+          category: 'mobile',
+          severity: 'medium',
+          title: 'Font sizes are too small for mobile',
+          description: 'Some text is below 12px and may be unreadable without zooming.',
+          plainEnglish: 'Text on your page is too small to read comfortably on mobile.',
+          fixPrompt: 'Set a minimum font size of 12px for all text content, especially at small-screen breakpoints.',
+          value: 'failing',
+        }, 'lighthouse', [evidence('metric', 'Font size audit', 'failing')]))
+      }
+    }
     const seoIssues = seoDeep.ok ? [...seoDeep.value, ...(linksResult.ok ? linksResult.value : [])] : (linksResult.ok ? linksResult.value : [])
     const aiVisibilityIssues = aiVisibilityDeep.ok ? aiVisibilityDeep.value.issues : []
     const aiPlatformReadiness = aiVisibilityDeep.ok
@@ -396,7 +424,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
         measurement: measurement('SEO audit', 'measured', undefined, seoDeep.durationMs),
       }),
       security: buildCategoryScore(securityFast.ok ? securityFast.value : [], 'security'),
-      mobile: buildCategoryScore(mobileFast.ok ? mobileFast.value : [], 'mobile'),
+      mobile: buildCategoryScore(mobileIssues, 'mobile'),
       ai_visibility: buildCategoryScore(aiVisibilityIssues, 'ai_visibility', {
         measurement: measurement('AI visibility audit', aiVisibilityDeep.ok ? 'measured' : 'partial', aiVisibilityDeep.ok ? undefined : 'Heuristic checks unavailable', aiVisibilityDeep.durationMs),
       }),

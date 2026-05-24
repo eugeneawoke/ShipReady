@@ -12,6 +12,8 @@ export interface LighthouseMetrics {
   cls: number | null
   inp: number | null
   fcp: number | null
+  tapTargets?: number | null
+  fontSizeIssues?: boolean
   warnings: string[]
 }
 
@@ -267,6 +269,8 @@ async function runLighthouseNow(
       throw runtimeError ?? new Error('Lighthouse did not produce a valid report')
     }
 
+    const tapTargetsScore = lhr.audits?.['tap-targets']?.score
+    const fontSizeScore = lhr.audits?.['font-size']?.score
     const metrics = {
       performanceScore: scoreFromCategory(lhr.categories?.performance, 'performance'),
       seoScore: optionalScoreFromCategory(lhr.categories?.seo, 'seo'),
@@ -275,6 +279,8 @@ async function runLighthouseNow(
       cls: optionalMetric(lhr, 'cumulative-layout-shift'),
       inp: optionalMetric(lhr, 'interaction-to-next-paint'),
       fcp: optionalMetric(lhr, 'first-contentful-paint'),
+      tapTargets: typeof tapTargetsScore === 'number' ? tapTargetsScore : null,
+      fontSizeIssues: typeof fontSizeScore === 'number' && fontSizeScore < 1,
       warnings: [
         ...(Array.isArray(lhr.runWarnings) ? lhr.runWarnings.filter((warning: unknown) => typeof warning === 'string') : []),
         ...profile.warnings,
