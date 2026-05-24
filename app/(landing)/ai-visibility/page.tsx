@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { ScanForm } from '@/components/landing/ScanForm'
 import { SiteBrandLink } from '@/components/SiteHeader'
+import { LandingNavAuth } from '@/components/landing/LandingNavAuth'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
@@ -23,7 +24,7 @@ export default function AIVisibilityLandingPage() {
           </div>
           <div className="flex items-center gap-3">
             <Link href="/pricing" className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors">Pricing</Link>
-            <Link href="/auth/login" className="rounded-lg bg-[#6E56CF] px-4 py-1.5 text-sm font-medium text-white hover:bg-[#7C68D4] transition-colors">Sign in</Link>
+            <LandingNavAuth />
           </div>
         </div>
       </header>
