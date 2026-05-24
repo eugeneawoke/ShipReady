@@ -37,6 +37,7 @@
 | 17 | Agency Integrations | GitHub Action (Marketplace), Vercel deploy hook, Slack/Discord alerts | 💡 Agency tier, post-Stage 5 |
 | 18 | Blog / Knowledge Base | SEO-контент: статьи по безопасности, AI visibility, SEO. Органика + экспертное позиционирование | 💡 идея |
 | 19 | Report Comparison     | Сравнение двух сканов одного домена: до/после, diff по категориям и issues                       | 💡 идея |
+| 20 | Product Evolution v2 — Phase 1 Cleanup | Удалить шум: twitter-card, og-url-double-slash, sitemap-double-slash, apple-touch-icon | ✅ done (2026-05-24, commit a461a09) |
 
 ---
 

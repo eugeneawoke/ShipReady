@@ -47,6 +47,10 @@
   - 14-day trial: `/signup?promo=14day-trial` → beta_access_grants запись создана → план = pro
 - [ ] Подготовить feedback path для beta users: email/support text/dashboard CTA.
 
+## Done
+
+- [x] **Phase 1 (Cleanup) — 2026-05-24**: Removed noise checks — `missing-twitter-card`, `missing-twitter-image`, `og-url-double-slash`, `sitemap-double-slash`, `missing-touch-icon` from seo.ts / mobile.ts / issue-meta.ts / issue-templates.ts / check-catalog.ts. Build clean. Commit a461a09.
+
 ## Done in code
 
 - [x] Next.js 16 App Router + React 19 app shell.
