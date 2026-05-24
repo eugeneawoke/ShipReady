@@ -30,7 +30,7 @@ async function resolveHostnameIps(hostname: string): Promise<string[]> {
   return [...new Set(records.map((record) => record.address))]
 }
 
-async function assertPublicHost(hostname: string): Promise<void> {
+export async function assertPublicHost(hostname: string): Promise<void> {
   if (PRIVATE_HOST_RE.some((re) => re.test(hostname))) {
     throw new Error('Blocked private host')
   }
