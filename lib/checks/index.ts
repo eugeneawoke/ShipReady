@@ -12,6 +12,7 @@ import { assertSafeScanUrl } from '@/lib/server/url-safety'
 import { fetchPrimaryContext, fetchSafeResource } from '@/lib/checks/fetch-context'
 import { generateEvidenceEnrichment } from '@/lib/ai/generate-evidence-enrichment'
 import { generateWowInsights } from '@/lib/ai/generate-wow-insights'
+import { generateArtifacts } from '@/lib/ai/generate-artifacts'
 import { measurement, withIssueMeta, evidence } from '@/lib/checks/issue-meta'
 import { buildMonitoringAlertDecision } from '@/lib/monitoring/alerts'
 import { sendMonitoringAlert } from '@/lib/email/send-alert'
@@ -537,6 +538,8 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
       })
     }
 
+    const generatedArtifacts = generateArtifacts(result, businessContext)
+
     result = buildScanResult({
       ...result,
       phase: 'final',
@@ -550,6 +553,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
       siteSummary,
       businessContext,
       scanGoal,
+      generatedArtifacts,
     })
 
     latestResult = result
