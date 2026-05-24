@@ -466,7 +466,8 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
   const latestScanRef = useRef<Scan | null>(null)
   const pollFailuresRef = useRef(0)
   const [id, setId] = useState<string>('')
-  const [activeCategory, setActiveCategory] = useState<IssueCategory>('performance')
+  const [activeCategory, setActiveCategory] = useState<IssueCategory>('seo')
+  const userChangedTabRef = useRef(false)
   const [passedOpen, setPassedOpen] = useState(false)
   const [shareLabel, setShareLabel] = useState('')
   const [isPro, setIsPro] = useState(false)
@@ -613,6 +614,13 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
       clearInterval(interval)
     }
   }, [id, pollVersion])
+
+  useEffect(() => {
+    const scanGoal = scan?.results?.scanGoal
+    if (scanGoal && !userChangedTabRef.current) {
+      setActiveCategory(getCategoryOrder(scanGoal)[0])
+    }
+  }, [scan?.results?.scanGoal])
 
   // Minimal spinner while loading existing report
   if (initialLoading) {
@@ -1115,7 +1123,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
                 return (
                   <button
                     key={cat}
-                    onClick={() => setActiveCategory(cat)}
+                    onClick={() => { userChangedTabRef.current = true; setActiveCategory(cat) }}
                     className={`flex items-center gap-1.5 px-4 py-2.5 text-sm whitespace-nowrap relative transition-colors cursor-pointer ${
                       isActive ? 'text-[#F1F0EE]' : 'text-[#8B8A85] hover:text-[#F1F0EE]'
                     }`}
