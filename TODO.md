@@ -51,6 +51,7 @@
 
 - [x] **Phase 1 (Cleanup) — 2026-05-24**: Removed noise checks — `missing-twitter-card`, `missing-twitter-image`, `og-url-double-slash`, `sitemap-double-slash`, `missing-touch-icon` from seo.ts / mobile.ts / issue-meta.ts / issue-templates.ts / check-catalog.ts. Build clean. Commit a461a09.
 - [x] **Phase 2 (ScanGoal) — 2026-05-24**: Replaced ScanGoal union with `seo|security|ai_visibility|full`. Updated 11 files: types, API routes, report page, enrichment, ScanForm, i18n. Added `buildScanStages(scanGoal?)` with per-goal labels. Commit ce8959e.
+- [x] **Phase 3 (GeneratedArtifacts) — 2026-05-24**: Added `GeneratedArtifacts` interface to `types/scan.ts`. Created `lib/ai/generate-artifacts.ts` (llms.txt, schema.org, security headers Next.js/nginx). Wired into `runAllChecks` post-enrichment + `buildScanResult`. Decision D-30. Commits a5a87d4, 17e89c9, 8db8f51.
 
 ## Done in code
 

@@ -158,6 +158,17 @@ Fallback: локально в dev можно продолжать запуска
 - Sandbox через `PAYPRO_SANDBOX=true` + `secret-key` параметр в checkout URL.
 Отклонено: хранение плана в `profiles.plan` при каждом webhook'е — нарушает независимость billing/beta систем.
 
+### D-30: GeneratedArtifacts — генерация артефактов детерминированная, без AI вызова
+Решение: артефакты (llms.txt, Schema.org JSON-LD, security headers для Next.js/nginx) генерируются детерминированными функциями в `lib/ai/generate-artifacts.ts`, без вызова OpenAI.
+Почему: артефакты — это шаблоны с подстановкой данных из scan result и businessContext. AI здесь не добавляет ценности, только стоимость и latency. Детерминированная генерация быстрее, дешевле, предсказуемее.
+Триггеры генерации:
+- `llmsTxt`: только если найден `missing-llms-txt` или `thin-llms-txt` в ai_visibility.issues
+- `schemaOrgJson`: только если найден `missing-schema-org` в ai_visibility.issues
+- `securityHeadersNextJs` + `securityHeadersNginx`: только если есть хотя бы один из `missing-hsts`, `missing-x-frame`, `missing-xcto`, `missing-referrer-policy`, `missing-permissions-policy` в security.issues
+Место вызова: в `runAllChecks` после enrichment block, перед финальным `buildScanResult`.
+Хранение: в `ScanResult.generatedArtifacts?` — опциональное поле, не влияет на score.
+Отклонено: AI-генерация артефактов — дорого и избыточно для шаблонных документов.
+
 ### D-29: ScanGoal — заменить маркетинговые цели на технические режимы
 Решение: `ScanGoal` тип заменён с `'sales' | 'leads' | 'traffic' | 'visibility' | 'general'` на `'seo' | 'security' | 'ai_visibility' | 'full'`.
 Почему: старые значения отражали маркетинговый outcome пользователя, а не технический режим сканера. Новые значения соответствуют трём landing page (`/seo`, `/security`, `/ai-visibility`) и позволяют строить mode-aware прогресс и report ordering. `'full'` заменяет `'general'` как дефолт.
