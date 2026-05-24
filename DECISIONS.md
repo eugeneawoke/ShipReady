@@ -56,10 +56,11 @@
 Почему: Аудитория — indie hackers которые хотят попасть в ChatGPT/Perplexity/Google SGE. Ни один конкурент (Cheeeck, Lighthouse, VibeEval) это не проверяет — это наш дифференциатор.
 Веса scoring обновлены: performance×0.25 + seo×0.20 + security×0.25 + mobile×0.10 + ai_visibility×0.20 = 1.0.
 
-### D-12: Один AI промпт в UI — vibePrompt предпочтительный
-Решение: GPT генерирует два варианта в одном вызове — `aiTechnicalPrompt` (Cursor, Windsurf, Claude Code — файловые пути, конкретные теги) и `aiVibePrompt` (Bolt, Lovable, v0, Replit — высокоуровнево). UI показывает **один** блок "Fix everything" с единственным промптом. Логика выбора: `aiVibePrompt` → `aiTechnicalPrompt` (fallback если vibePrompt слабый) → deterministic fallback. Таббар/инструментный селектор не реализован.
-Почему: Пересматривает D-03. Один GPT вызов, два поля внутри, но пользователь видит один лучший вариант без необходимости выбирать. Per-issue промпты убраны из UI (используются только для обогащения `cursorPrompt`/`boltPrompt` на issue-уровне внутри).
-Реализация: `app/report/[id]/page.tsx` строки 481–485, `lib/ai/generate-evidence-enrichment.ts`.
+### D-12: Один AI промпт в UI — только technicalPrompt ~~(обновлено: vibePrompt удалён)~~
+Решение: GPT генерирует один вариант — `aiTechnicalPrompt` (Cursor, Windsurf, Claude Code — файловые пути, конкретные теги). UI показывает **один** блок "Fix everything" с `aiTechnicalPrompt` → deterministic fallback если AI не вернул ничего. Таббар/инструментный селектор не реализован.
+Почему: Аудитория — разработчики и agency, vibePrompt (Bolt/Lovable) не подходит под dev-аудиторию. Один промпт без выбора. Пересматривает D-03.
+Отклонено: `aiVibePrompt` / `boltPrompt` — убраны полностью, не генерируются и не хранятся.
+Реализация: `lib/ai/generate-evidence-enrichment.ts`, `app/report/[id]/page.tsx`.
 
 ### D-13: Scan visibility model
 Решение: анонимные сканы остаются доступными по `report/[id]`, а сканы авторизованных пользователей приватны и доступны только владельцу.
@@ -169,8 +170,35 @@ Fallback: локально в dev можно продолжать запуска
 Хранение: в `ScanResult.generatedArtifacts?` — опциональное поле, не влияет на score.
 Отклонено: AI-генерация артефактов — дорого и избыточно для шаблонных документов.
 
+### D-33: Lighthouse mobile audits → mobileIssues, не performanceIssues
+Решение: `tap-targets` и `font-size` Lighthouse audits маппируются в `mobile` категорию через `mobileIssues`, а не в `performance`. `LighthouseMetrics` расширен двумя optional полями: `tapTargets: number | null` (0-1 score) и `fontSizeIssues: boolean`.
+Почему: tap targets и font size — пользовательские/UX проблемы мобильного устройства, а не performance метрики. Их место — mobile category, где уже есть viewport и favicon checks. Performance category фокусируется на Core Web Vitals и Lighthouse perf score.
+Порог срабатывания: `tapTargets < 0.9` (не 1.0 — небольшой процент edge cases приемлем), `fontSizeIssues = score < 1`.
+
+### D-31: SecurityAlertBanner — отдельный компонент, фильтр по ID, не severity
+Решение: баннер критических проблем безопасности реализован как отдельный `SecurityAlertBanner` компонент. Фильтрация по ID (`exposed-env-file`, `api-key-in-html`, `no-https`), а не по `severity === 'critical'`.
+Почему: конкретные ID более стабильны как контракт — severity у одного и того же issue может меняться по скорингу, а семантика "этот issue требует немедленного внимания" не должна зависеть от числовых порогов.
+Место вставки: сразу после `ScanProgressPanel` в report page, до pagespeed/recurring sections — наиболее видимое место при любом статусе скана.
+
+### D-32: redirect-chain — manual hop counting внутри runLinksCheck
+Решение: `countRedirectHops` — приватная функция в `lib/checks/links.ts`, использует `fetch` с `redirect: 'manual'` и HEAD method. Вызывается в начале `runLinksCheck` до проверки broken links. Порог — 2+ hop.
+Почему: нативный `fetch` с `redirect: 'manual'` — единственный надёжный способ посчитать redirects без side-effects. 2 hop — минимально проблемный уровень (прямой redirect приемлем, цепочка — нет).
+
 ### D-29: ScanGoal — заменить маркетинговые цели на технические режимы
 Решение: `ScanGoal` тип заменён с `'sales' | 'leads' | 'traffic' | 'visibility' | 'general'` на `'seo' | 'security' | 'ai_visibility' | 'full'`.
 Почему: старые значения отражали маркетинговый outcome пользователя, а не технический режим сканера. Новые значения соответствуют трём landing page (`/seo`, `/security`, `/ai-visibility`) и позволяют строить mode-aware прогресс и report ordering. `'full'` заменяет `'general'` как дефолт.
 Маппинг: `traffic → seo`, `visibility → ai_visibility`, `sales/leads/general → full`.
 Следствие: scan progress labels теперь mode-aware через `buildScanStages(scanGoal?)`. Enrichment prompt приоритизирует issues по выбранному режиму. ScanForm показывает 4 цели вместо 5.
+
+### D-34: getCategoryOrder — tab reorder only, CATEGORIES constant unchanged
+Решение: `getCategoryOrder(scanGoal?)` — отдельная функция только для порядка рендеринга category tabs в report. Константа `CATEGORIES` остаётся неизменной — используется для allIssues, totalPassed, score computation.
+Почему: изменение порядка `CATEGORIES` сломало бы все вычисления, зависящие от стабильного набора 6 категорий. Reorder — чисто display concern.
+Порядок по умолчанию (full/undefined): seo, security, performance, mobile, ai_visibility, accessibility.
+
+### D-35: SupportingCategoryChips — anchor links, не callback
+Решение: `SupportingCategoryChips` использует `<a href="#category-{cat}">` якоря. Не получает `onSelect` callback для переключения active tab.
+Почему: компонент — informational "also checked" chips, а не primary navigation. Anchor-based scroll достаточен; усложнение через callback нарушало бы принцип минимального изменения.
+
+### D-36: Focused landing pages — server components, без client state
+Решение: `/seo`, `/security`, `/ai-visibility` — Next.js server components с `export const metadata`. `ScanForm` вставляется как client island с `defaultScanGoal` prop.
+Почему: server components дают правильный `<title>` и meta description без гидратации. Весь client state (scan goal, URL input, error) живёт внутри `ScanForm`, который уже `'use client'`.
