@@ -1,9 +1,31 @@
 import type { BusinessContext, GeneratedArtifacts, ScanResult } from '@/types/scan'
 
+/**
+ * Sanitize an AI-extracted string for safe interpolation into text artifacts.
+ * Strips:
+ * - Markdown block-level control characters (#, >, -) at line start — prevents
+ *   structural injection into llms.txt which is a Markdown-like format.
+ * - C0 control characters (except \n and \t) — prevents ANSI/terminal escape
+ *   injection when developers paste artifact content into a terminal.
+ */
+function sanitizeArtifactText(raw: string): string {
+  return raw
+    // Strip C0 control chars except newline and tab
+    // eslint-disable-next-line no-control-regex
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+    // Strip Markdown block-level leaders at start of each line
+    .split('\n')
+    .map(line => line.replace(/^[#>*\-]+\s*/, '').trim())
+    .join(' ')
+    .trim()
+}
+
 function generateLlmsTxt(url: string, businessContext: BusinessContext | null): string {
   const origin = new URL(url).origin
-  const productName = businessContext?.detectedService ?? new URL(url).hostname
-  const description = businessContext?.businessProfile ?? 'A web product.'
+  const rawName = businessContext?.detectedService ?? new URL(url).hostname
+  const rawDesc = businessContext?.businessProfile ?? 'A web product.'
+  const productName = sanitizeArtifactText(rawName)
+  const description = sanitizeArtifactText(rawDesc)
 
   const lines: string[] = [
     `# ${productName}`,
@@ -23,8 +45,8 @@ function generateLlmsTxt(url: string, businessContext: BusinessContext | null): 
 }
 
 function generateSchemaOrg(url: string, businessContext: BusinessContext | null): string {
-  const productName = businessContext?.detectedService ?? new URL(url).hostname
-  const description = businessContext?.businessProfile ?? ''
+  const productName = sanitizeArtifactText(businessContext?.detectedService ?? new URL(url).hostname)
+  const description = sanitizeArtifactText(businessContext?.businessProfile ?? '')
 
   const schema = {
     '@context': 'https://schema.org',

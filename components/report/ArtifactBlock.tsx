@@ -12,9 +12,13 @@ export function ArtifactBlock({ title, content, filename, language = 'text' }: P
   const [copied, setCopied] = useState(false)
 
   async function handleCopy() {
-    await navigator.clipboard.writeText(content)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    try {
+      await navigator.clipboard.writeText(content)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // Clipboard permission denied or API unavailable — no-op, button stays in default state
+    }
   }
 
   void language // reserved for future syntax highlighting

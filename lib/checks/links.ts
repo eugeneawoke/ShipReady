@@ -3,6 +3,7 @@ import type { Issue } from '@/types/scan'
 import { T } from '@/lib/ai/issue-templates'
 import { evidence, withIssueMeta } from '@/lib/checks/issue-meta'
 import { fetchWithHeadFallback } from '@/lib/checks/fetch-context'
+import { assertPublicHost } from '@/lib/server/url-safety'
 
 async function countRedirectHops(startUrl: string, maxHops = 5): Promise<number> {
   let current = startUrl
@@ -21,8 +22,18 @@ async function countRedirectHops(startUrl: string, maxHops = 5): Promise<number>
       const location = res.headers.get('location')
       if (!location) break
 
+      const nextUrl = location.startsWith('http') ? location : new URL(location, current).href
+
+      // SSRF guard: validate redirect destination before following
+      try {
+        await assertPublicHost(new URL(nextUrl).hostname)
+      } catch {
+        // Redirect leads to private/blocked host — stop counting, don't follow
+        break
+      }
+
       hops++
-      current = location.startsWith('http') ? location : new URL(location, current).href
+      current = nextUrl
     } catch {
       break
     }
