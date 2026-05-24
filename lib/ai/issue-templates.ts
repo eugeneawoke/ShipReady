@@ -501,7 +501,7 @@ Or use app/opengraph-image.tsx with next/og for dynamic generation.`,
     title: 'Page blocked from indexing via meta robots',
     description: 'meta[name="robots"] contains noindex — search engines will not index this page.',
     plainEnglish: 'A meta tag explicitly tells search engines not to index this page. If this is a public marketing or product page, removing noindex is critical for organic traffic.',
-    fixPrompt: 'In Next.js, remove `robots: { index: false }` from the page metadata export or generateMetadata(). Check that no middleware or layout is injecting a noindex directive for this route.',
+    fixPrompt: 'In Next.js, remove `robots: { index: false }` from the page metadata export or generateMetadata(). Check that no middleware or layout is injecting a noindex directive for this route.\n\nAfter deploying the fix, use Google Search Console → URL Inspection → Request Indexing to re-submit the page.',
     docsUrl: 'https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag',
   },
 

@@ -289,7 +289,7 @@ export async function runAIVisibilityChecks(
       title: 'No sitemap.xml found',
       description: 'No sitemap.xml at /sitemap.xml and none referenced in the document.',
       plainEnglish: 'A sitemap helps crawlers discover the pages you want cited and indexed.',
-      fixPrompt: 'Expose a sitemap.xml endpoint or static file that covers the important public pages.',
+      fixPrompt: 'Expose a sitemap.xml endpoint or static file that covers the important public pages. In Next.js, create app/sitemap.ts and export a default function returning your URLs.\n\nAfter creating sitemap.xml:\n• Submit to Google: Search Console → Sitemaps → Add\n• Submit to Яндекс: Яндекс Вебмастер → Индексирование → Файлы Sitemap',
       docsUrl: 'https://nextjs.org/docs/app/api-reference/file-conventions/metadata/sitemap',
     }, 'ai-visibility', [evidence('selector', 'sitemap.xml', 'missing')]))
   }

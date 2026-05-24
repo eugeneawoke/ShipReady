@@ -1,6 +1,6 @@
 # ShipReady Project Specification
 
-Last updated: 2026-04-09
+Last updated: 2026-05-24
 Status: private beta readiness
 
 ## Purpose
@@ -28,12 +28,13 @@ Practical interpretation: ShipReady is close enough to show to first beta users,
 - URL scan from landing page.
 - Report page with partial/progressive scan states.
 - Report page actions for rescan of the current URL and starting a new URL scan.
-- Five categories:
+- Six categories:
   - Performance
   - SEO
   - Security
   - Mobile
   - AI visibility
+  - Accessibility
 - Evidence-backed issue cards.
 - Verified / likely / heuristic confidence model.
 - Measurement states for heavy checks.
@@ -42,12 +43,19 @@ Practical interpretation: ShipReady is close enough to show to first beta users,
 - PDF export for Pro/Agency users.
 - Weekly monitoring toggle for Pro/Agency users.
 - Email alert pipeline after Resend production setup is complete.
+- Three focused landing pages: `/seo`, `/security`, `/ai-visibility` with pre-selected scanGoal.
+- Per-platform AI readiness breakdown (ChatGPT, Claude, Perplexity, Google AI) in report.
+- Generated artifacts: llms.txt, Schema.org JSON-LD, security headers config (copy-paste blocks in report).
+- SPA/no-SSR detection (sites that render only in browser).
+- Redirect chain detection (2+ hops).
+- Lighthouse mobile metrics mapped to Mobile category (tap targets, font size).
+- Analytics detection (GA4/GTM/Яндекс Метрика).
+- Keyword-in-page check via businessContext.
 
 ### Out of scope for beta
 
 - Full public paid launch.
 - Agency/team workflows.
-- API access.
 - CI/CD integrations.
 - Multi-page crawl mode.
 - Deep DAST, runtime XSS testing, or auth bypass testing.
@@ -66,10 +74,11 @@ Practical interpretation: ShipReady is close enough to show to first beta users,
 ### Key decisions
 
 - Supabase is the database and auth provider.
-- Payment provider is TBD. Lemon Squeezy is explicitly not the selected provider.
+- Payment provider is PayPro Global (Merchant of Record). Lemon Squeezy and Stripe are explicitly rejected. See D-28.
 - Railway is used for scanner execution because Vercel Hobby is not a good fit for heavy Chromium scans.
 - AI is one compact enrichment call for normal scans, with Pro/Agency wow insights as a separate add-on.
 - PageSpeed Insights is only a future benchmark, not the default scanner path.
+- REST API v1 (`/api/v1/scan`) exists with API key authentication; Agency/team UI is deferred to Phase 17.
 
 ## Scan Flow
 
@@ -152,15 +161,20 @@ Current code state:
 - PDF export exists for Pro/Agency.
 - Weekly monitoring exists for Pro/Agency.
 - Email alert pipeline exists.
+- PayPro Global checkout + IPN webhook + SHA256 verification implemented (D-28).
+- `subscriptions` table + `payment_events` audit log (migration 015).
+- `beta_access_grants` + referral campaigns infrastructure (migration 014).
+- Effective plan: paid sub > beta_access_grant > profiles.plan (`getEffectivePlanForUserId`).
+- REST API v1 (`/api/v1/scan`) with Bearer API key auth + rate limiting.
 
 Production setup still required before relying on paid features:
 
-- Choose a payment provider available to the founder.
-- Implement provider-agnostic checkout/webhook plan updates.
-- Apply Supabase migrations in production.
+- Apply Supabase migrations 001–015 in production.
+- Create Pro Monthly/Yearly products in PayPro dashboard; get Product IDs.
+- Configure PayPro IPN URL and env vars (`PAYPRO_VALIDATION_KEY`, `PAYPRO_VENDOR_ID`, etc.).
 - Configure Resend API key and verified sender.
 - Verify the Railway scanner and shared `SCANNER_SECRET`.
-- Run end-to-end production tests.
+- Run end-to-end production smoke test.
 
 For today’s beta, manual invite/manual Pro access is acceptable and safer than rushing full paid launch.
 
@@ -237,6 +251,31 @@ Priority 3:
 - API access.
 - GitHub Action and deployment integrations.
 - Multi-page crawl and broader accessibility checks.
+
+### Coming Soon
+
+- IntentLead AI integration — post-audit "Who You're Missing" overlay layer
+- Growth Bundle (ShipReady Agency + IntentLead) — bundled pricing
+- REST API public documentation and SDK examples
+- GSC + Яндекс Вебмастер OAuth integration — real indexation data in report
+- GA4 + Яндекс Метрика OAuth integration — traffic data in report
+- Rank tracking via DataForSEO
+- Competitor analysis (keywords gap + backlinks)
+
+## Agency/Pro Integrations Roadmap
+
+These integrations require OAuth or paid APIs and are not part of the current scanner.
+
+| Integration | What it adds | When |
+|---|---|---|
+| Google Search Console | Real indexation, Coverage report, CTR per page | Pro tier, future phase |
+| Яндекс Вебмастер | Яндекс indexation, diagnostics | Pro tier, future phase |
+| Google Analytics 4 | Traffic, goals, conversions | Agency tier |
+| Яндекс Метрика | Same for RU/CIS market | Agency tier |
+| Rank tracking | Keyword positions via DataForSEO / SerpAPI | Agency tier |
+| Competitor analysis | Keywords gap + backlink comparison via DataForSEO | Agency tier |
+
+Until integration: fix prompts for relevant issues contain manual instructions with direct links to GSC, Яндекс Вебмастер, etc.
 
 ## Source Documents
 
