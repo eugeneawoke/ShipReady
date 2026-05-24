@@ -240,7 +240,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
       seo: buildCategoryScore(seoFast.ok ? seoFast.value : [], 'seo'),
       security: buildCategoryScore(securityFast.ok ? securityFast.value : [], 'security'),
       mobile: buildCategoryScore(mobileFast.ok ? mobileFast.value : [], 'mobile'),
-      ai_visibility: buildCategoryScore(aiVisibilityFast.ok ? aiVisibilityFast.value : [], 'ai_visibility'),
+      ai_visibility: buildCategoryScore(aiVisibilityFast.ok ? aiVisibilityFast.value.issues : [], 'ai_visibility'),
       accessibility: buildCategoryScore(accessibilityFast.ok ? accessibilityFast.value : [], 'accessibility'),
       businessContext,
       scanGoal,
@@ -333,7 +333,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
     const [lighthouseResult, linksResult, seoDeep, aiVisibilityDeep] = await Promise.all([
       safeTask(() => runLighthouse(finalUrl), 210_000, 'lighthouse'),
       safeTask(runLinksCheck(finalUrl, fetchContext.html), 12_000, 'links'),
-      safeTask(runSEOChecks(finalUrl, fetchContext.html), 10_000, 'seo-deep'),
+      safeTask(runSEOChecks(finalUrl, fetchContext.html, { businessContext }), 10_000, 'seo-deep'),
       safeTask(runAIVisibilityChecks(finalUrl, fetchContext.html), 10_000, 'ai-visibility-deep'),
     ])
 
@@ -359,7 +359,10 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
       }
     }
     const seoIssues = seoDeep.ok ? [...seoDeep.value, ...(linksResult.ok ? linksResult.value : [])] : (linksResult.ok ? linksResult.value : [])
-    const aiVisibilityIssues = aiVisibilityDeep.ok ? aiVisibilityDeep.value : []
+    const aiVisibilityIssues = aiVisibilityDeep.ok ? aiVisibilityDeep.value.issues : []
+    const aiPlatformReadiness = aiVisibilityDeep.ok
+      ? aiVisibilityDeep.value.platformReadiness
+      : (aiVisibilityFast.ok ? aiVisibilityFast.value.platformReadiness : undefined)
     const lighthouseStageStatus = lighthouseResult.ok
       ? (lighthouseResult.value.warnings.length > 0 ? 'partial' : 'done')
       : 'failed'
@@ -407,6 +410,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
       stages: currentStages,
       budget,
       siteSummary,
+      aiPlatformReadiness,
     })
 
     let providerData = result.providerData

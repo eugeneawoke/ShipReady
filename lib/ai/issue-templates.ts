@@ -1191,4 +1191,64 @@ Standard OG image: 1200×630px (1.91:1 ratio).
 Twitter summary_large_image also works best at 1200×628px.`,
     docsUrl: 'https://ogp.me/#structured',
   },
+
+  'spa-no-ssr': {
+    id: 'spa-no-ssr',
+    category: 'seo',
+    severity: 'high',
+    title: 'Site appears to be a client-side SPA without server-side rendering',
+    description: 'Page HTML contains almost no visible content — likely a React/Vue SPA that renders in the browser.',
+    plainEnglish: "Google and AI crawlers see an empty page. They fetch your HTML but JavaScript hasn't run yet, so they see no content. This means you're invisible to search engines and AI assistants.",
+    fixPrompt: 'Add server-side rendering (SSR) or static site generation (SSG). In Next.js use App Router with Server Components. If using Vite/React, consider switching to Next.js or adding a pre-rendering solution like vite-plugin-ssr.',
+  },
+
+  'missing-analytics': {
+    id: 'missing-analytics',
+    category: 'seo',
+    severity: 'medium',
+    title: 'No analytics tracking detected',
+    description: 'No Google Analytics 4, Google Tag Manager, or Яндекс Метрика found on the page.',
+    plainEnglish: "You can't improve what you don't measure. Without analytics you have no visibility into traffic, user behavior, or conversion goals.",
+    fixPrompt: "Install Google Analytics 4 via Google Tag Manager (recommended). Steps:\n1. Create a GA4 property at analytics.google.com\n2. Create a GTM container at tagmanager.google.com\n3. Add GTM snippet to your <head> and <body>\n4. Configure GA4 tag inside GTM\n5. Set up conversion goals (form submits, button clicks)\nFor Яндекс: go to metrika.yandex.ru, create a counter, add the snippet.",
+  },
+
+  'keywords-not-in-title': {
+    id: 'keywords-not-in-title',
+    category: 'seo',
+    severity: 'high',
+    title: 'Primary topic not found in title or H1',
+    description: "The page title and H1 heading don't clearly reflect what the site is about based on its description.",
+    plainEnglish: "Your title tag and H1 are the strongest signals Google uses to understand what your page is about. If your main topic isn't there, you won't rank for it.",
+    fixPrompt: 'Include your primary keyword in both the <title> tag and the <h1> heading. Title format: "Primary Keyword — Brand Name". H1 should match or closely echo the title. Avoid generic headings like "Welcome" or "Home".',
+  },
+
+  'redirect-chain': {
+    id: 'redirect-chain',
+    category: 'seo',
+    severity: 'medium',
+    title: 'Redirect chain detected',
+    description: 'The URL goes through multiple redirects before reaching the final destination.',
+    plainEnglish: 'Your URL redirects through 2+ hops before arriving at the page. This wastes crawl budget, passes less PageRank, and slows load time.',
+    fixPrompt: 'Update all internal links to point directly to the final URL. If using a CDN or proxy, configure it to serve a single 301 to the canonical URL.',
+  },
+
+  'small-tap-targets': {
+    id: 'small-tap-targets',
+    category: 'mobile',
+    severity: 'medium',
+    title: 'Tap targets are too small',
+    description: 'Some clickable elements are smaller than the 48×48px recommended by Google.',
+    plainEnglish: 'Some buttons or links are too small to tap accurately on a phone. This frustrates mobile users and hurts your Google mobile score.',
+    fixPrompt: 'Ensure all interactive elements (buttons, links) have a minimum size of 48×48px. In Tailwind: add min-h-12 min-w-12 to small buttons. Use padding instead of fixed height where possible.',
+  },
+
+  'mobile-font-too-small': {
+    id: 'mobile-font-too-small',
+    category: 'mobile',
+    severity: 'medium',
+    title: 'Font size too small on mobile',
+    description: 'Text is smaller than 16px on mobile, causing readability issues.',
+    plainEnglish: 'Some text is too small to read comfortably on mobile devices. Google flags this in mobile usability reports.',
+    fixPrompt: 'Set base font size to at least 16px. In Tailwind: ensure body uses text-base (16px) or larger. Avoid text-xs (12px) for body copy.',
+  },
 }

@@ -23,6 +23,15 @@ export type MeasurementStatus = 'measured' | 'partial' | 'unavailable'
 
 export type ScanGoal = 'seo' | 'security' | 'ai_visibility' | 'full'
 
+export type AIPlatformStatus = 'blocked' | 'partial' | 'ready'
+
+export interface AIPlatformReadiness {
+  chatgpt: AIPlatformStatus
+  claude: AIPlatformStatus
+  perplexity: AIPlatformStatus
+  googleAI: AIPlatformStatus
+}
+
 export interface BusinessContext {
   businessType: 'ecommerce' | 'saas' | 'local_business' | 'portfolio' | 'blog' | 'agency' | 'other'
   techStack: string[]
@@ -198,6 +207,7 @@ export interface ScanResult {
   scanGoal?: ScanGoal
   processingIssue?: ScanProcessingIssue
   generatedArtifacts?: GeneratedArtifacts
+  aiPlatformReadiness?: AIPlatformReadiness
 }
 
 export interface Scan {

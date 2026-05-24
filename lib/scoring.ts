@@ -1,4 +1,5 @@
 import type {
+  AIPlatformReadiness,
   BusinessContext,
   GeneratedArtifacts,
   ScanBudget,
@@ -213,6 +214,7 @@ export function buildScanResult(params: {
   businessContext?: BusinessContext | null
   scanGoal?: ScanGoal
   generatedArtifacts?: GeneratedArtifacts
+  aiPlatformReadiness?: AIPlatformReadiness
 }): ScanResult {
   const base = {
     url: params.url,
@@ -239,6 +241,7 @@ export function buildScanResult(params: {
     businessContext: params.businessContext,
     scanGoal: params.scanGoal,
     generatedArtifacts: params.generatedArtifacts,
+    aiPlatformReadiness: params.aiPlatformReadiness,
   }
 
   const totalScore = weightedTotal(base)

@@ -73,6 +73,12 @@ const CONFIDENCE_MAP: Record<string, { confidence: IssueConfidence; scoreEligibl
   'buttons-no-label': { confidence: 'verified', scoreEligible: true },
   'missing-lang-attribute': { confidence: 'verified', scoreEligible: true },
   'missing-skip-navigation': { confidence: 'heuristic', scoreEligible: false },
+  'spa-no-ssr': { confidence: 'likely', scoreEligible: true },
+  'missing-analytics': { confidence: 'verified', scoreEligible: false },
+  'keywords-not-in-title': { confidence: 'likely', scoreEligible: true },
+  'redirect-chain': { confidence: 'verified', scoreEligible: true },
+  'small-tap-targets': { confidence: 'verified', scoreEligible: true },
+  'mobile-font-too-small': { confidence: 'verified', scoreEligible: true },
 }
 
 export function evidence(kind: IssueEvidence['kind'], label: string, value: string | number): IssueEvidence {

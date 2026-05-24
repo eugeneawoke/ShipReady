@@ -1,5 +1,5 @@
 import * as cheerio from 'cheerio'
-import type { Issue } from '@/types/scan'
+import type { BusinessContext, Issue } from '@/types/scan'
 import { T } from '@/lib/ai/issue-templates'
 import { isValidUrl } from '@/lib/utils'
 import { evidence, withIssueMeta } from '@/lib/checks/issue-meta'
@@ -47,7 +47,11 @@ function isPathDisallowedByRobots(robotsText: string, pagePath: string): boolean
 export async function runSEOChecks(
   url: string,
   html: string,
-  options?: { includeLikely?: boolean; includeHeuristics?: boolean },
+  options?: {
+    includeLikely?: boolean
+    includeHeuristics?: boolean
+    businessContext?: BusinessContext | null
+  },
 ): Promise<Issue[]> {
   const includeLikely = options?.includeLikely ?? true
   const includeHeuristics = options?.includeHeuristics ?? true
@@ -355,6 +359,62 @@ export async function runSEOChecks(
         }
       }
     } catch { /* robots.txt fetch failed — not an issue */ }
+  }
+
+  // SPA / empty-shell detection
+  if (includeHeuristics) {
+    const bodyClone = $('body').clone()
+    bodyClone.find('script, style, noscript').remove()
+    const bodyText = bodyClone.text().trim()
+    const hasRootDiv = $('div#root, div#app, div#__next').length > 0
+    const wordCount = bodyText.split(/\s+/).filter(Boolean).length
+    const scriptCount = $('script').length
+    if (hasRootDiv && wordCount < 50 && scriptCount >= 1) {
+      issues.push(withIssueMeta(
+        { ...T['spa-no-ssr'] },
+        'dom',
+        [
+          evidence('count', 'Readable words in HTML', wordCount),
+          evidence('selector', 'Root SPA element', 'div#root / div#app detected'),
+        ],
+      ))
+    }
+  }
+
+  // Analytics detection
+  if (includeHeuristics) {
+    const htmlStr = $.html()
+    const hasGA4 = /googletagmanager\.com\/gtag\/js|gtag\('config'/.test(htmlStr)
+    const hasGTM = /googletagmanager\.com\/gtm\.js|GTM-[A-Z0-9]+/.test(htmlStr)
+    const hasYandexMetrika = /mc\.yandex\.ru\/metrika|Ya\.Metrika/.test(htmlStr)
+    if (!hasGA4 && !hasGTM && !hasYandexMetrika) {
+      issues.push(withIssueMeta(
+        { ...T['missing-analytics'] },
+        'dom',
+        [evidence('text', 'Analytics scripts found', 'none detected')],
+      ))
+    }
+  }
+
+  // Keyword-in-page check via businessContext
+  const bc = options?.businessContext
+  if (bc?.businessProfile || bc?.detectedService) {
+    const titleText = $('title').text().toLowerCase()
+    const h1Text = $('h1').first().text().toLowerCase()
+    const description = bc.businessProfile ?? bc.detectedService ?? ''
+    const keywords: string[] = description.toLowerCase().split(/\s+/).filter(w => w.length > 4).slice(0, 3)
+    const foundInTitle = keywords.some(kw => titleText.includes(kw))
+    const foundInH1 = keywords.some(kw => h1Text.includes(kw))
+    if (!foundInTitle && !foundInH1) {
+      issues.push(withIssueMeta(
+        { ...T['keywords-not-in-title'] },
+        'dom',
+        [
+          evidence('text', 'Title', $('title').text().slice(0, 80)),
+          evidence('text', 'H1', $('h1').first().text().slice(0, 80)),
+        ],
+      ))
+    }
   }
 
   return issues
