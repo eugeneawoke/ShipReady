@@ -157,3 +157,9 @@ Fallback: локально в dev можно продолжать запуска
 - SHA256 SIGNATURE verification (без разделителя между полями). MD5 HASH fallback только в test mode.
 - Sandbox через `PAYPRO_SANDBOX=true` + `secret-key` параметр в checkout URL.
 Отклонено: хранение плана в `profiles.plan` при каждом webhook'е — нарушает независимость billing/beta систем.
+
+### D-29: ScanGoal — заменить маркетинговые цели на технические режимы
+Решение: `ScanGoal` тип заменён с `'sales' | 'leads' | 'traffic' | 'visibility' | 'general'` на `'seo' | 'security' | 'ai_visibility' | 'full'`.
+Почему: старые значения отражали маркетинговый outcome пользователя, а не технический режим сканера. Новые значения соответствуют трём landing page (`/seo`, `/security`, `/ai-visibility`) и позволяют строить mode-aware прогресс и report ordering. `'full'` заменяет `'general'` как дефолт.
+Маппинг: `traffic → seo`, `visibility → ai_visibility`, `sales/leads/general → full`.
+Следствие: scan progress labels теперь mode-aware через `buildScanStages(scanGoal?)`. Enrichment prompt приоритизирует issues по выбранному режиму. ScanForm показывает 4 цели вместо 5.

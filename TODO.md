@@ -50,6 +50,7 @@
 ## Done
 
 - [x] **Phase 1 (Cleanup) — 2026-05-24**: Removed noise checks — `missing-twitter-card`, `missing-twitter-image`, `og-url-double-slash`, `sitemap-double-slash`, `missing-touch-icon` from seo.ts / mobile.ts / issue-meta.ts / issue-templates.ts / check-catalog.ts. Build clean. Commit a461a09.
+- [x] **Phase 2 (ScanGoal) — 2026-05-24**: Replaced ScanGoal union with `seo|security|ai_visibility|full`. Updated 11 files: types, API routes, report page, enrichment, ScanForm, i18n. Added `buildScanStages(scanGoal?)` with per-goal labels. Commit ce8959e.
 
 ## Done in code
 
