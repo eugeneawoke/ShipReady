@@ -9,6 +9,7 @@ import { ReportSkeleton } from '@/components/report/ReportSkeleton'
 import { ScoreRing } from '@/components/report/ScoreRing'
 import { CategoryCard } from '@/components/report/CategoryCard'
 import { IssueCard } from '@/components/report/IssueCard'
+import { SecurityAlertBanner } from '@/components/report/SecurityAlertBanner'
 import { ScanForm, useScanLauncher } from '@/components/landing/ScanForm'
 import { SiteBrandLink } from '@/components/SiteHeader'
 import { LanguageSwitcher } from '@/components/i18n/LanguageSwitcher'
@@ -988,6 +989,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
           retryError={retryError}
           onRetryLighthouse={handleRetryLighthouse}
         />
+        <SecurityAlertBanner result={results} />
         {pagespeedData && (
           <section className="rounded-xl border border-white/8 bg-white/[0.02] px-4 py-3">
             <p className="text-sm text-[#F1F0EE]">{t('pagespeedTitle')}</p>
