@@ -1,23 +1,48 @@
-import type { ScanStage, ScanStageId, ScanStageStatus } from '@/types/scan'
+import type { ScanGoal, ScanStage, ScanStageId, ScanStageStatus } from '@/types/scan'
 
-const DEFAULT_STAGE_LABELS: Record<ScanStageId, string> = {
-  fast: 'Fast truth checks',
-  crawl: 'Site crawl',
-  lighthouse: 'Lighthouse mobile audit',
-  enrichment: 'AI enrichment',
+const STAGE_LABELS: Record<ScanGoal, Record<ScanStageId, string>> = {
+  seo: {
+    fast: 'Checking if Google can read your pages',
+    crawl: 'Crawling site structure',
+    lighthouse: 'Measuring Core Web Vitals',
+    enrichment: 'Writing your SEO fix guide',
+  },
+  security: {
+    fast: 'Checking HTTPS and scanning for exposed files',
+    crawl: 'Crawling site for security signals',
+    lighthouse: 'Running deep security checks',
+    enrichment: 'Generating fix configs',
+  },
+  ai_visibility: {
+    fast: 'Checking if ChatGPT and Claude can access your site',
+    crawl: 'Crawling site for AI signals',
+    lighthouse: 'Analyzing structured data and content',
+    enrichment: 'Building your AI readiness report',
+  },
+  full: {
+    fast: 'Fast truth checks',
+    crawl: 'Site crawl',
+    lighthouse: 'Lighthouse mobile audit',
+    enrichment: 'AI enrichment',
+  },
 }
 
 const DEFAULT_STAGE_MESSAGES: Partial<Record<ScanStageId, string>> = {
   crawl: 'Bounded crawl is not enabled for this scan yet.',
 }
 
-export function buildDefaultScanStages(): ScanStage[] {
-  return (Object.keys(DEFAULT_STAGE_LABELS) as ScanStageId[]).map((id) => ({
+export function buildScanStages(scanGoal?: ScanGoal): ScanStage[] {
+  const labels = STAGE_LABELS[scanGoal ?? 'full']
+  return (Object.keys(labels) as ScanStageId[]).map((id) => ({
     id,
-    label: DEFAULT_STAGE_LABELS[id],
+    label: labels[id],
     status: 'queued',
     ...(DEFAULT_STAGE_MESSAGES[id] ? { message: DEFAULT_STAGE_MESSAGES[id] } : {}),
   }))
+}
+
+export function buildDefaultScanStages(): ScanStage[] {
+  return buildScanStages('full')
 }
 
 export function updateScanStage(

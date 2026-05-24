@@ -78,11 +78,10 @@ export function useScanLauncher() {
 }
 
 const SCAN_GOALS = [
-  { value: 'sales', labelKey: 'goals.sales' },
-  { value: 'leads', labelKey: 'goals.leads' },
-  { value: 'traffic', labelKey: 'goals.traffic' },
-  { value: 'visibility', labelKey: 'goals.visibility' },
-  { value: 'general', labelKey: 'goals.general' },
+  { value: 'seo', labelKey: 'goals.seo' },
+  { value: 'security', labelKey: 'goals.security' },
+  { value: 'ai_visibility', labelKey: 'goals.ai_visibility' },
+  { value: 'full', labelKey: 'goals.full' },
 ] as const
 
 export function ScanForm({
@@ -91,16 +90,18 @@ export function ScanForm({
   compact = false,
   autoFocus = false,
   className = '',
+  defaultScanGoal,
 }: {
   initialUrl?: string
   submitLabel?: string
   compact?: boolean
   autoFocus?: boolean
   className?: string
+  defaultScanGoal?: string
 }) {
   const t = useTranslations('ScanForm')
   const [url, setUrl] = useState(initialUrl)
-  const [scanGoal, setScanGoal] = useState<string>('')
+  const [scanGoal, setScanGoal] = useState<string>(defaultScanGoal ?? '')
   const { loading, error, launchScan } = useScanLauncher()
 
   async function handleSubmit(e: React.FormEvent) {

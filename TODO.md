@@ -47,6 +47,15 @@
   - 14-day trial: `/signup?promo=14day-trial` → beta_access_grants запись создана → план = pro
 - [ ] Подготовить feedback path для beta users: email/support text/dashboard CTA.
 
+## Done
+
+- [x] **Phase 1 (Cleanup) — 2026-05-24**: Removed noise checks — `missing-twitter-card`, `missing-twitter-image`, `og-url-double-slash`, `sitemap-double-slash`, `missing-touch-icon` from seo.ts / mobile.ts / issue-meta.ts / issue-templates.ts / check-catalog.ts. Build clean. Commit a461a09.
+- [x] **Phase 2 (ScanGoal) — 2026-05-24**: Replaced ScanGoal union with `seo|security|ai_visibility|full`. Updated 11 files: types, API routes, report page, enrichment, ScanForm, i18n. Added `buildScanStages(scanGoal?)` with per-goal labels. Commit ce8959e.
+- [x] **Phase 3 (GeneratedArtifacts) — 2026-05-24**: Added `GeneratedArtifacts` interface to `types/scan.ts`. Created `lib/ai/generate-artifacts.ts` (llms.txt, schema.org, security headers Next.js/nginx). Wired into `runAllChecks` post-enrichment + `buildScanResult`. Decision D-30. Commits a5a87d4, 17e89c9, 8db8f51.
+- [x] **Phase 4 (AI Visibility) — 2026-05-24**: Added `AIPlatformReadiness` type + `buildPlatformReadiness`. Changed `runAIVisibilityChecks` return to `{ issues, platformReadiness }`. Added SPA detection, analytics detection, keyword-in-title check to `runSEOChecks`. Wired `businessContext` into deep SEO. Commit 3d905a5.
+- [x] **Phase 5 (Security ALERT + Redirects) — 2026-05-24**: Created `SecurityAlertBanner` component (critical IDs: exposed-env-file, api-key-in-html, no-https). Inserted into report page after ScanProgressPanel. Added `countRedirectHops` + `redirect-chain` check to `runLinksCheck`. Commit 938e628.
+- [x] **Phase 6 (Mobile + Lighthouse) — 2026-05-24**: Added `tapTargets` + `fontSizeIssues` to `LighthouseMetrics`. Extract from `lhr.audits['tap-targets']` and `lhr.audits['font-size']`. `mobileIssues` now merges mobileFast + Lighthouse mobile checks. `small-tap-targets` fires at score < 0.9, `mobile-font-too-small` fires at score < 1. Commit 1a22f13.
+
 ## Done in code
 
 - [x] Next.js 16 App Router + React 19 app shell.
@@ -87,6 +96,22 @@
 - [ ] Multi-page crawl.
 - [ ] GitHub Action / CI integration.
 - [ ] Dedicated scanner outbound firewall/proxy.
+
+## Product Evolution v2 — Post-beta (Phases 7–9)
+
+Prerequisite: beta launched, prod stable.
+
+- [x] **Phase 7 — Report view adaptation** (2026-05-24, commit dc577c2): getCategoryOrder per scanGoal, ArtifactBlock copy-paste blocks, SupportingCategoryChips, AI platform readiness grid in ai_visibility tab.
+- [x] **Phase 8 — Landing pages** (2026-05-24, commit a79745a): /seo, /security, /ai-visibility pages; ModePicker on main landing; ScanForm defaultScanGoal prop; nav simplified (SEO/Security/AI links, removed See Report/What We Check/Methodology).
+- [x] **Phase 9 — Docs sync** (2026-05-24, commit 76ec36d): PLAN.md + project-spec.md updated; agency integrations roadmap added; fix prompts updated with GSC/Яндекс Вебмастер links.
+
+## Checks Deepening (Post-product-evolution)
+
+Prerequisite: Product Evolution Phases 7–9 выполнены. Ref: `docs/feature-plans/checks-deepening-main.md`.
+
+- [ ] **Phase 1 — Zero deps**: +17 checks — SPF/DMARC/DKIM DNS records, cookie Secure/HttpOnly/SameSite flags, expanded path probes, per-bot AI crawler checks (GPTBot, ClaudeBot, PerplexityBot), llms.txt content validation. Только Node built-ins + cheerio.
+- [ ] **Phase 2 — Light npm**: sitemap XML quality (fast-xml-parser), robots.txt quality (robots-parser), semantic HTML checks, schema.org required fields validation. +8 checks.
+- [ ] **Phase 3 — Free APIs**: SSL Labs TLS grading, OSV CVE lookup для npm deps, CrUX от PSI, Pro-only AI content citability + answer gap в enrichment. +5 checks.
 
 ## Post-beta next
 

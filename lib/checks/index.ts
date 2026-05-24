@@ -12,6 +12,7 @@ import { assertSafeScanUrl } from '@/lib/server/url-safety'
 import { fetchPrimaryContext, fetchSafeResource } from '@/lib/checks/fetch-context'
 import { generateEvidenceEnrichment } from '@/lib/ai/generate-evidence-enrichment'
 import { generateWowInsights } from '@/lib/ai/generate-wow-insights'
+import { generateArtifacts } from '@/lib/ai/generate-artifacts'
 import { measurement, withIssueMeta, evidence } from '@/lib/checks/issue-meta'
 import { buildMonitoringAlertDecision } from '@/lib/monitoring/alerts'
 import { sendMonitoringAlert } from '@/lib/email/send-alert'
@@ -19,7 +20,7 @@ import { analyzeBusinessContext } from '@/lib/ai/analyze-business-context'
 import { fetchPageSpeedData } from '@/lib/providers/pagespeed'
 import { crawlSite } from '@/lib/crawl/engine'
 import {
-  buildDefaultScanStages,
+  buildScanStages,
   failRunningStages,
   updateScanStage,
 } from '@/lib/scan/stage-telemetry'
@@ -171,10 +172,10 @@ async function finalizeMonitoredDomain(scanId: string): Promise<void> {
   }
 }
 
-export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanGoal): Promise<void> {
+export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanGoal, userLocale?: string): Promise<void> {
   const startedAt = Date.now()
   let currentStatus: ScanStatus = 'running_fast'
-  let currentStages = updateScanStage(buildDefaultScanStages(), 'fast', {
+  let currentStages = updateScanStage(buildScanStages(scanGoal), 'fast', {
     status: 'running',
     message: 'Fast truth checks are running against the fetched page.',
   })
@@ -239,7 +240,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
       seo: buildCategoryScore(seoFast.ok ? seoFast.value : [], 'seo'),
       security: buildCategoryScore(securityFast.ok ? securityFast.value : [], 'security'),
       mobile: buildCategoryScore(mobileFast.ok ? mobileFast.value : [], 'mobile'),
-      ai_visibility: buildCategoryScore(aiVisibilityFast.ok ? aiVisibilityFast.value : [], 'ai_visibility'),
+      ai_visibility: buildCategoryScore(aiVisibilityFast.ok ? aiVisibilityFast.value.issues : [], 'ai_visibility'),
       accessibility: buildCategoryScore(accessibilityFast.ok ? accessibilityFast.value : [], 'accessibility'),
       businessContext,
       scanGoal,
@@ -332,7 +333,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
     const [lighthouseResult, linksResult, seoDeep, aiVisibilityDeep] = await Promise.all([
       safeTask(() => runLighthouse(finalUrl), 210_000, 'lighthouse'),
       safeTask(runLinksCheck(finalUrl, fetchContext.html), 12_000, 'links'),
-      safeTask(runSEOChecks(finalUrl, fetchContext.html), 10_000, 'seo-deep'),
+      safeTask(runSEOChecks(finalUrl, fetchContext.html, { businessContext }), 10_000, 'seo-deep'),
       safeTask(runAIVisibilityChecks(finalUrl, fetchContext.html), 10_000, 'ai-visibility-deep'),
     ])
 
@@ -357,8 +358,39 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
         }, 'lighthouse', [evidence('metric', 'Accessibility score', a11yScore)]))
       }
     }
+    const mobileIssues = mobileFast.ok ? [...mobileFast.value] : []
+    if (lighthouseResult.ok) {
+      const lh = lighthouseResult.value
+      if (lh.tapTargets !== null && lh.tapTargets !== undefined && lh.tapTargets < 0.9) {
+        mobileIssues.push(withIssueMeta({
+          id: 'small-tap-targets',
+          category: 'mobile',
+          severity: 'medium',
+          title: 'Tap targets are too small for mobile',
+          description: 'Some tappable elements are smaller than 48×48px.',
+          plainEnglish: 'Buttons and links are too small to tap reliably on mobile devices.',
+          fixPrompt: 'Increase the size of all interactive elements to at least 48×48 pixels on mobile breakpoints.',
+          value: Math.round(lh.tapTargets * 100),
+        }, 'lighthouse', [evidence('metric', 'Tap targets score', Math.round(lh.tapTargets * 100))]))
+      }
+      if (lh.fontSizeIssues) {
+        mobileIssues.push(withIssueMeta({
+          id: 'mobile-font-too-small',
+          category: 'mobile',
+          severity: 'medium',
+          title: 'Font sizes are too small for mobile',
+          description: 'Some text is below 12px and may be unreadable without zooming.',
+          plainEnglish: 'Text on your page is too small to read comfortably on mobile.',
+          fixPrompt: 'Set a minimum font size of 12px for all text content, especially at small-screen breakpoints.',
+          value: 'failing',
+        }, 'lighthouse', [evidence('metric', 'Font size audit', 'failing')]))
+      }
+    }
     const seoIssues = seoDeep.ok ? [...seoDeep.value, ...(linksResult.ok ? linksResult.value : [])] : (linksResult.ok ? linksResult.value : [])
-    const aiVisibilityIssues = aiVisibilityDeep.ok ? aiVisibilityDeep.value : []
+    const aiVisibilityIssues = aiVisibilityDeep.ok ? aiVisibilityDeep.value.issues : []
+    const aiPlatformReadiness = aiVisibilityDeep.ok
+      ? aiVisibilityDeep.value.platformReadiness
+      : (aiVisibilityFast.ok ? aiVisibilityFast.value.platformReadiness : undefined)
     const lighthouseStageStatus = lighthouseResult.ok
       ? (lighthouseResult.value.warnings.length > 0 ? 'partial' : 'done')
       : 'failed'
@@ -392,7 +424,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
         measurement: measurement('SEO audit', 'measured', undefined, seoDeep.durationMs),
       }),
       security: buildCategoryScore(securityFast.ok ? securityFast.value : [], 'security'),
-      mobile: buildCategoryScore(mobileFast.ok ? mobileFast.value : [], 'mobile'),
+      mobile: buildCategoryScore(mobileIssues, 'mobile'),
       ai_visibility: buildCategoryScore(aiVisibilityIssues, 'ai_visibility', {
         measurement: measurement('AI visibility audit', aiVisibilityDeep.ok ? 'measured' : 'partial', aiVisibilityDeep.ok ? undefined : 'Heuristic checks unavailable', aiVisibilityDeep.durationMs),
       }),
@@ -406,6 +438,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
       stages: currentStages,
       budget,
       siteSummary,
+      aiPlatformReadiness,
     })
 
     let providerData = result.providerData
@@ -460,7 +493,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
 
       if (aiBudgetReservation.allowed) {
         const enrichment = await safeTask(
-          generateEvidenceEnrichment(result, businessContext, scanGoal),
+          generateEvidenceEnrichment(result, businessContext, scanGoal, userLocale),
           35_000,
           'ai-enrichment',
         )
@@ -537,6 +570,8 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
       })
     }
 
+    const generatedArtifacts = generateArtifacts(result, businessContext)
+
     result = buildScanResult({
       ...result,
       phase: 'final',
@@ -550,6 +585,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
       siteSummary,
       businessContext,
       scanGoal,
+      generatedArtifacts,
     })
 
     latestResult = result

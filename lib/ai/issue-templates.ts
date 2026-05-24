@@ -308,28 +308,6 @@ Or use app/opengraph-image.tsx with next/og for dynamic generation.`,
     docsUrl: 'https://developers.facebook.com/tools/debug/',
   },
 
-  'missing-twitter-card': {
-    id: 'missing-twitter-card',
-    category: 'seo',
-    severity: 'low',
-    title: 'Twitter/X card meta tag missing',
-    description: 'No twitter:card meta tag found.',
-    plainEnglish:
-      'Without this tag, Twitter/X may not show a rich link preview when your URL is shared. Links without rich cards get significantly less engagement.',
-    fixPrompt: `Add Twitter card meta tags in my Next.js app:
-In app/layout.tsx or the page file:
-export const metadata: Metadata = {
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Your Page Title',
-    description: 'Your description',
-    images: ['/og-image.png'],
-    // creator: '@yourhandle', // optional
-  },
-}`,
-    docsUrl: 'https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/abouts-cards',
-  },
-
   'placeholder-text': {
     id: 'placeholder-text',
     category: 'seo',
@@ -356,18 +334,6 @@ export const metadata: Metadata = {
     description: 'Meta description is either too short (<100 chars) or too long (>165 chars).',
     plainEnglish: 'Your meta description is either too short (under 100 chars) or too long (over 165 chars). Google typically shows 100–165 characters. Too short leaves value on the table; too long gets cut off with "…".',
     fixPrompt: 'Update the meta description to be between 120–160 characters. In Next.js, update the `description` field in `generateMetadata()`. Aim for: keyword-rich first 120 characters, compelling CTA in the last 30.',
-  },
-
-  'missing-twitter-image': {
-    id: 'missing-twitter-image',
-    category: 'seo',
-    severity: 'medium',
-    confidence: 'verified',
-    scoreEligible: true,
-    title: 'Twitter/X card declares summary_large_image but no twitter:image is set',
-    description: 'twitter:card is summary_large_image but no twitter:image meta tag was found.',
-    plainEnglish: 'Your page uses `twitter:card = summary_large_image` but provides no `twitter:image` URL. Twitter/X will show a blank card. Set the image or downgrade the card type.',
-    fixPrompt: 'In Next.js `generateMetadata()`, add `twitter: { card: "summary_large_image", images: ["/og.png"] }`. Create a 1200×630 PNG at `public/og.png` as the default OG image.',
   },
 
   'canonical-mismatch': {
@@ -416,18 +382,6 @@ export const metadata: Metadata = {
     description: 'The og:url hostname does not match the page hostname.',
     plainEnglish: 'Your share preview says the page belongs to a different domain than the one visitors are on. That creates inconsistent social previews and indexing signals.',
     fixPrompt: 'Set `openGraph.url` to the same production domain used by the canonical URL. In Next.js, normalize `NEXT_PUBLIC_APP_URL` once and reuse it for canonical and Open Graph URL generation.',
-  },
-
-  'og-url-double-slash': {
-    id: 'og-url-double-slash',
-    category: 'seo',
-    severity: 'high',
-    confidence: 'verified',
-    scoreEligible: true,
-    title: 'Open Graph URL contains a double-slash path',
-    description: 'The og:url value contains a malformed double-slash in the path.',
-    plainEnglish: 'Your Open Graph URL has an extra slash in the path. Social platforms may cache or display the wrong page URL.',
-    fixPrompt: 'Normalize the base URL before building `openGraph.url`. In Next.js, strip trailing slash from `NEXT_PUBLIC_APP_URL` before adding route paths.',
   },
 
   'sensitive-page-indexable': {
@@ -502,18 +456,6 @@ export const metadata: Metadata = {
     fixPrompt: 'Add `operatingSystem: "Web"` to your WebApplication JSON-LD schema. In Next.js, update the schema object in `app/layout.tsx` that contains `"@type": "WebApplication"`.',
   },
 
-  'sitemap-double-slash': {
-    id: 'sitemap-double-slash',
-    category: 'seo',
-    severity: 'high',
-    confidence: 'verified',
-    scoreEligible: true,
-    title: 'Sitemap URL in robots.txt has a double-slash',
-    description: 'The Sitemap: line in robots.txt contains a malformed URL with a double-slash after the protocol.',
-    plainEnglish: 'The Sitemap: line in your robots.txt contains a malformed URL with a double-slash (e.g. `//sitemap.xml`). Googlebot cannot process this URL, so your sitemap is effectively invisible.',
-    fixPrompt: 'The root cause is `NEXT_PUBLIC_APP_URL` ending with a trailing slash. Fix: (1) Remove the trailing slash from `NEXT_PUBLIC_APP_URL` in your Vercel environment variables, (2) Add `.replace(/\\/$/, "")` when using this env var to build URLs in `app/robots.ts` and `app/sitemap.ts`.',
-  },
-
   'thin-llms-txt': {
     id: 'thin-llms-txt',
     category: 'ai_visibility',
@@ -559,7 +501,7 @@ export const metadata: Metadata = {
     title: 'Page blocked from indexing via meta robots',
     description: 'meta[name="robots"] contains noindex — search engines will not index this page.',
     plainEnglish: 'A meta tag explicitly tells search engines not to index this page. If this is a public marketing or product page, removing noindex is critical for organic traffic.',
-    fixPrompt: 'In Next.js, remove `robots: { index: false }` from the page metadata export or generateMetadata(). Check that no middleware or layout is injecting a noindex directive for this route.',
+    fixPrompt: 'In Next.js, remove `robots: { index: false }` from the page metadata export or generateMetadata(). Check that no middleware or layout is injecting a noindex directive for this route.\n\nAfter deploying the fix, use Google Search Console → URL Inspection → Request Indexing to re-submit the page.',
     docsUrl: 'https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag',
   },
 
@@ -973,27 +915,6 @@ content="width=device-width, initial-scale=1"`,
     docsUrl: 'https://nextjs.org/docs/app/api-reference/file-conventions/metadata/app-icons',
   },
 
-  'missing-touch-icon': {
-    id: 'missing-touch-icon',
-    category: 'mobile',
-    severity: 'low',
-    title: 'Apple touch icon missing',
-    description: 'No <link rel="apple-touch-icon"> tag found.',
-    plainEnglish:
-      "When iPhone or iPad users save your site to their home screen, there's no proper icon — iOS will use a screenshot instead, which looks terrible. Adding this takes 5 minutes.",
-    fixPrompt: `Add Apple touch icon in my Next.js app:
-1. Create a 180×180px PNG image (your logo on a solid background)
-2. Save as public/apple-touch-icon.png
-3. In app/layout.tsx metadata:
-   export const metadata: Metadata = {
-     icons: {
-       apple: [{ url: '/apple-touch-icon.png', sizes: '180x180' }],
-     },
-   }
-Or place the file at app/apple-icon.png — Next.js handles it automatically.`,
-    docsUrl: 'https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariWebContent/ConfiguringWebApplications/ConfiguringWebApplications.html',
-  },
-
   'missing-web-manifest': {
     id: 'missing-web-manifest',
     category: 'mobile',
@@ -1269,5 +1190,65 @@ export const metadata = {
 Standard OG image: 1200×630px (1.91:1 ratio).
 Twitter summary_large_image also works best at 1200×628px.`,
     docsUrl: 'https://ogp.me/#structured',
+  },
+
+  'spa-no-ssr': {
+    id: 'spa-no-ssr',
+    category: 'seo',
+    severity: 'high',
+    title: 'Site appears to be a client-side SPA without server-side rendering',
+    description: 'Page HTML contains almost no visible content — likely a React/Vue SPA that renders in the browser.',
+    plainEnglish: "Google and AI crawlers see an empty page. They fetch your HTML but JavaScript hasn't run yet, so they see no content. This means you're invisible to search engines and AI assistants.",
+    fixPrompt: 'Add server-side rendering (SSR) or static site generation (SSG). In Next.js use App Router with Server Components. If using Vite/React, consider switching to Next.js or adding a pre-rendering solution like vite-plugin-ssr.',
+  },
+
+  'missing-analytics': {
+    id: 'missing-analytics',
+    category: 'seo',
+    severity: 'medium',
+    title: 'No analytics tracking detected',
+    description: 'No Google Analytics 4, Google Tag Manager, or Яндекс Метрика found on the page.',
+    plainEnglish: "You can't improve what you don't measure. Without analytics you have no visibility into traffic, user behavior, or conversion goals.",
+    fixPrompt: "Install Google Analytics 4 via Google Tag Manager (recommended). Steps:\n1. Create a GA4 property at analytics.google.com\n2. Create a GTM container at tagmanager.google.com\n3. Add GTM snippet to your <head> and <body>\n4. Configure GA4 tag inside GTM\n5. Set up conversion goals (form submits, button clicks)\nFor Яндекс: go to metrika.yandex.ru, create a counter, add the snippet.",
+  },
+
+  'keywords-not-in-title': {
+    id: 'keywords-not-in-title',
+    category: 'seo',
+    severity: 'high',
+    title: 'Primary topic not found in title or H1',
+    description: "The page title and H1 heading don't clearly reflect what the site is about based on its description.",
+    plainEnglish: "Your title tag and H1 are the strongest signals Google uses to understand what your page is about. If your main topic isn't there, you won't rank for it.",
+    fixPrompt: 'Include your primary keyword in both the <title> tag and the <h1> heading. Title format: "Primary Keyword — Brand Name". H1 should match or closely echo the title. Avoid generic headings like "Welcome" or "Home".',
+  },
+
+  'redirect-chain': {
+    id: 'redirect-chain',
+    category: 'seo',
+    severity: 'medium',
+    title: 'Redirect chain detected',
+    description: 'The URL goes through multiple redirects before reaching the final destination.',
+    plainEnglish: 'Your URL redirects through 2+ hops before arriving at the page. This wastes crawl budget, passes less PageRank, and slows load time.',
+    fixPrompt: 'Update all internal links to point directly to the final URL. If using a CDN or proxy, configure it to serve a single 301 to the canonical URL.',
+  },
+
+  'small-tap-targets': {
+    id: 'small-tap-targets',
+    category: 'mobile',
+    severity: 'medium',
+    title: 'Tap targets are too small',
+    description: 'Some clickable elements are smaller than the 48×48px recommended by Google.',
+    plainEnglish: 'Some buttons or links are too small to tap accurately on a phone. This frustrates mobile users and hurts your Google mobile score.',
+    fixPrompt: 'Ensure all interactive elements (buttons, links) have a minimum size of 48×48px. In Tailwind: add min-h-12 min-w-12 to small buttons. Use padding instead of fixed height where possible.',
+  },
+
+  'mobile-font-too-small': {
+    id: 'mobile-font-too-small',
+    category: 'mobile',
+    severity: 'medium',
+    title: 'Font size too small on mobile',
+    description: 'Text is smaller than 16px on mobile, causing readability issues.',
+    plainEnglish: 'Some text is too small to read comfortably on mobile devices. Google flags this in mobile usability reports.',
+    fixPrompt: 'Set base font size to at least 16px. In Tailwind: ensure body uses text-base (16px) or larger. Avoid text-xs (12px) for body copy.',
   },
 }

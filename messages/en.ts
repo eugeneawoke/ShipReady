@@ -13,6 +13,8 @@ const en = {
     termsTitle: 'Terms of Service - ShipReady',
     termsDescription: 'Terms and conditions for using ShipReady.',
     notFoundTitle: '404 - ShipReady',
+    methodologyTitle: 'Methodology — ShipReady',
+    methodologyDescription: 'How ShipReady checks your site: 6 categories, evidence-based confidence model, and honest measurement states.',
   },
   LanguageSwitcher: {
     ariaLabel: 'Switch language',
@@ -106,11 +108,10 @@ const en = {
     goalTitle: "What's your main goal? (optional)",
     goalHint: 'Pick one and we will bias the scan summary and fix guidance toward that outcome.',
     goals: {
-      sales: 'More sales',
-      leads: 'More leads',
-      traffic: 'More traffic',
-      visibility: 'AI visibility',
-      general: 'General',
+      seo: 'SEO',
+      security: 'Security',
+      ai_visibility: 'AI Visibility',
+      full: 'Full audit',
     },
     contactPrefix: 'If the problem persists, contact me:',
     contactTelegram: 'Telegram',
@@ -322,6 +323,17 @@ const en = {
       mobile: 'Mobile',
       ai_visibility: 'AI Visibility',
       accessibility: 'Accessibility',
+    },
+    strategicRec: {
+      heading: 'Strategic recommendations',
+      subtitle: 'Non-score guidance based on the findings, business context, and scan goal.',
+      noContext: 'Site type could not be determined confidently.',
+      noContextSub: 'Recommendations are general.',
+      timeframes: {
+        now: 'Now',
+        next_2_weeks: 'Next 2 weeks',
+        next_month: 'Next month',
+      },
     },
   },
   ReportSkeleton: {
@@ -768,6 +780,376 @@ const en = {
         craftedWith: 'Crafted with',
         by: 'by',
       },
+    },
+  },
+  Methodology: {
+    eyebrow: 'Methodology',
+    title: 'How ShipReady checks your site',
+    subtitle: "Every finding is backed by evidence. We tell you what we measured, what we inferred, and what we couldn't reach — because a failed check should never look like a pass.",
+
+    categories: {
+      heading: '6 categories, 60+ checks',
+      performance: {
+        name: 'Performance',
+        desc: 'A real Lighthouse mobile run inside a headless Chromium browser on Railway. We measure Core Web Vitals (LCP, CLS, INP, FCP), composite performance score, and accessibility score. No synthetic shortcuts — the same engine Google uses.',
+      },
+      seo: {
+        name: 'SEO & Social',
+        desc: 'Complete meta audit: title and description length, Open Graph image and tags, Twitter/X card, canonical URL, robots.txt directives, sitemap presence, and Schema.org structured data. Covers what search engines and social platforms read before your content.',
+      },
+      security: {
+        name: 'Security',
+        desc: '10 security checks including HTTPS enforcement, Content-Security-Policy, HSTS, X-Frame-Options, X-Content-Type-Options, SSL/TLS certificate validity, exposed .env files, and API key patterns in HTML. Surfaces the headers and files attackers look for first.',
+      },
+      mobile: {
+        name: 'Mobile',
+        desc: 'Viewport meta tag configuration, favicon presence (for browser tabs), and Apple touch icon (for iOS home screen). These three checks determine whether your site renders and identifies correctly across every device.',
+      },
+      ai: {
+        name: 'AI Visibility',
+        desc: 'GEO + AEO audit: checks whether ChatGPT, Claude, Perplexity, and Google AI Overview can find, parse, and cite your site. Covers llms.txt and ai.txt, AI crawler permissions in robots.txt, Schema.org JSON-LD entity signals, FAQ markup, answer-first content structure, date freshness, and organization entity clarity.',
+      },
+      accessibility: {
+        name: 'Accessibility',
+        desc: 'DOM-level a11y audit: images missing alt attributes, form inputs and buttons without accessible labels, missing lang attribute on the html element, and absent skip-navigation links. Paired with the Lighthouse accessibility score for a combined static + runtime view.',
+      },
+    },
+
+    confidence: {
+      heading: 'Confidence model',
+      subtitle: 'Not every finding can be confirmed with equal certainty. ShipReady labels every issue so you know how much weight to give it.',
+      verified: {
+        label: 'Verified',
+        desc: 'Confirmed by direct measurement or HTTP response. This finding is a fact. Verified issues are score-eligible.',
+      },
+      likely: {
+        label: 'Likely',
+        desc: 'Strongly indicated by evidence but not directly confirmed. Shown so you can investigate — not counted in your score.',
+      },
+      heuristic: {
+        label: 'Heuristic',
+        desc: 'Pattern-based observation. May or may not apply to your specific setup. Useful context, not a hard verdict.',
+      },
+    },
+
+    scoring: {
+      heading: 'How scoring works',
+      intro: 'The overall score (0–100) reflects only verified, score-eligible findings. Likely and heuristic issues are shown for context but do not silently penalise your score.',
+      detail: 'Each verified issue carries a severity weight (critical, high, medium, low). The score starts at 100 and deductions are applied per issue. Category scores follow the same logic within their domain.',
+      good: 'Good',
+      needsWork: 'Needs work',
+      critical: 'Critical',
+      rangeGood: '70+ is considered',
+      rangeMid: '50–69 is',
+      rangeLow: 'Below 50 is',
+    },
+
+    measurement: {
+      heading: 'Measurement states',
+      subtitle: 'Heavy checks (Lighthouse, SSL, DNS) may not complete for every site. We surface the state so you always know what was actually measured.',
+      measured: {
+        label: 'Measured',
+        desc: 'The check ran and produced a result. You can trust this finding.',
+      },
+      partial: {
+        label: 'Partial',
+        desc: 'The check ran but some data was unavailable (e.g. Lighthouse timed out on a slow server). Result is shown but flagged.',
+      },
+      unavailable: {
+        label: 'Unavailable',
+        desc: 'The check could not run — network block, timeout, or scanner limitation. We show this explicitly. A failed measurement never appears as a pass.',
+      },
+    },
+
+    contact: {
+      question: 'Have a question about a specific check?',
+      link: 'Ask on Telegram',
+    },
+  },
+  IssueDescriptions: {
+    'lcp-slow': {
+      title: 'Largest Contentful Paint is too slow',
+      plainEnglish: "Your page's main image or headline takes more than 2.5 seconds to show up. Visitors see a blank or half-loaded page, and most will leave before it finishes loading.",
+    },
+    'cls-high': {
+      title: 'Layout shifts detected (CLS)',
+      plainEnglish: 'Your page jumps around as it loads — buttons and text shift position, causing visitors to click the wrong thing. Google penalizes sites with this in search rankings.',
+    },
+    'inp-slow': {
+      title: 'Interaction to Next Paint is slow',
+      plainEnglish: "When visitors click a button or fill in a form, the page takes more than 200ms to respond. This makes your site feel slow and unresponsive, even if it loads quickly.",
+    },
+    'fcp-slow': {
+      title: 'First Contentful Paint is slow',
+      plainEnglish: "Your page takes more than 1.8 seconds before showing any content at all. Visitors stare at a blank screen and may leave before your site even starts to appear.",
+    },
+    'perf-score-low': {
+      title: 'Performance score is below 70',
+      plainEnglish: "Your site scores poorly on Google's performance test. Slow sites rank lower in search results and convert significantly fewer visitors into customers.",
+    },
+    'a11y-score-low': {
+      title: 'Accessibility score is below 70',
+      plainEnglish: 'Your site is difficult or impossible to use for people with disabilities. This also hurts your SEO — search engines use many of the same signals as screen readers.',
+    },
+    'missing-title': {
+      title: 'Page title is missing',
+      plainEnglish: 'Your page has no title. Browser tabs show a blank name, and Google has nothing to display in search results. This is one of the most basic SEO requirements.',
+    },
+    'title-length': {
+      title: 'Page title length is not optimal',
+      plainEnglish: 'Your page title is either too short to be descriptive, or too long and gets cut off in Google search results with "...". Both reduce click-through rates.',
+    },
+    'missing-description': {
+      title: 'Meta description is missing',
+      plainEnglish: 'Your page has no description. Google shows a random snippet of text from your page in search results instead, which often looks unprofessional and reduces clicks.',
+    },
+    'missing-h1': {
+      title: 'H1 heading is missing or duplicated',
+      plainEnglish: 'Every page should have exactly one main heading (H1) that tells Google what the page is about. Missing or multiple H1s confuse search engines and lower your rankings.',
+    },
+    'missing-canonical': {
+      title: 'Canonical URL is missing',
+      plainEnglish: 'Without a canonical tag, Google might index multiple versions of your page (with/without www, with/without trailing slash) and split your SEO value between them.',
+    },
+    'missing-og-title': {
+      title: 'Open Graph title missing',
+      plainEnglish: 'When someone shares your link on social media or messaging apps, no title appears — just a blank card or raw URL. This drastically reduces engagement with shared links.',
+    },
+    'missing-og-description': {
+      title: 'Open Graph description missing',
+      plainEnglish: 'When someone shares your link, no description shows under the title. Social media cards look incomplete and get fewer clicks than ones with clear descriptions.',
+    },
+    'missing-og-image': {
+      title: 'Open Graph image missing',
+      plainEnglish: 'When someone shares your link on Twitter or Telegram, no image appears. This cuts click-through rates by up to 3×.',
+    },
+    'og-image-invalid': {
+      title: 'Open Graph image URL is broken',
+      plainEnglish: 'You have an og:image tag, but the image URL is broken — it returns an error. Social media sites will show a placeholder or nothing when your link is shared.',
+    },
+    'missing-twitter-card': {
+      title: 'Twitter/X card meta tag missing',
+      plainEnglish: 'Without this tag, Twitter/X may not show a rich link preview when your URL is shared. Links without rich cards get significantly less engagement.',
+    },
+    'placeholder-text': {
+      title: 'Placeholder text found on page',
+      plainEnglish: 'Your page contains dummy text that was never replaced with real content. This looks unprofessional to visitors and can cause Google to rank your page as low-quality content.',
+    },
+    'desc-length': {
+      title: 'Meta description length is not optimal',
+      plainEnglish: 'Your meta description is either too short (under 100 chars) or too long (over 165 chars). Google typically shows 100–165 characters. Too short leaves value on the table; too long gets cut off with "…".',
+    },
+    'missing-twitter-image': {
+      title: 'Twitter/X card declares summary_large_image but no twitter:image is set',
+      plainEnglish: 'Your page uses `twitter:card = summary_large_image` but provides no `twitter:image` URL. Twitter/X will show a blank card. Set the image or downgrade the card type.',
+    },
+    'canonical-mismatch': {
+      title: 'Canonical URL points to a different domain',
+      plainEnglish: "The canonical tag says this page belongs to a different domain than the one you're actually on. Google will index the canonical domain's version and ignore this one, potentially splitting ranking signals.",
+    },
+    'canonical-double-slash': {
+      title: 'Canonical URL contains a double-slash path',
+      plainEnglish: 'Your canonical URL has an extra slash in the path. Google may treat that as a different URL and split ranking signals.',
+    },
+    'missing-og-url': {
+      title: 'Open Graph URL missing',
+      plainEnglish: 'Social platforms and crawlers have no explicit canonical sharing URL for this page. This can weaken preview consistency across channels.',
+    },
+    'og-url-mismatch': {
+      title: 'Open Graph URL points to a different domain',
+      plainEnglish: 'Your share preview says the page belongs to a different domain than the one visitors are on. That creates inconsistent social previews and indexing signals.',
+    },
+    'og-url-double-slash': {
+      title: 'Open Graph URL contains a double-slash path',
+      plainEnglish: 'Your Open Graph URL has an extra slash in the path. Social platforms may cache or display the wrong page URL.',
+    },
+    'sensitive-page-indexable': {
+      title: 'Sensitive page appears indexable',
+      plainEnglish: 'This page looks like a report, dashboard, or account page, but search engines are not told to keep it out of the index.',
+    },
+    'page-noindex': {
+      title: 'Page is marked noindex',
+      plainEnglish: 'Search engines are instructed not to index this page. This is correct for private pages, but a problem for public marketing or product pages.',
+    },
+    'image-missing-alt': {
+      title: 'Images are missing alt text',
+      plainEnglish: 'Some images have no alt text. Screen readers and search engines lose context, and image search previews are weaker.',
+    },
+    'image-missing-dimensions': {
+      title: 'Images are missing dimensions',
+      plainEnglish: 'Images without dimensions can cause layout shifts while the page loads. That hurts Core Web Vitals and makes the page feel unstable.',
+    },
+    'missing-structured-data': {
+      title: 'No structured data (JSON-LD) found',
+      plainEnglish: 'No Schema.org JSON-LD blocks were found on this page. Structured data helps Google understand your content and display rich results. It also improves AI search visibility.',
+    },
+    'missing-operating-system': {
+      title: 'WebApplication schema is missing operatingSystem',
+      plainEnglish: 'Your WebApplication or SoftwareApplication structured data is missing the `operatingSystem` field. Google requires this for Software rich results in search.',
+    },
+    'sitemap-double-slash': {
+      title: 'Sitemap URL in robots.txt has a double-slash',
+      plainEnglish: 'The Sitemap: line in your robots.txt contains a malformed URL with a double-slash (e.g. `//sitemap.xml`). Googlebot cannot process this URL, so your sitemap is effectively invisible.',
+    },
+    'images-missing-alt': {
+      title: 'Images with empty or missing alt text',
+      plainEnglish: 'Some images have no meaningful alt text. Screen readers read these as "image" with no context, hurting accessibility and image search visibility.',
+    },
+    'meta-robots-noindex': {
+      title: 'Page blocked from indexing via meta robots',
+      plainEnglish: 'A meta tag explicitly tells search engines not to index this page. If this is a public marketing or product page, removing noindex is critical for organic traffic.',
+    },
+    'robots-txt-disallow': {
+      title: 'URL disallowed in robots.txt',
+      plainEnglish: 'Your robots.txt file tells Google not to crawl this page. If this is a public page you want indexed, the Disallow rule needs to be removed or narrowed.',
+    },
+    'thin-internal-linking': {
+      title: 'Very few internal links on the page',
+      plainEnglish: 'This page has almost no links to other pages on your site. Internal links help Google discover and understand your site structure, and help visitors navigate. Most substantive pages should link to at least 3–5 related pages.',
+    },
+    'canonical-url-mismatch': {
+      title: 'Canonical URL differs from page URL',
+      plainEnglish: "Your canonical tag points to a slightly different URL than the page you're on (e.g., with/without trailing slash, or a different path). Google will treat the canonical URL as the \"real\" version and may not index this one.",
+    },
+    'broken-links': {
+      title: 'Broken links found',
+      plainEnglish: "Some links on your site lead to pages that don't exist. Visitors click them and hit a dead end, which damages trust. Google also crawls these links — broken ones hurt your SEO.",
+    },
+    'seo-og-image-dimensions': {
+      title: 'OG image missing width and height',
+      plainEnglish: 'Twitter/X, LinkedIn, Telegram, and Discord need the image dimensions declared in your HTML to display the preview correctly. Without them, the preview may be skipped entirely or shown at the wrong size — reducing click-through rate when your link is shared.',
+    },
+    'no-https': {
+      title: 'Site is not served over HTTPS',
+      plainEnglish: 'Your site is not encrypted. Anyone on the same network can read or modify data your visitors send you — including passwords and form submissions. Browsers also show a "Not Secure" warning, which kills trust instantly.',
+    },
+    'missing-hsts': {
+      title: 'HSTS header missing',
+      plainEnglish: 'Your site allows browsers to connect over HTTP even though you have HTTPS. Attackers can intercept the first request and downgrade visitors to unencrypted HTTP. HSTS prevents this.',
+    },
+    'missing-x-frame': {
+      title: 'X-Frame-Options header missing',
+      plainEnglish: 'Your site can be embedded in an invisible iframe on another website. Attackers use this technique (called "clickjacking") to trick your users into clicking things without realising it.',
+    },
+    'missing-xcto': {
+      title: 'X-Content-Type-Options header missing',
+      plainEnglish: 'Browsers can "sniff" your files and treat them as a different file type than intended. This can allow attackers to upload files that get executed as scripts. This header prevents that.',
+    },
+    'missing-referrer-policy': {
+      title: 'Referrer-Policy header missing',
+      plainEnglish: 'When visitors click a link to leave your site, their browser sends your full URL (including any private query parameters) to the destination site. A referrer policy controls what gets shared.',
+    },
+    'missing-csp': {
+      title: 'Content Security Policy missing',
+      plainEnglish: "There's no policy controlling what scripts and resources your page can load. Without this, an attacker who injects any code into your page can do anything — steal cookies, redirect users, exfiltrate data.",
+    },
+    'unsafe-csp': {
+      title: "CSP contains 'unsafe-inline' or 'unsafe-eval'",
+      plainEnglish: "You have a Content Security Policy, but it includes 'unsafe-inline' or 'unsafe-eval' which largely defeats the purpose. It's like having a lock on your door but leaving the key in it.",
+    },
+    'ssl-expiring': {
+      title: 'SSL certificate expiring soon',
+      plainEnglish: "Your HTTPS certificate is about to expire. Once it does, browsers will show a scary 'Your connection is not private' warning to every visitor — and most will immediately leave.",
+    },
+    'exposed-env-file': {
+      title: 'Environment file publicly accessible',
+      plainEnglish: 'Your API keys and passwords are visible to anyone right now. Attackers scan for this automatically — rotate your keys immediately.',
+    },
+    'api-key-in-html': {
+      title: 'API key found in page HTML',
+      plainEnglish: "A secret API key is visible in your page's HTML source code. Anyone can view-source your page and steal it — this is actively exploited by bots that scrape the web looking for this.",
+    },
+    'mixed-content': {
+      title: 'Mixed content — HTTP resources on HTTPS page',
+      plainEnglish: 'Your HTTPS page loads some resources (images, scripts, or styles) over insecure HTTP. Browsers block or warn about this, causing parts of your page to break or display incorrectly for visitors.',
+    },
+    'missing-permissions-policy': {
+      title: 'Missing Permissions-Policy header',
+      plainEnglish: 'Without a Permissions-Policy header, any script on your page can access the camera, microphone, geolocation, and other sensitive browser features. This is a defence-in-depth security header that limits exposure if you get XSS.',
+    },
+    'missing-cookie-consent': {
+      title: 'No cookie consent mechanism detected',
+      plainEnglish: 'Your site loads tracking scripts (Google Analytics, Meta Pixel, etc.) but no cookie consent banner was found. GDPR and similar laws require informed consent before tracking EU visitors — fines can reach €20M.',
+    },
+    'missing-privacy-policy': {
+      title: 'No privacy policy link found',
+      plainEnglish: 'A privacy policy link is legally required in most jurisdictions if you collect any user data. It also builds trust with visitors who want to understand how their data is handled.',
+    },
+    'third-party-trackers': {
+      title: 'Third-party tracking scripts detected',
+      plainEnglish: 'Your site loads scripts from third-party tracking services. Each tracker adds latency, can access cookies/localStorage, and represents a privacy surface. More trackers = slower page + more GDPR liability.',
+    },
+    'missing-viewport': {
+      title: 'Viewport meta tag missing',
+      plainEnglish: 'Your site has no mobile viewport configuration. On phones, it will render as a tiny desktop page that visitors have to zoom into to read anything — a guaranteed high bounce rate.',
+    },
+    'blocking-viewport': {
+      title: 'Viewport blocks user scaling',
+      plainEnglish: 'Your site prevents users from zooming in on mobile. This is a serious accessibility issue — many people with visual impairments rely on zoom. Apple and Google also penalise this in their quality guidelines.',
+    },
+    'missing-favicon': {
+      title: 'Favicon is missing',
+      plainEnglish: 'Your site has no favicon — the small icon that appears in browser tabs and bookmarks. It makes your site look unfinished and makes it harder for users to find your tab when they have many tabs open.',
+    },
+    'missing-touch-icon': {
+      title: 'Apple touch icon missing',
+      plainEnglish: "When iPhone or iPad users save your site to their home screen, there's no proper icon — iOS will use a screenshot instead, which looks terrible. Adding this takes 5 minutes.",
+    },
+    'missing-web-manifest': {
+      title: 'No web app manifest found',
+      plainEnglish: 'Your site has no web app manifest. Without it, users who add your site to their home screen on Android get a generic browser icon and no app-like experience. It also helps Chrome show the "Add to Home Screen" prompt.',
+    },
+    'phone-numbers-not-linked': {
+      title: 'Phone numbers not linked for tap-to-call',
+      plainEnglish: 'Phone numbers on your page are plain text — mobile users cannot tap to call. Wrapping them in <a href="tel:+1234567890"> lets users call directly from the page, which significantly increases conversion on mobile.',
+    },
+    'thin-llms-txt': {
+      title: 'llms.txt file is too short',
+      plainEnglish: 'Your llms.txt exists but has very few words. AI systems (Perplexity, ChatGPT, Claude) use this file to understand your product. A thin file means generic or wrong AI-generated summaries about your site.',
+    },
+    'no-explicit-ai-crawlers': {
+      title: 'No explicit AI crawler rules in robots.txt',
+      plainEnglish: 'Your robots.txt has no explicit rules for AI crawlers (GPTBot, ClaudeBot, PerplexityBot). While a wildcard `Allow: /` covers them, naming them explicitly signals AI-indexing intent and is best practice for AI search visibility.',
+    },
+    'geo-missing-org-sameas': {
+      title: 'Organization schema missing sameAs links',
+      plainEnglish: 'ChatGPT, Claude, and Perplexity use sameAs links to connect your website to your brand as a known entity. Without them, AI systems may not reliably attribute your content to your brand when answering questions — reducing how often your site gets cited.',
+    },
+    'geo-missing-date-signal': {
+      title: 'No content date signal found',
+      plainEnglish: 'Perplexity and Google AI Overview weight fresh content significantly higher. Without a date signal, your page may be treated as potentially outdated — reducing how often AI systems cite it in answers.',
+    },
+    'geo-no-question-headings': {
+      title: 'No question-format headings found',
+      plainEnglish: 'ChatGPT, Claude, and Perplexity extract headings as Q&A pairs and include them in answers with a link to your page. Pages with question-format headings are cited more often in AI responses.',
+    },
+    'geo-answer-first-paragraph': {
+      title: 'First paragraph too short for AI citation',
+      plainEnglish: 'AI systems like ChatGPT, Claude, and Perplexity extract the beginning of your page as citation passages. A short or absent opening paragraph means they have little useful content to cite, reducing how often your page appears in AI answers.',
+    },
+    'low-a11y-score': {
+      title: 'Low Lighthouse accessibility score',
+      plainEnglish: 'Your site scores poorly on automated accessibility tests. This means real users — people using screen readers, keyboard navigation, or who need high contrast — likely struggle to use your site.',
+    },
+    'images-missing-alt-a11y': {
+      title: 'Images missing alt text (accessibility)',
+      plainEnglish: 'Some images have no alt attribute at all. Screen readers will say "image" with no context, or skip the image entirely. This is an unambiguous accessibility failure.',
+    },
+    'form-inputs-no-label': {
+      title: 'Form inputs missing labels',
+      plainEnglish: 'Some form fields have no label. Screen reader users cannot tell what the field is for. Placeholder text is not a substitute — it disappears when you start typing.',
+    },
+    'buttons-no-label': {
+      title: 'Buttons without accessible label',
+      plainEnglish: 'Some buttons (icon buttons, hamburger menus, close buttons) have no accessible name. Screen readers will say "button" with no context — users cannot tell what clicking the button does.',
+    },
+    'missing-lang-attribute': {
+      title: 'Missing lang attribute on html element',
+      plainEnglish: 'Your page has no language declaration. Screen readers need this to choose the right pronunciation engine. Without it, content may be read in the wrong language, making it incomprehensible for visually impaired users.',
+    },
+    'missing-skip-navigation': {
+      title: 'No skip navigation link',
+      plainEnglish: 'Keyboard and screen reader users have to tab through every navigation item on every page to reach the main content. A "skip to content" link at the top of the page lets them jump directly to the main area.',
     },
   },
 }

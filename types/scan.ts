@@ -21,7 +21,16 @@ export type IssueSource = 'lighthouse' | 'http' | 'dom' | 'ssl' | 'link-check' |
 export type EvidenceKind = 'metric' | 'header' | 'selector' | 'response' | 'text' | 'count' | 'status'
 export type MeasurementStatus = 'measured' | 'partial' | 'unavailable'
 
-export type ScanGoal = 'sales' | 'leads' | 'traffic' | 'visibility' | 'general'
+export type ScanGoal = 'seo' | 'security' | 'ai_visibility' | 'full'
+
+export type AIPlatformStatus = 'blocked' | 'partial' | 'ready'
+
+export interface AIPlatformReadiness {
+  chatgpt: AIPlatformStatus
+  claude: AIPlatformStatus
+  perplexity: AIPlatformStatus
+  googleAI: AIPlatformStatus
+}
 
 export interface BusinessContext {
   businessType: 'ecommerce' | 'saas' | 'local_business' | 'portfolio' | 'blog' | 'agency' | 'other'
@@ -160,6 +169,13 @@ export interface ScanProcessingIssue {
   staleAgeSeconds: number
 }
 
+export interface GeneratedArtifacts {
+  llmsTxt?: string
+  schemaOrgJson?: string
+  securityHeadersNextJs?: string
+  securityHeadersNginx?: string
+}
+
 export interface ScanResult {
   url: string
   scannedAt: string
@@ -190,6 +206,8 @@ export interface ScanResult {
   businessContext?: BusinessContext | null
   scanGoal?: ScanGoal
   processingIssue?: ScanProcessingIssue
+  generatedArtifacts?: GeneratedArtifacts
+  aiPlatformReadiness?: AIPlatformReadiness
 }
 
 export interface Scan {

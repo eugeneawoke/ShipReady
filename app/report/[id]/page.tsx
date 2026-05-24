@@ -9,8 +9,12 @@ import { ReportSkeleton } from '@/components/report/ReportSkeleton'
 import { ScoreRing } from '@/components/report/ScoreRing'
 import { CategoryCard } from '@/components/report/CategoryCard'
 import { IssueCard } from '@/components/report/IssueCard'
+import { SecurityAlertBanner } from '@/components/report/SecurityAlertBanner'
+import { SupportingCategoryChips } from '@/components/report/SupportingCategoryChips'
+import { ArtifactBlock } from '@/components/report/ArtifactBlock'
 import { ScanForm, useScanLauncher } from '@/components/landing/ScanForm'
 import { SiteBrandLink } from '@/components/SiteHeader'
+import { LanguageSwitcher } from '@/components/i18n/LanguageSwitcher'
 import type { Scan, Issue, IssueCategory, ScanResult, ScanStage, ScanStatus, BusinessContext, ScanGoal } from '@/types/scan'
 import { createBrowserClient } from '@/lib/supabase-browser'
 import {
@@ -21,7 +25,6 @@ import {
 } from '@/lib/report/report-helpers'
 import {
   normalizeStrategicRecommendationsForDisplay,
-  strategicTimeframeLabel,
 } from '@/lib/report/report-safety'
 import { effectivePlanFromSources, type Plan } from '@/lib/growth/attribution'
 
@@ -124,11 +127,10 @@ const BUSINESS_TYPE_LABELS: Record<BusinessContext['businessType'], string> = {
 }
 
 const SCAN_GOAL_LABELS: Record<ScanGoal, string | null> = {
-  sales: 'More sales',
-  leads: 'More leads',
-  traffic: 'More traffic',
-  visibility: 'AI visibility',
-  general: null,
+  seo: 'SEO focus',
+  security: 'Security focus',
+  ai_visibility: 'AI visibility focus',
+  full: null,
 }
 
 function trackGrowthEvent(eventName: string, properties?: Record<string, unknown>) {
@@ -144,6 +146,7 @@ function BusinessProfileBlock({ businessContext, scanGoal }: {
   businessContext?: BusinessContext | null
   scanGoal?: ScanGoal
 }) {
+  const t = useTranslations('Report')
   const isHighConfidence = businessContext != null && businessContext.businessType !== 'other'
 
   return (
@@ -183,7 +186,7 @@ function BusinessProfileBlock({ businessContext, scanGoal }: {
               <span className="text-[#6F6E69]">Conversion path:</span>{' '}{businessContext.primaryConversionPath.replaceAll('_', ' ')}
             </p>
           )}
-          {scanGoal && scanGoal !== 'general' && SCAN_GOAL_LABELS[scanGoal] && (
+          {scanGoal && scanGoal !== 'full' && SCAN_GOAL_LABELS[scanGoal] && (
             <p className="text-xs text-[#8B8A85]">
               <span className="text-[#6F6E69]">Your goal:</span>{' '}{SCAN_GOAL_LABELS[scanGoal]}
             </p>
@@ -192,8 +195,8 @@ function BusinessProfileBlock({ businessContext, scanGoal }: {
         </div>
       ) : (
         <div className="space-y-1">
-          <p className="text-sm text-[#8B8A85]">Site type could not be determined confidently.</p>
-          <p className="text-xs text-[#5A5955]">Recommendations are general.</p>
+          <p className="text-sm text-[#8B8A85]">{t('strategicRec.noContext')}</p>
+          <p className="text-xs text-[#5A5955]">{t('strategicRec.noContextSub')}</p>
         </div>
       )}
     </div>
@@ -203,6 +206,7 @@ function BusinessProfileBlock({ businessContext, scanGoal }: {
 function StrategicRecommendationsBlock({ recommendations }: {
   recommendations?: ScanResult['strategicRecommendations']
 }) {
+  const t = useTranslations('Report')
   const safeRecommendations = normalizeStrategicRecommendationsForDisplay(recommendations)
 
   if (!safeRecommendations.length) return null
@@ -210,16 +214,18 @@ function StrategicRecommendationsBlock({ recommendations }: {
   return (
     <section className="rounded-xl border border-[#4A9EFF]/18 bg-[#101922] px-4 py-4">
       <div className="mb-3">
-        <p className="text-[10px] uppercase tracking-[0.12em] text-[#8B8A85] font-mono">Strategic recommendations</p>
+        <p className="text-[10px] uppercase tracking-[0.12em] text-[#8B8A85] font-mono">
+          {t('strategicRec.heading')}
+        </p>
         <p className="mt-1 text-xs text-[#6F6E69]">
-          Non-score guidance based on the findings, business context, and scan goal.
+          {t('strategicRec.subtitle')}
         </p>
       </div>
       <div className="space-y-3">
         {safeRecommendations.map((item, index) => (
           <div key={`${item.timeframe}-${item.title}-${index}`} className="rounded-lg border border-white/6 bg-white/[0.03] p-3">
             <span className="inline-flex rounded-full border border-[#4A9EFF]/20 bg-[#4A9EFF]/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-[#A9D1FF]">
-              {strategicTimeframeLabel(item.timeframe)}
+              {t(`strategicRec.timeframes.${item.timeframe}` as 'strategicRec.timeframes.now')}
             </span>
             <h3 className="mt-2 text-sm font-medium text-[#F1F0EE]">{item.title}</h3>
             <p className="mt-1 text-sm leading-relaxed text-[#8B8A85]">{item.body}</p>
@@ -239,6 +245,20 @@ const SEVERITY_ORDER: Record<string, number> = {
 }
 
 const CATEGORIES: IssueCategory[] = ['performance', 'seo', 'security', 'mobile', 'ai_visibility', 'accessibility']
+
+function getCategoryOrder(scanGoal: ScanGoal | undefined): IssueCategory[] {
+  switch (scanGoal) {
+    case 'seo':
+      return ['seo', 'performance', 'mobile', 'security', 'ai_visibility', 'accessibility']
+    case 'security':
+      return ['security', 'seo', 'performance', 'mobile', 'ai_visibility', 'accessibility']
+    case 'ai_visibility':
+      return ['ai_visibility', 'seo', 'security', 'performance', 'mobile', 'accessibility']
+    default:
+      return ['seo', 'security', 'performance', 'mobile', 'ai_visibility', 'accessibility']
+  }
+}
+
 const ACTIVE_SCAN_STATUSES: ScanStatus[] = ['pending', 'running', 'running_fast', 'running_deep', 'enriching', 'crawling']
 type StageState = 'done' | 'running' | 'pending' | 'unavailable' | 'partial' | 'failed'
 type ProgressStage = { id: string; title: string; state: StageState; detail: string }
@@ -849,6 +869,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
           <SiteBrandLink className="shrink-0" />
           <span className="text-[#5A5955] text-sm">/</span>
           <span className="text-sm text-[#8B8A85] font-mono truncate flex-1">{domain}</span>
+          <LanguageSwitcher />
           <button
             type="button"
             onClick={() => setNewScanOpen(open => !open)}
@@ -984,6 +1005,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
           retryError={retryError}
           onRetryLighthouse={handleRetryLighthouse}
         />
+        <SecurityAlertBanner result={results} />
         {pagespeedData && (
           <section className="rounded-xl border border-white/8 bg-white/[0.02] px-4 py-3">
             <p className="text-sm text-[#F1F0EE]">{t('pagespeedTitle')}</p>
@@ -1087,7 +1109,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
         <section>
           <div className="print:hidden">
             <div className="flex border-b border-white/6 mb-6 overflow-x-auto scrollbar-hide">
-              {CATEGORIES.map(cat => {
+              {getCategoryOrder(results.scanGoal).map(cat => {
                 const score = results[cat].score
                 const isActive = activeCategory === cat
                 return (
@@ -1109,7 +1131,46 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
                 )
               })}
             </div>
+
+            {/* AI Platform Readiness grid — shown when AI Visibility tab is active */}
+            {activeCategory === 'ai_visibility' && results.aiPlatformReadiness && (
+              <div className="mb-4 overflow-hidden rounded-xl border border-white/[0.08]">
+                <div className="border-b border-white/[0.06] px-4 py-2.5">
+                  <span className="text-xs font-medium text-[#8B8A85]">AI Platform Readiness</span>
+                </div>
+                <div className="grid grid-cols-2 gap-px bg-white/[0.04] sm:grid-cols-4">
+                  {[
+                    { key: 'chatgpt', label: 'ChatGPT' },
+                    { key: 'claude', label: 'Claude' },
+                    { key: 'perplexity', label: 'Perplexity' },
+                    { key: 'googleAI', label: 'Google AI' },
+                  ].map(({ key, label }) => {
+                    const status = results.aiPlatformReadiness![key as keyof typeof results.aiPlatformReadiness]
+                    const colorMap = {
+                      blocked: { text: 'text-red-400', bg: 'bg-red-500/10 text-red-400' },
+                      partial: { text: 'text-yellow-400', bg: 'bg-yellow-500/10 text-yellow-400' },
+                      ready: { text: 'text-green-400', bg: 'bg-green-500/10 text-green-400' },
+                    }
+                    const icons = { blocked: '✗', partial: '~', ready: '✓' }
+                    const colors = colorMap[status]
+                    return (
+                      <div key={key} className="flex flex-col items-center gap-1 bg-[#0E0E0F] px-4 py-3">
+                        <span className={`text-lg font-bold ${colors.text}`}>{icons[status]}</span>
+                        <span className="text-xs text-[#8B8A85]">{label}</span>
+                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${colors.bg}`}>{status}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
             <CategoryCard category={activeCategory} data={results[activeCategory]} />
+
+            {/* Supporting category chips — shown when scan was focused (not full) */}
+            {results.scanGoal && results.scanGoal !== 'full' && (
+              <SupportingCategoryChips result={results} primaryGoal={results.scanGoal} />
+            )}
           </div>
 
           {/* Print only — all categories stacked */}
@@ -1131,6 +1192,36 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
             isReady={isFinalReport}
           />
         </section>
+
+        {/* Generated artifacts — hidden in print */}
+        {isFinalReport && results.generatedArtifacts && (
+          <section className="print:hidden space-y-2">
+            <h2 className="text-sm font-medium text-[#F1F0EE]">Generated for you</h2>
+            {results.generatedArtifacts.llmsTxt && (
+              <ArtifactBlock
+                title="Generated llms.txt"
+                filename="llms.txt"
+                content={results.generatedArtifacts.llmsTxt}
+              />
+            )}
+            {results.generatedArtifacts.schemaOrgJson && (
+              <ArtifactBlock
+                title="Generated Schema.org markup"
+                filename="schema.json"
+                language="json"
+                content={results.generatedArtifacts.schemaOrgJson}
+              />
+            )}
+            {results.generatedArtifacts.securityHeadersNextJs && (
+              <ArtifactBlock
+                title="Security headers — Next.js"
+                filename="next.config.js"
+                language="javascript"
+                content={results.generatedArtifacts.securityHeadersNextJs}
+              />
+            )}
+          </section>
+        )}
 
         {/* All issues */}
         {activeIssues.length > 0 && (

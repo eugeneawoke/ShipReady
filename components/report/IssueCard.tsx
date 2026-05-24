@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useMessages } from 'next-intl'
 import { Check, Copy, ChevronDown, Lock } from 'lucide-react'
 import type { Issue } from '@/types/scan'
 
@@ -28,8 +28,14 @@ interface IssueCardProps {
   promptsReady?: boolean
 }
 
+type IssueDesc = { title?: string; plainEnglish?: string }
+
 export function IssueCard({ issue, isPro, promptsReady = true }: IssueCardProps) {
   const t = useTranslations('IssueCard')
+  const messages = useMessages()
+  const issueDesc = ((messages.IssueDescriptions as Record<string, IssueDesc>)?.[issue.id]) ?? {}
+  const localizedTitle = issueDesc.title ?? issue.title
+  const localizedPlainEnglish = issueDesc.plainEnglish ?? issue.plainEnglish
   const [promptOpen, setPromptOpen] = useState(false)
   const [copied, setCopied] = useState(false)
 
@@ -70,11 +76,11 @@ export function IssueCard({ issue, isPro, promptsReady = true }: IssueCardProps)
               <span className="text-[10px] font-mono text-[#8B8A85]">· {issue.value}</span>
             )}
           </div>
-          <p className="text-sm font-medium text-[#F1F0EE]">{issue.title}</p>
+          <p className="text-sm font-medium text-[#F1F0EE]">{localizedTitle}</p>
         </div>
       </div>
 
-      <p className="text-sm text-[#8B8A85] leading-relaxed">{issue.plainEnglish}</p>
+      <p className="text-sm text-[#8B8A85] leading-relaxed">{localizedPlainEnglish}</p>
 
       {issue.evidence && issue.evidence.length > 0 && (
         <div className="flex flex-wrap gap-1.5">

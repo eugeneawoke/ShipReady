@@ -1,5 +1,5 @@
 import * as cheerio from 'cheerio'
-import type { Issue } from '@/types/scan'
+import type { AIPlatformReadiness, AIPlatformStatus, Issue } from '@/types/scan'
 import { evidence, withIssueMeta } from '@/lib/checks/issue-meta'
 import { T } from '@/lib/ai/issue-templates'
 
@@ -58,11 +58,39 @@ function parseRobotsBlock(robotsText: string, bot: string) {
   return candidates.some(section => section.rules.includes('disallow:/'))
 }
 
+function buildPlatformReadiness(
+  robotsTxt: string | null,
+  hasLlmsTxt: boolean,
+  hasSchemaOrg: boolean,
+): AIPlatformReadiness {
+  const bots: Record<keyof AIPlatformReadiness, string[]> = {
+    chatgpt: ['GPTBot', 'OAI-SearchBot'],
+    claude: ['ClaudeBot', 'anthropic-ai'],
+    perplexity: ['PerplexityBot'],
+    googleAI: ['Googlebot'],
+  }
+
+  function getPlatformStatus(botNames: string[]): AIPlatformStatus {
+    if (!robotsTxt) return 'partial'
+    const isBlocked = botNames.some(bot => parseRobotsBlock(robotsTxt, bot))
+    if (isBlocked) return 'blocked'
+    if (hasLlmsTxt && hasSchemaOrg) return 'ready'
+    return 'partial'
+  }
+
+  return {
+    chatgpt: getPlatformStatus(bots.chatgpt),
+    claude: getPlatformStatus(bots.claude),
+    perplexity: getPlatformStatus(bots.perplexity),
+    googleAI: getPlatformStatus(bots.googleAI),
+  }
+}
+
 export async function runAIVisibilityChecks(
   url: string,
   html: string,
   options?: { includeLikely?: boolean; includeHeuristics?: boolean },
-): Promise<Issue[]> {
+): Promise<{ issues: Issue[]; platformReadiness: AIPlatformReadiness }> {
   const includeLikely = options?.includeLikely ?? true
   const includeHeuristics = options?.includeHeuristics ?? true
   const $ = cheerio.load(html)
@@ -261,7 +289,7 @@ export async function runAIVisibilityChecks(
       title: 'No sitemap.xml found',
       description: 'No sitemap.xml at /sitemap.xml and none referenced in the document.',
       plainEnglish: 'A sitemap helps crawlers discover the pages you want cited and indexed.',
-      fixPrompt: 'Expose a sitemap.xml endpoint or static file that covers the important public pages.',
+      fixPrompt: 'Expose a sitemap.xml endpoint or static file that covers the important public pages. In Next.js, create app/sitemap.ts and export a default function returning your URLs.\n\nAfter creating sitemap.xml:\n• Submit to Google: Search Console → Sitemaps → Add\n• Submit to Яндекс: Яндекс Вебмастер → Индексирование → Файлы Sitemap',
       docsUrl: 'https://nextjs.org/docs/app/api-reference/file-conventions/metadata/sitemap',
     }, 'ai-visibility', [evidence('selector', 'sitemap.xml', 'missing')]))
   }
@@ -398,5 +426,11 @@ export async function runAIVisibilityChecks(
     }
   }
 
-  return issues
+  const platformReadiness = buildPlatformReadiness(
+    robotsTxt,
+    llmsTxtBody !== null,
+    hasJsonLd || hasMicrodata,
+  )
+
+  return { issues, platformReadiness }
 }

@@ -65,12 +65,11 @@ function buildBusinessContextBlock(
     }
   }
 
-  if (scanGoal && scanGoal !== 'general') {
+  if (scanGoal && scanGoal !== 'full') {
     const goalLabels: Record<string, string> = {
-      sales: 'increase sales/conversions',
-      leads: 'generate more leads',
-      traffic: 'increase organic traffic',
-      visibility: 'improve AI search visibility (AEO/GEO)',
+      seo: 'increase organic search rankings',
+      security: 'harden site security',
+      ai_visibility: 'improve AI search visibility (AEO/GEO)',
     }
     lines.push(`- Owner's goal: ${goalLabels[scanGoal] ?? scanGoal}`)
     lines.push(`- Prioritise issues that most directly block this goal.`)
@@ -110,12 +109,16 @@ export async function generateEvidenceEnrichment(
   result: ScanResult,
   businessContext?: BusinessContext | null,
   scanGoal?: ScanGoal,
+  locale?: string,
 ): Promise<EvidenceEnrichment> {
   const client = new OpenAI()
   const activeIssues = getAllIssues(result).filter(issue => issue.severity !== 'pass')
   const compactIssues = activeIssues.slice(0, MAX_AI_ISSUES).map(compactIssue)
   const issueIds = compactIssues.map(issue => issue.id)
   const businessContextBlock = buildBusinessContextBlock(businessContext, scanGoal)
+  const localeInstruction = locale === 'ru'
+    ? '\nIMPORTANT: Write all text fields (summary, topPriorities, strategicRecommendations title/body, issuePrompts technical) in Russian. Keep technical terms like HTML tag names, CSS properties, HTTP header names, file paths, and code snippets in English.'
+    : ''
 
   const completion = await client.chat.completions.create({
     model: process.env.OPENAI_SCAN_MODEL || DEFAULT_ENRICHMENT_MODEL,
@@ -124,7 +127,7 @@ export async function generateEvidenceEnrichment(
     messages: [
       {
         role: 'user',
-        content: `You are helping produce an honest web quality report. You may summarize and prioritize findings, but you may not invent new technical facts or issue IDs.
+        content: `You are helping produce an honest web quality report. You may summarize and prioritize findings, but you may not invent new technical facts or issue IDs.${localeInstruction}
 
 URL: ${result.url}
 Phase: ${result.phase}

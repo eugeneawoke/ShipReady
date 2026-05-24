@@ -4,7 +4,7 @@ import { assertSafeScanUrl } from '@/lib/server/url-safety'
 import { validateApiKey, ApiKeyError } from '@/lib/api/api-key-auth'
 import type { ScanGoal } from '@/types/scan'
 
-const VALID_GOALS = new Set<string>(['sales', 'leads', 'traffic', 'visibility', 'general'])
+const VALID_GOALS = new Set<string>(['seo', 'security', 'ai_visibility', 'full'])
 
 export const runtime = 'nodejs'
 

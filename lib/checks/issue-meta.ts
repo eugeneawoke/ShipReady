@@ -22,11 +22,8 @@ const CONFIDENCE_MAP: Record<string, { confidence: IssueConfidence; scoreEligibl
   'missing-og-description': { confidence: 'verified', scoreEligible: true },
   'missing-og-image': { confidence: 'verified', scoreEligible: true },
   'og-image-invalid': { confidence: 'likely', scoreEligible: false },
-  'missing-twitter-card': { confidence: 'verified', scoreEligible: true },
-  'missing-twitter-image': { confidence: 'verified', scoreEligible: true },
   'missing-og-url': { confidence: 'verified', scoreEligible: true },
   'og-url-mismatch': { confidence: 'verified', scoreEligible: true },
-  'og-url-double-slash': { confidence: 'verified', scoreEligible: true },
   'canonical-mismatch': { confidence: 'verified', scoreEligible: true },
   'canonical-double-slash': { confidence: 'verified', scoreEligible: true },
   'sensitive-page-indexable': { confidence: 'verified', scoreEligible: true },
@@ -49,7 +46,6 @@ const CONFIDENCE_MAP: Record<string, { confidence: IssueConfidence; scoreEligibl
   'missing-viewport': { confidence: 'verified', scoreEligible: true },
   'blocking-viewport': { confidence: 'verified', scoreEligible: true },
   'missing-favicon': { confidence: 'verified', scoreEligible: true },
-  'missing-touch-icon': { confidence: 'verified', scoreEligible: true },
   'missing-schema-org': { confidence: 'verified', scoreEligible: true },
   'missing-structured-data': { confidence: 'likely', scoreEligible: false },
   'missing-operating-system': { confidence: 'likely', scoreEligible: false },
@@ -77,6 +73,12 @@ const CONFIDENCE_MAP: Record<string, { confidence: IssueConfidence; scoreEligibl
   'buttons-no-label': { confidence: 'verified', scoreEligible: true },
   'missing-lang-attribute': { confidence: 'verified', scoreEligible: true },
   'missing-skip-navigation': { confidence: 'heuristic', scoreEligible: false },
+  'spa-no-ssr': { confidence: 'likely', scoreEligible: true },
+  'missing-analytics': { confidence: 'verified', scoreEligible: false },
+  'keywords-not-in-title': { confidence: 'likely', scoreEligible: true },
+  'redirect-chain': { confidence: 'verified', scoreEligible: true },
+  'small-tap-targets': { confidence: 'verified', scoreEligible: true },
+  'mobile-font-too-small': { confidence: 'verified', scoreEligible: true },
 }
 
 export function evidence(kind: IssueEvidence['kind'], label: string, value: string | number): IssueEvidence {
