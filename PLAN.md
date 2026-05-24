@@ -8,7 +8,7 @@
 ЦЕЛЬ:   Дать продукт первым beta-пользователям без ложных обещаний:
         scan/report/auth/dashboard должны работать в проде,
         AI prompts должны быть включены через OPENAI_API_KEY,
-        billing provider остаётся TBD и не блокирует beta.
+        billing через PayPro Global (D-28) — код написан, ждёт prod env + ревью IPN со стороны PayPro.
 ```
 
 ---
@@ -23,7 +23,7 @@
 | 3 | Security | 11 security проверок | ✅ готово |
 | 4 | AI Engine | issue templates + OpenAI summary + AI Visibility | ✅ готово (код написан) |
 | 5 | Report UI | ScoreRing + IssueCard + FixPromptSection | ✅ готово (UI есть) |
-| 6 | Монетизация | Auth + provider-agnostic billing + paywall UI | 🔄 provider TBD; beta manual access |
+| 6 | Монетизация | Auth + PayPro Global billing + paywall UI | 🔄 PayPro Global выбран (D-28); код есть; нужен prod env + IPN URL |
 | 7 | Public Launch | Product Hunt + vc.ru + HN | ⏳ после beta |
 | 8 | Pro Features | AI промпты + PDF + мониторинг + email | 🔄 код есть, prod setup/checks нужны |
 | 9 | Quality Overhaul | Confidence/evidence model, phased scan flow, truthful scoring, telemetry | ✅ core shipped; telemetry script остаётся |
@@ -64,7 +64,7 @@
 | Фича | Что написано | Почему не работает |
 |------|-------------|-------------------|
 | AI fix prompts | `generate-evidence-enrichment.ts` генерирует summary/priorities/prompts поверх evidence | Нужен `OPENAI_API_KEY` в env там, где выполняется scanner |
-| Billing webhook | Legacy Lemon Squeezy route removed | Payment provider TBD; paid access can be manual during beta |
+| Billing webhook | PayPro Global IPN webhook написан (`/api/payments/paypro/webhook`), SHA256 верификация, subscriptions + payment_events таблицы | Нужны prod env (`PAYPRO_VALIDATION_KEY`, `PAYPRO_VENDOR_ID`, `PAYPRO_PRODUCT_PRO_*`) + IPN URL в PayPro dashboard + ревью интеграции со стороны PayPro |
 | Weekly monitoring rescan | `monitored_domains` + dashboard toggle + `app/api/cron/rescan/route.ts` ресканят активные домены | Нужны prod env (`CRON_SECRET`, `RAILWAY_SCANNER_URL`, `SCANNER_SECRET`) и applied migration `008_monitoring.sql` |
 | Rate limiting | Написан в `app/api/scan/route.ts` | Работает только как базовый monthly limit; нет richer abuse controls и observability |
 | PDF export | `GET /api/report/[id]/pdf` генерирует PDF через Chromium | Нужен `pro/agency` user, node runtime и applied deploy |
