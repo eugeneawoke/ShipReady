@@ -8,7 +8,7 @@ export const maxDuration = 300
 export const runtime = 'nodejs'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-const VALID_GOALS = ['sales', 'leads', 'traffic', 'visibility', 'general'] as const
+const VALID_GOALS = ['seo', 'security', 'ai_visibility', 'full'] as const
 
 export async function POST(request: NextRequest) {
   const auth = request.headers.get('authorization')

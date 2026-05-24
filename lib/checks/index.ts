@@ -19,7 +19,7 @@ import { analyzeBusinessContext } from '@/lib/ai/analyze-business-context'
 import { fetchPageSpeedData } from '@/lib/providers/pagespeed'
 import { crawlSite } from '@/lib/crawl/engine'
 import {
-  buildDefaultScanStages,
+  buildScanStages,
   failRunningStages,
   updateScanStage,
 } from '@/lib/scan/stage-telemetry'
@@ -174,7 +174,7 @@ async function finalizeMonitoredDomain(scanId: string): Promise<void> {
 export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanGoal, userLocale?: string): Promise<void> {
   const startedAt = Date.now()
   let currentStatus: ScanStatus = 'running_fast'
-  let currentStages = updateScanStage(buildDefaultScanStages(), 'fast', {
+  let currentStages = updateScanStage(buildScanStages(scanGoal), 'fast', {
     status: 'running',
     message: 'Fast truth checks are running against the fetched page.',
   })

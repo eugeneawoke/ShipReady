@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const raw = body.url as string
-    const scanGoal = (['sales', 'leads', 'traffic', 'visibility', 'general'] as const)
+    const scanGoal = (['seo', 'security', 'ai_visibility', 'full'] as const)
       .includes(body.scanGoal) ? body.scanGoal as ScanGoal : null
     const userLocale = request.cookies.get('shipready-locale')?.value === 'ru' ? 'ru' : undefined
 

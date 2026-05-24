@@ -21,7 +21,7 @@ export type IssueSource = 'lighthouse' | 'http' | 'dom' | 'ssl' | 'link-check' |
 export type EvidenceKind = 'metric' | 'header' | 'selector' | 'response' | 'text' | 'count' | 'status'
 export type MeasurementStatus = 'measured' | 'partial' | 'unavailable'
 
-export type ScanGoal = 'sales' | 'leads' | 'traffic' | 'visibility' | 'general'
+export type ScanGoal = 'seo' | 'security' | 'ai_visibility' | 'full'
 
 export interface BusinessContext {
   businessType: 'ecommerce' | 'saas' | 'local_business' | 'portfolio' | 'blog' | 'agency' | 'other'

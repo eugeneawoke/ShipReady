@@ -124,11 +124,10 @@ const BUSINESS_TYPE_LABELS: Record<BusinessContext['businessType'], string> = {
 }
 
 const SCAN_GOAL_LABELS: Record<ScanGoal, string | null> = {
-  sales: 'More sales',
-  leads: 'More leads',
-  traffic: 'More traffic',
-  visibility: 'AI visibility',
-  general: null,
+  seo: 'SEO focus',
+  security: 'Security focus',
+  ai_visibility: 'AI visibility focus',
+  full: null,
 }
 
 function trackGrowthEvent(eventName: string, properties?: Record<string, unknown>) {
@@ -184,7 +183,7 @@ function BusinessProfileBlock({ businessContext, scanGoal }: {
               <span className="text-[#6F6E69]">Conversion path:</span>{' '}{businessContext.primaryConversionPath.replaceAll('_', ' ')}
             </p>
           )}
-          {scanGoal && scanGoal !== 'general' && SCAN_GOAL_LABELS[scanGoal] && (
+          {scanGoal && scanGoal !== 'full' && SCAN_GOAL_LABELS[scanGoal] && (
             <p className="text-xs text-[#8B8A85]">
               <span className="text-[#6F6E69]">Your goal:</span>{' '}{SCAN_GOAL_LABELS[scanGoal]}
             </p>

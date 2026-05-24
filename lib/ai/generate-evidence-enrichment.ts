@@ -65,12 +65,11 @@ function buildBusinessContextBlock(
     }
   }
 
-  if (scanGoal && scanGoal !== 'general') {
+  if (scanGoal && scanGoal !== 'full') {
     const goalLabels: Record<string, string> = {
-      sales: 'increase sales/conversions',
-      leads: 'generate more leads',
-      traffic: 'increase organic traffic',
-      visibility: 'improve AI search visibility (AEO/GEO)',
+      seo: 'increase organic search rankings',
+      security: 'harden site security',
+      ai_visibility: 'improve AI search visibility (AEO/GEO)',
     }
     lines.push(`- Owner's goal: ${goalLabels[scanGoal] ?? scanGoal}`)
     lines.push(`- Prioritise issues that most directly block this goal.`)

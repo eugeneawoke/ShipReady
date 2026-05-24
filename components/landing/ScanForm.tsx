@@ -78,11 +78,10 @@ export function useScanLauncher() {
 }
 
 const SCAN_GOALS = [
-  { value: 'sales', labelKey: 'goals.sales' },
-  { value: 'leads', labelKey: 'goals.leads' },
-  { value: 'traffic', labelKey: 'goals.traffic' },
-  { value: 'visibility', labelKey: 'goals.visibility' },
-  { value: 'general', labelKey: 'goals.general' },
+  { value: 'seo', labelKey: 'goals.seo' },
+  { value: 'security', labelKey: 'goals.security' },
+  { value: 'ai_visibility', labelKey: 'goals.ai_visibility' },
+  { value: 'full', labelKey: 'goals.full' },
 ] as const
 
 export function ScanForm({
