@@ -843,6 +843,116 @@ For custom certificates:
   },
 
   // ─────────────────────────────────────────
+  // SECURITY — DNS / Email / Cookies / Paths (added Phase 1)
+  // ─────────────────────────────────────────
+
+  'missing-spf': {
+    id: 'missing-spf',
+    category: 'security',
+    severity: 'medium',
+    title: 'No SPF record found',
+    description: 'No SPF TXT record was found in the domain DNS.',
+    plainEnglish: 'SPF tells email servers which servers are allowed to send email for your domain. Without it, anyone can send email pretending to be you, and your own emails may land in spam.',
+    fixPrompt: 'Add an SPF TXT record to your DNS. Minimal example:\n  Name: @ (or your domain)\n  Type: TXT\n  Value: "v=spf1 include:_spf.google.com ~all"\nReplace the include with your actual email provider (Resend, SendGrid, Postmark, etc.). Use ~all (softfail) to start, tighten to -all once emails are confirmed working.',
+    docsUrl: 'https://www.cloudflare.com/learning/dns/dns-records/dns-spf-record/',
+  },
+
+  'missing-dmarc': {
+    id: 'missing-dmarc',
+    category: 'security',
+    severity: 'high',
+    title: 'No DMARC record found',
+    description: 'No DMARC TXT record at _dmarc.<domain> was found.',
+    plainEnglish: 'DMARC tells email providers what to do when someone forges your domain in emails. Without it, phishing attacks using your domain name are trivially easy.',
+    fixPrompt: 'Add a DMARC TXT record to your DNS:\n  Name: _dmarc\n  Type: TXT\n  Value: "v=DMARC1; p=quarantine; rua=mailto:dmarc-reports@yourdomain.com"\nStart with p=quarantine (suspicious emails go to spam) then move to p=reject once you confirm no false positives. The rua address receives aggregate reports.',
+    docsUrl: 'https://www.cloudflare.com/learning/dns/dns-records/dns-dmarc-record/',
+  },
+
+  'weak-dmarc-policy': {
+    id: 'weak-dmarc-policy',
+    category: 'security',
+    severity: 'medium',
+    title: 'DMARC policy is set to none (monitoring only)',
+    description: 'DMARC record exists but p=none — emails that fail DMARC are still delivered.',
+    plainEnglish: 'Your DMARC record only monitors, it does not protect. Emails that fail DMARC (including spoofed phishing from your domain) are still delivered to inboxes.',
+    fixPrompt: 'Change your DMARC policy from p=none to p=quarantine once you confirm your legitimate email sources all pass SPF or DKIM. Then graduate to p=reject for maximum protection:\n  "v=DMARC1; p=quarantine; rua=mailto:dmarc@yourdomain.com"',
+  },
+
+  'missing-caa': {
+    id: 'missing-caa',
+    category: 'security',
+    severity: 'low',
+    title: 'No CAA DNS record',
+    description: 'No Certification Authority Authorization record found. Any CA can issue SSL certificates for this domain.',
+    plainEnglish: 'Without a CAA record, any certificate authority in the world can issue an SSL certificate for your domain. A CAA record restricts which CAs are allowed.',
+    fixPrompt: 'Add CAA records to restrict certificate issuance to your CA:\n  Name: @\n  Type: CAA\n  Value: 0 issue "letsencrypt.org"\n  Value: 0 issue "sectigo.com"\nAdd entries for each CA you use. This prevents unauthorized certificate issuance.',
+  },
+
+  // ── Cookie security flags ─────────────────────────────────
+
+  'cookie-missing-secure': {
+    id: 'cookie-missing-secure',
+    category: 'security',
+    severity: 'high',
+    title: 'Cookie set without Secure flag',
+    description: 'One or more Set-Cookie headers are missing the Secure flag.',
+    plainEnglish: 'Without the Secure flag, cookies (including session tokens) can be sent over HTTP connections, making them visible to network attackers.',
+    fixPrompt: 'Add the Secure flag to all cookies that contain sensitive data:\n  Set-Cookie: session=abc123; Secure; HttpOnly; SameSite=Lax\nIn Next.js API routes:\n  res.setHeader("Set-Cookie", serialize("session", value, { secure: true, httpOnly: true, sameSite: "lax" }))\nIn Supabase auth, cookies are managed by @supabase/ssr — ensure NEXT_PUBLIC_APP_URL uses https://.',
+  },
+
+  'cookie-missing-httponly': {
+    id: 'cookie-missing-httponly',
+    category: 'security',
+    severity: 'high',
+    title: 'Cookie set without HttpOnly flag',
+    description: 'One or more Set-Cookie headers are missing the HttpOnly flag.',
+    plainEnglish: 'Without HttpOnly, JavaScript on the page (including injected scripts from XSS attacks) can read your cookies, including session tokens.',
+    fixPrompt: 'Add HttpOnly to all session and auth cookies:\n  Set-Cookie: session=abc123; HttpOnly; Secure; SameSite=Lax\nHttpOnly prevents document.cookie access from JavaScript. This does not affect server-side cookie reads.',
+  },
+
+  'cookie-missing-samesite': {
+    id: 'cookie-missing-samesite',
+    category: 'security',
+    severity: 'medium',
+    title: 'Cookie set without SameSite attribute',
+    description: 'One or more cookies are missing the SameSite attribute, defaulting to browser behaviour.',
+    plainEnglish: 'Without SameSite, cookies may be sent with cross-site requests, enabling CSRF attacks. Modern browsers default to Lax, but explicit is better.',
+    fixPrompt: 'Add SameSite=Lax to all cookies (or Strict for sensitive sessions):\n  Set-Cookie: session=abc123; SameSite=Lax; Secure; HttpOnly\nUse SameSite=Strict for admin sessions. Use SameSite=None only if you need cross-site cookie sharing (requires Secure).',
+  },
+
+  // ── Exposed sensitive paths ───────────────────────────────
+
+  'exposed-git-head': {
+    id: 'exposed-git-head',
+    category: 'security',
+    severity: 'high',
+    title: '.git directory is publicly accessible',
+    description: '/.git/HEAD returned HTTP 200, meaning the git repository may be downloadable.',
+    plainEnglish: 'Your .git directory is publicly accessible. Anyone can download your entire source code history, including any secrets or tokens that were ever committed.',
+    fixPrompt: 'Block access to the .git directory at your web server or CDN level:\n\nVercel: add to vercel.json:\n  { "headers": [{ "source": "/.git/(.*)", "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }] }] }\n  Better: ensure your deployment only serves the build output, not the source directory.\n\nNginx:\n  location ~ /\\.git { deny all; return 404; }\n\nApache: add to .htaccess:\n  RedirectMatch 404 /\\.git',
+  },
+
+  'exposed-source-map': {
+    id: 'exposed-source-map',
+    category: 'security',
+    severity: 'medium',
+    title: 'JavaScript source map publicly accessible',
+    description: 'A .map file referenced in a script sourceMappingURL comment is publicly accessible.',
+    plainEnglish: 'Your JavaScript source maps are publicly downloadable. This exposes your original source code, file structure, and potentially internal logic to anyone who looks.',
+    fixPrompt: 'Disable source map generation in production builds:\n\nNext.js (next.config.js):\n  productionBrowserSourceMaps: false\n\nVite (vite.config.ts):\n  build: { sourcemap: false }\n\nAlternatively, restrict .map file access at CDN level (Vercel, Cloudflare) to only your monitoring IP range.',
+  },
+
+  'graphql-introspection-open': {
+    id: 'graphql-introspection-open',
+    category: 'security',
+    severity: 'high',
+    title: 'GraphQL introspection is enabled in production',
+    description: 'A GraphQL introspection query returned the full schema.',
+    plainEnglish: 'Your GraphQL API exposes its full schema publicly. Attackers can enumerate every query, mutation, and type to plan attacks without any prior knowledge of your system.',
+    fixPrompt: 'Disable GraphQL introspection in production:\n\nApollo Server:\n  new ApolloServer({ introspection: process.env.NODE_ENV !== "production" })\n\nGraphQL Yoga:\n  createServer({ graphiql: false, maskedErrors: true })\n\nAlso disable the GraphiQL playground UI in production. Consider adding depth limiting and query complexity analysis.',
+  },
+
+  // ─────────────────────────────────────────
   // MOBILE (6)
   // ─────────────────────────────────────────
 
@@ -1250,5 +1360,266 @@ Twitter summary_large_image also works best at 1200×628px.`,
     description: 'Text is smaller than 16px on mobile, causing readability issues.',
     plainEnglish: 'Some text is too small to read comfortably on mobile devices. Google flags this in mobile usability reports.',
     fixPrompt: 'Set base font size to at least 16px. In Tailwind: ensure body uses text-base (16px) or larger. Avoid text-xs (12px) for body copy.',
+  },
+
+  // ─────────────────────────────────────────
+  // AI VISIBILITY — Per-bot crawler checks (Phase 1)
+  // ─────────────────────────────────────────
+
+  'oai-searchbot-blocked': {
+    id: 'oai-searchbot-blocked',
+    category: 'ai_visibility',
+    severity: 'high',
+    title: 'OAI-SearchBot is blocked in robots.txt',
+    description: 'OAI-SearchBot (ChatGPT web search crawler) is disallowed in robots.txt.',
+    plainEnglish: "ChatGPT's search crawler cannot index your site. When users ask ChatGPT questions, your site will not appear in answers even if it's relevant.",
+    fixPrompt: 'In your robots.txt, add an explicit Allow for OAI-SearchBot:\n  User-agent: OAI-SearchBot\n  Allow: /\nNote: OAI-SearchBot is the search crawler (for ChatGPT answers). GPTBot is the training crawler. You can block GPTBot while allowing OAI-SearchBot if you want.',
+    docsUrl: 'https://platform.openai.com/docs/bots/overview',
+  },
+
+  'gptbot-blocked': {
+    id: 'gptbot-blocked',
+    category: 'ai_visibility',
+    severity: 'medium',
+    title: 'GPTBot is blocked in robots.txt',
+    description: 'GPTBot (ChatGPT training crawler) is disallowed in robots.txt.',
+    plainEnglish: "GPTBot trains ChatGPT's knowledge. Blocking it means your content won't be included in future ChatGPT model training. This may or may not be intentional.",
+    fixPrompt: 'If you want your content in future ChatGPT models, remove the GPTBot disallow:\n  # Remove this:\n  User-agent: GPTBot\n  Disallow: /\n\nIf you intentionally blocked training (but want search), keep GPTBot blocked and only allow OAI-SearchBot.',
+  },
+
+  'claudebot-blocked': {
+    id: 'claudebot-blocked',
+    category: 'ai_visibility',
+    severity: 'high',
+    title: 'ClaudeBot is blocked in robots.txt',
+    description: 'ClaudeBot or anthropic-ai user-agent is disallowed in robots.txt.',
+    plainEnglish: "Anthropic's crawler cannot read your site. Claude will not be able to cite your content in answers.",
+    fixPrompt: 'In your robots.txt, allow ClaudeBot:\n  User-agent: ClaudeBot\n  Allow: /\n  User-agent: anthropic-ai\n  Allow: /',
+    docsUrl: 'https://support.anthropic.com/en/articles/8896518-does-anthropic-crawl-the-web-and-how-can-site-owners-block-the-crawler',
+  },
+
+  'perplexitybot-blocked': {
+    id: 'perplexitybot-blocked',
+    category: 'ai_visibility',
+    severity: 'high',
+    title: 'PerplexityBot is blocked in robots.txt',
+    description: 'PerplexityBot is disallowed in robots.txt.',
+    plainEnglish: "Perplexity AI's crawler cannot read your site. You won't appear in Perplexity search answers.",
+    fixPrompt: 'In your robots.txt, allow PerplexityBot:\n  User-agent: PerplexityBot\n  Allow: /',
+  },
+
+  'deepseekbot-blocked': {
+    id: 'deepseekbot-blocked',
+    category: 'ai_visibility',
+    severity: 'low',
+    title: 'DeepSeekBot is blocked in robots.txt',
+    description: 'DeepSeekBot user-agent is disallowed in robots.txt.',
+    plainEnglish: "DeepSeek's crawler is blocked. DeepSeek is an emerging AI assistant with a growing user base.",
+    fixPrompt: 'If you want your content visible in DeepSeek answers:\n  User-agent: DeepSeekBot\n  Allow: /',
+  },
+
+  // ─────────────────────────────────────────
+  // AI VISIBILITY — llms.txt validation (Phase 1)
+  // ─────────────────────────────────────────
+
+  'llms-txt-no-description': {
+    id: 'llms-txt-no-description',
+    category: 'ai_visibility',
+    severity: 'medium',
+    title: 'llms.txt has no product description',
+    description: 'llms.txt file exists but contains no product description (> blockquote or description text).',
+    plainEnglish: "Your llms.txt exists but doesn't explain what your product is. AI systems use the description to understand your site context.",
+    fixPrompt: 'Add a description to your llms.txt using blockquote format (as per llmstxt.org spec):\n\n  # Your Product Name\n\n  > One-sentence description of what your product does and who it\'s for.\n\n  ## Key Pages\n  - /: Homepage\n  - /pricing: Pricing',
+    docsUrl: 'https://llmstxt.org',
+  },
+
+  'llms-txt-no-sections': {
+    id: 'llms-txt-no-sections',
+    category: 'ai_visibility',
+    severity: 'low',
+    title: 'llms.txt has no structured sections',
+    description: 'llms.txt exists but has no ## section headings.',
+    plainEnglish: 'Your llms.txt is present but lacks structured sections. The llmstxt.org spec recommends ## sections to help AI systems navigate your content.',
+    fixPrompt: 'Add ## sections to your llms.txt:\n\n  # Product Name\n  > Description\n\n  ## Key Pages\n  - /: Homepage description\n  - /docs: Documentation\n\n  ## About\n  Brief about the product.',
+  },
+
+  'llms-txt-broken-links': {
+    id: 'llms-txt-broken-links',
+    category: 'ai_visibility',
+    severity: 'medium',
+    title: 'llms.txt references broken links',
+    description: 'One or more URLs listed in llms.txt returned a non-200 status.',
+    plainEnglish: "Your llms.txt lists pages that don't load. AI systems following these links will hit dead ends.",
+    fixPrompt: 'Audit your llms.txt and remove or fix any broken URLs. Run: curl -I <url> for each listed URL to verify.',
+  },
+
+  // ─────────────────────────────────────────
+  // SEO — Sitemap + Robots quality (Phase 2)
+  // ─────────────────────────────────────────
+
+  'sitemap-empty': {
+    id: 'sitemap-empty',
+    category: 'seo',
+    severity: 'high',
+    title: 'sitemap.xml exists but contains no URLs',
+    description: 'A sitemap.xml was found but it has no <url> or <sitemap> entries.',
+    plainEnglish: 'Your sitemap.xml is empty. Search engines and AI crawlers use sitemaps to discover pages — an empty sitemap provides no benefit.',
+    fixPrompt: 'Regenerate your sitemap.xml to include all public pages:\n\nNext.js App Router: create app/sitemap.ts:\n  import type { MetadataRoute } from "next"\n  export default function sitemap(): MetadataRoute.Sitemap {\n    return [\n      { url: "https://yourdomain.com", lastModified: new Date() },\n      { url: "https://yourdomain.com/pricing", lastModified: new Date() },\n    ]\n  }',
+    docsUrl: 'https://nextjs.org/docs/app/api-reference/file-conventions/metadata/sitemap',
+  },
+
+  'sitemap-lastmod-stale': {
+    id: 'sitemap-lastmod-stale',
+    category: 'seo',
+    severity: 'low',
+    title: 'Sitemap lastmod dates are stale',
+    description: 'All lastmod dates in sitemap.xml are more than 6 months old.',
+    plainEnglish: "Your sitemap's last-modified dates are old. Search engines use these to decide how often to recrawl — stale dates suggest the site isn't updated.",
+    fixPrompt: 'Update lastmod to reflect actual last-modified dates in your sitemap. In Next.js sitemap.ts, set lastModified dynamically from your content system or use new Date() for actively maintained pages.',
+  },
+
+  'robots-no-sitemap-directive': {
+    id: 'robots-no-sitemap-directive',
+    category: 'seo',
+    severity: 'medium',
+    title: 'robots.txt has no Sitemap directive',
+    description: 'robots.txt does not include a Sitemap: line pointing to sitemap.xml.',
+    plainEnglish: 'Adding a Sitemap: directive to robots.txt helps all crawlers discover your sitemap immediately, without needing to guess or find it through other means.',
+    fixPrompt: 'Add a Sitemap directive to your robots.txt:\n  Sitemap: https://yourdomain.com/sitemap.xml\n\nIn Next.js, you can create app/robots.ts:\n  export default function robots() {\n    return {\n      rules: { userAgent: "*", allow: "/" },\n      sitemap: "https://yourdomain.com/sitemap.xml",\n    }\n  }',
+    docsUrl: 'https://nextjs.org/docs/app/api-reference/file-conventions/metadata/robots',
+  },
+
+  'robots-disallow-all': {
+    id: 'robots-disallow-all',
+    category: 'seo',
+    severity: 'high',
+    title: 'robots.txt blocks all crawlers from the entire site',
+    description: 'robots.txt contains Disallow: / for * or Googlebot, blocking the whole site.',
+    plainEnglish: 'Your robots.txt is telling Google and all crawlers not to index any page. This is often set accidentally during development and forgotten. Your entire site is invisible to search engines.',
+    fixPrompt: 'Update robots.txt to allow crawling:\n  User-agent: *\n  Allow: /\n  Sitemap: https://yourdomain.com/sitemap.xml\n\nIn Next.js app/robots.ts:\n  export default function robots() {\n    return { rules: { userAgent: "*", allow: "/" }, sitemap: "https://yourdomain.com/sitemap.xml" }\n  }',
+  },
+
+  // ─────────────────────────────────────────
+  // AI VISIBILITY — Semantic HTML + Schema (Phase 2)
+  // ─────────────────────────────────────────
+
+  'no-semantic-html': {
+    id: 'no-semantic-html',
+    category: 'ai_visibility',
+    severity: 'medium',
+    title: 'No semantic HTML landmarks found',
+    description: 'No <main>, <article>, or <section> tags found in the page body.',
+    plainEnglish: 'AI agents and screen readers navigate pages using semantic HTML landmarks. Without them, your content structure is invisible to machines.',
+    fixPrompt: 'Wrap your main content in semantic HTML elements:\n  <main> — primary content area (one per page)\n  <article> — self-contained content (blog posts, product descriptions)\n  <section> — thematic groupings with a heading\n  <nav> — navigation links\n  <aside> — secondary content\n\nIn React/Next.js, replace generic <div> containers with the appropriate semantic element.',
+    docsUrl: 'https://web.dev/articles/ai-agent-site-ux',
+  },
+
+  'content-js-only': {
+    id: 'content-js-only',
+    category: 'ai_visibility',
+    severity: 'high',
+    title: 'Page has very little readable content in raw HTML',
+    description: 'Fewer than 100 readable words found in the HTML before JavaScript runs.',
+    plainEnglish: "AI crawlers and search engines fetch raw HTML before running JavaScript. If your page has little visible text in the HTML, they see an almost-empty page.",
+    fixPrompt: "Ensure key content is server-side rendered (SSR) or statically generated:\n\nNext.js: Use Server Components (default in App Router) or generateStaticParams.\nReact SPA: Migrate to Next.js or add a pre-rendering solution.\nVerify: View Page Source — if you see your main headline and description there, you're good.",
+  },
+
+  'schema-missing-required-fields': {
+    id: 'schema-missing-required-fields',
+    category: 'ai_visibility',
+    severity: 'medium',
+    title: 'Schema.org markup is missing required fields',
+    description: 'A Schema.org type was detected but required fields for that type are missing.',
+    plainEnglish: 'Your structured data has the right type but is incomplete. Google and AI systems may ignore incomplete schema.',
+    fixPrompt: 'Check which fields are required for your schema type at schema.org and add them. Common required fields:\n  Organization: name, url\n  Product: name, offers\n  Article: headline, author, datePublished\n  FAQPage: mainEntity (array of Questions with acceptedAnswer)',
+    docsUrl: 'https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data',
+  },
+
+  // ─────────────────────────────────────────
+  // SECURITY — TLS (Phase 3, SSL Labs)
+  // ─────────────────────────────────────────
+
+  'tls-old-protocol': {
+    id: 'tls-old-protocol',
+    category: 'security',
+    severity: 'high',
+    title: 'Old TLS protocol version supported (TLS 1.0 or 1.1)',
+    description: 'The server accepts TLS 1.0 or TLS 1.1, which are deprecated and insecure.',
+    plainEnglish: 'Your server still supports old encryption protocols from the early 2000s. These are known to have weaknesses. Modern browsers and security standards require TLS 1.2 or higher.',
+    fixPrompt: 'Disable TLS 1.0 and 1.1 on your server. Most modern hosting handles this automatically:\n\nVercel: TLS 1.2+ is enforced by default — no action needed.\nCloudflare: Dashboard → SSL/TLS → Edge Certificates → Minimum TLS Version → set to TLS 1.2\nNginx: ssl_protocols TLSv1.2 TLSv1.3;\nApache: SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1',
+  },
+
+  'tls-weak-cipher': {
+    id: 'tls-weak-cipher',
+    category: 'security',
+    severity: 'high',
+    title: 'Weak TLS cipher suite detected',
+    description: 'The server supports weak cipher suites (RC4, DES, NULL, EXPORT, or anonymous).',
+    plainEnglish: "Your server uses outdated encryption methods that can be broken by attackers. This puts your users' data at risk.",
+    fixPrompt: 'Disable weak cipher suites:\n\nNginx:\n  ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384;\n  ssl_prefer_server_ciphers off;\n\nApache:\n  SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256\n\nUse the Mozilla SSL Configuration Generator for your specific server.',
+    docsUrl: 'https://ssl-config.mozilla.org/',
+  },
+
+  'tls-grade-low': {
+    id: 'tls-grade-low',
+    category: 'security',
+    severity: 'medium',
+    title: 'SSL Labs grade below A',
+    description: 'SSL Labs assessed the TLS configuration and gave a grade below A.',
+    plainEnglish: "Your HTTPS configuration scored below A on SSL Labs' independent assessment. This means there are TLS configuration improvements to make.",
+    fixPrompt: "Run a full assessment at ssllabs.com/ssltest/ to see the detailed breakdown. Common fixes to reach A+:\n1. Enable HSTS (Strict-Transport-Security header)\n2. Disable TLS 1.0/1.1\n3. Use ECDHE key exchange\n4. Enable OCSP stapling",
+    docsUrl: 'https://www.ssllabs.com/ssltest/',
+  },
+
+  // ─────────────────────────────────────────
+  // SECURITY — CVE (Phase 3, OSV)
+  // ─────────────────────────────────────────
+
+  'vulnerable-js-lib': {
+    id: 'vulnerable-js-lib',
+    category: 'security',
+    severity: 'high',
+    title: 'JavaScript library with known CVE detected',
+    description: 'A JavaScript library version was detected that has known security vulnerabilities in the OSV database.',
+    plainEnglish: 'One of your JavaScript libraries has publicly known security vulnerabilities. Attackers actively scan for sites using these outdated versions.',
+    fixPrompt: 'Update the affected library to the latest patched version:\n1. Check the CVE IDs listed in this report at https://osv.dev\n2. Update via npm: npm update <package-name>\n3. For CDN-loaded libraries, update the version number in your HTML\n4. Run npm audit after updating to confirm no remaining vulnerabilities',
+    docsUrl: 'https://osv.dev',
+  },
+
+  // ─────────────────────────────────────────
+  // PERFORMANCE — CrUX field data (Phase 3)
+  // ─────────────────────────────────────────
+
+  'crux-lcp-poor': {
+    id: 'crux-lcp-poor',
+    category: 'performance',
+    severity: 'high',
+    title: 'Real-user LCP is poor (CrUX field data)',
+    description: "Google's Chrome User Experience Report shows real users experience LCP above 4000ms.",
+    plainEnglish: 'Real visitors to your site experience the main content loading in more than 4 seconds. This is based on actual Chrome browser data from real users, not a lab test.',
+    fixPrompt: 'This is real-user data showing slow load. Focus on: server response time, render-blocking resources, large images without priority loading. See the LCP guidance and also check the Lighthouse audit above for specific elements.',
+    docsUrl: 'https://web.dev/articles/lcp',
+  },
+
+  'crux-cls-poor': {
+    id: 'crux-cls-poor',
+    category: 'performance',
+    severity: 'medium',
+    title: 'Real-user CLS is poor (CrUX field data)',
+    description: "Google's Chrome User Experience Report shows real users experience CLS above 0.25.",
+    plainEnglish: 'Real visitors see your page jumping around while it loads. This is measured from actual Chrome user data.',
+    fixPrompt: 'Reserve space for images, ads, and dynamic content. Set explicit width and height on images. Avoid inserting content above existing elements after load.',
+    docsUrl: 'https://web.dev/articles/cls',
+  },
+
+  'crux-inp-poor': {
+    id: 'crux-inp-poor',
+    category: 'performance',
+    severity: 'medium',
+    title: 'Real-user INP is poor (CrUX field data)',
+    description: 'Chrome User Experience Report shows real users experience INP above 500ms.',
+    plainEnglish: 'Real visitors find your page slow to respond to clicks and interactions. This is from actual user data.',
+    fixPrompt: "Reduce JavaScript execution time. Break up long tasks. Defer non-critical scripts. Use React's useTransition for expensive state updates.",
+    docsUrl: 'https://web.dev/articles/inp',
   },
 }

@@ -235,40 +235,90 @@ export async function runAIVisibilityChecks(
     }
   }
 
-  const aiCrawlers = ['GPTBot', 'ClaudeBot', 'PerplexityBot', 'CCBot', 'anthropic-ai']
+  if (llmsTxtBody && includeLikely) {
+    const hasDescription = /^>\s+\S/m.test(llmsTxtBody)
+    if (!hasDescription) {
+      issues.push(withIssueMeta(
+        { ...T['llms-txt-no-description'] },
+        'http',
+        [evidence('text', 'llms.txt', 'no > description line found')],
+      ))
+    }
+
+    if (includeHeuristics) {
+      const hasSections = /^##\s+\S/m.test(llmsTxtBody)
+      if (!hasSections) {
+        issues.push(withIssueMeta(
+          { ...T['llms-txt-no-sections'] },
+          'http',
+          [evidence('text', 'llms.txt', 'no ## section headings found')],
+        ))
+      }
+    }
+
+    const urlPattern = /\]\((https?:\/\/[^)]+)\)|^-\s+(https?:\/\/\S+)/gm
+    const linkedUrls: string[] = []
+    let urlMatch: RegExpExecArray | null
+    // eslint-disable-next-line no-cond-assign
+    while ((urlMatch = urlPattern.exec(llmsTxtBody)) !== null) {
+      const found = urlMatch[1] ?? urlMatch[2]
+      if (found) linkedUrls.push(found)
+    }
+
+    const urlsToCheck = linkedUrls.slice(0, 5)
+    const brokenUrls: string[] = []
+    for (const linkedUrl of urlsToCheck) {
+      try {
+        const { fetchSafeResource: fetchCheck } = await import('@/lib/checks/fetch-context')
+        const res = await fetchCheck(linkedUrl, { signal: AbortSignal.timeout(2500) })
+        if (!res.ok) brokenUrls.push(linkedUrl)
+      } catch {
+        brokenUrls.push(linkedUrl)
+      }
+    }
+
+    if (brokenUrls.length > 0) {
+      issues.push(withIssueMeta(
+        { ...T['llms-txt-broken-links'], value: `${brokenUrls.length} broken` },
+        'http',
+        [
+          evidence('count', 'Broken links in llms.txt', brokenUrls.length),
+          evidence('text', 'First broken URL', brokenUrls[0].slice(0, 80)),
+        ],
+      ))
+    }
+  }
+
   let robotsTxt: string | null = null
   try {
     const { fetchSafeResource: fetchSafeResourceRobots } = await import('@/lib/checks/fetch-context')
     const robotsRes = await fetchSafeResourceRobots(`${origin}/robots.txt`, { signal: AbortSignal.timeout(2500) })
     if (robotsRes.ok) {
       robotsTxt = await robotsRes.text()
-      const blocked = aiCrawlers.filter(bot => parseRobotsBlock(robotsTxt!, bot))
-      if (blocked.length > 0) {
-        issues.push(withIssueMeta({
-          id: 'ai-crawlers-blocked',
-          category: 'ai_visibility',
-          severity: 'high',
-          title: 'AI crawlers blocked in robots.txt',
-          description: `Blocked: ${blocked.join(', ')}`,
-          plainEnglish: `Your robots.txt blocks ${blocked.join(', ')}. That prevents some AI crawlers from using the site.`,
-          fixPrompt: 'Update robots.txt so product pages are not fully disallowed for the AI crawlers you want to allow.',
-          value: blocked.join(', '),
-        }, 'ai-visibility', [evidence('text', 'Blocked AI crawlers', blocked.join(', '))]))
+
+      const perBotChecks: Array<{ bot: string | string[]; issueId: string; label: string }> = [
+        { bot: 'OAI-SearchBot', issueId: 'oai-searchbot-blocked', label: 'OAI-SearchBot' },
+        { bot: 'GPTBot', issueId: 'gptbot-blocked', label: 'GPTBot' },
+        { bot: ['ClaudeBot', 'anthropic-ai'], issueId: 'claudebot-blocked', label: 'ClaudeBot' },
+        { bot: 'PerplexityBot', issueId: 'perplexitybot-blocked', label: 'PerplexityBot' },
+        { bot: 'DeepSeekBot', issueId: 'deepseekbot-blocked', label: 'DeepSeekBot' },
+      ]
+
+      for (const { bot, issueId, label } of perBotChecks) {
+        const bots = Array.isArray(bot) ? bot : [bot]
+        const isBlocked = bots.some(b => parseRobotsBlock(robotsTxt!, b))
+        if (isBlocked) {
+          if (issueId === 'deepseekbot-blocked' && !includeHeuristics) continue
+          issues.push(withIssueMeta(
+            { ...T[issueId] },
+            'ai-visibility',
+            [evidence('text', `${label} in robots.txt`, 'Disallow: /')],
+          ))
+        }
       }
     }
   } catch {
     // ignore robots fetch failures
-  }
-
-  if (includeHeuristics && robotsTxt) {
-    const hasExplicitAiCrawlers = /GPTBot|OAI-SearchBot|ClaudeBot|PerplexityBot/i.test(robotsTxt)
-    if (!hasExplicitAiCrawlers) {
-      issues.push(withIssueMeta(
-        { ...T['no-explicit-ai-crawlers'] },
-        'http',
-        [evidence('text', 'robots.txt', 'No named AI crawler rules found'), evidence('text', 'Recommendation', 'Add explicit Allow rules for GPTBot, ClaudeBot, PerplexityBot')],
-      ))
-    }
   }
 
   const hasSitemapInHead = !!$('link[rel="sitemap"]').attr('href')
