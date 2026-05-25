@@ -209,6 +209,7 @@ export function buildScanResult(params: {
   aiTechnicalPrompt?: string
   issuePrompts?: Record<string, { technical: string }>
   wowInsights?: ScanResult['wowInsights']
+  answerGap?: string
   strategicRecommendations?: ScanResult['strategicRecommendations']
   processingIssue?: ScanProcessingIssue
   businessContext?: BusinessContext | null
@@ -236,6 +237,7 @@ export function buildScanResult(params: {
     aiTechnicalPrompt: params.aiTechnicalPrompt,
     issuePrompts: params.issuePrompts,
     wowInsights: params.wowInsights,
+    answerGap: params.answerGap,
     strategicRecommendations: params.strategicRecommendations,
     processingIssue: params.processingIssue,
     businessContext: params.businessContext,
