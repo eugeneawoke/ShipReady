@@ -79,6 +79,48 @@ const CONFIDENCE_MAP: Record<string, { confidence: IssueConfidence; scoreEligibl
   'redirect-chain': { confidence: 'verified', scoreEligible: true },
   'small-tap-targets': { confidence: 'verified', scoreEligible: true },
   'mobile-font-too-small': { confidence: 'verified', scoreEligible: true },
+  // Phase 1 — DNS / Email
+  'missing-spf': { confidence: 'verified', scoreEligible: true },
+  'missing-dmarc': { confidence: 'verified', scoreEligible: true },
+  'weak-dmarc-policy': { confidence: 'likely', scoreEligible: false },
+  'missing-caa': { confidence: 'heuristic', scoreEligible: false },
+  // Phase 1 — Cookie flags
+  'cookie-missing-secure': { confidence: 'verified', scoreEligible: true },
+  'cookie-missing-httponly': { confidence: 'verified', scoreEligible: true },
+  'cookie-missing-samesite': { confidence: 'likely', scoreEligible: false },
+  // Phase 1 — Exposed paths
+  'exposed-git-head': { confidence: 'verified', scoreEligible: true },
+  'exposed-source-map': { confidence: 'verified', scoreEligible: true },
+  'graphql-introspection-open': { confidence: 'verified', scoreEligible: true },
+  // Phase 1 — Per-bot AI crawlers
+  'oai-searchbot-blocked': { confidence: 'verified', scoreEligible: true },
+  'gptbot-blocked': { confidence: 'verified', scoreEligible: false },
+  'claudebot-blocked': { confidence: 'verified', scoreEligible: true },
+  'perplexitybot-blocked': { confidence: 'verified', scoreEligible: true },
+  'deepseekbot-blocked': { confidence: 'heuristic', scoreEligible: false },
+  // Phase 1 — llms.txt validation
+  'llms-txt-no-description': { confidence: 'likely', scoreEligible: false },
+  'llms-txt-no-sections': { confidence: 'heuristic', scoreEligible: false },
+  'llms-txt-broken-links': { confidence: 'likely', scoreEligible: false },
+  // Phase 2 — Sitemap quality
+  'sitemap-empty': { confidence: 'verified', scoreEligible: true },
+  'sitemap-lastmod-stale': { confidence: 'heuristic', scoreEligible: false },
+  'robots-no-sitemap-directive': { confidence: 'verified', scoreEligible: true },
+  'robots-disallow-all': { confidence: 'verified', scoreEligible: true },
+  // Phase 2 — Semantic HTML / Schema
+  'no-semantic-html': { confidence: 'likely', scoreEligible: false },
+  'content-js-only': { confidence: 'likely', scoreEligible: true },
+  'schema-missing-required-fields': { confidence: 'likely', scoreEligible: true },
+  // Phase 3 — SSL Labs TLS
+  'tls-old-protocol': { confidence: 'verified', scoreEligible: true },
+  'tls-weak-cipher': { confidence: 'verified', scoreEligible: true },
+  'tls-grade-low': { confidence: 'verified', scoreEligible: false },
+  // Phase 3 — OSV CVE
+  'vulnerable-js-lib': { confidence: 'verified', scoreEligible: true },
+  // Phase 3 — CrUX field metrics
+  'crux-lcp-poor': { confidence: 'verified', scoreEligible: true },
+  'crux-cls-poor': { confidence: 'verified', scoreEligible: true },
+  'crux-inp-poor': { confidence: 'verified', scoreEligible: true },
 }
 
 export function evidence(kind: IssueEvidence['kind'], label: string, value: string | number): IssueEvidence {

@@ -8,7 +8,7 @@
 ЦЕЛЬ:   Дать продукт первым beta-пользователям без ложных обещаний:
         scan/report/auth/dashboard должны работать в проде,
         AI prompts должны быть включены через OPENAI_API_KEY,
-        billing provider остаётся TBD и не блокирует beta.
+        billing через PayPro Global (D-28) — код написан, ждёт prod env + ревью IPN со стороны PayPro.
 ```
 
 ---
@@ -23,7 +23,7 @@
 | 3 | Security | 11 security проверок | ✅ готово |
 | 4 | AI Engine | issue templates + OpenAI summary + AI Visibility | ✅ готово (код написан) |
 | 5 | Report UI | ScoreRing + IssueCard + FixPromptSection | ✅ готово (UI есть) |
-| 6 | Монетизация | Auth + provider-agnostic billing + paywall UI | 🔄 provider TBD; beta manual access |
+| 6 | Монетизация | Auth + PayPro Global billing + paywall UI | 🔄 PayPro Global выбран (D-28); код есть; нужен prod env + IPN URL |
 | 7 | Public Launch | Product Hunt + vc.ru + HN | ⏳ после beta |
 | 8 | Pro Features | AI промпты + PDF + мониторинг + email | 🔄 код есть, prod setup/checks нужны |
 | 9 | Quality Overhaul | Confidence/evidence model, phased scan flow, truthful scoring, telemetry | ✅ core shipped; telemetry script остаётся |
@@ -46,9 +46,9 @@
 | 26 | Product Evolution v2 — Phase 7 Report UI | scanGoal-aware category ordering, ArtifactBlock copy UI, SupportingCategoryChips, AI platform readiness grid | ✅ done (2026-05-24, commit dc577c2) |
 | 27 | Product Evolution v2 — Phase 8 Landing Pages | /seo, /security, /ai-visibility pages + ModePicker на главной + nav update | ✅ done (2026-05-24, commit a79745a) |
 | 28 | Product Evolution v2 — Phase 9 Docs Sync | Обновить PLAN.md + project-spec.md после фаз 7–8 | ✅ done (2026-05-24) |
-| 29 | Checks Deepening — Phase 1 Zero Deps | +17 checks: SPF/DMARC/DKIM DNS, cookie flags, per-bot AI crawler, llms.txt validation | 💡 planned |
-| 30 | Checks Deepening — Phase 2 Light npm | sitemap quality, robots.txt quality, semantic HTML, schema required fields (fast-xml-parser, robots-parser) | 💡 planned |
-| 31 | Checks Deepening — Phase 3 Free APIs | SSL Labs TLS checks, OSV CVE lookup, CrUX from PSI, Pro AI content citability | 💡 planned |
+| 29 | Checks Deepening — Phase 1 Zero Deps | +17 checks: SPF/DMARC/DKIM DNS, cookie flags, per-bot AI crawler, llms.txt validation | ✅ done (2026-05-25, commit 172ece3) |
+| 30 | Checks Deepening — Phase 2 Light npm | sitemap quality, robots.txt quality, semantic HTML, schema required fields (fast-xml-parser, robots-parser) | ✅ done (2026-05-25, commit 1961a2d) |
+| 31 | Checks Deepening — Phase 3 Free APIs | SSL Labs TLS checks, OSV CVE lookup, CrUX from PSI, Pro AI content citability | ✅ done (2026-05-25, commit eb579b5) |
 | 32 | IntentLead Integration | Post-audit "Who You're Missing" overlay via IntentLead AI (Reddit/HN signals by businessContext) | 💡 Coming Soon |
 | 33 | Growth Bundle | ShipReady Agency + IntentLead Growth as bundled plan ($99/mo). Single billing, unified dashboard | 💡 Coming Soon |
 | 34 | REST API Public Docs | Public docs + SDKs for Agency API v1 (already exists in code, needs docs + rate-limit tuning) | 💡 Coming Soon (Agency tier) |
@@ -64,7 +64,7 @@
 | Фича | Что написано | Почему не работает |
 |------|-------------|-------------------|
 | AI fix prompts | `generate-evidence-enrichment.ts` генерирует summary/priorities/prompts поверх evidence | Нужен `OPENAI_API_KEY` в env там, где выполняется scanner |
-| Billing webhook | Legacy Lemon Squeezy route removed | Payment provider TBD; paid access can be manual during beta |
+| Billing webhook | PayPro Global IPN webhook написан (`/api/payments/paypro/webhook`), SHA256 верификация, subscriptions + payment_events таблицы | Нужны prod env (`PAYPRO_VALIDATION_KEY`, `PAYPRO_VENDOR_ID`, `PAYPRO_PRODUCT_PRO_*`) + IPN URL в PayPro dashboard + ревью интеграции со стороны PayPro |
 | Weekly monitoring rescan | `monitored_domains` + dashboard toggle + `app/api/cron/rescan/route.ts` ресканят активные домены | Нужны prod env (`CRON_SECRET`, `RAILWAY_SCANNER_URL`, `SCANNER_SECRET`) и applied migration `008_monitoring.sql` |
 | Rate limiting | Написан в `app/api/scan/route.ts` | Работает только как базовый monthly limit; нет richer abuse controls и observability |
 | PDF export | `GET /api/report/[id]/pdf` генерирует PDF через Chromium | Нужен `pro/agency` user, node runtime и applied deploy |

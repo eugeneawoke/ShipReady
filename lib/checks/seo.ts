@@ -1,4 +1,6 @@
 import * as cheerio from 'cheerio'
+import { XMLParser } from 'fast-xml-parser'
+import robotsParser from 'robots-parser'
 import type { BusinessContext, Issue } from '@/types/scan'
 import { T } from '@/lib/ai/issue-templates'
 import { isValidUrl } from '@/lib/utils'
@@ -415,6 +417,95 @@ export async function runSEOChecks(
         ],
       ))
     }
+  }
+
+  // ── Sitemap quality ──────────────────────────────────────────
+  try {
+    const { fetchSafeResource: fetchSitemapResource } = await import('@/lib/checks/fetch-context')
+    const seoOrigin = new URL(url).origin
+    const sitemapRes = await fetchSitemapResource(`${seoOrigin}/sitemap.xml`, { signal: AbortSignal.timeout(3000) })
+
+    if (sitemapRes.ok) {
+      const sitemapXml = await sitemapRes.text()
+      const parser = new XMLParser({ ignoreAttributes: false })
+      const parsed = parser.parse(sitemapXml) as Record<string, unknown>
+
+      const urlset = parsed?.urlset as Record<string, unknown> | undefined
+      const sitemapUrls: unknown[] = urlset?.url
+        ? (Array.isArray(urlset.url) ? urlset.url : [urlset.url])
+        : []
+
+      if (sitemapUrls.length === 0) {
+        issues.push(withIssueMeta(
+          { ...T['sitemap-empty'] },
+          'http',
+          [evidence('response', 'sitemap.xml status', 200), evidence('count', 'URLs found', 0)],
+        ))
+      } else if (includeHeuristics) {
+        const sixMonthsAgo = Date.now() - 180 * 24 * 60 * 60 * 1000
+        const urlsWithLastmod = sitemapUrls.filter((u): u is Record<string, unknown> =>
+          typeof u === 'object' && u !== null && 'lastmod' in u,
+        )
+        if (urlsWithLastmod.length > 0) {
+          const allStale = urlsWithLastmod.every((u) => {
+            const lm = u.lastmod
+            if (!lm || typeof lm !== 'string') return true
+            const d = new Date(lm)
+            return !isNaN(d.getTime()) && d.getTime() < sixMonthsAgo
+          })
+          if (allStale) {
+            const oldestDateStr = urlsWithLastmod
+              .map(u => String(u.lastmod))
+              .sort()
+              .at(-1) ?? 'unknown'
+            issues.push(withIssueMeta(
+              { ...T['sitemap-lastmod-stale'], value: `last updated ${oldestDateStr}` },
+              'http',
+              [evidence('text', 'Most recent lastmod', oldestDateStr), evidence('count', 'URLs checked', urlsWithLastmod.length)],
+            ))
+          }
+        }
+      }
+    }
+  } catch {
+    // non-fatal
+  }
+
+  // ── Robots.txt quality ───────────────────────────────────────
+  try {
+    const { fetchSafeResource: fetchRobotsResource } = await import('@/lib/checks/fetch-context')
+    const seoOrigin = new URL(url).origin
+    const robotsRes = await fetchRobotsResource(`${seoOrigin}/robots.txt`, { signal: AbortSignal.timeout(2500) })
+
+    if (robotsRes.ok) {
+      const robotsText = await robotsRes.text()
+      const robotsUrl = `${seoOrigin}/robots.txt`
+      const robots = robotsParser(robotsUrl, robotsText)
+
+      const homeUrl = `${seoOrigin}/`
+      const isHomeBlocked =
+        robots.isDisallowed(homeUrl, 'Googlebot') ||
+        robots.isDisallowed(homeUrl, '*')
+
+      if (isHomeBlocked) {
+        issues.push(withIssueMeta(
+          { ...T['robots-disallow-all'] },
+          'http',
+          [evidence('text', 'robots.txt', 'Disallow: / for * or Googlebot'), evidence('text', 'Checked URL', homeUrl)],
+        ))
+      }
+
+      const hasSitemapDirective = /^Sitemap:/im.test(robotsText)
+      if (!hasSitemapDirective) {
+        issues.push(withIssueMeta(
+          { ...T['robots-no-sitemap-directive'] },
+          'http',
+          [evidence('text', 'robots.txt Sitemap directive', 'missing')],
+        ))
+      }
+    }
+  } catch {
+    // non-fatal
   }
 
   return issues

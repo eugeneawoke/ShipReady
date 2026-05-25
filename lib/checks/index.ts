@@ -1,5 +1,5 @@
 import { createServiceClient } from '@/lib/supabase'
-import type { BusinessContext, ScanGoal, ScanPlan, ScanResult, ScanStatus, ScanTimings } from '@/types/scan'
+import type { BusinessContext, Issue, ScanGoal, ScanPlan, ScanResult, ScanStatus, ScanTimings } from '@/types/scan'
 import { buildCategoryScore, buildPerformanceIssues, buildScanResult } from '@/lib/scoring'
 import { runLighthouse } from '@/lib/checks/lighthouse'
 import { runSEOChecks } from '@/lib/checks/seo'
@@ -12,6 +12,10 @@ import { assertSafeScanUrl } from '@/lib/server/url-safety'
 import { fetchPrimaryContext, fetchSafeResource } from '@/lib/checks/fetch-context'
 import { generateEvidenceEnrichment } from '@/lib/ai/generate-evidence-enrichment'
 import { generateWowInsights } from '@/lib/ai/generate-wow-insights'
+import { generateAnswerGap } from '@/lib/ai/generate-answer-gap'
+import { fetchSSLLabsData } from '@/lib/providers/ssllabs'
+import { detectJsLibraries, queryOSVBatch } from '@/lib/providers/osv'
+import { T } from '@/lib/ai/issue-templates'
 import { generateArtifacts } from '@/lib/ai/generate-artifacts'
 import { measurement, withIssueMeta, evidence } from '@/lib/checks/issue-meta'
 import { buildMonitoringAlertDecision } from '@/lib/monitoring/alerts'
@@ -455,12 +459,111 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
           ...providerData,
           pagespeed: pageSpeed.data,
         }
+
+        // ── CrUX field metrics (task 3.4) ─────────────────────────
+        const fm = pageSpeed.data.fieldMetrics
+        const cruxIssues: Issue[] = []
+        if (typeof fm.lcpMs === 'number' && fm.lcpMs > 4000) {
+          cruxIssues.push(withIssueMeta(
+            { ...T['crux-lcp-poor'], value: `${(fm.lcpMs / 1000).toFixed(1)}s` },
+            'dom',
+            [evidence('metric', 'CrUX P75 LCP', fm.lcpMs)],
+          ))
+        }
+        if (typeof fm.cls === 'number' && fm.cls > 0.25) {
+          cruxIssues.push(withIssueMeta(
+            { ...T['crux-cls-poor'], value: fm.cls.toFixed(2) },
+            'dom',
+            [evidence('metric', 'CrUX P75 CLS', fm.cls)],
+          ))
+        }
+        if (typeof fm.inpMs === 'number' && fm.inpMs > 500) {
+          cruxIssues.push(withIssueMeta(
+            { ...T['crux-inp-poor'], value: `${fm.inpMs}ms` },
+            'dom',
+            [evidence('metric', 'CrUX P75 INP', fm.inpMs)],
+          ))
+        }
+        if (cruxIssues.length > 0) {
+          result = buildScanResult({
+            ...result,
+            performance: buildCategoryScore(
+              [...result.performance.issues, ...cruxIssues],
+              'performance',
+              { measurement: result.performance.measurement },
+            ),
+          })
+        }
       } else {
         budget = markProviderState(budget, 'pagespeed', pageSpeed.status, pageSpeed.message)
       }
 
       result = buildScanResult({
         ...result,
+        budget,
+        providerData,
+        siteSummary,
+        businessContext,
+        scanGoal,
+      })
+    }
+
+    // ── SSL Labs (task 3.3) ──────────────────────────────────────
+    const sslIssues: Issue[] = []
+    const sslCheckResult = await safeTask(fetchSSLLabsData(new URL(finalUrl).hostname), 40_000, 'ssllabs')
+    if (sslCheckResult.ok && sslCheckResult.value.ok) {
+      const sslData = sslCheckResult.value.data
+      if (sslData.hasOldProtocol) {
+        sslIssues.push(withIssueMeta(
+          { ...T['tls-old-protocol'] },
+          'http',
+          [evidence('text', 'TLS protocol', 'TLS < 1.2 detected')],
+        ))
+      }
+      if (sslData.hasWeakCipher) {
+        sslIssues.push(withIssueMeta(
+          { ...T['tls-weak-cipher'] },
+          'http',
+          [evidence('text', 'Cipher suite', 'weak cipher detected')],
+        ))
+      }
+      if (sslData.grade && !['A', 'A+', 'A-'].includes(sslData.grade)) {
+        sslIssues.push(withIssueMeta(
+          { ...T['tls-grade-low'], value: sslData.grade },
+          'http',
+          [evidence('text', 'SSL Labs grade', sslData.grade)],
+        ))
+      }
+    }
+
+    // ── OSV CVE scan (task 3.3) ───────────────────────────────────
+    const osvLibraries = detectJsLibraries(fetchContext.html)
+    const osvIssues: Issue[] = []
+    if (osvLibraries.length > 0) {
+      const osvCheckResult = await safeTask(queryOSVBatch(osvLibraries), 15_000, 'osv')
+      if (osvCheckResult.ok) {
+        for (const cveResult of osvCheckResult.value) {
+          osvIssues.push(withIssueMeta(
+            { ...T['vulnerable-js-lib'], value: `${cveResult.library.name}@${cveResult.library.version}` },
+            'dom',
+            [
+              evidence('text', 'Library', `${cveResult.library.name}@${cveResult.library.version}`),
+              evidence('text', 'CVEs', cveResult.cveIds.join(', ')),
+              evidence('text', 'Severity', cveResult.severity),
+            ],
+          ))
+        }
+      }
+    }
+
+    if (sslIssues.length > 0 || osvIssues.length > 0) {
+      result = buildScanResult({
+        ...result,
+        security: buildCategoryScore(
+          [...result.security.issues, ...sslIssues, ...osvIssues],
+          'security',
+          { measurement: result.security.measurement },
+        ),
         budget,
         providerData,
         siteSummary,
@@ -545,6 +648,18 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
                 result.wowInsights = wowInsights.value
               } else {
                 budget = markProviderState(budget, 'wowInsights', 'failed', `Wow insights failed: ${wowInsights.error}`)
+              }
+            }
+
+            // ── Answer Gap (task 3.5) — Pro/Agency only ───────────
+            if (businessContext && process.env.OPENAI_API_KEY) {
+              const answerGapResult = await safeTask(
+                generateAnswerGap(result, businessContext),
+                20_000,
+                'answer-gap',
+              )
+              if (answerGapResult.ok && answerGapResult.value) {
+                result.answerGap = answerGapResult.value
               }
             }
           }
