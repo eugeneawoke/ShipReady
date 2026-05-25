@@ -476,6 +476,77 @@ export async function runAIVisibilityChecks(
     }
   }
 
+  // ── Semantic HTML / AI readability ──────────────────────────
+  if (includeLikely) {
+    const hasMain = $('main').length > 0
+    const hasArticle = $('article').length > 0
+    const hasSection = $('section').length > 0
+
+    if (!hasMain && !hasArticle && !hasSection) {
+      issues.push(withIssueMeta(
+        { ...T['no-semantic-html'] },
+        'dom',
+        [evidence('selector', '<main>, <article>, <section>', 'none found')],
+      ))
+    }
+
+    const rawWordCount = readableBodyText.split(/\s+/).filter(Boolean).length
+    const hasReactRoot = $('div#root, div#app, div#__next').length > 0
+    if (!hasReactRoot && rawWordCount < 100) {
+      issues.push(withIssueMeta(
+        { ...T['content-js-only'], value: `${rawWordCount} words in HTML` },
+        'dom',
+        [evidence('count', 'Readable words in raw HTML', rawWordCount)],
+      ))
+    }
+  }
+
+  // ── Schema required fields validation ───────────────────────
+  if (includeLikely && hasJsonLd) {
+    const REQUIRED_FIELDS: Record<string, string[]> = {
+      Organization: ['name', 'url'],
+      Person: ['name'],
+      Product: ['name', 'offers'],
+      Article: ['headline', 'author', 'datePublished'],
+      BlogPosting: ['headline', 'author', 'datePublished'],
+      FAQPage: ['mainEntity'],
+      SoftwareApplication: ['name', 'applicationCategory'],
+      LocalBusiness: ['name', 'address'],
+      WebSite: ['name', 'url'],
+    }
+
+    for (const block of jsonLdScripts) {
+      try {
+        const raw = $(block).html()
+        if (!raw) continue
+        const data = JSON.parse(raw)
+        const items = Array.isArray(data) ? data : [data]
+
+        for (const item of items) {
+          const schemaType = item?.['@type']
+          if (typeof schemaType !== 'string') continue
+          const required = REQUIRED_FIELDS[schemaType]
+          if (!required) continue
+
+          const missingFields = required.filter(field => !item[field])
+          if (missingFields.length > 0) {
+            issues.push(withIssueMeta(
+              { ...T['schema-missing-required-fields'], value: `${schemaType}: missing ${missingFields.join(', ')}` },
+              'dom',
+              [
+                evidence('text', 'Schema type', schemaType),
+                evidence('text', 'Missing required fields', missingFields.join(', ')),
+              ],
+            ))
+            break
+          }
+        }
+      } catch {
+        // skip malformed JSON-LD
+      }
+    }
+  }
+
   const platformReadiness = buildPlatformReadiness(
     robotsTxt,
     llmsTxtBody !== null,
