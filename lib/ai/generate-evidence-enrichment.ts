@@ -120,6 +120,17 @@ export async function generateEvidenceEnrichment(
     ? '\nIMPORTANT: Write all text fields (summary, topPriorities, strategicRecommendations title/body, issuePrompts technical) in Russian. Keep technical terms like HTML tag names, CSS properties, HTTP header names, file paths, and code snippets in English.'
     : ''
 
+  const citabilitySignals = {
+    hasDataTables: (result.ai_visibility?.issues ?? []).every(i => i.id !== 'thin-content'),
+    wordCount: (() => {
+      const wc = (result.ai_visibility?.issues ?? []).find(i => i.id === 'thin-content')?.value
+      return wc ? parseInt(String(wc)) : null
+    })(),
+    hasDateSignal: !(result.ai_visibility?.issues ?? []).some(i => i.id === 'geo-missing-date-signal'),
+    hasFAQSchema: !(result.ai_visibility?.issues ?? []).some(i => i.id === 'missing-faq-schema'),
+    hasOrgSchema: !(result.ai_visibility?.issues ?? []).some(i => i.id === 'missing-schema-org'),
+  }
+
   const completion = await client.chat.completions.create({
     model: process.env.OPENAI_SCAN_MODEL || DEFAULT_ENRICHMENT_MODEL,
     max_tokens: 3500,
@@ -132,6 +143,7 @@ export async function generateEvidenceEnrichment(
 URL: ${result.url}
 Phase: ${result.phase}
 Total score: ${result.totalScore ?? 'unavailable'}
+Content citability signals: ${JSON.stringify(citabilitySignals)}
 Category scores:
 - Performance: ${result.performance.score ?? 'unavailable'}
 - SEO: ${result.seo.score ?? 'unavailable'}

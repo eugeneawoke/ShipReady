@@ -202,6 +202,7 @@ export interface ScanResult {
   aiTechnicalPrompt?: string
   issuePrompts?: Record<string, { technical: string }>
   wowInsights?: WowInsight[]
+  answerGap?: string
   strategicRecommendations?: StrategicRecommendation[]
   businessContext?: BusinessContext | null
   scanGoal?: ScanGoal
