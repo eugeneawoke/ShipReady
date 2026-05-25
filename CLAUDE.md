@@ -72,6 +72,23 @@ There is no `npm run typecheck` script right now; `next build` is the practical 
 
 ---
 
+## ⛔️ GIT — НИКОГДА НЕ КОММИТИТЬ
+
+**Это нарушалось и попало в репо. Никогда не повторять.**
+
+Запрещено трекать в git:
+- `.claude/`, `.agents/`, `.kiro/`, `.windsurf/`, `.superpowers/`, `.cursor/` — IDE-конфиги
+- `MEMORY.md` — содержит личные данные
+- `PLAN.md`, `TODO.md`, `ACTION-PLAN.md`, `DECISIONS.md`, `EVIDENCE.md`, `DESIGN.md`, `CHECKS.md`, `AGENTS.md`
+- `docs/plans/`, `docs/superpowers/`, `docs/setup/`, `docs/feature-plans/`, `docs/marketing/`
+- `docs/paypro-global-integration.md`, любые интеграционные инструкции
+- `agentdb.rvf`, `ruvector.db`, `*.pid`, `*.log` — runtime файлы
+- Любые research/анализ документы в корне (`*_research_*.md`, `*-analysis.md`)
+
+Перед `git add` — всегда проверять `git status` и добавлять файлы поимённо, не `git add -A`.
+
+---
+
 ## Hard Rules
 
 - Read relevant docs before answering project questions.
@@ -182,7 +199,7 @@ SCANNER_SECRET
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **ShipReady** (3970 symbols, 5946 relationships, 209 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **ShipReady** (4096 symbols, 6090 relationships, 210 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 

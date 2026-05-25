@@ -23,8 +23,48 @@
 # misc
 .DS_Store
 *.pem
-.claude/settings.local.json
 supabase/.temp/
+
+# AI / IDE tool configs — local only
+.claude/
+.agents/
+.kiro/
+.windsurf/
+.superpowers/
+.cursor/
+.aider*
+
+# Internal planning & context docs — local only
+MEMORY.md
+PLAN.md
+TODO.md
+ACTION-PLAN.md
+DECISIONS.md
+EVIDENCE.md
+DESIGN.md
+CHECKS.md
+GEO-ANALYSIS.md
+FULL-AUDIT-REPORT.md
+docs/plans/
+docs/superpowers/
+docs/setup/
+docs/paypro-global-integration.md
+docs/feature-plans/
+docs/marketing/
+docs/campaigns-playbook.md
+docs/deferred-security-issues.md
+docs/shipready-growth-roadmap.md
+docs/shipready_competitors.md
+
+# Agent/AI runtime databases
+agentdb.rvf
+agentdb.rvf.lock
+ruvector.db
+
+# Research / competitive analysis docs (root level)
+limerank_research_summary.md
+sitepravo-ru-reverse-engineering.md
+AGENTS.md
 
 # debug
 npm-debug.log*
