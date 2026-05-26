@@ -482,6 +482,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
   const [pdfError, setPdfError] = useState<string | null>(null)
   const [newScanOpen, setNewScanOpen] = useState(false)
   const [reportActionsOpen, setReportActionsOpen] = useState(false)
+  const [issueStatuses, setIssueStatuses] = useState<Record<string, import('@/components/report/IssueCard').IssueStatus>>({})
   const [pollVersion, setPollVersion] = useState(0)
   const [retryingMeasurement, setRetryingMeasurement] = useState(false)
   const [retryError, setRetryError] = useState<string | null>(null)
@@ -547,6 +548,17 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
       setIsPro(userPlan === 'pro' || userPlan === 'agency')
     })
   }, [])
+
+  // Load issue checklist statuses once we have the scan ID and user is logged in
+  useEffect(() => {
+    if (!id || !isLoggedIn) return
+    fetch(`/api/issues/${id}/status`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data?.statuses) setIssueStatuses(data.statuses)
+      })
+      .catch(() => {})
+  }, [id, isLoggedIn])
 
   useEffect(() => {
     if (!id) return
@@ -1248,7 +1260,22 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
                   </div>
                   <div className="space-y-2">
                     {group.issues.map(issue => (
-                      <IssueCard key={issue.id} issue={issue} isPro={isPro} promptsReady={isFinalReport} />
+                      <IssueCard
+                        key={issue.id}
+                        issue={issue}
+                        isPro={isPro}
+                        promptsReady={isFinalReport}
+                        isAuthenticated={isLoggedIn}
+                        issueStatus={issueStatuses[issue.id]}
+                        onStatusChange={(issueId, status) => {
+                          setIssueStatuses(prev => ({ ...prev, [issueId]: status }))
+                          fetch(`/api/issues/${id}/status`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ issueId, status }),
+                          }).catch(() => {})
+                        }}
+                      />
                     ))}
                   </div>
                 </div>

@@ -26,9 +26,6 @@ export async function generateMetadata(): Promise<Metadata> {
       'website audit tool',
       'Google AI Overview optimization',
     ],
-    alternates: {
-      canonical: appUrl,
-    },
     openGraph: {
       title: t('appTitle'),
       description: t('appDescription'),

@@ -7,6 +7,20 @@ import Link from 'next/link'
 export const metadata: Metadata = {
   title: 'Security Audit — ShipReady',
   description: 'Scan your site for security vulnerabilities. Check HTTPS, security headers, exposed .env files, API keys in HTML. Free security audit in 30 seconds.',
+  alternates: { canonical: 'https://shipready.app/security' },
+  openGraph: {
+    title: 'Free Security Audit — ShipReady',
+    description: 'Scan your site for security vulnerabilities. Check HTTPS, security headers, exposed .env files, API keys in HTML. Free security audit in 30 seconds.',
+    url: 'https://shipready.app/security',
+    type: 'website',
+    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'ShipReady — Free Security Audit' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Free Security Audit — ShipReady',
+    description: 'Scan your site for security vulnerabilities. Free security audit in 30 seconds.',
+    images: ['/opengraph-image'],
+  },
 }
 
 export default function SecurityLandingPage() {

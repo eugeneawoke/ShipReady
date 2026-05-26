@@ -52,5 +52,22 @@
     "invalidUrl": "Please enter a valid URL",
     "scanFailed": "Scan failed — please try again",
     "freeLimitReached": "Free limit reached — upgrade to Pro for unlimited scans"
+  },
+  "IssueCard": {
+    "confidence": {
+      "verified": "verified",
+      "likely": "likely",
+      "heuristic": "heuristic"
+    },
+    "docs": "Read docs →",
+    "recommendedFix": "Recommended fix",
+    "copied": "Copied",
+    "copy": "Copy prompt",
+    "upgrade": "Upgrade to Pro",
+    "preparing": "Fix prompt generating…",
+    "markFixed": "Mark as fixed",
+    "markOpen": "Reopen",
+    "statusFixed": "fixed",
+    "statusIgnored": "ignored"
   }
 }

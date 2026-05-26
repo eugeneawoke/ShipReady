@@ -1,12 +1,50 @@
 import { MetadataRoute } from 'next'
+import { createServiceClient } from '@/lib/supabase'
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export const revalidate = 3600
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = (process.env.NEXT_PUBLIC_APP_URL || 'https://shipready.app').replace(/\/$/, '')
-  return [
-    { url: `${base}/`, lastModified: new Date('2026-05-09') },
-    { url: `${base}/pricing`, lastModified: new Date('2026-05-09') },
-    { url: `${base}/roadmap`, lastModified: new Date('2026-05-09') },
-    { url: `${base}/privacy`, lastModified: new Date('2026-05-11') },
-    { url: `${base}/terms`, lastModified: new Date('2026-05-11') },
+  const staticRoutes: MetadataRoute.Sitemap = [
+    { url: `${base}/`, lastModified: new Date('2026-05-26'), changeFrequency: 'weekly', priority: 1.0 },
+    { url: `${base}/seo`, lastModified: new Date('2026-05-26'), changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${base}/security`, lastModified: new Date('2026-05-26'), changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${base}/ai-visibility`, lastModified: new Date('2026-05-26'), changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${base}/ai-readiness-report`, lastModified: new Date('2026-05-26'), changeFrequency: 'daily', priority: 0.8 },
+    { url: `${base}/pricing`, lastModified: new Date('2026-05-26'), changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/roadmap`, lastModified: new Date('2026-05-26'), changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${base}/privacy`, lastModified: new Date('2026-05-11'), changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${base}/terms`, lastModified: new Date('2026-05-11'), changeFrequency: 'yearly', priority: 0.3 },
   ]
+
+  const checkSlugs = [
+    'performance', 'seo', 'security', 'mobile', 'ai-visibility',
+    'accessibility', 'lcp', 'csp-headers', 'llms-txt', 'structured-data',
+  ]
+  const checkRoutes: MetadataRoute.Sitemap = checkSlugs.map(slug => ({
+    url: `${base}/check/${slug}`,
+    lastModified: new Date('2026-05-26'),
+    changeFrequency: 'weekly' as const,
+    priority: 0.7,
+  }))
+
+  // Published domain pages
+  let domainRoutes: MetadataRoute.Sitemap = []
+  try {
+    const supabase = createServiceClient()
+    const { data } = await supabase
+      .from('published_domains')
+      .select('slug, updated_at')
+      .eq('is_published', true)
+    domainRoutes = (data ?? []).map(row => ({
+      url: `${base}/site/${row.slug}`,
+      lastModified: new Date(row.updated_at),
+      changeFrequency: 'weekly' as const,
+      priority: 0.75,
+    }))
+  } catch {
+    // supabase not configured locally — skip
+  }
+
+  return [...staticRoutes, ...checkRoutes, ...domainRoutes]
 }
