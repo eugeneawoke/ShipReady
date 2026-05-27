@@ -245,6 +245,7 @@ function Nav({ t, lang, setLang, switching, languageAriaLabel }: { t: Translatio
             <Link href="/seo" className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors whitespace-nowrap">SEO</Link>
             <Link href="/security" className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors whitespace-nowrap">Security</Link>
             <Link href="/ai-visibility" className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors whitespace-nowrap">AI</Link>
+            <Link href="/docs/api" className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors whitespace-nowrap">Docs</Link>
             <button
               onClick={() => smoothScrollTo('#how-it-works')}
               className="text-sm text-[#8B8A85] hover:text-[#F1F0EE] transition-colors whitespace-nowrap cursor-pointer"
