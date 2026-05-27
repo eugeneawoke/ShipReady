@@ -92,6 +92,7 @@ export default async function PricingPage() {
       rows: [
         { label: r.allCategoryScores,  free: true,       pro: true,   agency: true },
         { label: r.issueDescriptions,  free: true,       pro: true,   agency: true },
+        { label: r.issueChecklist,     free: true,       pro: true,   agency: true },
         { label: r.aiFixPrompts,       free: c.blurred,  pro: true,   agency: true },
         { label: r.pdfExport,          free: false,      pro: true,   agency: true },
         { label: r.whiteLabelPdf,      free: false,      pro: false,  agency: true },
@@ -100,8 +101,9 @@ export default async function PricingPage() {
     {
       heading: s.monitoring,
       rows: [
-        { label: r.weeklyRescan,  free: false, pro: true, agency: true },
-        { label: r.emailAlerts,   free: false, pro: true, agency: true },
+        { label: r.weeklyRescan,   free: false, pro: true, agency: true },
+        { label: r.weeklyDigest,   free: false, pro: true, agency: true },
+        { label: r.emailAlerts,    free: false, pro: true, agency: true },
       ],
     },
     {
@@ -166,6 +168,7 @@ export default async function PricingPage() {
     {
       heading: s.apiTeam,
       rows: [
+        { label: r.mcpServer,      free: false, pro: false, agency: true },
         { label: r.restApi,        free: false, pro: false, agency: true,      note: n.apiEndpoints },
         { label: r.bulkScanApi,    free: false, pro: false, agency: true,      note: n.bulkUrls },
         { label: r.teamSeats,      free: false, pro: false, agency: c.upTo5,   note: n.inviteEmail },
