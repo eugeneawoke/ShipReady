@@ -29,6 +29,9 @@ import {
   updateScanStage,
 } from '@/lib/scan/stage-telemetry'
 import { buildSiteSummary } from '@/lib/scan/aggregation'
+import { getScanUserId, getValidToken } from '@/lib/integrations/token-refresh'
+import { fetchGscIndexing } from '@/lib/integrations/gsc'
+import { fetchBingIndexing } from '@/lib/integrations/bing-webmaster'
 import {
   buildScanBudget,
   markProviderState,
@@ -173,6 +176,98 @@ async function finalizeMonitoredDomain(scanId: string): Promise<void> {
 
   if (error) {
     console.error('[checks] Failed to update monitored domain baseline:', error)
+  }
+}
+
+/**
+ * Best-effort: enriches scan result with real indexation data from connected OAuth integrations.
+ * Never throws — any error is swallowed so scan completion is not blocked.
+ */
+async function enrichWithOAuthData(
+  scanId: string,
+  url: string,
+  result: ScanResult
+): Promise<ScanResult> {
+  try {
+    const userId = await getScanUserId(scanId)
+    if (!userId) return result // anonymous scan — skip
+
+    const domain = new URL(url).hostname
+    const enrichedSeoIssues = [...(result.seo?.issues ?? [])]
+    let changed = false
+
+    // Google Search Console
+    try {
+      const googleToken = await getValidToken(userId, 'google')
+      if (googleToken) {
+        const gscData = await fetchGscIndexing(googleToken, `https://${domain}`, url)
+        if (gscData && !gscData.indexed) {
+          const existing = enrichedSeoIssues.findIndex((i) => i.id === 'not-indexed')
+          const verifiedIssue: Issue = {
+            id: 'not-indexed',
+            category: 'seo',
+            severity: 'critical',
+            title: 'Page not indexed by Google',
+            description: `Google Search Console confirms this URL is not indexed. Coverage: ${gscData.coverage}.`,
+            plainEnglish: 'Google cannot find this page in its index.',
+            fixPrompt: 'Check Google Search Console for crawl errors and submit the URL for indexing.',
+            confidence: 'verified',
+            scoreEligible: true,
+            evidence: [
+              { kind: 'text', label: 'GSC coverage state', value: gscData.coverage },
+              ...(gscData.lastCrawled ? [{ kind: 'text' as const, label: 'Last crawled', value: gscData.lastCrawled }] : []),
+            ],
+            source: 'http',
+          }
+          if (existing !== -1) enrichedSeoIssues[existing] = verifiedIssue
+          else enrichedSeoIssues.push(verifiedIssue)
+          changed = true
+        }
+      }
+    } catch {
+      // swallow — enrichment is best-effort
+    }
+
+    // Bing Webmaster
+    try {
+      const bingToken = await getValidToken(userId, 'bing')
+      if (bingToken) {
+        const bingData = await fetchBingIndexing(bingToken, `https://${domain}`)
+        if (bingData && bingData.crawlErrors > 0) {
+          enrichedSeoIssues.push({
+            id: 'bing-crawl-errors',
+            category: 'seo',
+            severity: 'medium',
+            title: `Bing reports ${bingData.crawlErrors} crawl errors`,
+            description: `Bing Webmaster Tools found ${bingData.crawlErrors} crawl errors on this domain.`,
+            plainEnglish: 'Bing has trouble crawling some pages on your site.',
+            fixPrompt: 'Review crawl errors in Bing Webmaster Tools and fix 4xx/5xx responses.',
+            confidence: 'verified',
+            scoreEligible: false,
+            evidence: [
+              { kind: 'count', label: 'Crawl errors', value: bingData.crawlErrors },
+              { kind: 'count', label: 'Blocked URLs', value: bingData.blockedUrls },
+            ],
+            source: 'http',
+          })
+          changed = true
+        }
+      }
+    } catch {
+      // swallow
+    }
+
+    if (!changed) return result
+
+    return {
+      ...result,
+      seo: {
+        ...result.seo,
+        issues: enrichedSeoIssues,
+      },
+    }
+  } catch {
+    return result // always return original on unexpected error
   }
 }
 
@@ -686,6 +781,9 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
     }
 
     const generatedArtifacts = generateArtifacts(result, businessContext)
+
+    // Best-effort OAuth enrichment (real indexation data if user has connected integrations)
+    result = await enrichWithOAuthData(scanId, url, result)
 
     result = buildScanResult({
       ...result,
