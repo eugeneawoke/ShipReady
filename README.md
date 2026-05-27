@@ -1,6 +1,6 @@
 # ShipReady
 
-Pre-deploy quality gate for vibe-coded apps. ShipReady scans a live URL and produces a report across performance, SEO, security, mobile, and AI visibility. The product is being upgraded toward a trust-first model: only confirmed findings should affect score, slower checks must report "could not verify" instead of inventing healthy results, and AI acts as enrichment over evidence rather than as the source of truth.
+Web audit tool for founders, developers, and agencies. Paste a URL — find out why Google, ChatGPT, and Perplexity can't see your site, and get the exact fix. ShipReady runs 80+ checks across SEO, AI visibility, security, performance, mobile, and accessibility. Findings are confidence-graded (verified / likely / heuristic) — no invented facts. Report generates ready-to-paste artifacts: llms.txt, Schema.org JSON-LD, security headers config.
 
 ## Stack
 

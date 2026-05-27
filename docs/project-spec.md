@@ -5,9 +5,11 @@ Status: private beta readiness
 
 ## Purpose
 
-ShipReady is a pre-deploy quality gate for vibe-coded apps. A user submits a live URL and receives a report across performance, SEO, security, mobile readiness, and AI visibility.
+ShipReady is a web audit tool for founders, developers, and agencies who want their site found — by Google, by AI assistants, and by real users. Paste a URL and get a confidence-scored report across SEO, AI visibility, security, performance, mobile, and accessibility.
 
-The product promise is trust-first: the report should say what was verified, what is likely, what is heuristic, and what could not be measured. AI improves wording, prioritization, and fix prompts, but it must not invent technical findings.
+The product serves three tiers: solo founders who scan and fix manually; developers and tech leads who use fix prompts and copy-paste artifacts; freelancers and agencies who use the API and MCP server (coming soon) for client audits and bulk workflows.
+
+The product promise is trust-first: the report says what was verified, what is likely, what is heuristic, and what could not be measured. AI improves wording, prioritization, and fix prompts, but must not invent technical findings.
 
 ## Current Phase
 
