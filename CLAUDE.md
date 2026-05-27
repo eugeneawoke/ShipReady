@@ -194,12 +194,23 @@ RESEND_FROM_EMAIL
 CRON_SECRET
 RAILWAY_SCANNER_URL
 SCANNER_SECRET
+OAUTH_STATE_SECRET
+GOOGLE_OAUTH_CLIENT_ID
+GOOGLE_OAUTH_CLIENT_SECRET
+GOOGLE_OAUTH_REDIRECT_URI
+YANDEX_OAUTH_CLIENT_ID
+YANDEX_OAUTH_CLIENT_SECRET
+YANDEX_OAUTH_REDIRECT_URI
+BING_OAUTH_CLIENT_ID
+BING_OAUTH_CLIENT_SECRET
+BING_OAUTH_TENANT_ID
+BING_OAUTH_REDIRECT_URI
 ```
 
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **ShipReady** (3113 symbols, 5271 relationships, 229 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **ShipReady** (3401 symbols, 5841 relationships, 275 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 
