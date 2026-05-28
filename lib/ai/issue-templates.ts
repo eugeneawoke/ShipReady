@@ -1622,4 +1622,65 @@ Twitter summary_large_image also works best at 1200×628px.`,
     fixPrompt: "Reduce JavaScript execution time. Break up long tasks. Defer non-critical scripts. Use React's useTransition for expensive state updates.",
     docsUrl: 'https://web.dev/articles/inp',
   },
+
+  // ─────────────────────────────────────────
+  // TRUST SIGNALS (phases 57–59)
+  // ─────────────────────────────────────────
+
+  'young-domain': {
+    id: 'young-domain',
+    category: 'ai_visibility',
+    severity: 'low',
+    title: 'New domain — limited AI trust signals',
+    description: 'Domain registered less than 6 months ago.',
+    plainEnglish: 'AI assistants and search engines build trust in sites over time. New domains have fewer authority signals, so it takes longer for AI to cite them. This is expected and resolves naturally as you build content, backlinks, and mentions.',
+    fixPrompt: 'Accelerate trust-building: register on G2/Capterra/Product Hunt, get mentioned on Reddit and Hacker News, add Organization schema with sameAs links, and build backlinks from known sites.',
+    scoreEligible: false,
+  },
+
+  'no-reddit-presence': {
+    id: 'no-reddit-presence',
+    category: 'ai_visibility',
+    severity: 'low',
+    title: 'No Reddit mentions found',
+    description: 'No Reddit posts or discussions mentioning this domain were found.',
+    plainEnglish: 'Reddit discussions are a major source AI assistants use when building answers. Sites mentioned in relevant subreddits are more likely to be cited by ChatGPT and Perplexity.',
+    fixPrompt: 'Share your product in relevant subreddits (r/SaaS, r/indiehackers, r/webdev, etc.) by answering questions authentically and linking when relevant. Do not spam — contribute first.',
+    scoreEligible: false,
+  },
+
+  'no-github-presence': {
+    id: 'no-github-presence',
+    category: 'ai_visibility',
+    severity: 'low',
+    title: 'No GitHub repositories found for this product',
+    description: 'GitHub search found no public repos matching this domain or product name.',
+    plainEnglish: 'Developer-facing products and SaaS tools with public GitHub repos get more AI citations. GitHub stars and README content are frequently crawled by AI training datasets.',
+    fixPrompt: 'Create a public GitHub organization or repository for your product. Even a docs repo, example code, or issue tracker increases discoverability and trust for developer audiences.',
+    scoreEligible: false,
+  },
+
+  'no-g2-listing': {
+    id: 'no-g2-listing',
+    category: 'ai_visibility',
+    severity: 'medium',
+    title: 'Not listed on G2 or Capterra',
+    description: 'No G2 or Capterra listing found for this product.',
+    plainEnglish: "G2 and Capterra reviews are among the most-cited sources when AI assistants answer 'what is the best [software category]?' questions. Being absent means you're invisible in those comparisons.",
+    fixPrompt: 'Create a free profile on G2 (g2.com/products/new) and Capterra (capterra.com/vendors/sign-up). Ask early users to leave a review. Even 3 reviews with detailed descriptions dramatically improve AI citation chance.',
+    scoreEligible: false,
+    docsUrl: 'https://www.g2.com/products/new',
+  },
+
+  'no-producthunt-listing': {
+    id: 'no-producthunt-listing',
+    category: 'ai_visibility',
+    severity: 'low',
+    title: 'Not found on Product Hunt',
+    description: 'No Product Hunt listing found for this product.',
+    plainEnglish: 'Product Hunt listings are frequently cited by AI when answering questions about new SaaS tools. A launch post also drives initial community trust signals.',
+    fixPrompt: 'Submit your product to Product Hunt. Prepare a good tagline, screenshots, and a first comment from the maker. Time it for Tuesday–Thursday for maximum upvotes.',
+    scoreEligible: false,
+    docsUrl: 'https://www.producthunt.com/posts/new',
+  },
 }

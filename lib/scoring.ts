@@ -15,6 +15,7 @@ import type {
   SiteSummary,
   ScanStage,
   ScanTimings,
+  TrustSignals,
 } from '@/types/scan'
 import { measurement, withIssueMeta, evidence } from '@/lib/checks/issue-meta'
 import type { LighthouseMetrics } from '@/lib/checks/lighthouse'
@@ -216,6 +217,7 @@ export function buildScanResult(params: {
   scanGoal?: ScanGoal
   generatedArtifacts?: GeneratedArtifacts
   aiPlatformReadiness?: AIPlatformReadiness
+  trustSignals?: TrustSignals
 }): ScanResult {
   const base = {
     url: params.url,
@@ -244,6 +246,7 @@ export function buildScanResult(params: {
     scanGoal: params.scanGoal,
     generatedArtifacts: params.generatedArtifacts,
     aiPlatformReadiness: params.aiPlatformReadiness,
+    trustSignals: params.trustSignals,
   }
 
   const totalScore = weightedTotal(base)

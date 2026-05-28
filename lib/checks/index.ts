@@ -433,7 +433,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
       safeTask(() => runLighthouse(finalUrl), 210_000, 'lighthouse'),
       safeTask(runLinksCheck(finalUrl, fetchContext.html), 12_000, 'links'),
       safeTask(runSEOChecks(finalUrl, fetchContext.html, { businessContext }), 10_000, 'seo-deep'),
-      safeTask(runAIVisibilityChecks(finalUrl, fetchContext.html), 10_000, 'ai-visibility-deep'),
+      safeTask(runAIVisibilityChecks(finalUrl, fetchContext.html, { businessContext: businessContext ?? null }), 10_000, 'ai-visibility-deep'),
     ])
 
     timings.fastPassMs = fastResult.timings?.fastPassMs
@@ -490,6 +490,9 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
     const aiPlatformReadiness = aiVisibilityDeep.ok
       ? aiVisibilityDeep.value.platformReadiness
       : (aiVisibilityFast.ok ? aiVisibilityFast.value.platformReadiness : undefined)
+    const trustSignals = aiVisibilityDeep.ok
+      ? aiVisibilityDeep.value.trustSignals
+      : (aiVisibilityFast.ok ? aiVisibilityFast.value.trustSignals : undefined)
     const lighthouseStageStatus = lighthouseResult.ok
       ? (lighthouseResult.value.warnings.length > 0 ? 'partial' : 'done')
       : 'failed'
@@ -538,6 +541,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
       budget,
       siteSummary,
       aiPlatformReadiness,
+      trustSignals,
     })
 
     let providerData = result.providerData
