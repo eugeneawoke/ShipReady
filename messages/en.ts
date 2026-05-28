@@ -656,7 +656,7 @@ const en = {
       worksWithExamples: 'v0, Bolt, Lovable and more',
     },
     stats: [
-      { value: '60+', label: 'automated checks' },
+      { value: '90+', label: 'automated checks' },
       { value: '6', label: 'categories covered' },
       { value: '', label: 'sites scanned' },
       { value: 'AI', label: 'fix prompt per issue' },
@@ -666,7 +666,7 @@ const en = {
       title: 'Three steps to ship-ready',
       steps: [
         { step: '01', emoji: '1', title: 'Paste your URL', desc: 'Drop any live URL. Vercel, Netlify, or a custom domain. No setup or browser extension needed.' },
-        { step: '02', emoji: '2', title: '60+ checks run', desc: 'Fast truth checks run first, then deeper analysis follows for performance and noisier heuristics.' },
+        { step: '02', emoji: '2', title: '90+ checks run', desc: 'Fast truth checks run first, then deeper analysis follows for performance and noisier heuristics.' },
         { step: '03', emoji: '3', title: 'Get AI fix prompts', desc: 'Each issue has a plain-English explanation and one ready-to-paste prompt you can use in any AI coding tool.' },
       ],
     },
@@ -688,12 +688,12 @@ const en = {
     },
     features: {
       eyebrow: 'What we check',
-      title: '60+ checks across 6 categories',
+      title: '90+ checks across 6 categories',
       sub: 'Every check that matters before your app goes live.',
       items: [
         { title: 'Performance', desc: 'Real Lighthouse mobile run in a headless browser. Core Web Vitals and composite performance score.', checks: ['LCP < 2.5s', 'CLS < 0.1', 'INP < 200ms', 'FCP < 1.8s', 'Performance score'] },
         { title: 'SEO & Social', desc: 'Complete meta audit. OG tags, Twitter cards, canonical, robots.txt, sitemap, structured data.', checks: ['Title & description', 'OG image & tags', 'Canonical URL', 'Sitemap.xml', 'Twitter card'] },
-        { title: 'Security', desc: '15 security checks: HTTPS, HTTP headers, SSL cert validity, exposed .env files, API key detection, mixed content, trackers, and privacy.', checks: ['CSP header', 'HSTS', 'X-Frame-Options', 'SSL/TLS cert', 'Exposed .env'] },
+        { title: 'Security', desc: '20+ security checks: HTTPS, HTTP headers, SSL/TLS grading, exposed .env files, API key detection, SPF/DMARC, cookie flags, mixed content, trackers, and privacy.', checks: ['CSP header', 'HSTS', 'X-Frame-Options', 'SSL/TLS cert', 'Exposed .env'] },
         { title: 'Mobile', desc: 'Viewport meta tag, favicon, Apple touch icon, web manifest, and clickable phone numbers. Ensures correct rendering and home screen appearance.', checks: ['Viewport meta', 'Favicon', 'Apple touch icon', 'Web manifest', 'Phone links'] },
         { title: 'AI Visibility', desc: 'GEO + AEO audit: checks whether ChatGPT, Claude, Perplexity, and Google AI Overview can find, parse, and cite your site. Covers llms.txt, AI crawlers, structured data, question headings, and answer-first signals.', checks: ['Schema.org JSON-LD', 'llms.txt', 'AI crawlers', 'FAQ schema', 'Answer-first signal', 'Date freshness', 'Org entity'] },
         { title: 'Accessibility', desc: '5 static checks for screen readers, keyboard navigation, and WCAG basics. Lighthouse also measures an overall accessibility score.', checks: ['Images alt text', 'Form labels', 'Button labels', 'Skip navigation', 'Lang attribute'] },
@@ -743,7 +743,7 @@ const en = {
         },
         {
           q: 'How do I check if my website has security vulnerabilities?',
-          a: 'The most impactful security issues are misconfigured HTTP headers — missing CSP, HSTS, X-Frame-Options, and Referrer-Policy expose your site to XSS and clickjacking attacks. ShipReady runs 10+ security checks for free: paste your URL and get a report in under a minute, with exact fix prompts for each issue.',
+          a: 'The most impactful security issues are misconfigured HTTP headers — missing CSP, HSTS, X-Frame-Options, and Referrer-Policy expose your site to XSS and clickjacking attacks. ShipReady runs 20+ security checks for free: paste your URL and get a report in under a minute, with exact fix prompts for each issue.',
         },
         {
           q: 'How do I audit my website\'s SEO for free?',
@@ -805,7 +805,7 @@ const en = {
     subtitle: "Every finding is backed by evidence. We tell you what we measured, what we inferred, and what we couldn't reach — because a failed check should never look like a pass.",
 
     categories: {
-      heading: '6 categories, 60+ checks',
+      heading: '6 categories, 90+ checks',
       performance: {
         name: 'Performance',
         desc: 'A real Lighthouse mobile run inside a headless Chromium browser on Railway. We measure Core Web Vitals (LCP, CLS, INP, FCP), composite performance score, and accessibility score. No synthetic shortcuts — the same engine Google uses.',
@@ -816,7 +816,7 @@ const en = {
       },
       security: {
         name: 'Security',
-        desc: '10 security checks including HTTPS enforcement, Content-Security-Policy, HSTS, X-Frame-Options, X-Content-Type-Options, SSL/TLS certificate validity, exposed .env files, and API key patterns in HTML. Surfaces the headers and files attackers look for first.',
+        desc: '20+ security checks including HTTPS enforcement, Content-Security-Policy, HSTS, X-Frame-Options, SSL/TLS grading, SPF/DMARC/CAA DNS records, cookie security flags, exposed .env/.git files, API key patterns, and vulnerable JS libraries. Surfaces the headers and files attackers look for first.',
       },
       mobile: {
         name: 'Mobile',

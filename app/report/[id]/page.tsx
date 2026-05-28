@@ -1185,6 +1185,12 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
               </div>
             )}
 
+            {activeCategory === 'ai_visibility' && (
+              <p className="mb-4 text-xs text-[#8B8A85]">
+                Score reflects technical readiness — AI crawlers can access your site. Real citations in ChatGPT, Claude, or Perplexity also require indexing, backlinks, and content authority built over time.
+              </p>
+            )}
+
             <CategoryCard category={activeCategory} data={results[activeCategory]} />
 
             {/* Supporting category chips — shown when scan was focused (not full) */}

@@ -5,7 +5,7 @@ const ru: AppMessages = {
     appTitle: 'ShipReady',
     appDescription: 'Аудит сайтов, который понимает бизнес вашего клиента.',
     layoutTitle: 'ShipReady - Аудит сайтов, который понимает бизнес вашего клиента.',
-    layoutDescription: '60+ автоматических проверок по производительности, SEO, безопасности, мобильности и AI visibility. Получайте evidence-based промпты для исправлений, готовые для любого AI-инструмента.',
+    layoutDescription: '90+ автоматических проверок по производительности, SEO, безопасности, мобильности и AI visibility. Получайте evidence-based промпты для исправлений, готовые для любого AI-инструмента.',
     pricingTitle: 'Тарифы - ShipReady',
     pricingDescription: 'Простые и прозрачные тарифы ShipReady для соло-фаундеров и команд.',
     roadmapTitle: 'Роадмэп - ShipReady',
@@ -658,7 +658,7 @@ const ru: AppMessages = {
       worksWithExamples: 'v0, Bolt, Lovable и другие',
     },
     stats: [
-      { value: '60+', label: 'автоматических проверок' },
+      { value: '90+', label: 'автоматических проверок' },
       { value: '6', label: 'категорий' },
       { value: '', label: 'сайтов проверено' },
       { value: 'AI', label: 'промпт на каждую проблему' },
@@ -668,7 +668,7 @@ const ru: AppMessages = {
       title: 'Три шага до готовности к релизу',
       steps: [
         { step: '01', emoji: '1', title: 'Вставьте URL', desc: 'Любой live URL. Vercel, Netlify или свой домен. Никакой настройки и расширений не нужно.' },
-        { step: '02', emoji: '2', title: '60+ проверок', desc: 'Сначала идут быстрые truth-checks, затем подключается более глубокий анализ производительности и шумных эвристик.' },
+        { step: '02', emoji: '2', title: '90+ проверок', desc: 'Сначала идут быстрые truth-checks, затем подключается более глубокий анализ производительности и шумных эвристик.' },
         { step: '03', emoji: '3', title: 'Получите AI-промпты', desc: 'У каждой проблемы есть понятное объяснение и готовый промпт, который можно использовать в любом AI-инструменте для кода.' },
       ],
     },
@@ -690,12 +690,12 @@ const ru: AppMessages = {
     },
     features: {
       eyebrow: 'Что проверяем',
-      title: '60+ проверок по 6 категориям',
+      title: '90+ проверок по 6 категориям',
       sub: 'Всё, что действительно важно перед выходом в прод.',
       items: [
         { title: 'Производительность', desc: 'Реальный Lighthouse mobile в headless-браузере. Core Web Vitals и суммарный балл производительности.', checks: ['LCP < 2.5с', 'CLS < 0.1', 'INP < 200мс', 'FCP < 1.8с', 'Performance score'] },
         { title: 'SEO и соцсети', desc: 'Полный аудит meta-тегов. OG, Twitter cards, canonical, robots.txt, sitemap, structured data.', checks: ['Title и description', 'OG image и tags', 'Canonical URL', 'Sitemap.xml', 'Twitter card'] },
-        { title: 'Безопасность', desc: '15 security-checks: HTTPS, HTTP headers, валидность SSL, открытые .env файлы, обнаружение API-ключей, смешанный контент, трекеры и приватность.', checks: ['CSP header', 'HSTS', 'X-Frame-Options', 'SSL/TLS cert', 'Открытый .env'] },
+        { title: 'Безопасность', desc: '20+ security checks: HTTPS, HTTP headers, SSL/TLS-грейдинг, открытые .env файлы, SPF/DMARC/CAA, флаги cookies, обнаружение API-ключей, уязвимые JS-библиотеки и приватность.', checks: ['CSP header', 'HSTS', 'X-Frame-Options', 'SSL/TLS cert', 'Открытый .env'] },
         { title: 'Мобильность', desc: 'Viewport meta тег, favicon, Apple touch icon, веб-манифест и кликабельные номера. Гарантирует корректный рендер и отображение на экране iOS и Android.', checks: ['Viewport meta', 'Favicon', 'Apple touch icon', 'Веб-манифест', 'Ссылки на тел.'] },
         { title: 'AI visibility', desc: 'AEO + GEO checks: Schema.org, FAQ schema, llms.txt, доступ AI crawler-ов, sitemap и author entity.', checks: ['Schema.org JSON-LD', 'llms.txt', 'AI crawlers', 'Sitemap.xml', 'FAQ schema'] },
         { title: 'Доступность', desc: '5 статических проверок для скринридеров, клавиатурной навигации и базовых требований WCAG. Lighthouse также измеряет общий accessibility score.', checks: ['Alt-текст изображений', 'Метки форм', 'Метки кнопок', 'Skip navigation', 'Атрибут lang'] },
@@ -807,7 +807,7 @@ const ru: AppMessages = {
     subtitle: 'Каждый вывод подкреплён доказательствами. Мы сообщаем, что измерили, что предположили и куда не смогли добраться — потому что проваленная проверка никогда не должна выглядеть как успешная.',
 
     categories: {
-      heading: '6 категорий, 60+ проверок',
+      heading: '6 категорий, 90+ проверок',
       performance: {
         name: 'Производительность',
         desc: 'Реальный запуск Lighthouse на мобильном устройстве в headless Chromium-браузере на Railway. Мы измеряем Core Web Vitals (LCP, CLS, INP, FCP), общую оценку производительности и accessibility score. Никаких синтетических сокращений — тот же движок, что использует Google.',
@@ -818,7 +818,7 @@ const ru: AppMessages = {
       },
       security: {
         name: 'Безопасность',
-        desc: '10 проверок безопасности: HTTPS, Content-Security-Policy, HSTS, X-Frame-Options, X-Content-Type-Options, валидность SSL/TLS-сертификата, открытые .env-файлы и паттерны API-ключей в HTML. Выявляет заголовки и файлы, которые атакующие ищут в первую очередь.',
+        desc: '20+ проверок безопасности: HTTPS, CSP, HSTS, X-Frame-Options, SSL/TLS-грейдинг, SPF/DMARC/CAA DNS-записи, флаги cookies (Secure, HttpOnly, SameSite), открытые .env/.git-файлы, паттерны API-ключей и уязвимые JS-библиотеки (CVE). Выявляет заголовки и файлы, которые атакующие ищут в первую очередь.',
       },
       mobile: {
         name: 'Мобильные устройства',
