@@ -1,5 +1,5 @@
 import * as cheerio from 'cheerio'
-import type { AIPlatformReadiness, AIPlatformStatus, Issue } from '@/types/scan'
+import type { AIPlatformReadiness, AIPlatformStatus, BusinessContext, Issue, TrustSignals } from '@/types/scan'
 import { evidence, withIssueMeta } from '@/lib/checks/issue-meta'
 import { T } from '@/lib/ai/issue-templates'
 
@@ -86,11 +86,90 @@ function buildPlatformReadiness(
   }
 }
 
+async function getDomainAgeDays(hostname: string): Promise<number | null> {
+  try {
+    const { fetchSafeResource } = await import('@/lib/checks/fetch-context')
+    const res = await fetchSafeResource(`https://rdap.org/domain/${hostname}`, {
+      signal: AbortSignal.timeout(3500),
+    })
+    if (!res.ok) return null
+    const data = await res.json() as { events?: Array<{ eventAction: string; eventDate: string }> }
+    const regEvent = data.events?.find(e => e.eventAction === 'registration')
+    if (!regEvent?.eventDate) return null
+    const ageMs = Date.now() - new Date(regEvent.eventDate).getTime()
+    return Math.floor(ageMs / (1000 * 60 * 60 * 24))
+  } catch {
+    return null
+  }
+}
+
+async function getRedditMentionCount(hostname: string): Promise<number | null> {
+  try {
+    const { fetchSafeResource } = await import('@/lib/checks/fetch-context')
+    const encodedQuery = encodeURIComponent(`site:${hostname}`)
+    const res = await fetchSafeResource(
+      `https://www.reddit.com/search.json?q=${encodedQuery}&limit=5&type=link`,
+      {
+        headers: { 'User-Agent': 'ShipReady-Audit/1.0 (web audit tool)' },
+        signal: AbortSignal.timeout(4000),
+      },
+    )
+    if (!res.ok) return null
+    const data = await res.json() as { data?: { dist?: number } }
+    return data?.data?.dist ?? 0
+  } catch {
+    return null
+  }
+}
+
+async function getGithubRepoCount(hostname: string): Promise<number | null> {
+  try {
+    const { fetchSafeResource } = await import('@/lib/checks/fetch-context')
+    const query = encodeURIComponent(hostname.replace(/^www\./, ''))
+    const res = await fetchSafeResource(
+      `https://api.github.com/search/repositories?q=${query}&per_page=5`,
+      {
+        headers: {
+          'Accept': 'application/vnd.github+json',
+          'User-Agent': 'ShipReady-Audit/1.0',
+        },
+        signal: AbortSignal.timeout(4000),
+      },
+    )
+    if (!res.ok) return null
+    const data = await res.json() as { total_count?: number }
+    return data?.total_count ?? 0
+  } catch {
+    return null
+  }
+}
+
+async function searchSerper(query: string): Promise<number> {
+  const apiKey = process.env.SERPER_API_KEY
+  if (!apiKey) return 0
+  try {
+    const res = await fetch('https://google.serper.dev/search', {
+      method: 'POST',
+      headers: {
+        'X-API-KEY': apiKey,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ q: query, num: 3 }),
+      signal: AbortSignal.timeout(4000),
+    })
+    if (!res.ok) return 0
+    const data = await res.json() as { organic?: unknown[] }
+    return data?.organic?.length ?? 0
+  } catch {
+    return 0
+  }
+}
+
 export async function runAIVisibilityChecks(
   url: string,
   html: string,
-  options?: { includeLikely?: boolean; includeHeuristics?: boolean },
-): Promise<{ issues: Issue[]; platformReadiness: AIPlatformReadiness }> {
+  options?: { includeLikely?: boolean; includeHeuristics?: boolean; businessContext?: BusinessContext | null },
+): Promise<{ issues: Issue[]; platformReadiness: AIPlatformReadiness; trustSignals: TrustSignals }> {
   const includeLikely = options?.includeLikely ?? true
   const includeHeuristics = options?.includeHeuristics ?? true
   const $ = cheerio.load(html)
@@ -553,5 +632,74 @@ export async function runAIVisibilityChecks(
     hasJsonLd || hasMicrodata,
   )
 
-  return { issues, platformReadiness }
+  // ── Trust Signals (external API checks — only in deep/heuristic pass) ───────
+  const trustSignals: TrustSignals = {}
+
+  if (includeHeuristics) {
+    const hostname = new URL(url).hostname
+
+    // Domain age via RDAP (public, no auth)
+    const domainAgeDays = await getDomainAgeDays(hostname)
+    trustSignals.domainAgedays = domainAgeDays
+    if (domainAgeDays !== null && domainAgeDays < 180) {
+      issues.push(withIssueMeta(
+        { ...T['young-domain'], value: `${domainAgeDays} days old` },
+        'http',
+        [evidence('text', 'Domain age via RDAP', `${domainAgeDays} days`)],
+      ))
+    }
+
+    // Reddit mentions (public JSON API, no auth)
+    const redditMentions = await getRedditMentionCount(hostname)
+    trustSignals.redditMentions = redditMentions
+    if (redditMentions !== null && redditMentions === 0) {
+      issues.push(withIssueMeta(
+        { ...T['no-reddit-presence'] },
+        'http',
+        [evidence('count', 'Reddit mentions for domain', 0)],
+      ))
+    }
+
+    // GitHub presence — only for SaaS/tech products
+    const businessType = options?.businessContext?.businessType
+    const isTechProduct = businessType === 'saas' || businessType === 'other' || businessType === 'blog'
+    if (isTechProduct) {
+      const githubRepos = await getGithubRepoCount(hostname)
+      trustSignals.githubRepos = githubRepos
+      if (githubRepos !== null && githubRepos === 0) {
+        issues.push(withIssueMeta(
+          { ...T['no-github-presence'] },
+          'http',
+          [evidence('count', 'GitHub repos matching domain', 0)],
+        ))
+      }
+    }
+
+    // G2 + Product Hunt via Serper (graceful fallback if SERPER_API_KEY absent)
+    if (process.env.SERPER_API_KEY && isTechProduct) {
+      const domain = hostname.replace(/^www\./, '')
+
+      const g2Count = await searchSerper(`site:g2.com "${domain}"`)
+      trustSignals.g2Listed = g2Count > 0
+      if (!trustSignals.g2Listed && includeLikely) {
+        issues.push(withIssueMeta(
+          { ...T['no-g2-listing'] },
+          'http',
+          [evidence('text', 'G2/Capterra listing', 'not found')],
+        ))
+      }
+
+      const phCount = await searchSerper(`site:producthunt.com "${domain}"`)
+      trustSignals.productHuntListed = phCount > 0
+      if (!trustSignals.productHuntListed) {
+        issues.push(withIssueMeta(
+          { ...T['no-producthunt-listing'] },
+          'http',
+          [evidence('text', 'Product Hunt listing', 'not found')],
+        ))
+      }
+    }
+  }
+
+  return { issues, platformReadiness, trustSignals }
 }

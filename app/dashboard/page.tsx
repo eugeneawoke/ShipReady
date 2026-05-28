@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { ArrowLeft } from 'lucide-react'
+import { Suspense } from 'react'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase'
 import { getUserWithPlan } from '@/lib/auth'
@@ -9,8 +10,10 @@ import { SignOutButton } from '@/components/auth/SignOutButton'
 import { ScanForm } from '@/components/landing/ScanForm'
 import { MonitoringToggle } from '@/components/dashboard/MonitoringToggle'
 import { BetaAccessPanel } from '@/components/dashboard/BetaAccessPanel'
+import { OAuthToast } from '@/components/dashboard/OAuthToast'
 import { domainFromUrl } from '@/lib/monitoring/domains'
 import { SiteHeader } from '@/components/SiteHeader'
+import { disconnectIntegration } from '@/app/dashboard/integrations/disconnect/actions'
 
 export const metadata: Metadata = { robots: { index: false, follow: false } }
 
@@ -49,6 +52,13 @@ export default async function DashboardPage() {
     .eq('user_id', user.id)
     .eq('provider', 'payproglobal')
     .maybeSingle()
+
+  const { data: connectedIntegrations } = await supabase
+    .from('oauth_integrations')
+    .select('provider')
+    .eq('user_id', user.id)
+
+  const connectedProviders = new Set((connectedIntegrations ?? []).map((r) => r.provider))
 
   const monitoringMap = new Map(
     (monitoredDomains ?? []).map((item) => [item.domain, item])
@@ -240,6 +250,85 @@ export default async function DashboardPage() {
             </Link>
           </div>
         )}
+
+        {/* Search Intelligence integrations */}
+        <section className="mt-10 rounded-xl border border-[#2A2A2A] bg-[#131312] p-6">
+          <h2 className="mb-1 text-sm font-semibold text-[#F1F0EE]">Search Intelligence</h2>
+          <p className="mb-5 text-xs text-[#8B8A85]">
+            Connect search tools to enrich reports with real indexation and traffic data.
+          </p>
+          <div className="space-y-3">
+            {([
+              {
+                provider: 'google',
+                label: 'Google (GSC + GA4)',
+                description: 'Search Console indexation + Analytics traffic',
+                href: '/api/auth/google',
+                icon: '🔵',
+              },
+              {
+                provider: 'yandex',
+                label: 'Яндекс (Вебмастер + Метрика)',
+                description: 'Индексация + трафик для RU/CIS аудитории',
+                href: '/api/auth/yandex',
+                icon: '🟡',
+              },
+              {
+                provider: 'bing',
+                label: 'Bing Webmaster',
+                description: 'Crawl errors + index status from Bing',
+                href: '/api/auth/bing',
+                icon: '⚪',
+              },
+            ] as const).map(({ provider, label, description, href, icon }) => (
+              <div key={provider} className="flex items-center justify-between rounded-lg border border-[#2A2A2A] bg-[#0E0E0D] px-4 py-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-lg">{icon}</span>
+                  <div>
+                    <p className="text-sm font-medium text-[#F1F0EE]">{label}</p>
+                    <p className="text-xs text-[#8B8A85]">{description}</p>
+                  </div>
+                </div>
+                {connectedProviders.has(provider) ? (
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-[#3DDC84]">Connected</span>
+                    <form action={disconnectIntegration.bind(null, provider)}>
+                      <button
+                        type="submit"
+                        className="text-xs text-[#8B8A85] underline hover:text-[#F1F0EE]"
+                      >
+                        Disconnect
+                      </button>
+                    </form>
+                  </div>
+                ) : (
+                  <a
+                    href={href}
+                    className="rounded-md bg-[#2A2A2A] px-3 py-1.5 text-xs font-medium text-[#F1F0EE] transition-colors hover:bg-[#3A3A3A]"
+                  >
+                    Connect
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Agency API Keys link */}
+        {effectivePlan === 'agency' && (
+          <div className="mt-4 flex justify-end">
+            <Link
+              href="/dashboard/api"
+              className="inline-flex items-center gap-2 rounded-md border border-[#2A2A2A] bg-[#131312] px-3 py-2 text-sm text-[#F1F0EE] transition-colors hover:border-[#3A3A3A]"
+            >
+              API Keys →
+            </Link>
+          </div>
+        )}
+
+        <Suspense fallback={null}>
+          <OAuthToast />
+        </Suspense>
       </div>
     </div>
   )

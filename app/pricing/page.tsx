@@ -1,11 +1,12 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { getTranslations } from 'next-intl/server'
+import { getLocale, getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase'
 import { SiteHeader } from '@/components/SiteHeader'
 import { CinematicFooter } from '@/components/ui/motion-footer'
 import { ScrollAnchorButton } from '@/components/ui/scroll-anchor-button'
 import { PricingCtas } from '@/components/pricing/PricingCtas'
+import { ChecksAccordion } from '@/components/pricing/ChecksAccordion'
 import { MobileDockSpacer } from '@/components/navigation/MobileDockSpacer'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -59,6 +60,7 @@ function Cell({ value, highlight }: { value: CellValue; highlight?: boolean }) {
 // ─── page ─────────────────────────────────────────────────────────────────────
 
 export default async function PricingPage() {
+  const locale = await getLocale()
   const [tp, tnav, tpricing, tcta] = await Promise.all([
     getTranslations('Pricing'),
     getTranslations('Landing.nav'),
@@ -92,6 +94,7 @@ export default async function PricingPage() {
       rows: [
         { label: r.allCategoryScores,  free: true,       pro: true,   agency: true },
         { label: r.issueDescriptions,  free: true,       pro: true,   agency: true },
+        { label: r.issueChecklist,     free: true,       pro: true,   agency: true },
         { label: r.aiFixPrompts,       free: c.blurred,  pro: true,   agency: true },
         { label: r.pdfExport,          free: false,      pro: true,   agency: true },
         { label: r.whiteLabelPdf,      free: false,      pro: false,  agency: true },
@@ -100,8 +103,9 @@ export default async function PricingPage() {
     {
       heading: s.monitoring,
       rows: [
-        { label: r.weeklyRescan,  free: false, pro: true, agency: true },
-        { label: r.emailAlerts,   free: false, pro: true, agency: true },
+        { label: r.weeklyRescan,   free: false, pro: true, agency: true },
+        { label: r.weeklyDigest,   free: false, pro: true, agency: true },
+        { label: r.emailAlerts,    free: false, pro: true, agency: true },
       ],
     },
     {
@@ -166,6 +170,7 @@ export default async function PricingPage() {
     {
       heading: s.apiTeam,
       rows: [
+        { label: r.mcpServer,      free: false, pro: false, agency: true },
         { label: r.restApi,        free: false, pro: false, agency: true,      note: n.apiEndpoints },
         { label: r.bulkScanApi,    free: false, pro: false, agency: true,      note: n.bulkUrls },
         { label: r.teamSeats,      free: false, pro: false, agency: c.upTo5,   note: n.inviteEmail },
@@ -316,6 +321,11 @@ export default async function PricingPage() {
             ))}
           </div>
           </div>
+        </div>
+
+        {/* checks accordion */}
+        <div className="mb-20">
+          <ChecksAccordion locale={locale} />
         </div>
 
         {/* faq */}

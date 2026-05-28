@@ -32,6 +32,14 @@ export interface AIPlatformReadiness {
   googleAI: AIPlatformStatus
 }
 
+export interface TrustSignals {
+  domainAgedays?: number | null
+  redditMentions?: number | null
+  githubRepos?: number | null
+  g2Listed?: boolean | null
+  productHuntListed?: boolean | null
+}
+
 export interface BusinessContext {
   businessType: 'ecommerce' | 'saas' | 'local_business' | 'portfolio' | 'blog' | 'agency' | 'other'
   techStack: string[]
@@ -209,6 +217,7 @@ export interface ScanResult {
   processingIssue?: ScanProcessingIssue
   generatedArtifacts?: GeneratedArtifacts
   aiPlatformReadiness?: AIPlatformReadiness
+  trustSignals?: TrustSignals
 }
 
 export interface Scan {

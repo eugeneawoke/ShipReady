@@ -15,7 +15,7 @@ import { ArtifactBlock } from '@/components/report/ArtifactBlock'
 import { ScanForm, useScanLauncher } from '@/components/landing/ScanForm'
 import { SiteBrandLink } from '@/components/SiteHeader'
 import { LanguageSwitcher } from '@/components/i18n/LanguageSwitcher'
-import type { Scan, Issue, IssueCategory, ScanResult, ScanStage, ScanStatus, BusinessContext, ScanGoal } from '@/types/scan'
+import type { Scan, Issue, IssueCategory, ScanResult, ScanStage, ScanStatus, BusinessContext, ScanGoal, TrustSignals } from '@/types/scan'
 import { createBrowserClient } from '@/lib/supabase-browser'
 import {
   buildFixEverythingPrompt,
@@ -452,6 +452,29 @@ function ScanProgressPanel({ scan, results, processingIssue, retryingMeasurement
   )
 }
 
+function buildTrustGapReasons(issues: Issue[]): string[] {
+  const aiIssues = issues.filter(i => i.category === 'ai_visibility')
+  const idMap: Record<string, string> = {
+    'missing-schema-org':       'No Schema.org structured data',
+    'missing-llms-txt':         'No llms.txt file',
+    'thin-content':             'Not enough readable content (<300 words)',
+    'missing-sitemap':          'No sitemap.xml',
+    'missing-author-entity':    'No identifiable brand/author entity',
+    'geo-missing-date-signal':  'Content lacks publication date signals',
+    'no-semantic-html':         'No semantic HTML structure',
+    'young-domain':             'Domain is less than 6 months old',
+    'no-reddit-presence':       'No Reddit community mentions',
+    'no-github-presence':       'No GitHub presence for this product',
+    'no-g2-listing':            'Not listed on G2 or Capterra',
+  }
+  const reasons: string[] = []
+  for (const issue of aiIssues) {
+    if (idMap[issue.id]) reasons.push(idMap[issue.id])
+    if (reasons.length >= 4) break
+  }
+  return reasons
+}
+
 function isWeakFixPrompt(prompt: string | undefined, activeIssues: Issue[]) {
   const text = prompt?.trim() ?? ''
   if (!text) return true
@@ -482,6 +505,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
   const [pdfError, setPdfError] = useState<string | null>(null)
   const [newScanOpen, setNewScanOpen] = useState(false)
   const [reportActionsOpen, setReportActionsOpen] = useState(false)
+  const [issueStatuses, setIssueStatuses] = useState<Record<string, import('@/components/report/IssueCard').IssueStatus>>({})
   const [pollVersion, setPollVersion] = useState(0)
   const [retryingMeasurement, setRetryingMeasurement] = useState(false)
   const [retryError, setRetryError] = useState<string | null>(null)
@@ -547,6 +571,17 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
       setIsPro(userPlan === 'pro' || userPlan === 'agency')
     })
   }, [])
+
+  // Load issue checklist statuses once we have the scan ID and user is logged in
+  useEffect(() => {
+    if (!id || !isLoggedIn) return
+    fetch(`/api/issues/${id}/status`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data?.statuses) setIssueStatuses(data.statuses)
+      })
+      .catch(() => {})
+  }, [id, isLoggedIn])
 
   useEffect(() => {
     if (!id) return
@@ -1173,6 +1208,100 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
               </div>
             )}
 
+            {/* Trust gap diagnosis — shows WHY platform readiness is partial */}
+            {activeCategory === 'ai_visibility' && results.aiPlatformReadiness && (() => {
+              const isAnyPartial = Object.values(results.aiPlatformReadiness!).some(s => s === 'partial')
+              const allIssues = Object.values(results as unknown as Record<string, unknown>).flatMap(cat =>
+                typeof cat === 'object' && cat !== null && 'issues' in cat
+                  ? ((cat as { issues?: Issue[] }).issues ?? [])
+                  : []
+              )
+              const reasons = buildTrustGapReasons(allIssues)
+              if (!isAnyPartial || reasons.length === 0) return null
+              return (
+                <div className="mb-4 rounded-xl border border-yellow-500/20 bg-yellow-500/5 px-4 py-3">
+                  <p className="mb-1.5 text-xs font-medium text-yellow-400">Why AI assistants may not cite your site yet:</p>
+                  <ul className="space-y-0.5">
+                    {reasons.map((r, i) => (
+                      <li key={i} className="flex items-start gap-1.5 text-xs text-[#C8C7C1]">
+                        <span className="mt-0.5 text-yellow-500/60">•</span>
+                        {r}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )
+            })()}
+
+            {/* Trust Signals row — domain age, Reddit, GitHub, G2, Product Hunt */}
+            {activeCategory === 'ai_visibility' && results.trustSignals && (() => {
+              const ts = results.trustSignals as TrustSignals
+              const signals = [
+                ts.domainAgedays !== null && ts.domainAgedays !== undefined
+                  ? {
+                      label: 'Domain age',
+                      value: ts.domainAgedays < 30
+                        ? `${ts.domainAgedays}d`
+                        : ts.domainAgedays < 365
+                          ? `${Math.floor(ts.domainAgedays / 30)}mo`
+                          : `${Math.floor(ts.domainAgedays / 365)}yr`,
+                      ok: ts.domainAgedays > 180,
+                    }
+                  : null,
+                ts.redditMentions !== null && ts.redditMentions !== undefined
+                  ? { label: 'Reddit mentions', value: ts.redditMentions === 0 ? 'none' : `${ts.redditMentions}+`, ok: ts.redditMentions > 0 }
+                  : null,
+                ts.githubRepos !== null && ts.githubRepos !== undefined
+                  ? { label: 'GitHub repos', value: ts.githubRepos === 0 ? 'none' : `${ts.githubRepos}+`, ok: ts.githubRepos > 0 }
+                  : null,
+                ts.g2Listed !== null && ts.g2Listed !== undefined
+                  ? { label: 'G2 listing', value: ts.g2Listed ? 'found' : 'none', ok: ts.g2Listed === true }
+                  : null,
+                ts.productHuntListed !== null && ts.productHuntListed !== undefined
+                  ? { label: 'Product Hunt', value: ts.productHuntListed ? 'found' : 'none', ok: ts.productHuntListed === true }
+                  : null,
+              ].filter((s): s is { label: string; value: string; ok: boolean } => s !== null)
+
+              if (signals.length === 0) return null
+              return (
+                <div className="mb-4 overflow-hidden rounded-xl border border-white/[0.08]">
+                  <div className="border-b border-white/[0.06] px-4 py-2.5">
+                    <span className="text-xs font-medium text-[#8B8A85]">Trust Signals</span>
+                  </div>
+                  <div className="flex flex-wrap gap-px bg-white/[0.04]">
+                    {signals.map(s => (
+                      <div key={s.label} className="flex min-w-[100px] flex-col gap-0.5 bg-[#0E0E0F] px-4 py-3">
+                        <span className="text-xs text-[#8B8A85]">{s.label}</span>
+                        <span className={`text-sm font-medium ${s.ok ? 'text-green-400' : 'text-[#C8C7C1]'}`}>{s.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            })()}
+
+            {/* answerGap — content gaps AI identifies */}
+            {activeCategory === 'ai_visibility' && results.answerGap && (
+              <div className="mb-4 overflow-hidden rounded-xl border border-white/[0.08]">
+                <div className="border-b border-white/[0.06] px-4 py-2.5">
+                  <span className="text-xs font-medium text-[#8B8A85]">Content Gaps — Why AI May Not Cite You</span>
+                </div>
+                <div className="px-4 py-3">
+                  {results.answerGap.split('\n').filter(Boolean).map((line, i) => (
+                    <p key={i} className="mb-1.5 text-sm leading-relaxed text-[#C8C7C1] last:mb-0">
+                      {line}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {activeCategory === 'ai_visibility' && (
+              <p className="mb-4 text-xs text-[#8B8A85]">
+                Score reflects technical readiness — AI crawlers can access your site. Real citations in ChatGPT, Claude, or Perplexity also require indexing, backlinks, and content authority built over time.
+              </p>
+            )}
+
             <CategoryCard category={activeCategory} data={results[activeCategory]} />
 
             {/* Supporting category chips — shown when scan was focused (not full) */}
@@ -1248,7 +1377,22 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
                   </div>
                   <div className="space-y-2">
                     {group.issues.map(issue => (
-                      <IssueCard key={issue.id} issue={issue} isPro={isPro} promptsReady={isFinalReport} />
+                      <IssueCard
+                        key={issue.id}
+                        issue={issue}
+                        isPro={isPro}
+                        promptsReady={isFinalReport}
+                        isAuthenticated={isLoggedIn}
+                        issueStatus={issueStatuses[issue.id]}
+                        onStatusChange={(issueId, status) => {
+                          setIssueStatuses(prev => ({ ...prev, [issueId]: status }))
+                          fetch(`/api/issues/${id}/status`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ issueId, status }),
+                          }).catch(() => {})
+                        }}
+                      />
                     ))}
                   </div>
                 </div>

@@ -1,80 +1,204 @@
 # ShipReady
 
-Pre-deploy quality gate for vibe-coded apps. ShipReady scans a live URL and produces a report across performance, SEO, security, mobile, and AI visibility. The product is being upgraded toward a trust-first model: only confirmed findings should affect score, slower checks must report "could not verify" instead of inventing healthy results, and AI acts as enrichment over evidence rather than as the source of truth.
+Web audit for founders, developers, and agencies. Paste a URL — find out why Google, ChatGPT, and Perplexity can't find your site, and get the exact fix.
 
-## Stack
+80+ checks across **SEO**, **AI visibility**, **security**, **performance**, **mobile**, and **accessibility**. Findings are confidence-graded (`verified` / `likely` / `heuristic`) — no invented facts.
 
-- Next.js 16 App Router
-- React 19
-- Supabase for auth + Postgres
-- Railway scanner for heavy Lighthouse/Chromium work
-- Vercel for frontend and lightweight route handlers
+[Get API Key](https://shipready.app/dashboard) · [Try it](https://shipready.app)
 
-## Local development
+---
+
+## What ShipReady checks
+
+- **SEO** — meta tags, canonical URLs, structured data, sitemaps, indexability
+- **AI visibility** — llms.txt, AI crawler access, answer-gap analysis, per-bot readiness (ChatGPT, Claude, Gemini, Perplexity)
+- **Security** — HTTPS, headers, SSL validity, redirect chains, known vulnerabilities
+- **Performance** — Core Web Vitals via Lighthouse, CrUX field data
+- **Mobile** — tap targets, font sizes, viewport
+- **Accessibility** — Lighthouse a11y audit
+
+Report generates ready-to-paste artifacts: `llms.txt`, Schema.org JSON-LD, security headers config.
+
+---
+
+## MCP Integration
+
+ShipReady exposes a remote MCP server at `/api/mcp`. Connect any MCP-compatible AI assistant to run audits, fetch reports, and filter issues directly in your workflow.
+
+### Tools
+
+| Tool | Description |
+|------|-------------|
+| `scan_url` | Submit a URL for audit. Optional `goal`: `seo` \| `security` \| `ai_visibility` \| `full` |
+| `get_report` | Fetch scan status and full results by scan `id` |
+| `list_issues` | List and filter issues from a completed scan |
+| `get_issue` | Fetch a single issue with full details and fix prompt |
+
+### Setup
+
+Replace `YOUR_API_KEY` with your key from [Dashboard → API Keys](https://shipready.app/dashboard).
+
+<details>
+<summary>Claude Desktop</summary>
+
+**macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`  
+**Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "shipready": {
+      "url": "https://shipready.app/api/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_API_KEY"
+      }
+    }
+  }
+}
+```
+</details>
+
+<details>
+<summary>Cursor</summary>
+
+**Global:** `~/.cursor/mcp.json`  
+**Project:** `.cursor/mcp.json`
+
+```json
+{
+  "mcpServers": {
+    "shipready": {
+      "url": "https://shipready.app/api/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_API_KEY"
+      }
+    }
+  }
+}
+```
+</details>
+
+<details>
+<summary>Windsurf</summary>
+
+**File:** `~/.codeium/windsurf/mcp_config.json`
+
+```json
+{
+  "mcpServers": {
+    "shipready": {
+      "url": "https://shipready.app/api/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_API_KEY"
+      }
+    }
+  }
+}
+```
+</details>
+
+<details>
+<summary>Codex CLI</summary>
+
+**File:** `~/.codex/mcp_servers.json`
+
+```json
+{
+  "mcpServers": {
+    "shipready": {
+      "url": "https://shipready.app/api/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_API_KEY"
+      }
+    }
+  }
+}
+```
+</details>
+
+<details>
+<summary>VS Code — Cline</summary>
+
+Open Cline extension → MCP Servers → Add Server. Or edit directly:
+
+**macOS:** `~/Library/Application Support/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json`
+
+```json
+{
+  "mcpServers": {
+    "shipready": {
+      "url": "https://shipready.app/api/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_API_KEY"
+      }
+    }
+  }
+}
+```
+</details>
+
+---
+
+## REST API
+
+All endpoints require `Authorization: Bearer YOUR_API_KEY`.
+
+### Scan a URL
+
+```bash
+curl -X POST https://shipready.app/api/v1/scan \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://example.com", "goal": "full"}'
+```
+
+```json
+{ "id": "scan_abc123", "url": "https://example.com", "status": "pending" }
+```
+
+### Get report
+
+```bash
+curl https://shipready.app/api/v1/scan/scan_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Bulk scan (Agency plan)
+
+```bash
+curl -X POST https://shipready.app/api/v1/bulk-scan \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"urls": ["https://example.com", "https://another.com"]}'
+```
+
+Max 10 URLs per request.
+
+### Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/v1/scan` | Submit scan |
+| `GET` | `/api/v1/scan/:id` | Get results |
+| `GET` | `/api/v1/scan/:id/issues` | List issues |
+| `POST` | `/api/v1/bulk-scan` | Bulk scan (Agency) |
+
+---
+
+## Get API Key
+
+Sign in at [shipready.app/dashboard](https://shipready.app/dashboard) → Settings → API Keys.
+
+---
+
+## Development
 
 ```bash
 npm install
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000).
-
-## Required environment variables
-
-See [`.env.example`](/Users/eugene.gusakov/Documents/self-projects/ShipReady/.env.example).
-
-Core variables:
-
-- `NEXT_PUBLIC_APP_URL`
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `OPENAI_API_KEY`
-- `RESEND_API_KEY`
-- `RESEND_FROM_EMAIL`
-- `CRON_SECRET`
-- `RAILWAY_SCANNER_URL`
-- `SCANNER_SECRET`
-
-Payment provider variables are intentionally not listed yet; the provider is TBD.
-
-## Scan flow
-
-Current production flow:
-
-1. `POST /api/scan` enforces same-origin JSON requests, validates URL safety, applies quota checks, creates a `pending` scan, and dispatches the job to Railway.
-2. Railway hits `/api/run-scan` with `Authorization: Bearer ${SCANNER_SECRET}`.
-3. `Fast Truth Pass` runs verified checks from a shared fetch context and saves partial results quickly.
-4. `Deep Pass` runs Lighthouse and slower/less certain checks without blocking initial truthful feedback.
-5. `AI enrichment` rewrites and prioritizes findings from evidence only; it does not invent score-bearing issues.
-6. Results are written back to Supabase and polled from `/report/[id]`.
-
-## Paid features
-
-- `PDF export` is available through `GET /api/report/[id]/pdf` for authenticated `pro` and `agency` users.
-- `Weekly monitoring` is managed from the dashboard. Users can enable monitoring per scanned domain; Vercel cron rescans active monitored domains every Monday at 09:00 UTC.
-- `Email alerts` are sent through Resend when a monitored weekly scan introduces new `critical/high` issues or drops total score by more than 10 points.
-
-## Quality model
-
-- Findings use three confidence levels: `verified`, `likely`, `heuristic`.
-- Only `verified` findings should affect category and total scores.
-- Heavy checks such as Lighthouse must expose a measurement status like `measured` vs `unavailable`; a failed measurement must never silently look healthy.
-- Anonymous scans remain readable by report URL; authenticated scans remain private to the owner.
-
-## Access model
-
-- Anonymous scans are readable by report URL.
-- Authenticated scans are private to the owner.
-- Badge lookups require explicit `badge_enabled = true`; the default is private/off.
-
-## Verification
-
-```bash
+npm run dev   # http://localhost:3000
 npm run lint
 npm run build
 ```
 
-## Production setup
-
-Service-by-service setup is documented in [`docs/setup/paid-features-setup.md`](/Users/eugene.gusakov/Documents/self-projects/ShipReady/docs/setup/paid-features-setup.md).
+Environment variables: [`.env.example`](.env.example)  
+Architecture and scan flow: [`CLAUDE.md`](CLAUDE.md)

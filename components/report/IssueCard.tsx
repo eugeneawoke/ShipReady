@@ -3,8 +3,10 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { useTranslations, useMessages } from 'next-intl'
-import { Check, Copy, ChevronDown, Lock } from 'lucide-react'
+import { Check, Copy, ChevronDown, Lock, CheckCircle2, EyeOff, RotateCcw } from 'lucide-react'
 import type { Issue } from '@/types/scan'
+
+export type IssueStatus = 'open' | 'fixed' | 'ignored'
 
 const SEVERITY_COLORS: Record<string, string> = {
   critical: '#FF4444',
@@ -26,11 +28,21 @@ interface IssueCardProps {
   issue: Issue
   isPro: boolean
   promptsReady?: boolean
+  issueStatus?: IssueStatus
+  onStatusChange?: (issueId: string, status: IssueStatus) => void
+  isAuthenticated?: boolean
 }
 
 type IssueDesc = { title?: string; plainEnglish?: string }
 
-export function IssueCard({ issue, isPro, promptsReady = true }: IssueCardProps) {
+export function IssueCard({
+  issue,
+  isPro,
+  promptsReady = true,
+  issueStatus,
+  onStatusChange,
+  isAuthenticated = false,
+}: IssueCardProps) {
   const t = useTranslations('IssueCard')
   const messages = useMessages()
   const issueDesc = ((messages.IssueDescriptions as Record<string, IssueDesc>)?.[issue.id]) ?? {}
@@ -39,8 +51,20 @@ export function IssueCard({ issue, isPro, promptsReady = true }: IssueCardProps)
   const [promptOpen, setPromptOpen] = useState(false)
   const [copied, setCopied] = useState(false)
 
-  const color = SEVERITY_COLORS[issue.severity] || '#8B8A85'
-  const bg = SEVERITY_BG[issue.severity] || 'transparent'
+  const status = issueStatus ?? 'open'
+  const isFixed = status === 'fixed'
+  const isIgnored = status === 'ignored'
+
+  const color = isFixed
+    ? '#3DDC84'
+    : isIgnored
+    ? '#5A5955'
+    : (SEVERITY_COLORS[issue.severity] || '#8B8A85')
+  const bg = isFixed
+    ? 'rgba(61,220,132,0.04)'
+    : isIgnored
+    ? 'rgba(90,89,85,0.04)'
+    : (SEVERITY_BG[issue.severity] || 'transparent')
 
   const hasPrompts = !!issue.fixPrompt && issue.severity !== 'pass'
   const currentPrompt = issue.fixPrompt || ''
@@ -52,10 +76,17 @@ export function IssueCard({ issue, isPro, promptsReady = true }: IssueCardProps)
     setTimeout(() => setCopied(false), 2000)
   }
 
+  function cycleStatus() {
+    if (!onStatusChange) return
+    if (status === 'open') onStatusChange(issue.id, 'fixed')
+    else if (status === 'fixed') onStatusChange(issue.id, 'ignored')
+    else onStatusChange(issue.id, 'open')
+  }
+
   return (
     <div
       id={`issue-${issue.id}`}
-      className="group rounded-r-xl py-3 px-4 space-y-2"
+      className={`group rounded-r-xl py-3 px-4 space-y-2 transition-opacity ${isIgnored ? 'opacity-50' : ''}`}
       style={{ borderLeft: `2px solid ${color}`, background: bg }}
     >
       <div className="flex items-start gap-3">
@@ -63,21 +94,37 @@ export function IssueCard({ issue, isPro, promptsReady = true }: IssueCardProps)
           <div className="flex items-center gap-2 mb-1">
             <span
               className="text-[10px] font-mono uppercase tracking-[0.08em]"
-              style={{ color }}
+              style={{ color: isFixed || isIgnored ? color : SEVERITY_COLORS[issue.severity] || '#8B8A85' }}
             >
-              {issue.severity}
+              {isFixed ? t('statusFixed') : isIgnored ? t('statusIgnored') : issue.severity}
             </span>
-            {issue.confidence && (
+            {!isFixed && !isIgnored && issue.confidence && (
               <span className="text-[10px] font-mono text-[#5A5955] uppercase tracking-[0.08em]">
                 · {t(`confidence.${issue.confidence}`)}
               </span>
             )}
-            {issue.value !== undefined && (
+            {!isFixed && !isIgnored && issue.value !== undefined && (
               <span className="text-[10px] font-mono text-[#8B8A85]">· {issue.value}</span>
             )}
           </div>
-          <p className="text-sm font-medium text-[#F1F0EE]">{localizedTitle}</p>
+          <p className={`text-sm font-medium ${isFixed ? 'line-through text-[#5A5955]' : 'text-[#F1F0EE]'}`}>
+            {localizedTitle}
+          </p>
         </div>
+        {isAuthenticated && issue.severity !== 'pass' && (
+          <button
+            onClick={cycleStatus}
+            title={isFixed ? t('markOpen') : isIgnored ? t('markOpen') : t('markFixed')}
+            className="shrink-0 mt-0.5 text-[#5A5955] hover:text-[#3DDC84] transition-colors cursor-pointer"
+          >
+            {isFixed
+              ? <CheckCircle2 className="w-4 h-4 text-[#3DDC84]" />
+              : isIgnored
+              ? <RotateCcw className="w-4 h-4" />
+              : <CheckCircle2 className="w-4 h-4" />
+            }
+          </button>
+        )}
       </div>
 
       <p className="text-sm text-[#8B8A85] leading-relaxed">{localizedPlainEnglish}</p>
