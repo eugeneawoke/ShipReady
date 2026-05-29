@@ -517,6 +517,14 @@ const ru: AppMessages = {
       inProgress: 'В работе',
       planned: 'Запланировано',
     },
+    tabs: {
+      roadmap: 'Роадмэп',
+      whatsNew: 'Что нового',
+    },
+    changelog: {
+      released: 'Выпущено',
+      empty: 'Релизов пока нет',
+    },
     title: 'Роадмэп',
     heading: 'Куда движется ShipReady',
     intro: 'ShipReady строится открыто. Этот роадмэп показывает, что уже доставлено, что почти готово к запуску и что будет дальше после первых пользователей.',
@@ -533,6 +541,7 @@ const ru: AppMessages = {
         title: 'Движок сканера',
         subtitle: 'Полный audit-движок уже работает',
         status: 'done',
+        releaseDate: '2026-05-07',
         items: [
           '90+ проверок: производительность, SEO, безопасность, мобильность, доступность и AI-видимость',
           'Быстрые честные проверки сначала, глубокий Lighthouse-анализ — следом',
@@ -546,6 +555,7 @@ const ru: AppMessages = {
         title: 'Отчёт и AI-промпты',
         subtitle: 'UI отчёта и AI-промпты готовы',
         status: 'done',
+        releaseDate: '2026-05-07',
         items: [
           'Проблемы с доказательной базой, уровнем достоверности и ранжированием приоритетов',
           'AI-сводка с готовыми промптами для Cursor, Claude Code, Windsurf и любого AI-инструмента',
@@ -557,6 +567,7 @@ const ru: AppMessages = {
         title: 'Аккаунты, тарифы и мониторинг',
         subtitle: 'Авторизация, тиры и еженедельный мониторинг работают',
         status: 'done',
+        releaseDate: '2026-05-07',
         items: [
           'Вход через email или Google, dashboard с историей сканов',
           'Структура тарифов Free / Pro / Agency',
@@ -569,6 +580,7 @@ const ru: AppMessages = {
         title: 'Growth & Quality Tooling',
         subtitle: 'Чеклист, digest, MCP Server и SEO-страницы запущены',
         status: 'done',
+        releaseDate: '2026-05-28',
         items: [
           'Чеклист задач — отмечайте проблемы как исправленные или игнорированные, прогресс сохраняется',
           'Еженедельный digest — diff последнего и базового скана каждый понедельник',
