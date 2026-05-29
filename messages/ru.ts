@@ -774,6 +774,7 @@ const ru: AppMessages = {
       howItWorks: 'Как это работает',
       pricing: 'Тарифы',
       roadmap: 'Роадмэп',
+      compare: 'Сравнение',
       exampleReport: 'Пример отчёта',
       emailLabel: 'Поддержка по email',
       xLabel: 'X (Twitter)',

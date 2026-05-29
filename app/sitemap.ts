@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next'
 import { createServiceClient } from '@/lib/supabase'
+import { competitorSlugs } from '@/lib/vs/competitors'
 
 export const revalidate = 3600
 
@@ -28,6 +29,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }))
 
+  // Competitor comparison pages
+  const vsRoutes: MetadataRoute.Sitemap = [
+    { url: `${base}/vs`, lastModified: new Date('2026-05-29'), changeFrequency: 'monthly', priority: 0.7 },
+    ...competitorSlugs.map(slug => ({
+      url: `${base}/vs/${slug}`,
+      lastModified: new Date('2026-05-29'),
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    })),
+  ]
+
   // Published domain pages
   let domainRoutes: MetadataRoute.Sitemap = []
   try {
@@ -46,5 +58,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // supabase not configured locally — skip
   }
 
-  return [...staticRoutes, ...checkRoutes, ...domainRoutes]
+  return [...staticRoutes, ...checkRoutes, ...vsRoutes, ...domainRoutes]
 }

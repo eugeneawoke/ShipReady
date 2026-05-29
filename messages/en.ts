@@ -772,6 +772,7 @@ const en = {
       howItWorks: 'How it works',
       pricing: 'Pricing',
       roadmap: 'Roadmap',
+      compare: 'Compare',
       exampleReport: 'Example report',
       emailLabel: 'Email support',
       xLabel: 'X (Twitter)',

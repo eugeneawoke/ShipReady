@@ -53,7 +53,7 @@ export async function getCategoryStats(slug: string): Promise<CategoryStats> {
 
     if (scans.length === 0) return empty
 
-    let scores: number[] = []
+    const scores: number[] = []
     let passes = 0
     const issueCounts: Record<string, number> = {}
 
