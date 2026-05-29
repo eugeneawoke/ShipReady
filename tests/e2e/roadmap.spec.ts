@@ -11,7 +11,7 @@ test.describe('/roadmap — changelog tab', () => {
     await page.goto('/roadmap')
     await page.getByRole('button', { name: /what.s new/i }).click()
     // At least one done phase with releaseDate should appear
-    await expect(page.getByText(/Scanner Engine|Report & AI|Growth & Quality|Accounts/)).toBeVisible()
+    await expect(page.getByText(/Scanner Engine|Report & AI|Growth & Quality|Accounts/).first()).toBeVisible()
   })
 
   test('changelog sorted newest first — May 28 before May 7', async ({ page }) => {

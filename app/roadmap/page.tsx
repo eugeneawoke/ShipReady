@@ -1,8 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { getLocale, getMessages, getTranslations } from 'next-intl/server'
-import { CheckCircle2, Circle, Clock } from 'lucide-react'
-import { ArrowLeft } from 'lucide-react'
+import { CheckCircle2, Circle, Clock, ArrowLeft } from 'lucide-react'
 import { SiteHeader } from '@/components/SiteHeader'
 import { CinematicFooter } from '@/components/ui/motion-footer'
 import { RoadmapMobileMenu } from '@/components/RoadmapMobileMenu'
@@ -32,10 +31,21 @@ export default async function RoadmapPage() {
     releaseDate?: string
     items: string[]
   }>
-  const statusMeta: Record<PhaseStatus, { label: string; color: string; Icon: typeof CheckCircle2 }> = {
-    done: { label: t.statuses.done, color: '#3DDC84', Icon: CheckCircle2 },
-    'in-progress': { label: t.statuses.inProgress, color: '#F5C518', Icon: Clock },
-    planned: { label: t.statuses.planned, color: '#5A5955', Icon: Circle },
+  // Status meta for the legend in the header (server-rendered, icons used directly here)
+  const STATUS_COLORS: Record<PhaseStatus, string> = {
+    done: '#3DDC84',
+    'in-progress': '#F5C518',
+    planned: '#5A5955',
+  }
+  const STATUS_ICONS: Record<PhaseStatus, typeof CheckCircle2> = {
+    done: CheckCircle2,
+    'in-progress': Clock,
+    planned: Circle,
+  }
+  const statusLabels: Record<PhaseStatus, string> = {
+    done: t.statuses.done,
+    'in-progress': t.statuses.inProgress,
+    planned: t.statuses.planned,
   }
 
   const navLabels = {
@@ -56,11 +66,11 @@ export default async function RoadmapPage() {
             {/* Status legend — desktop only, would overflow on mobile */}
             <div className="hidden sm:flex items-center gap-4 text-xs text-[#5A5955]">
               {(['done', 'in-progress', 'planned'] as PhaseStatus[]).map(s => {
-                const { label, color, Icon } = statusMeta[s]
+                const Icon = STATUS_ICONS[s]
                 return (
                   <span key={s} className="flex items-center gap-1.5">
-                    <Icon className="w-3 h-3" style={{ color }} />
-                    {label}
+                    <Icon className="w-3 h-3" style={{ color: STATUS_COLORS[s] }} />
+                    {statusLabels[s]}
                   </span>
                 )
               })}
@@ -82,11 +92,11 @@ export default async function RoadmapPage() {
         {/* Status legend — mobile (below Back, above title) */}
         <div className="flex sm:hidden items-center gap-4 text-xs text-[#5A5955] mb-6">
           {(['done', 'in-progress', 'planned'] as PhaseStatus[]).map(s => {
-            const { label, color, Icon } = statusMeta[s]
+            const Icon = STATUS_ICONS[s]
             return (
               <span key={s} className="flex items-center gap-1.5">
-                <Icon className="w-3 h-3" style={{ color }} />
-                {label}
+                <Icon className="w-3 h-3" style={{ color: STATUS_COLORS[s] }} />
+                {statusLabels[s]}
               </span>
             )
           })}
@@ -104,7 +114,7 @@ export default async function RoadmapPage() {
 
         <RoadmapTabs
           phases={phases}
-          statusMeta={statusMeta}
+          statusLabels={statusLabels}
           inProgressBadge={t.inProgressBadge}
           tabRoadmap={t.tabs.roadmap}
           tabWhatsNew={t.tabs.whatsNew}

@@ -15,15 +15,17 @@ interface RoadmapPhase {
   items: string[]
 }
 
-interface StatusMeta {
-  label: string
-  color: string
-  Icon: typeof CheckCircle2
+// Status meta lives client-side — cannot serialize React components server→client
+const STATUS_META: Record<PhaseStatus, { color: string; Icon: typeof CheckCircle2 }> = {
+  done: { color: '#3DDC84', Icon: CheckCircle2 },
+  'in-progress': { color: '#F5C518', Icon: Clock },
+  planned: { color: '#5A5955', Icon: Circle },
 }
 
 interface RoadmapTabsProps {
   phases: RoadmapPhase[]
-  statusMeta: Record<PhaseStatus, StatusMeta>
+  // Labels from server (serializable strings only)
+  statusLabels: Record<PhaseStatus, string>
   inProgressBadge: string
   tabRoadmap: string
   tabWhatsNew: string
@@ -34,7 +36,7 @@ interface RoadmapTabsProps {
 
 export function RoadmapTabs({
   phases,
-  statusMeta,
+  statusLabels,
   inProgressBadge,
   tabRoadmap,
   tabWhatsNew,
@@ -76,7 +78,7 @@ export function RoadmapTabs({
           <div className="absolute left-[19px] top-3 bottom-3 w-px bg-gradient-to-b from-[#6E56CF]/40 via-white/[0.06] to-transparent" />
           <div className="space-y-8">
             {phases.map(phase => {
-              const { color, Icon } = statusMeta[phase.status]
+              const { color, Icon } = STATUS_META[phase.status]
               return (
                 <div key={phase.id} className="flex gap-6">
                   <div className="shrink-0 mt-1">

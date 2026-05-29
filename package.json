@@ -10,7 +10,8 @@
     "test:checks": "tsx --test \"tests/**/*.test.ts\"",
     "test:unit": "vitest run",
     "test:e2e": "playwright test",
-    "test:all": "npm run test:unit && npm run test:e2e && node scripts/merge-reports.mjs"
+    "test:all": "npm run test:unit && npm run test:e2e && node scripts/merge-reports.mjs",
+    "test:install": "playwright install"
   },
   "dependencies": {
     "@sparticuz/chromium": "^143.0.4",
