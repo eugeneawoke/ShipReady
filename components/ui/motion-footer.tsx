@@ -398,6 +398,7 @@ export function CinematicFooter({
               {/* Secondary links */}
               <div className="flex flex-wrap justify-center gap-3 md:gap-4 w-full mt-2">
                 <MagneticButton as="a" href="/blog" className="sr-glass-pill px-6 py-3 rounded-full text-[#8B8A85] font-medium text-xs md:text-sm hover:text-[#F1F0EE]">{messages.Landing.footer.blog}</MagneticButton>
+                <MagneticButton as="a" href="/audits" className="sr-glass-pill px-6 py-3 rounded-full text-[#8B8A85] font-medium text-xs md:text-sm hover:text-[#F1F0EE]">{messages.Landing.footer.auditReports}</MagneticButton>
                 <MagneticButton as="a" href="/vs" className="sr-glass-pill px-6 py-3 rounded-full text-[#8B8A85] font-medium text-xs md:text-sm hover:text-[#F1F0EE]">{messages.Landing.footer.compare}</MagneticButton>
                 <MagneticButton as="a" href="/privacy" className="sr-glass-pill px-6 py-3 rounded-full text-[#8B8A85] font-medium text-xs md:text-sm hover:text-[#F1F0EE]">{messages.Landing.footer.privacy}</MagneticButton>
                 <MagneticButton as="a" href="/terms" className="sr-glass-pill px-6 py-3 rounded-full text-[#8B8A85] font-medium text-xs md:text-sm hover:text-[#F1F0EE]">{messages.Landing.footer.terms}</MagneticButton>

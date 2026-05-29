@@ -788,6 +788,7 @@ const ru: AppMessages = {
       roadmap: 'Роадмэп',
       compare: 'Сравнение',
       blog: 'Блог',
+      auditReports: 'Аудит-отчёты',
       exampleReport: 'Пример отчёта',
       emailLabel: 'Поддержка по email',
       xLabel: 'X (Twitter)',

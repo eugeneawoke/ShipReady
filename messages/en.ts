@@ -786,6 +786,7 @@ const en = {
       roadmap: 'Roadmap',
       compare: 'Compare',
       blog: 'Blog',
+      auditReports: 'Audit Reports',
       exampleReport: 'Example report',
       emailLabel: 'Email support',
       xLabel: 'X (Twitter)',

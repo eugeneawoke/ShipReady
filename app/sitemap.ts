@@ -81,5 +81,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // supabase not configured locally — skip
   }
 
-  return [...staticRoutes, ...checkRoutes, ...vsRoutes, ...blogRoutes, ...domainRoutes]
+  // Audit report pages
+  let auditRoutes: MetadataRoute.Sitemap = [
+    { url: `${base}/audits`, lastModified: new Date('2026-05-29'), changeFrequency: 'weekly', priority: 0.7 },
+  ]
+  try {
+    const supabaseAudits = createServiceClient()
+    const { data: audits } = await supabaseAudits
+      .from('audit_reports')
+      .select('slug, updated_at')
+      .eq('status', 'published')
+    auditRoutes = [
+      ...auditRoutes,
+      ...(audits ?? []).map(a => ({
+        url: `${base}/audits/${a.slug}`,
+        lastModified: new Date(a.updated_at),
+        changeFrequency: 'weekly' as const,
+        priority: 0.75,
+      })),
+    ]
+  } catch {
+    // skip if supabase not configured
+  }
+
+  return [...staticRoutes, ...checkRoutes, ...vsRoutes, ...blogRoutes, ...auditRoutes, ...domainRoutes]
 }
