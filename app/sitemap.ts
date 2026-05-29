@@ -29,6 +29,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }))
 
+  // Blog pages
+  let blogRoutes: MetadataRoute.Sitemap = [
+    { url: `${base}/blog`, lastModified: new Date('2026-05-29'), changeFrequency: 'weekly', priority: 0.7 },
+  ]
+  try {
+    const supabaseBlog = createServiceClient()
+    const { data: posts } = await supabaseBlog
+      .from('blog_posts')
+      .select('slug, updated_at')
+      .eq('status', 'published')
+    blogRoutes = [
+      ...blogRoutes,
+      ...(posts ?? []).map(p => ({
+        url: `${base}/blog/${p.slug}`,
+        lastModified: new Date(p.updated_at),
+        changeFrequency: 'weekly' as const,
+        priority: 0.7,
+      })),
+    ]
+  } catch {
+    // skip if supabase not configured
+  }
+
   // Competitor comparison pages
   const vsRoutes: MetadataRoute.Sitemap = [
     { url: `${base}/vs`, lastModified: new Date('2026-05-29'), changeFrequency: 'monthly', priority: 0.7 },
@@ -58,5 +81,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // supabase not configured locally — skip
   }
 
-  return [...staticRoutes, ...checkRoutes, ...vsRoutes, ...domainRoutes]
+  return [...staticRoutes, ...checkRoutes, ...vsRoutes, ...blogRoutes, ...domainRoutes]
 }

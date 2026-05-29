@@ -785,6 +785,7 @@ const en = {
       pricing: 'Pricing',
       roadmap: 'Roadmap',
       compare: 'Compare',
+      blog: 'Blog',
       exampleReport: 'Example report',
       emailLabel: 'Email support',
       xLabel: 'X (Twitter)',
