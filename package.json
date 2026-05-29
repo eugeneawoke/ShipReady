@@ -7,7 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:checks": "tsx --test \"tests/**/*.test.ts\""
+    "test:checks": "tsx --test \"tests/**/*.test.ts\"",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test",
+    "test:all": "npm run test:unit && npm run test:e2e && node scripts/merge-reports.mjs"
   },
   "dependencies": {
     "@sparticuz/chromium": "^143.0.4",
