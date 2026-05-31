@@ -588,14 +588,14 @@ const en = {
       },
       {
         id: '05',
-        title: 'Beta Launch',
-        subtitle: 'Going live for first real users',
+        title: 'Public Beta',
+        subtitle: 'Open registration, billing active, first paying users',
         status: 'in-progress',
         items: [
-          'Production rollout with live AI prompts and monitoring',
-          'Billing activation and first paid users',
-          'Stability hardening based on real traffic',
-          'Direct feedback loop with early users',
+          'Open registration — no waitlist, anyone can start for free',
+          'Pro and Agency plans available for purchase',
+          'Weekly digest and email alerts when site score drops',
+          'Direct feedback channel with the team from every report',
         ],
       },
       {
