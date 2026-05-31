@@ -306,6 +306,23 @@ export function CinematicFooter({
   const giantTextRef  = useRef<HTMLDivElement>(null)
   const headingRef    = useRef<HTMLHeadingElement>(null)
   const linksRef      = useRef<HTMLDivElement>(null)
+  const compareRef    = useRef<HTMLDivElement>(null)
+  const [compareOpen, setCompareOpen] = useState(false)
+
+  useEffect(() => {
+    if (!compareOpen) return
+    function handleOutside(e: MouseEvent | TouchEvent) {
+      if (compareRef.current && !compareRef.current.contains(e.target as Node)) {
+        setCompareOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleOutside)
+    document.addEventListener('touchstart', handleOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleOutside)
+      document.removeEventListener('touchstart', handleOutside)
+    }
+  }, [compareOpen])
 
   useEffect(() => {
     if (typeof window === 'undefined' || !wrapperRef.current) return
@@ -401,35 +418,47 @@ export function CinematicFooter({
               <div className="flex flex-wrap justify-center gap-3 md:gap-4 w-full mt-2">
                 <MagneticButton as="a" href="/blog" className="sr-glass-pill px-6 py-3 rounded-full text-[#8B8A85] font-medium text-xs md:text-sm hover:text-[#F1F0EE]">{messages.Landing.footer.blog}</MagneticButton>
 
-                {/* Compare dropdown — CSS hover, no JS state */}
-                <div className="group relative">
-                  <div className="sr-glass-pill px-6 py-3 rounded-full text-[#8B8A85] font-medium text-xs md:text-sm hover:text-[#F1F0EE] cursor-pointer select-none flex items-center gap-1.5 transition-colors">
+                {/* Compare dropdown — click/touch toggle */}
+                <div className="relative" ref={compareRef}>
+                  <button
+                    type="button"
+                    onClick={() => setCompareOpen(o => !o)}
+                    className="sr-glass-pill px-6 py-3 rounded-full text-[#8B8A85] font-medium text-xs md:text-sm hover:text-[#F1F0EE] cursor-pointer select-none flex items-center gap-1.5 transition-colors"
+                  >
                     {messages.Landing.footer.compare}
-                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="opacity-50 group-hover:opacity-100 transition-opacity">
+                    <svg
+                      width="10" height="10" viewBox="0 0 10 10" fill="none"
+                      className="transition-transform duration-200"
+                      style={{ transform: compareOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                    >
                       <path d="M2 4l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
-                  </div>
+                  </button>
                   {/* Dropdown list — appears upward */}
-                  <div className="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 absolute bottom-full mb-2 left-1/2 -translate-x-1/2 min-w-[230px] bg-[#161618] border border-white/[0.08] rounded-xl p-2 z-50 shadow-2xl">
-                    {competitorSlugs.map(slug => (
-                      <Link
-                        key={slug}
-                        href={`/vs/${slug}`}
-                        className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-[#8B8A85] hover:text-[#F1F0EE] hover:bg-white/[0.04] transition-colors"
-                      >
-                        <span className="text-[#6E56CF] font-mono text-[10px]">vs</span>
-                        {competitors[slug].name}
-                      </Link>
-                    ))}
-                    <div className="border-t border-white/[0.06] mt-1 pt-1">
-                      <Link
-                        href="/vs"
-                        className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-[#5A5955] hover:text-[#6E56CF] transition-colors"
-                      >
-                        All comparisons →
-                      </Link>
+                  {compareOpen && (
+                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 min-w-[230px] bg-[#161618] border border-white/[0.08] rounded-xl p-2 z-50 shadow-2xl">
+                      {competitorSlugs.map(slug => (
+                        <Link
+                          key={slug}
+                          href={`/vs/${slug}`}
+                          onClick={() => setCompareOpen(false)}
+                          className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-[#8B8A85] hover:text-[#F1F0EE] hover:bg-white/[0.04] transition-colors"
+                        >
+                          <span className="text-[#6E56CF] font-mono text-[10px]">vs</span>
+                          {competitors[slug].name}
+                        </Link>
+                      ))}
+                      <div className="border-t border-white/[0.06] mt-1 pt-1">
+                        <Link
+                          href="/vs"
+                          onClick={() => setCompareOpen(false)}
+                          className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-[#5A5955] hover:text-[#6E56CF] transition-colors"
+                        >
+                          All comparisons →
+                        </Link>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 <MagneticButton as="a" href="/privacy" className="sr-glass-pill px-6 py-3 rounded-full text-[#8B8A85] font-medium text-xs md:text-sm hover:text-[#F1F0EE]">{messages.Landing.footer.privacy}</MagneticButton>
