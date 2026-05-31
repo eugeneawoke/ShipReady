@@ -515,6 +515,14 @@ const en = {
       inProgress: 'In progress',
       planned: 'Planned',
     },
+    tabs: {
+      roadmap: 'Roadmap',
+      whatsNew: "What's New",
+    },
+    changelog: {
+      released: 'Released',
+      empty: 'No releases yet',
+    },
     title: 'Roadmap',
     heading: "Where we're going",
     intro: 'ShipReady is being built in the open. This roadmap shows what is already shipped, what is almost launch-ready, and what comes next after the first users are onboard.',
@@ -531,6 +539,7 @@ const en = {
         title: 'Scanner Engine',
         subtitle: 'Full audit engine is shipped',
         status: 'done',
+        releaseDate: '2026-05-07',
         items: [
           '90+ checks across performance, SEO, security, mobile, accessibility, and AI visibility',
           'Fast truth checks first, deep Lighthouse analysis second',
@@ -544,6 +553,7 @@ const en = {
         title: 'Report & AI Fix Prompts',
         subtitle: 'Report UI and AI prompts are shipped',
         status: 'done',
+        releaseDate: '2026-05-07',
         items: [
           'Issues with evidence, confidence levels, and ranked priorities',
           'AI-generated summary with ready-to-paste fix prompts for Cursor, Claude Code, Windsurf',
@@ -555,6 +565,7 @@ const en = {
         title: 'Accounts, Plans & Monitoring',
         subtitle: 'Auth, tiers, and weekly domain monitoring are live',
         status: 'done',
+        releaseDate: '2026-05-07',
         items: [
           'Sign in with email or Google, dashboard with scan history',
           'Free / Pro / Agency plan structure',
@@ -567,6 +578,7 @@ const en = {
         title: 'Growth & Quality Tooling',
         subtitle: 'Issue tracking, digest, MCP, and SEO pages shipped',
         status: 'done',
+        releaseDate: '2026-05-28',
         items: [
           'Issue checklist — mark issues as fixed or ignored, progress persists',
           'Weekly digest email — diff of latest vs baseline scan every Monday',
@@ -772,6 +784,9 @@ const en = {
       howItWorks: 'How it works',
       pricing: 'Pricing',
       roadmap: 'Roadmap',
+      compare: 'Compare',
+      blog: 'Blog',
+      auditReports: 'Audit Reports',
       exampleReport: 'Example report',
       emailLabel: 'Email support',
       xLabel: 'X (Twitter)',

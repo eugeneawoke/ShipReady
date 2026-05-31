@@ -7,13 +7,27 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:checks": "tsx --test \"tests/**/*.test.ts\""
+    "test:checks": "tsx --test \"tests/**/*.test.ts\"",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test",
+    "test:all": "npm run test:unit && npm run test:e2e && node scripts/merge-reports.mjs",
+    "test:install": "playwright install"
   },
   "dependencies": {
     "@sparticuz/chromium": "^143.0.4",
     "@supabase/ssr": "^0.10.0",
     "@supabase/supabase-js": "^2.101.1",
     "@swc/helpers": "^0.5.21",
+    "@tiptap/extension-code-block-lowlight": "^3.23.6",
+    "@tiptap/extension-highlight": "^3.23.6",
+    "@tiptap/extension-image": "^3.23.6",
+    "@tiptap/extension-link": "^3.23.6",
+    "@tiptap/extension-placeholder": "^3.23.6",
+    "@tiptap/extension-typography": "^3.23.6",
+    "@tiptap/html": "^3.23.6",
+    "@tiptap/pm": "^3.23.6",
+    "@tiptap/react": "^3.23.6",
+    "@tiptap/starter-kit": "^3.23.6",
     "@vercel/functions": "^3.4.3",
     "cheerio": "^1.2.0",
     "clsx": "^2.1.1",
@@ -22,6 +36,7 @@
     "geist": "^1.7.0",
     "gsap": "^3.14.2",
     "lighthouse": "^13.1.0",
+    "lowlight": "^3.3.0",
     "lucide-react": "^1.7.0",
     "motion": "^12.38.0",
     "next": "16.2.2",
@@ -38,14 +53,17 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitest/coverage-v8": "^4.1.7",
     "eslint": "^9",
     "eslint-config-next": "16.2.2",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.7"
   }
 }

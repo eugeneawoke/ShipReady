@@ -101,6 +101,8 @@ There is no `npm run typecheck` script right now; `next build` is the practical 
 - Scan code belongs in `lib/checks/*`, `lib/ai/*`, or route handlers.
 - New architecture decisions go into `DECISIONS.md`.
 - New verified facts or invalidated assumptions go into `EVIDENCE.md`.
+- **After `git commit` on any phase: run `npm run test:all`. Phase is NOT ✅ done until `test:all` passes with 0 failures.**
+- Manual scan flow is NOT coverable by Playwright — always test manually via smoke checklist (`docs/qa/smoke-checklist.md`) before prod deploy.
 
 ---
 
@@ -211,7 +213,7 @@ SERPER_API_KEY
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **ShipReady** (3478 symbols, 5954 relationships, 279 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **ShipReady** (3904 symbols, 6684 relationships, 300 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 

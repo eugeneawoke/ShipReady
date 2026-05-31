@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next'
 import { createServiceClient } from '@/lib/supabase'
+import { competitorSlugs } from '@/lib/vs/competitors'
 
 export const revalidate = 3600
 
@@ -28,6 +29,40 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }))
 
+  // Blog pages
+  let blogRoutes: MetadataRoute.Sitemap = [
+    { url: `${base}/blog`, lastModified: new Date('2026-05-29'), changeFrequency: 'weekly', priority: 0.7 },
+  ]
+  try {
+    const supabaseBlog = createServiceClient()
+    const { data: posts } = await supabaseBlog
+      .from('blog_posts')
+      .select('slug, updated_at')
+      .eq('status', 'published')
+    blogRoutes = [
+      ...blogRoutes,
+      ...(posts ?? []).map(p => ({
+        url: `${base}/blog/${p.slug}`,
+        lastModified: new Date(p.updated_at),
+        changeFrequency: 'weekly' as const,
+        priority: 0.7,
+      })),
+    ]
+  } catch {
+    // skip if supabase not configured
+  }
+
+  // Competitor comparison pages
+  const vsRoutes: MetadataRoute.Sitemap = [
+    { url: `${base}/vs`, lastModified: new Date('2026-05-29'), changeFrequency: 'monthly', priority: 0.7 },
+    ...competitorSlugs.map(slug => ({
+      url: `${base}/vs/${slug}`,
+      lastModified: new Date('2026-05-29'),
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    })),
+  ]
+
   // Published domain pages
   let domainRoutes: MetadataRoute.Sitemap = []
   try {
@@ -46,5 +81,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // supabase not configured locally — skip
   }
 
-  return [...staticRoutes, ...checkRoutes, ...domainRoutes]
+  // Audit report pages
+  let auditRoutes: MetadataRoute.Sitemap = [
+    { url: `${base}/audits`, lastModified: new Date('2026-05-29'), changeFrequency: 'weekly', priority: 0.7 },
+  ]
+  try {
+    const supabaseAudits = createServiceClient()
+    const { data: audits } = await supabaseAudits
+      .from('audit_reports')
+      .select('slug, updated_at')
+      .eq('status', 'published')
+    auditRoutes = [
+      ...auditRoutes,
+      ...(audits ?? []).map(a => ({
+        url: `${base}/audits/${a.slug}`,
+        lastModified: new Date(a.updated_at),
+        changeFrequency: 'weekly' as const,
+        priority: 0.75,
+      })),
+    ]
+  } catch {
+    // skip if supabase not configured
+  }
+
+  return [...staticRoutes, ...checkRoutes, ...vsRoutes, ...blogRoutes, ...auditRoutes, ...domainRoutes]
 }
