@@ -24,12 +24,36 @@ type BlogPost = {
   published_at: string
 }
 
+type AuditReport = {
+  id: string
+  slug: string
+  company_name: string
+  company_website: string
+  editorial_summary: string | null
+  og_image_url: string | null
+  published_at: string
+}
+
+// Unified card shape
+type ContentCard = {
+  id: string
+  href: string
+  title: string
+  excerpt: string | null
+  tags: string[]
+  og_image_url: string | null
+  published_at: string
+  reading_time_minutes?: number | null
+  badge?: string
+}
+
 const CATEGORIES = [
-  { label: 'Latest', href: '/blog' },
-  { label: 'SEO', href: '/blog?tag=SEO' },
-  { label: 'AI Visibility', href: '/blog?tag=AI+Visibility' },
-  { label: 'Security', href: '/blog?tag=Security' },
-  { label: 'Performance', href: '/blog?tag=Performance' },
+  { label: 'Latest',        href: '/blog',                    param: null },
+  { label: 'SEO',           href: '/blog?tag=SEO',            param: 'SEO' },
+  { label: 'AI Visibility', href: '/blog?tag=AI+Visibility',  param: 'AI Visibility' },
+  { label: 'Security',      href: '/blog?tag=Security',       param: 'Security' },
+  { label: 'Performance',   href: '/blog?tag=Performance',    param: 'Performance' },
+  { label: 'Audit Reports', href: '/blog?category=audits',    param: 'audits' },
 ]
 
 const TAG_GRADIENTS: Record<string, string> = {
@@ -37,6 +61,7 @@ const TAG_GRADIENTS: Record<string, string> = {
   'AI Visibility': 'from-[#3DDC84] to-[#4A9EFF]',
   Security: 'from-[#FF4444] to-[#F5C518]',
   Performance: 'from-[#F5C518] to-[#3DDC84]',
+  audits: 'from-[#6E56CF] to-[#3DDC84]',
   default: 'from-[#6E56CF] to-[#161618]',
 }
 
@@ -47,29 +72,63 @@ function tagGradient(tags: string[]): string {
   return TAG_GRADIENTS.default
 }
 
-export default async function BlogPage({ searchParams }: { searchParams: Promise<{ tag?: string }> }) {
-  const { tag } = await searchParams
+export default async function BlogPage({ searchParams }: { searchParams: Promise<{ tag?: string; category?: string }> }) {
+  const { tag, category } = await searchParams
+  const isAudits = category === 'audits'
 
-  let posts: BlogPost[] = []
+  let cards: ContentCard[] = []
+
   try {
     const supabase = createServiceClient()
-    const query = supabase
-      .from('blog_posts')
-      .select('id, slug, title, excerpt, tags, reading_time_minutes, og_image_url, published_at')
-      .eq('status', 'published')
-      .order('published_at', { ascending: false })
 
-    if (tag) {
-      query.contains('tags', [tag])
+    if (isAudits) {
+      // Fetch audit reports
+      const { data } = await supabase
+        .from('audit_reports')
+        .select('id, slug, company_name, company_website, editorial_summary, og_image_url, published_at')
+        .eq('status', 'published')
+        .order('published_at', { ascending: false })
+
+      cards = ((data ?? []) as AuditReport[]).map(r => ({
+        id: r.id,
+        href: `/audits/${r.slug}`,
+        title: r.company_name,
+        excerpt: r.editorial_summary,
+        tags: [r.company_website],
+        og_image_url: r.og_image_url,
+        published_at: r.published_at,
+        badge: 'Audit Report',
+      }))
+    } else {
+      // Fetch blog posts
+      const query = supabase
+        .from('blog_posts')
+        .select('id, slug, title, excerpt, tags, reading_time_minutes, og_image_url, published_at')
+        .eq('status', 'published')
+        .order('published_at', { ascending: false })
+
+      if (tag) query.contains('tags', [tag])
+
+      const { data } = await query
+      cards = ((data ?? []) as BlogPost[]).map(p => ({
+        id: p.id,
+        href: `/blog/${p.slug}`,
+        title: p.title,
+        excerpt: p.excerpt,
+        tags: p.tags ?? [],
+        og_image_url: p.og_image_url,
+        published_at: p.published_at,
+        reading_time_minutes: p.reading_time_minutes,
+      }))
     }
-
-    const { data } = await query
-    posts = data ?? []
   } catch {
     // supabase not configured locally
   }
 
-  const activeHref = tag ? `/blog?tag=${encodeURIComponent(tag)}` : '/blog'
+  // Active sidebar link
+  const activeHref = isAudits
+    ? '/blog?category=audits'
+    : tag ? `/blog?tag=${encodeURIComponent(tag)}` : '/blog'
 
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE]">
@@ -87,31 +146,26 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
               </p>
 
               <nav className="space-y-1">
-                {CATEGORIES.map(cat => {
+                {CATEGORIES.map((cat, i) => {
                   const active = cat.href === activeHref
+                  const isAuditLink = cat.label === 'Audit Reports'
                   return (
-                    <Link
-                      key={cat.label}
-                      href={cat.href}
-                      className={`block py-1.5 text-sm transition-colors border-l-2 pl-3 ${
-                        active
-                          ? 'border-[#6E56CF] text-[#F1F0EE] font-medium'
-                          : 'border-transparent text-[#8B8A85] hover:text-[#F1F0EE] hover:border-white/[0.2]'
-                      }`}
-                    >
-                      {cat.label}
-                    </Link>
+                    <>
+                      {isAuditLink && <div key="divider" className="border-t border-white/[0.06] my-3" />}
+                      <Link
+                        key={cat.label}
+                        href={cat.href}
+                        className={`block py-1.5 text-sm transition-colors border-l-2 pl-3 ${
+                          active
+                            ? 'border-[#6E56CF] text-[#F1F0EE] font-medium'
+                            : 'border-transparent text-[#8B8A85] hover:text-[#F1F0EE] hover:border-white/[0.2]'
+                        }`}
+                      >
+                        {cat.label}
+                      </Link>
+                    </>
                   )
                 })}
-
-                <div className="border-t border-white/[0.06] my-3" />
-
-                <Link
-                  href="/audits"
-                  className="block py-1.5 text-sm text-[#8B8A85] hover:text-[#F1F0EE] border-l-2 border-transparent hover:border-white/[0.2] pl-3 transition-colors"
-                >
-                  Audit Reports
-                </Link>
               </nav>
             </div>
           </aside>
@@ -136,51 +190,58 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
               ))}
             </div>
 
-            {posts.length === 0 ? (
+            {cards.length === 0 ? (
               <div className="text-center py-20 text-[#5A5955]">
-                <p className="text-sm">No posts yet. Check back soon.</p>
+                <p className="text-sm">{isAudits ? 'No audit reports published yet.' : 'No posts yet. Check back soon.'}</p>
               </div>
             ) : (
               <div className="grid gap-5 sm:grid-cols-2">
-                {posts.map(post => (
+                {cards.map(card => (
                   <Link
-                    key={post.id}
-                    href={`/blog/${post.slug}`}
+                    key={card.id}
+                    href={card.href}
                     className="group rounded-2xl bg-[#161618] border border-white/[0.06] hover:border-[#6E56CF]/30 transition-all overflow-hidden flex flex-col"
                   >
                     {/* Cover image */}
                     <div className="relative h-44 w-full overflow-hidden shrink-0">
-                      {post.og_image_url ? (
+                      {card.og_image_url ? (
                         <Image
-                          src={post.og_image_url}
-                          alt={post.title}
+                          src={card.og_image_url}
+                          alt={card.title}
                           fill
                           className="object-cover group-hover:scale-105 transition-transform duration-500"
                           sizes="(max-width: 640px) 100vw, 50vw"
                         />
                       ) : (
-                        <div className={`h-full w-full bg-gradient-to-br ${tagGradient(post.tags ?? [])} opacity-40`} />
+                        <div className={`h-full w-full bg-gradient-to-br ${
+                          isAudits ? TAG_GRADIENTS.audits : tagGradient(card.tags)
+                        } opacity-40`} />
                       )}
                     </div>
 
                     {/* Card body */}
                     <div className="p-5 flex flex-col flex-1">
-                      {(post.tags ?? []).length > 0 && (
-                        <span className="text-[10px] font-mono text-[#6E56CF] mb-2">{post.tags[0]}</span>
-                      )}
+                      <div className="flex items-center gap-2 mb-2">
+                        {card.badge && (
+                          <span className="text-[10px] font-mono text-[#3DDC84] bg-[#3DDC84]/10 px-2 py-0.5 rounded-full">{card.badge}</span>
+                        )}
+                        {!card.badge && card.tags.length > 0 && (
+                          <span className="text-[10px] font-mono text-[#6E56CF]">{card.tags[0]}</span>
+                        )}
+                      </div>
                       <h2 className="font-medium text-base text-[#F1F0EE] group-hover:text-white transition-colors mb-2 leading-snug">
-                        {post.title}
+                        {card.title}
                       </h2>
-                      {post.excerpt && (
-                        <p className="text-sm text-[#8B8A85] leading-relaxed line-clamp-2 flex-1">{post.excerpt}</p>
+                      {card.excerpt && (
+                        <p className="text-sm text-[#8B8A85] leading-relaxed line-clamp-2 flex-1">{card.excerpt}</p>
                       )}
                       <div className="flex items-center gap-3 mt-3">
-                        {post.reading_time_minutes && (
-                          <span className="text-[10px] font-mono text-[#5A5955]">{post.reading_time_minutes} min</span>
+                        {card.reading_time_minutes && (
+                          <span className="text-[10px] font-mono text-[#5A5955]">{card.reading_time_minutes} min</span>
                         )}
-                        {post.published_at && (
+                        {card.published_at && (
                           <span className="text-[10px] text-[#3A3A3A]">
-                            {new Date(post.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                            {new Date(card.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                           </span>
                         )}
                       </div>
