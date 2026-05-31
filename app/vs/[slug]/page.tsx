@@ -1,11 +1,10 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { getTranslations } from 'next-intl/server'
 import { competitors, competitorSlugs } from '@/lib/vs/competitors'
 import { CompetitorTable } from '@/components/vs/CompetitorTable'
 import { CompetitorFaq } from '@/components/vs/CompetitorFaq'
-import { SiteHeader } from '@/components/SiteHeader'
+import { ContentPageHeader } from '@/components/navigation/ContentPageHeader'
 import { CinematicFooter } from '@/components/ui/motion-footer'
 import { MobileDockSpacer } from '@/components/navigation/MobileDockSpacer'
 
@@ -35,18 +34,11 @@ export default async function VsPage({ params }: { params: Promise<{ slug: strin
   const c = competitors[slug]
   if (!c) notFound()
 
-  const tnav = await getTranslations('Landing.nav')
   const year = new Date().getFullYear()
 
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE]">
-      <SiteHeader
-        sticky
-        mobileNavItems={[
-          { label: tnav('pricing'), href: '/pricing' },
-          { label: tnav('roadmap'), href: '/roadmap' },
-        ]}
-      />
+      <ContentPageHeader />
 
       <main className="max-w-3xl mx-auto px-6 py-16">
         {/* Breadcrumb */}

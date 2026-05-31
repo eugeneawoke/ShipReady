@@ -33,6 +33,58 @@ const FlickeringGrid = dynamic(async () => { const m = await import('@/component
 
 const CinematicFooter = dynamic(async () => { const m = await import('@/components/ui/motion-footer'); return m.CinematicFooter as AnyComponent }, { ssr: false })
 
+// ─── AI tools with icons ─────────────────────────────────────────────────────
+
+const AI_TOOLS = [
+  {
+    name: 'Cursor',
+    accent: '#4B9EFF',
+    icon: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+        <path d="M4 4l7 18 3-8 8-3L4 4z" fill="currentColor" opacity="0.9"/>
+        <path d="M14 14l6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+      </svg>
+    ),
+  },
+  {
+    name: 'Claude Code',
+    accent: '#E8784D',
+    icon: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z" fill="currentColor"/>
+      </svg>
+    ),
+  },
+  {
+    name: 'Windsurf',
+    accent: '#5B8BDF',
+    icon: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+        <path d="M3 18c4-8 10-12 18-10C15 10 12 14 12 22 10 18 7 16 3 18z" fill="currentColor" opacity="0.9"/>
+      </svg>
+    ),
+  },
+  {
+    name: 'Codex',
+    accent: '#A0A0A0',
+    icon: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8"/>
+        <path d="M9 9l6 6M15 9l-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+      </svg>
+    ),
+  },
+  {
+    name: 'Gemini',
+    accent: '#4285F4',
+    icon: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2C12 12 12 12 2 12c10 0 10 0 10 10 0-10 0-10 10-10C12 12 12 12 12 2z" fill="currentColor"/>
+      </svg>
+    ),
+  },
+]
+
 // ─── smooth scroll ────────────────────────────────────────────────────────────
 
 function smoothScrollTo(selector: string) {
@@ -403,9 +455,14 @@ function HeroSection({ t }: { t: Translations }) {
               {t.hero.worksWith}
             </p>
             <div className="flex flex-wrap items-center justify-center gap-2">
-              {['Cursor', 'Claude Code', 'Windsurf', 'Codex', 'Gemini'].map(p => (
-                <div key={p} className="works-chip">
-                  <span className="works-chip-inner">{p}</span>
+              {AI_TOOLS.map(tool => (
+                <div key={tool.name} className="works-chip">
+                  <span className="works-chip-inner flex items-center gap-1.5">
+                    <span className="shrink-0" style={{ color: tool.accent }} aria-hidden="true">
+                      {tool.icon}
+                    </span>
+                    {tool.name}
+                  </span>
                 </div>
               ))}
               <span className="text-xs text-[#6F6E69]">{t.hero.worksWithExamples}</span>

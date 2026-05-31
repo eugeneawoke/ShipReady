@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { getTranslations } from 'next-intl/server'
 import { createServiceClient } from '@/lib/supabase'
-import { SiteHeader } from '@/components/SiteHeader'
+import { ContentPageHeader } from '@/components/navigation/ContentPageHeader'
 import { CinematicFooter } from '@/components/ui/motion-footer'
 import { MobileDockSpacer } from '@/components/navigation/MobileDockSpacer'
 
@@ -24,8 +23,6 @@ type AuditRow = {
 }
 
 export default async function AuditsPage() {
-  const tnav = await getTranslations('Landing.nav')
-
   let audits: AuditRow[] = []
   try {
     const supabase = createServiceClient()
@@ -41,13 +38,7 @@ export default async function AuditsPage() {
 
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE]">
-      <SiteHeader
-        sticky
-        mobileNavItems={[
-          { label: tnav('pricing'), href: '/pricing' },
-          { label: tnav('roadmap'), href: '/roadmap' },
-        ]}
-      />
+      <ContentPageHeader />
 
       <main className="max-w-3xl mx-auto px-6 py-16">
         <p className="text-[11px] text-[#6E56CF] uppercase tracking-[0.15em] mb-3 font-mono">Audit Reports</p>

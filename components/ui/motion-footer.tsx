@@ -2,11 +2,13 @@
 
 import * as React from 'react'
 import { useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
 import { useMessages } from 'next-intl'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { cn } from '@/lib/utils'
 import type { AppMessages } from '@/messages/en'
+import { competitors, competitorSlugs } from '@/lib/vs/competitors'
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger)
@@ -398,8 +400,38 @@ export function CinematicFooter({
               {/* Secondary links */}
               <div className="flex flex-wrap justify-center gap-3 md:gap-4 w-full mt-2">
                 <MagneticButton as="a" href="/blog" className="sr-glass-pill px-6 py-3 rounded-full text-[#8B8A85] font-medium text-xs md:text-sm hover:text-[#F1F0EE]">{messages.Landing.footer.blog}</MagneticButton>
-                <MagneticButton as="a" href="/audits" className="sr-glass-pill px-6 py-3 rounded-full text-[#8B8A85] font-medium text-xs md:text-sm hover:text-[#F1F0EE]">{messages.Landing.footer.auditReports}</MagneticButton>
-                <MagneticButton as="a" href="/vs" className="sr-glass-pill px-6 py-3 rounded-full text-[#8B8A85] font-medium text-xs md:text-sm hover:text-[#F1F0EE]">{messages.Landing.footer.compare}</MagneticButton>
+
+                {/* Compare dropdown — CSS hover, no JS state */}
+                <div className="group relative">
+                  <div className="sr-glass-pill px-6 py-3 rounded-full text-[#8B8A85] font-medium text-xs md:text-sm hover:text-[#F1F0EE] cursor-pointer select-none flex items-center gap-1.5 transition-colors">
+                    {messages.Landing.footer.compare}
+                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="opacity-50 group-hover:opacity-100 transition-opacity">
+                      <path d="M2 4l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  {/* Dropdown list — appears upward */}
+                  <div className="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 absolute bottom-full mb-2 left-1/2 -translate-x-1/2 min-w-[230px] bg-[#161618] border border-white/[0.08] rounded-xl p-2 z-50 shadow-2xl">
+                    {competitorSlugs.map(slug => (
+                      <Link
+                        key={slug}
+                        href={`/vs/${slug}`}
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-[#8B8A85] hover:text-[#F1F0EE] hover:bg-white/[0.04] transition-colors"
+                      >
+                        <span className="text-[#6E56CF] font-mono text-[10px]">vs</span>
+                        {competitors[slug].name}
+                      </Link>
+                    ))}
+                    <div className="border-t border-white/[0.06] mt-1 pt-1">
+                      <Link
+                        href="/vs"
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-[#5A5955] hover:text-[#6E56CF] transition-colors"
+                      >
+                        All comparisons →
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+
                 <MagneticButton as="a" href="/privacy" className="sr-glass-pill px-6 py-3 rounded-full text-[#8B8A85] font-medium text-xs md:text-sm hover:text-[#F1F0EE]">{messages.Landing.footer.privacy}</MagneticButton>
                 <MagneticButton as="a" href="/terms" className="sr-glass-pill px-6 py-3 rounded-full text-[#8B8A85] font-medium text-xs md:text-sm hover:text-[#F1F0EE]">{messages.Landing.footer.terms}</MagneticButton>
                 <ContactButton label={t.contact} />

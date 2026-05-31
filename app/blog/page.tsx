@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { getTranslations } from 'next-intl/server'
+import Image from 'next/image'
 import { createServiceClient } from '@/lib/supabase'
-import { SiteHeader } from '@/components/SiteHeader'
+import { ContentPageHeader } from '@/components/navigation/ContentPageHeader'
 import { CinematicFooter } from '@/components/ui/motion-footer'
 import { MobileDockSpacer } from '@/components/navigation/MobileDockSpacer'
 
@@ -24,11 +24,31 @@ type BlogPost = {
   published_at: string
 }
 
-const TAG_FILTERS = ['SEO', 'AI Visibility', 'Security', 'Performance']
+const CATEGORIES = [
+  { label: 'Latest', href: '/blog' },
+  { label: 'SEO', href: '/blog?tag=SEO' },
+  { label: 'AI Visibility', href: '/blog?tag=AI+Visibility' },
+  { label: 'Security', href: '/blog?tag=Security' },
+  { label: 'Performance', href: '/blog?tag=Performance' },
+]
+
+const TAG_GRADIENTS: Record<string, string> = {
+  SEO: 'from-[#6E56CF] to-[#4A9EFF]',
+  'AI Visibility': 'from-[#3DDC84] to-[#4A9EFF]',
+  Security: 'from-[#FF4444] to-[#F5C518]',
+  Performance: 'from-[#F5C518] to-[#3DDC84]',
+  default: 'from-[#6E56CF] to-[#161618]',
+}
+
+function tagGradient(tags: string[]): string {
+  for (const tag of tags) {
+    if (TAG_GRADIENTS[tag]) return TAG_GRADIENTS[tag]
+  }
+  return TAG_GRADIENTS.default
+}
 
 export default async function BlogPage({ searchParams }: { searchParams: Promise<{ tag?: string }> }) {
   const { tag } = await searchParams
-  const tnav = await getTranslations('Landing.nav')
 
   let posts: BlogPost[] = []
   try {
@@ -46,88 +66,131 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
     const { data } = await query
     posts = data ?? []
   } catch {
-    // supabase not configured locally — skip
+    // supabase not configured locally
   }
+
+  const activeHref = tag ? `/blog?tag=${encodeURIComponent(tag)}` : '/blog'
 
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE]">
-      <SiteHeader
-        sticky
-        mobileNavItems={[
-          { label: tnav('pricing'), href: '/pricing' },
-          { label: tnav('roadmap'), href: '/roadmap' },
-        ]}
-      />
+      <ContentPageHeader activePath="/blog" />
 
-      <main className="max-w-3xl mx-auto px-6 py-16">
-        <p className="text-[11px] text-[#6E56CF] uppercase tracking-[0.15em] mb-3 font-mono">Blog</p>
-        <h1 className="text-[28px] sm:text-[36px] font-medium tracking-tight mb-3">
-          SEO, AI visibility, and security
-        </h1>
-        <p className="text-[#8B8A85] text-sm leading-relaxed max-w-lg mb-10">
-          Practical guides for founders and developers building sites that get found — by Google and by AI.
-        </p>
+      <main className="max-w-6xl mx-auto px-6 py-12">
+        <div className="flex gap-10">
 
-        {/* Tag filters */}
-        <div className="flex flex-wrap gap-2 mb-10">
-          <Link
-            href="/blog"
-            className={`px-3 py-1.5 rounded-full text-xs font-mono transition-colors ${
-              !tag ? 'bg-[#6E56CF] text-white' : 'bg-[#161618] text-[#8B8A85] border border-white/[0.06] hover:text-[#F1F0EE]'
-            }`}
-          >
-            All
-          </Link>
-          {TAG_FILTERS.map(t => (
-            <Link
-              key={t}
-              href={`/blog?tag=${encodeURIComponent(t)}`}
-              className={`px-3 py-1.5 rounded-full text-xs font-mono transition-colors ${
-                tag === t ? 'bg-[#6E56CF] text-white' : 'bg-[#161618] text-[#8B8A85] border border-white/[0.06] hover:text-[#F1F0EE]'
-              }`}
-            >
-              {t}
-            </Link>
-          ))}
+          {/* ── Left sidebar (desktop) ───────────────────────────────────── */}
+          <aside className="hidden lg:block w-48 shrink-0">
+            <div className="sticky top-24">
+              <h1 className="text-2xl font-semibold mb-1">Blog</h1>
+              <p className="text-xs text-[#8B8A85] leading-relaxed mb-8">
+                Practical guides for founders and developers.
+              </p>
+
+              <nav className="space-y-1">
+                {CATEGORIES.map(cat => {
+                  const active = cat.href === activeHref
+                  return (
+                    <Link
+                      key={cat.label}
+                      href={cat.href}
+                      className={`block py-1.5 text-sm transition-colors border-l-2 pl-3 ${
+                        active
+                          ? 'border-[#6E56CF] text-[#F1F0EE] font-medium'
+                          : 'border-transparent text-[#8B8A85] hover:text-[#F1F0EE] hover:border-white/[0.2]'
+                      }`}
+                    >
+                      {cat.label}
+                    </Link>
+                  )
+                })}
+
+                <div className="border-t border-white/[0.06] my-3" />
+
+                <Link
+                  href="/audits"
+                  className="block py-1.5 text-sm text-[#8B8A85] hover:text-[#F1F0EE] border-l-2 border-transparent hover:border-white/[0.2] pl-3 transition-colors"
+                >
+                  Audit Reports
+                </Link>
+              </nav>
+            </div>
+          </aside>
+
+          {/* ── Main content ─────────────────────────────────────────────── */}
+          <div className="flex-1 min-w-0">
+
+            {/* Mobile category chips */}
+            <div className="flex flex-wrap gap-2 mb-8 lg:hidden">
+              {CATEGORIES.map(cat => (
+                <Link
+                  key={cat.label}
+                  href={cat.href}
+                  className={`px-3 py-1.5 rounded-full text-xs font-mono transition-colors ${
+                    cat.href === activeHref
+                      ? 'bg-[#6E56CF] text-white'
+                      : 'bg-[#161618] text-[#8B8A85] border border-white/[0.06] hover:text-[#F1F0EE]'
+                  }`}
+                >
+                  {cat.label}
+                </Link>
+              ))}
+            </div>
+
+            {posts.length === 0 ? (
+              <div className="text-center py-20 text-[#5A5955]">
+                <p className="text-sm">No posts yet. Check back soon.</p>
+              </div>
+            ) : (
+              <div className="grid gap-5 sm:grid-cols-2">
+                {posts.map(post => (
+                  <Link
+                    key={post.id}
+                    href={`/blog/${post.slug}`}
+                    className="group rounded-2xl bg-[#161618] border border-white/[0.06] hover:border-[#6E56CF]/30 transition-all overflow-hidden flex flex-col"
+                  >
+                    {/* Cover image */}
+                    <div className="relative h-44 w-full overflow-hidden shrink-0">
+                      {post.og_image_url ? (
+                        <Image
+                          src={post.og_image_url}
+                          alt={post.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                          sizes="(max-width: 640px) 100vw, 50vw"
+                        />
+                      ) : (
+                        <div className={`h-full w-full bg-gradient-to-br ${tagGradient(post.tags ?? [])} opacity-40`} />
+                      )}
+                    </div>
+
+                    {/* Card body */}
+                    <div className="p-5 flex flex-col flex-1">
+                      {(post.tags ?? []).length > 0 && (
+                        <span className="text-[10px] font-mono text-[#6E56CF] mb-2">{post.tags[0]}</span>
+                      )}
+                      <h2 className="font-medium text-base text-[#F1F0EE] group-hover:text-white transition-colors mb-2 leading-snug">
+                        {post.title}
+                      </h2>
+                      {post.excerpt && (
+                        <p className="text-sm text-[#8B8A85] leading-relaxed line-clamp-2 flex-1">{post.excerpt}</p>
+                      )}
+                      <div className="flex items-center gap-3 mt-3">
+                        {post.reading_time_minutes && (
+                          <span className="text-[10px] font-mono text-[#5A5955]">{post.reading_time_minutes} min</span>
+                        )}
+                        {post.published_at && (
+                          <span className="text-[10px] text-[#3A3A3A]">
+                            {new Date(post.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-
-        {posts.length === 0 ? (
-          <div className="text-center py-20 text-[#5A5955]">
-            <p className="text-sm">No posts yet. Check back soon.</p>
-          </div>
-        ) : (
-          <div className="space-y-5">
-            {posts.map(post => (
-              <Link
-                key={post.id}
-                href={`/blog/${post.slug}`}
-                className="group block p-6 rounded-2xl bg-[#161618] border border-white/[0.06] hover:border-[#6E56CF]/30 transition-all"
-              >
-                <div className="flex items-start justify-between gap-4 mb-2">
-                  <h2 className="font-medium text-base text-[#F1F0EE] group-hover:text-white transition-colors">
-                    {post.title}
-                  </h2>
-                  {post.reading_time_minutes && (
-                    <span className="text-[10px] font-mono text-[#5A5955] shrink-0 mt-0.5">{post.reading_time_minutes} min</span>
-                  )}
-                </div>
-                {post.excerpt && (
-                  <p className="text-sm text-[#8B8A85] leading-relaxed mb-3 line-clamp-2">{post.excerpt}</p>
-                )}
-                <div className="flex items-center gap-3">
-                  {(post.tags ?? []).map(t => (
-                    <span key={t} className="text-[10px] font-mono text-[#6E56CF]">{t}</span>
-                  ))}
-                  {post.published_at && (
-                    <span className="text-[10px] text-[#3A3A3A]">
-                      {new Date(post.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                    </span>
-                  )}
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
       </main>
 
       <MobileDockSpacer />
