@@ -70,7 +70,17 @@ export function ChangelogView({ phases, releasedLabel, emptyLabel, locale }: Cha
                       {releasedLabel} {formatDate(phase.releaseDate!, locale)}
                     </span>
                   </div>
-                  <p className="text-xs text-[#5A5955]">{phase.subtitle}</p>
+                  <p className="text-xs text-[#5A5955] mb-3">{phase.subtitle}</p>
+                  {phase.items && phase.items.length > 0 && (
+                    <ul className="space-y-1">
+                      {phase.items.map(item => (
+                        <li key={item} className="flex items-start gap-2 text-xs text-[#6F6E69]">
+                          <span className="text-[#3DDC84] mt-0.5 shrink-0">•</span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               </div>
             ))}
