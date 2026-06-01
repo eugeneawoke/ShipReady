@@ -5,6 +5,7 @@ import { createServiceClient } from '@/lib/supabase'
 import { ContentPageHeader } from '@/components/navigation/ContentPageHeader'
 import { CinematicFooter } from '@/components/ui/motion-footer'
 import { MobileDockSpacer } from '@/components/navigation/MobileDockSpacer'
+import { ChangelogFeed } from '@/components/blog/ChangelogFeed'
 
 export const revalidate = 3600
 
@@ -48,12 +49,13 @@ type ContentCard = {
 }
 
 const CATEGORIES = [
-  { label: 'Latest',        href: '/blog',                    param: null },
-  { label: 'SEO',           href: '/blog?tag=SEO',            param: 'SEO' },
-  { label: 'AI Visibility', href: '/blog?tag=AI+Visibility',  param: 'AI Visibility' },
-  { label: 'Security',      href: '/blog?tag=Security',       param: 'Security' },
-  { label: 'Performance',   href: '/blog?tag=Performance',    param: 'Performance' },
-  { label: 'Audit Reports', href: '/blog?category=audits',    param: 'audits' },
+  { label: 'Latest',        href: '/blog',                      param: null },
+  { label: 'SEO',           href: '/blog?tag=SEO',              param: 'SEO' },
+  { label: 'AI Visibility', href: '/blog?tag=AI+Visibility',    param: 'AI Visibility' },
+  { label: 'Security',      href: '/blog?tag=Security',         param: 'Security' },
+  { label: 'Performance',   href: '/blog?tag=Performance',      param: 'Performance' },
+  { label: 'Audit Reports', href: '/blog?category=audits',      param: 'audits' },
+  { label: 'Changelog',     href: '/blog?category=changelog',   param: 'changelog' },
 ]
 
 const TAG_GRADIENTS: Record<string, string> = {
@@ -75,6 +77,7 @@ function tagGradient(tags: string[]): string {
 export default async function BlogPage({ searchParams }: { searchParams: Promise<{ tag?: string; category?: string }> }) {
   const { tag, category } = await searchParams
   const isAudits = category === 'audits'
+  const isChangelog = category === 'changelog'
 
   let cards: ContentCard[] = []
 
@@ -126,9 +129,13 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
   }
 
   // Active sidebar link
-  const activeHref = isAudits
-    ? '/blog?category=audits'
-    : tag ? `/blog?tag=${encodeURIComponent(tag)}` : '/blog'
+  const activeHref = tag
+    ? `/blog?tag=${encodeURIComponent(tag)}`
+    : category === 'audits'
+      ? '/blog?category=audits'
+      : category === 'changelog'
+        ? '/blog?category=changelog'
+        : '/blog'
 
   return (
     <div className="min-h-screen bg-[#0E0E0F] text-[#F1F0EE]">
@@ -190,7 +197,9 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
               ))}
             </div>
 
-            {cards.length === 0 ? (
+            {isChangelog ? (
+              <ChangelogFeed />
+            ) : cards.length === 0 ? (
               <div className="text-center py-20 text-[#5A5955]">
                 <p className="text-sm">{isAudits ? 'No audit reports published yet.' : 'No posts yet. Check back soon.'}</p>
               </div>
