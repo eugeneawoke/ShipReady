@@ -1,5 +1,8 @@
+export type FeatureCategory = 'SEO' | 'Security' | 'AI Visibility' | 'Performance' | 'Pricing' | 'Usability'
+
 export interface CompetitorFeature {
   label: string
+  category: FeatureCategory
   shipready: true | false | string
   competitor: true | false | string
   note?: string
@@ -15,6 +18,7 @@ export interface CompetitorData {
   name: string
   tagline: string
   pricingRange: string
+  whyWins: [string, string, string]
   features: CompetitorFeature[]
   weaknesses: string[]
   verdict: string
