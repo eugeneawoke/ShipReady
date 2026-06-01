@@ -436,23 +436,25 @@ export function CinematicFooter({
                   </button>
                   {/* Dropdown list — appears upward */}
                   {compareOpen && (
-                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 min-w-[230px] bg-[#161618] border border-white/[0.08] rounded-xl p-2 z-50 shadow-2xl">
-                      {competitorSlugs.map(slug => (
-                        <Link
-                          key={slug}
-                          href={`/vs/${slug}`}
-                          onClick={() => setCompareOpen(false)}
-                          className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-[#8B8A85] hover:text-[#F1F0EE] hover:bg-white/[0.04] transition-colors"
-                        >
-                          <span className="text-[#6E56CF] font-mono text-[10px]">vs</span>
-                          {competitors[slug].name}
-                        </Link>
-                      ))}
-                      <div className="border-t border-white/[0.06] mt-1 pt-1">
+                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-[400px] max-w-[90vw] bg-[#161618] border border-white/[0.08] rounded-xl p-2 z-50 shadow-2xl">
+                      <div className="grid grid-cols-2 gap-0.5">
+                        {competitorSlugs.map(slug => (
+                          <Link
+                            key={slug}
+                            href={`/vs/${slug}`}
+                            onClick={() => setCompareOpen(false)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-[#8B8A85] hover:text-[#F1F0EE] hover:bg-white/[0.04] transition-colors truncate"
+                          >
+                            <span className="text-[#6E56CF] font-mono text-[10px] shrink-0">vs</span>
+                            <span className="truncate">{competitors[slug].name}</span>
+                          </Link>
+                        ))}
+                      </div>
+                      <div className="border-t border-white/[0.06] mt-1.5 pt-1.5">
                         <Link
                           href="/vs"
                           onClick={() => setCompareOpen(false)}
-                          className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-[#5A5955] hover:text-[#6E56CF] transition-colors"
+                          className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs text-[#5A5955] hover:text-[#6E56CF] transition-colors"
                         >
                           All comparisons →
                         </Link>
