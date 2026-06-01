@@ -18,6 +18,13 @@ Read these before proposing architecture, features, or status:
 
 After a completed change, update the relevant doc instead of leaving stale plans behind.
 
+**After every completed phase or architectural decision:**
+- `PLAN.md` — mark phase ✅ done with commit hash
+- `TODO.md` — check off items, add new ones
+- `DECISIONS.md` — add D-N entry if architectural choice was made
+- `EVIDENCE.md` — add verified fact or mark assumption outdated
+- `MEMORY.md` — update current phase + key changes if significant
+
 ---
 
 ## Product

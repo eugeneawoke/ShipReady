@@ -26,11 +26,16 @@ export async function GET(
 
     const { data, error } = await supabase
       .from('scans')
-      .select('id, url, results')
+      .select('id, url, results, user_id')
       .eq('id', id)
       .single()
 
     if (error || !data?.results) {
+      return NextResponse.json({ error: 'Report not found' }, { status: 404 })
+    }
+
+    // Explicit ownership check — defence-in-depth on top of RLS
+    if (data.user_id && data.user_id !== user.id) {
       return NextResponse.json({ error: 'Report not found' }, { status: 404 })
     }
 

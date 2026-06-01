@@ -44,6 +44,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     manifest: '/manifest.json',
     metadataBase: new URL(appUrl),
+    alternates: { canonical: appUrl.replace(/\/$/, '') + '/' },
   }
 }
 

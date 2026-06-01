@@ -33,7 +33,7 @@ export interface AIPlatformReadiness {
 }
 
 export interface TrustSignals {
-  domainAgedays?: number | null
+  domainAgeDays?: number | null
   redditMentions?: number | null
   githubRepos?: number | null
   g2Listed?: boolean | null

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isValidUrl } from '@/lib/utils'
+import { assertSafeScanUrl } from '@/lib/server/url-safety'
+import { verifyBearerToken } from '@/lib/server/verify-bearer'
 import type { ScanGoal } from '@/types/scan'
 
 // This endpoint is deployed on Railway only.
@@ -12,7 +14,7 @@ const VALID_GOALS = ['seo', 'security', 'ai_visibility', 'full'] as const
 
 export async function POST(request: NextRequest) {
   const auth = request.headers.get('authorization')
-  if (!process.env.SCANNER_SECRET || auth !== `Bearer ${process.env.SCANNER_SECRET}`) {
+  if (!verifyBearerToken(auth, process.env.SCANNER_SECRET)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -33,6 +35,13 @@ export async function POST(request: NextRequest) {
 
   if (!isValidUrl(url)) {
     return NextResponse.json({ error: 'Invalid URL' }, { status: 400 })
+  }
+
+  // DNS-rebinding SSRF guard — checks resolved IP, not just hostname pattern
+  try {
+    await assertSafeScanUrl(url)
+  } catch {
+    return NextResponse.json({ error: 'Invalid or unsafe URL' }, { status: 400 })
   }
 
   if (!UUID_RE.test(scanId)) {

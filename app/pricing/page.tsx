@@ -12,9 +12,12 @@ import { FeatureCell } from '@/components/shared/FeatureCell'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('Metadata')
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://shipready.app').replace(/\/$/, '')
   return {
     title: t('pricingTitle'),
     description: t('pricingDescription'),
+    alternates: { canonical: `${appUrl}/pricing` },
+    openGraph: { url: `${appUrl}/pricing` },
   }
 }
 

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { verifyBearerToken } from '@/lib/server/verify-bearer'
 
 export const maxDuration = 300
 export const runtime = 'nodejs'
@@ -7,7 +8,7 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 
 export async function POST(request: NextRequest) {
   const auth = request.headers.get('authorization')
-  if (!process.env.SCANNER_SECRET || auth !== `Bearer ${process.env.SCANNER_SECRET}`) {
+  if (!verifyBearerToken(auth, process.env.SCANNER_SECRET)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

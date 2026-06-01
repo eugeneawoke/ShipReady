@@ -637,10 +637,21 @@ export async function runAIVisibilityChecks(
 
   if (includeHeuristics) {
     const hostname = new URL(url).hostname
+    const businessType = options?.businessContext?.businessType
+    const isTechProduct = businessType === 'saas' || businessType === 'other' || businessType === 'blog'
+    const hasSerper = !!process.env.SERPER_API_KEY && isTechProduct
+    const domain = hostname.replace(/^www\./, '')
 
-    // Domain age via RDAP (public, no auth)
-    const domainAgeDays = await getDomainAgeDays(hostname)
-    trustSignals.domainAgedays = domainAgeDays
+    // Run all external trust-signal checks concurrently — each has its own timeout
+    const [domainAgeDays, redditMentions, githubRepos, g2Count, phCount] = await Promise.all([
+      getDomainAgeDays(hostname),
+      getRedditMentionCount(hostname),
+      isTechProduct ? getGithubRepoCount(hostname) : Promise.resolve(null),
+      hasSerper ? searchSerper(`site:g2.com "${domain}"`) : Promise.resolve(0),
+      hasSerper ? searchSerper(`site:producthunt.com "${domain}"`) : Promise.resolve(0),
+    ])
+
+    trustSignals.domainAgeDays = domainAgeDays
     if (domainAgeDays !== null && domainAgeDays < 180) {
       issues.push(withIssueMeta(
         { ...T['young-domain'], value: `${domainAgeDays} days old` },
@@ -649,8 +660,6 @@ export async function runAIVisibilityChecks(
       ))
     }
 
-    // Reddit mentions (public JSON API, no auth)
-    const redditMentions = await getRedditMentionCount(hostname)
     trustSignals.redditMentions = redditMentions
     if (redditMentions !== null && redditMentions === 0) {
       issues.push(withIssueMeta(
@@ -660,11 +669,7 @@ export async function runAIVisibilityChecks(
       ))
     }
 
-    // GitHub presence — only for SaaS/tech products
-    const businessType = options?.businessContext?.businessType
-    const isTechProduct = businessType === 'saas' || businessType === 'other' || businessType === 'blog'
     if (isTechProduct) {
-      const githubRepos = await getGithubRepoCount(hostname)
       trustSignals.githubRepos = githubRepos
       if (githubRepos !== null && githubRepos === 0) {
         issues.push(withIssueMeta(
@@ -675,11 +680,7 @@ export async function runAIVisibilityChecks(
       }
     }
 
-    // G2 + Product Hunt via Serper (graceful fallback if SERPER_API_KEY absent)
-    if (process.env.SERPER_API_KEY && isTechProduct) {
-      const domain = hostname.replace(/^www\./, '')
-
-      const g2Count = await searchSerper(`site:g2.com "${domain}"`)
+    if (hasSerper) {
       trustSignals.g2Listed = g2Count > 0
       if (!trustSignals.g2Listed && includeLikely) {
         issues.push(withIssueMeta(
@@ -689,7 +690,6 @@ export async function runAIVisibilityChecks(
         ))
       }
 
-      const phCount = await searchSerper(`site:producthunt.com "${domain}"`)
       trustSignals.productHuntListed = phCount > 0
       if (!trustSignals.productHuntListed) {
         issues.push(withIssueMeta(

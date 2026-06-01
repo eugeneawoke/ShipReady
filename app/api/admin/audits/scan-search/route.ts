@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase'
+import { verifyBearerToken } from '@/lib/server/verify-bearer'
 
 export const runtime = 'nodejs'
 
 function adminAuth(req: NextRequest): boolean {
-  const secret = process.env.ADMIN_SECRET
-  if (!secret) return false
-  return req.headers.get('authorization') === `Bearer ${secret}`
+  return verifyBearerToken(req.headers.get('authorization'), process.env.ADMIN_SECRET)
 }
 
 // GET /api/admin/audits/scan-search?domain=linear.app

@@ -24,6 +24,9 @@ export async function POST(request: Request): Promise<Response> {
 
   // Step 2b: Reject test-mode IPNs in production (and vice versa)
   const ipnTestMode = body['TEST_MODE'] === 'true' || body['TEST_MODE'] === '1'
+  const orderId = body['ORDER_ID'] ?? ''
+  const ipnTypeName = body['IPN_TYPE_NAME'] ?? ''
+  console.log('[paypro-webhook] IPN received and verified:', ipnTypeName, 'orderId:', orderId, 'testMode:', ipnTestMode)
   if (ipnTestMode !== isSandboxMode()) {
     // Silently 200 — don't 401 (PayPro would retry) but don't process either
     console.warn('[paypro-webhook] TEST_MODE mismatch: ipn=%s server=%s', ipnTestMode, isSandboxMode())
@@ -32,8 +35,6 @@ export async function POST(request: Request): Promise<Response> {
 
   // Step 3: Idempotent insert to payment_events using ON CONFLICT DO NOTHING
   const supabase = createServiceClient()
-  const orderId = body['ORDER_ID'] ?? ''
-  const ipnTypeName = body['IPN_TYPE_NAME'] ?? ''
 
   const payload = parseIpnPayload(body)
   const { userId } = payload

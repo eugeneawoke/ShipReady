@@ -21,19 +21,20 @@ function requestOrigin(request: NextRequest): string | null {
   return normalizeOrigin(`${proto}://${host}`)
 }
 
-function allowedOrigins(request: NextRequest): Set<string> {
+function allowedOrigins(): Set<string> {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '')
   const localOrigins = process.env.NODE_ENV !== 'production' ? LOCAL_ORIGINS : []
+  // requestOrigin(request) intentionally excluded — deriving allowed origin from
+  // inbound Host header makes the CSRF guard a no-op (Host always self-matches).
   return new Set([
     ...(appUrl ? [appUrl] : []),
-    ...(requestOrigin(request) ? [requestOrigin(request)!] : []),
     ...localOrigins,
   ])
 }
 
-export function isAllowedOrigin(request: NextRequest, origin: string): boolean {
+export function isAllowedOrigin(_request: NextRequest, origin: string): boolean {
   const normalizedOrigin = normalizeOrigin(origin)
-  return !!normalizedOrigin && allowedOrigins(request).has(normalizedOrigin)
+  return !!normalizedOrigin && allowedOrigins().has(normalizedOrigin)
 }
 
 export function requireSameOriginJsonRequest(request: NextRequest): NextResponse | null {

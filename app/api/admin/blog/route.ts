@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase'
+import { verifyBearerToken } from '@/lib/server/verify-bearer'
 
 export const runtime = 'nodejs'
 
 function adminAuth(request: NextRequest): boolean {
-  const secret = process.env.ADMIN_SECRET
-  if (!secret) return false
-  const auth = request.headers.get('authorization') ?? ''
-  return auth === `Bearer ${secret}`
+  return verifyBearerToken(request.headers.get('authorization'), process.env.ADMIN_SECRET)
 }
 
 function slugify(title: string): string {

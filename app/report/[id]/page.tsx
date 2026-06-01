@@ -1237,15 +1237,15 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
             {activeCategory === 'ai_visibility' && results.trustSignals && (() => {
               const ts = results.trustSignals as TrustSignals
               const signals = [
-                ts.domainAgedays !== null && ts.domainAgedays !== undefined
+                ts.domainAgeDays !== null && ts.domainAgeDays !== undefined
                   ? {
                       label: 'Domain age',
-                      value: ts.domainAgedays < 30
-                        ? `${ts.domainAgedays}d`
-                        : ts.domainAgedays < 365
-                          ? `${Math.floor(ts.domainAgedays / 30)}mo`
-                          : `${Math.floor(ts.domainAgedays / 365)}yr`,
-                      ok: ts.domainAgedays > 180,
+                      value: ts.domainAgeDays < 30
+                        ? `${ts.domainAgeDays}d`
+                        : ts.domainAgeDays < 365
+                          ? `${Math.floor(ts.domainAgeDays / 30)}mo`
+                          : `${Math.floor(ts.domainAgeDays / 365)}yr`,
+                      ok: ts.domainAgeDays > 180,
                     }
                   : null,
                 ts.redditMentions !== null && ts.redditMentions !== undefined
