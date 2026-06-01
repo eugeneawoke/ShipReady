@@ -4,6 +4,8 @@ import { notFound } from 'next/navigation'
 import { competitors, competitorSlugs } from '@/lib/vs/competitors'
 import { CompetitorTable } from '@/components/vs/CompetitorTable'
 import { CompetitorFaq } from '@/components/vs/CompetitorFaq'
+import { CompetitorWins } from '@/components/vs/CompetitorWins'
+import { RelatedComparisons } from '@/components/vs/RelatedComparisons'
 import { ContentPageHeader } from '@/components/navigation/ContentPageHeader'
 import { CinematicFooter } from '@/components/ui/motion-footer'
 import { MobileDockSpacer } from '@/components/navigation/MobileDockSpacer'
@@ -68,7 +70,7 @@ export default async function VsPage({ params }: { params: Promise<{ slug: strin
           <div className="p-5 rounded-xl bg-[#6E56CF]/[0.06] border border-[#6E56CF]/20 text-center">
             <p className="text-[10px] font-mono text-[#6E56CF] uppercase tracking-widest mb-2">ShipReady</p>
             <p className="text-2xl font-bold text-[#F1F0EE]">$14<span className="text-sm font-normal text-[#8B8A85]">/mo</span></p>
-            <p className="text-[11px] text-[#5A5955] mt-1">Free tier available</p>
+            <p className="text-[11px] text-[#5A5955] mt-1">Free tier — no credit card</p>
           </div>
           <div className="p-5 rounded-xl bg-[#161618] border border-white/[0.06] text-center">
             <p className="text-[10px] font-mono text-[#5A5955] uppercase tracking-widest mb-2">{c.name}</p>
@@ -77,12 +79,29 @@ export default async function VsPage({ params }: { params: Promise<{ slug: strin
           </div>
         </div>
 
+        {/* Why ShipReady wins */}
+        <CompetitorWins wins={c.whyWins} competitorName={c.name} />
+
         {/* Feature comparison table */}
         <div className="mb-12">
           <h2 className="text-[11px] font-mono uppercase tracking-[0.14em] text-[#5A5955] mb-5">
             Feature comparison
           </h2>
           <CompetitorTable features={c.features} competitorName={c.name} />
+        </div>
+
+        {/* Mid-page CTA */}
+        <div className="mb-12 rounded-2xl bg-[#6E56CF]/[0.06] border border-[#6E56CF]/25 p-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-medium text-[#F1F0EE] mb-1">Try ShipReady free</p>
+            <p className="text-xs text-[#8B8A85]">No credit card required. Full report in under a minute.</p>
+          </div>
+          <Link
+            href="/"
+            className="shrink-0 inline-flex items-center gap-2 text-sm px-5 py-2.5 rounded-xl bg-[#6E56CF] text-white hover:bg-[#7C68D4] transition-colors font-medium"
+          >
+            Scan your site →
+          </Link>
         </div>
 
         {/* Weaknesses */}
@@ -93,7 +112,7 @@ export default async function VsPage({ params }: { params: Promise<{ slug: strin
           <ul className="space-y-2">
             {c.weaknesses.map(w => (
               <li key={w} className="flex items-start gap-2 text-sm text-[#8B8A85]">
-                <span className="text-[#5A5955] mt-0.5 shrink-0">—</span>
+                <span className="text-[#FF4444] mt-0.5 shrink-0">⚠</span>
                 {w}
               </li>
             ))}
@@ -104,6 +123,9 @@ export default async function VsPage({ params }: { params: Promise<{ slug: strin
         <div className="mb-12">
           <CompetitorFaq items={c.faq} competitorName={c.name} />
         </div>
+
+        {/* Related comparisons */}
+        <RelatedComparisons currentSlug={slug} />
 
         {/* CTA */}
         <div className="rounded-2xl bg-[#6E56CF]/[0.06] border border-[#6E56CF]/25 p-10 text-center">
