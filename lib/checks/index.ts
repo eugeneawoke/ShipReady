@@ -32,6 +32,9 @@ import { buildSiteSummary } from '@/lib/scan/aggregation'
 import { getScanUserId, getValidToken } from '@/lib/integrations/token-refresh'
 import { fetchGscIndexing } from '@/lib/integrations/gsc'
 import { fetchBingIndexing } from '@/lib/integrations/bing-webmaster'
+import { fetchYandexUserId, fetchYandexHosts, fetchYandexIndexing } from '@/lib/integrations/yandex-webmaster'
+import { findGa4PropertyForDomain, fetchGa4Traffic } from '@/lib/integrations/ga4'
+import { fetchYandexMetrikaCounters, fetchYandexMetrikaTraffic } from '@/lib/integrations/yandex-metrika'
 import {
   buildScanBudget,
   markProviderState,
@@ -255,6 +258,130 @@ async function enrichWithOAuthData(
       }
     } catch {
       // swallow
+    }
+
+    // Yandex Webmaster — indexation + crawl errors
+    try {
+      const yandexToken = await getValidToken(userId, 'yandex')
+      if (yandexToken) {
+        const yandexUserId = await fetchYandexUserId(yandexToken)
+        if (yandexUserId) {
+          const hosts = await fetchYandexHosts(yandexToken, yandexUserId)
+          const matchingHost = hosts.find(h => h.unicode_host_url.includes(domain))
+          if (matchingHost) {
+            const indexing = await fetchYandexIndexing(yandexToken, yandexUserId, matchingHost.host_id)
+            if (indexing) {
+              if (indexing.indexed === 0) {
+                const existing = enrichedSeoIssues.findIndex(i => i.id === 'yandex-not-indexed')
+                const issue: Issue = {
+                  id: 'yandex-not-indexed',
+                  category: 'seo',
+                  severity: 'critical',
+                  title: 'Site not indexed by Yandex',
+                  description: 'Yandex Webmaster reports zero indexed pages for this domain.',
+                  plainEnglish: 'Yandex has no indexed pages for your site — Russian search traffic is completely blocked.',
+                  fixPrompt: 'Check Yandex Webmaster for crawl errors and submit your sitemap at https://webmaster.yandex.ru',
+                  confidence: 'verified',
+                  scoreEligible: true,
+                  evidence: [{ kind: 'count', label: 'Indexed pages (Yandex)', value: 0 }],
+                  source: 'http',
+                }
+                if (existing !== -1) enrichedSeoIssues[existing] = issue
+                else enrichedSeoIssues.push(issue)
+                changed = true
+              }
+              if (indexing.errors > 0) {
+                enrichedSeoIssues.push({
+                  id: 'yandex-crawl-errors',
+                  category: 'seo',
+                  severity: 'medium',
+                  title: `Yandex reports ${indexing.errors} crawl error${indexing.errors !== 1 ? 's' : ''}`,
+                  description: `Yandex Webmaster found ${indexing.errors} crawl errors on this domain.`,
+                  plainEnglish: 'Yandex has trouble crawling some pages on your site.',
+                  fixPrompt: 'Review crawl errors in Yandex Webmaster and fix 4xx/5xx responses.',
+                  confidence: 'verified',
+                  scoreEligible: false,
+                  evidence: [
+                    { kind: 'count', label: 'Crawl errors', value: indexing.errors },
+                    { kind: 'count', label: 'Warnings', value: indexing.warnings },
+                  ],
+                  source: 'http',
+                })
+                changed = true
+              }
+            }
+          }
+        }
+      }
+    } catch {
+      // swallow — enrichment is best-effort
+    }
+
+    // GA4 — high bounce rate
+    try {
+      const googleToken = await getValidToken(userId, 'google')
+      if (googleToken) {
+        const propertyId = await findGa4PropertyForDomain(googleToken, domain)
+        if (propertyId) {
+          const traffic = await fetchGa4Traffic(googleToken, propertyId)
+          if (traffic && traffic.bounceRate > 0.7) {
+            enrichedSeoIssues.push({
+              id: 'ga4-high-bounce-rate',
+              category: 'seo',
+              severity: 'medium',
+              title: `High bounce rate — ${Math.round(traffic.bounceRate * 100)}% (GA4)`,
+              description: `GA4 reports a ${Math.round(traffic.bounceRate * 100)}% bounce rate over the last 28 days.`,
+              plainEnglish: 'Most visitors leave after viewing one page. This signals content or UX issues that hurt SEO rankings.',
+              fixPrompt: 'Improve first-screen clarity, ensure content matches the search intent, and reduce page load time.',
+              confidence: 'verified',
+              scoreEligible: false,
+              evidence: [
+                { kind: 'metric', label: 'Bounce rate (28d)', value: `${Math.round(traffic.bounceRate * 100)}%` },
+                { kind: 'count', label: 'Sessions (28d)', value: traffic.sessions },
+              ],
+              source: 'http',
+            })
+            changed = true
+          }
+        }
+      }
+    } catch {
+      // swallow — enrichment is best-effort
+    }
+
+    // Yandex Metrika — high bounce rate
+    try {
+      const yandexToken = await getValidToken(userId, 'yandex')
+      if (yandexToken) {
+        const counters = await fetchYandexMetrikaCounters(yandexToken)
+        const matchingCounter = counters.find(
+          c => c.site.includes(domain) || domain.includes(c.site),
+        )
+        if (matchingCounter) {
+          const traffic = await fetchYandexMetrikaTraffic(yandexToken, matchingCounter.id.toString())
+          if (traffic && traffic.bounceRate > 70) {
+            enrichedSeoIssues.push({
+              id: 'yandex-high-bounce-rate',
+              category: 'seo',
+              severity: 'medium',
+              title: `High bounce rate — ${Math.round(traffic.bounceRate)}% (Яндекс Метрика)`,
+              description: `Яндекс Метрика reports a ${Math.round(traffic.bounceRate)}% bounce rate over the last 28 days.`,
+              plainEnglish: 'Most visitors from Yandex leave after viewing one page.',
+              fixPrompt: 'Improve content relevance for Russian search queries and reduce page load time.',
+              confidence: 'verified',
+              scoreEligible: false,
+              evidence: [
+                { kind: 'metric', label: 'Bounce rate (28d)', value: `${Math.round(traffic.bounceRate)}%` },
+                { kind: 'count', label: 'Visits (28d)', value: traffic.visits },
+              ],
+              source: 'http',
+            })
+            changed = true
+          }
+        }
+      }
+    } catch {
+      // swallow — enrichment is best-effort
     }
 
     if (!changed) return result

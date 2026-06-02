@@ -6,6 +6,27 @@ export interface YandexMetrikaTraffic {
   avgDuration: number
 }
 
+export interface YandexMetrikaCounter {
+  id: number
+  site: string
+}
+
+export async function fetchYandexMetrikaCounters(
+  accessToken: string,
+): Promise<YandexMetrikaCounter[]> {
+  const res = await fetch(
+    'https://api-metrika.yandex.net/management/v1/counters',
+    { headers: { Authorization: `OAuth ${accessToken}` } },
+  )
+  if (!res.ok) return []
+  const data = await res.json() as {
+    counters?: Array<{ id: number; site?: string }>
+  }
+  return (data.counters ?? [])
+    .filter(c => c.site)
+    .map(c => ({ id: c.id, site: c.site! }))
+}
+
 export async function fetchYandexMetrikaTraffic(
   accessToken: string,
   counterId: string

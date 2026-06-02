@@ -40,3 +40,51 @@ export async function fetchGa4Traffic(
     avgSessionDuration: parseFloat(values[2].value ?? '0'),
   }
 }
+
+async function fetchGa4DataStreamUris(
+  accessToken: string,
+  propertyId: string,
+): Promise<string[]> {
+  const res = await fetch(
+    `https://analyticsadmin.googleapis.com/v1beta/${propertyId}/dataStreams`,
+    { headers: { Authorization: `Bearer ${accessToken}` } },
+  )
+  if (!res.ok) return []
+  const data = await res.json() as {
+    dataStreams?: Array<{ webStreamData?: { defaultUri?: string } }>
+  }
+  return (data.dataStreams ?? [])
+    .map(s => s.webStreamData?.defaultUri ?? '')
+    .filter(Boolean)
+}
+
+// Returns numeric property ID (e.g. "123456789") for the given domain,
+// or null if none of the user's GA4 properties match.
+export async function findGa4PropertyForDomain(
+  accessToken: string,
+  domain: string,
+): Promise<string | null> {
+  const res = await fetch(
+    'https://analyticsadmin.googleapis.com/v1beta/accountSummaries',
+    { headers: { Authorization: `Bearer ${accessToken}` } },
+  )
+  if (!res.ok) return null
+  const data = await res.json() as {
+    accountSummaries?: Array<{
+      propertySummaries?: Array<{ property: string }>
+    }>
+  }
+
+  const propertyRefs = (data.accountSummaries ?? []).flatMap(
+    a => a.propertySummaries ?? [],
+  )
+
+  for (const { property } of propertyRefs) {
+    // property is "properties/123456789"
+    const uris = await fetchGa4DataStreamUris(accessToken, property)
+    if (uris.some(uri => uri.includes(domain))) {
+      return property.replace('properties/', '')
+    }
+  }
+  return null
+}
