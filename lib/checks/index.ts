@@ -183,7 +183,9 @@ async function finalizeMonitoredDomain(scanId: string): Promise<void> {
 }
 
 /**
- * Best-effort: enriches scan result with real indexation data from connected OAuth integrations.
+ * Best-effort: enriches scan result with real indexation/traffic data from connected OAuth integrations.
+ * Authenticated users without a connected integration see a low-severity suggestion.
+ * Anonymous users are silently skipped.
  * Never throws — any error is swallowed so scan completion is not blocked.
  */
 async function enrichWithOAuthData(
@@ -193,16 +195,37 @@ async function enrichWithOAuthData(
 ): Promise<ScanResult> {
   try {
     const userId = await getScanUserId(scanId)
-    if (!userId) return result // anonymous scan — skip
+    if (!userId) return result // anonymous scan — skip entirely
 
     const domain = new URL(url).hostname
     const enrichedSeoIssues = [...(result.seo?.issues ?? [])]
     let changed = false
 
-    // Google Search Console
-    try {
-      const googleToken = await getValidToken(userId, 'google')
-      if (googleToken) {
+    // Fetch tokens once upfront
+    const [googleToken, yandexToken] = await Promise.all([
+      getValidToken(userId, 'google').catch(() => null),
+      getValidToken(userId, 'yandex').catch(() => null),
+    ])
+
+    // ── Google: GSC + GA4 ─────────────────────────────────────
+    if (!googleToken) {
+      enrichedSeoIssues.push({
+        id: 'suggest-connect-google',
+        category: 'seo',
+        severity: 'low',
+        title: 'Connect Google to unlock real indexation & traffic data',
+        description: 'Google Search Console and GA4 are not connected.',
+        plainEnglish: 'Connecting your Google account lets ShipReady verify real indexation status from GSC and detect high bounce rates from GA4 — turning heuristic checks into verified facts.',
+        fixPrompt: 'Go to Dashboard → Integrations and connect your Google account to enable GSC and GA4 enrichment.',
+        confidence: 'likely',
+        scoreEligible: false,
+        evidence: [],
+        source: 'http',
+      })
+      changed = true
+    } else {
+      // GSC — real indexation
+      try {
         const gscData = await fetchGscIndexing(googleToken, `https://${domain}`, url)
         if (gscData && !gscData.indexed) {
           const existing = enrichedSeoIssues.findIndex((i) => i.id === 'not-indexed')
@@ -226,14 +249,43 @@ async function enrichWithOAuthData(
           else enrichedSeoIssues.push(verifiedIssue)
           changed = true
         }
+      } catch {
+        // swallow — enrichment is best-effort
       }
-    } catch {
-      // swallow — enrichment is best-effort
+
+      // GA4 — high bounce rate
+      try {
+        const propertyId = await findGa4PropertyForDomain(googleToken, domain)
+        if (propertyId) {
+          const traffic = await fetchGa4Traffic(googleToken, propertyId)
+          if (traffic && traffic.bounceRate > 0.7) {
+            enrichedSeoIssues.push({
+              id: 'ga4-high-bounce-rate',
+              category: 'seo',
+              severity: 'medium',
+              title: `High bounce rate — ${Math.round(traffic.bounceRate * 100)}% (GA4)`,
+              description: `GA4 reports a ${Math.round(traffic.bounceRate * 100)}% bounce rate over the last 28 days.`,
+              plainEnglish: 'Most visitors leave after viewing one page. This signals content or UX issues that hurt SEO rankings.',
+              fixPrompt: 'Improve first-screen clarity, ensure content matches the search intent, and reduce page load time.',
+              confidence: 'verified',
+              scoreEligible: false,
+              evidence: [
+                { kind: 'metric', label: 'Bounce rate (28d)', value: `${Math.round(traffic.bounceRate * 100)}%` },
+                { kind: 'count', label: 'Sessions (28d)', value: traffic.sessions },
+              ],
+              source: 'http',
+            })
+            changed = true
+          }
+        }
+      } catch {
+        // swallow — enrichment is best-effort
+      }
     }
 
-    // Bing Webmaster
+    // ── Bing Webmaster ────────────────────────────────────────
     try {
-      const bingToken = await getValidToken(userId, 'bing')
+      const bingToken = await getValidToken(userId, 'bing').catch(() => null)
       if (bingToken) {
         const bingData = await fetchBingIndexing(bingToken, `https://${domain}`)
         if (bingData && bingData.crawlErrors > 0) {
@@ -260,10 +312,25 @@ async function enrichWithOAuthData(
       // swallow
     }
 
-    // Yandex Webmaster — indexation + crawl errors
-    try {
-      const yandexToken = await getValidToken(userId, 'yandex')
-      if (yandexToken) {
+    // ── Yandex: Webmaster + Metrika ───────────────────────────
+    if (!yandexToken) {
+      enrichedSeoIssues.push({
+        id: 'suggest-connect-yandex',
+        category: 'seo',
+        severity: 'low',
+        title: 'Connect Yandex to unlock indexation & traffic data for Russian search',
+        description: 'Yandex Webmaster and Яндекс Метрика are not connected.',
+        plainEnglish: 'Connecting Yandex lets ShipReady verify real indexation in Yandex Search and detect high bounce rates from Метрика — critical if your audience is in Russia or CIS.',
+        fixPrompt: 'Go to Dashboard → Integrations and connect your Yandex account to enable Webmaster and Метрика enrichment.',
+        confidence: 'likely',
+        scoreEligible: false,
+        evidence: [],
+        source: 'http',
+      })
+      changed = true
+    } else {
+      // Yandex Webmaster — indexation + crawl errors
+      try {
         const yandexUserId = await fetchYandexUserId(yandexToken)
         if (yandexUserId) {
           const hosts = await fetchYandexHosts(yandexToken, yandexUserId)
@@ -312,47 +379,12 @@ async function enrichWithOAuthData(
             }
           }
         }
+      } catch {
+        // swallow — enrichment is best-effort
       }
-    } catch {
-      // swallow — enrichment is best-effort
-    }
 
-    // GA4 — high bounce rate
-    try {
-      const googleToken = await getValidToken(userId, 'google')
-      if (googleToken) {
-        const propertyId = await findGa4PropertyForDomain(googleToken, domain)
-        if (propertyId) {
-          const traffic = await fetchGa4Traffic(googleToken, propertyId)
-          if (traffic && traffic.bounceRate > 0.7) {
-            enrichedSeoIssues.push({
-              id: 'ga4-high-bounce-rate',
-              category: 'seo',
-              severity: 'medium',
-              title: `High bounce rate — ${Math.round(traffic.bounceRate * 100)}% (GA4)`,
-              description: `GA4 reports a ${Math.round(traffic.bounceRate * 100)}% bounce rate over the last 28 days.`,
-              plainEnglish: 'Most visitors leave after viewing one page. This signals content or UX issues that hurt SEO rankings.',
-              fixPrompt: 'Improve first-screen clarity, ensure content matches the search intent, and reduce page load time.',
-              confidence: 'verified',
-              scoreEligible: false,
-              evidence: [
-                { kind: 'metric', label: 'Bounce rate (28d)', value: `${Math.round(traffic.bounceRate * 100)}%` },
-                { kind: 'count', label: 'Sessions (28d)', value: traffic.sessions },
-              ],
-              source: 'http',
-            })
-            changed = true
-          }
-        }
-      }
-    } catch {
-      // swallow — enrichment is best-effort
-    }
-
-    // Yandex Metrika — high bounce rate
-    try {
-      const yandexToken = await getValidToken(userId, 'yandex')
-      if (yandexToken) {
+      // Yandex Metrika — high bounce rate
+      try {
         const counters = await fetchYandexMetrikaCounters(yandexToken)
         const matchingCounter = counters.find(
           c => c.site.includes(domain) || domain.includes(c.site),
@@ -379,9 +411,9 @@ async function enrichWithOAuthData(
             changed = true
           }
         }
+      } catch {
+        // swallow — enrichment is best-effort
       }
-    } catch {
-      // swallow — enrichment is best-effort
     }
 
     if (!changed) return result
