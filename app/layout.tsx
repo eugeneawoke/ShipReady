@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import { GeistSans } from 'geist/font/sans'
 import { GeistMono } from 'geist/font/mono'
 import { NextIntlClientProvider } from 'next-intl'
@@ -152,6 +154,8 @@ export default async function RootLayout({
           {children}
         </NextIntlClientProvider>
         <MobileBottomDockClient />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )
