@@ -1,12 +1,11 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
-import { useTranslations } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { LanguageSwitcher } from '@/components/i18n/LanguageSwitcher'
+import { GlookLogo } from '@/components/GlookLogo'
 
 interface HeaderNavItem {
   label: string
@@ -25,15 +24,13 @@ interface SiteHeaderProps {
 }
 
 export function SiteBrandLink({ className = '' }: { className?: string }) {
-  const t = useTranslations('SiteHeader')
-
   return (
     <Link
       href="/"
-      className={`flex items-center gap-2 text-sm font-semibold tracking-tight text-[#F1F0EE] transition-opacity hover:opacity-80 ${className}`.trim()}
+      className={`flex items-center transition-opacity hover:opacity-80 ${className}`.trim()}
+      aria-label="Glook — Home"
     >
-      <Image src="/logo.svg" alt={t('brandAlt')} width={28} height={28} className="h-7 w-7 shrink-0" />
-      <span>ShipReady</span>
+      <GlookLogo size={22} />
     </Link>
   )
 }
