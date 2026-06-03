@@ -72,7 +72,7 @@ const FRAG = `
 
     float f = warpedFbm(uv * 2.2, t);
 
-    // ShipReady palette: deep dark → muted purple → accent purple
+    // Glook palette: deep dark → muted purple → accent purple
     vec3 dark    = vec3(0.055, 0.055, 0.060);   // #0E0E0F
     vec3 midPurp = vec3(0.14,  0.11,  0.24);    // muted deep purple
     vec3 accent  = vec3(0.43,  0.34,  0.81);    // #6E56CF

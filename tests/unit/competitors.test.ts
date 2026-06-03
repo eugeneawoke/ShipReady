@@ -37,7 +37,7 @@ describe('competitors data', () => {
     expect(competitors[slug].weaknesses.length).toBeGreaterThan(0)
   })
 
-  it('ShipReady feature value is never null/undefined', () => {
+  it('Glook feature value is never null/undefined', () => {
     for (const slug of REQUIRED_SLUGS) {
       for (const f of competitors[slug].features) {
         expect(f.shipready).not.toBeUndefined()

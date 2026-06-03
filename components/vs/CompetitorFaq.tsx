@@ -28,7 +28,7 @@ export function CompetitorFaq({ items, competitorName }: CompetitorFaqProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <h2 className="text-[11px] font-mono uppercase tracking-[0.14em] text-[#5A5955] mb-6">
-        Common questions about ShipReady vs {competitorName}
+        Common questions about Glook vs {competitorName}
       </h2>
       <div className="space-y-3">
         {items.map(({ q, a }) => (

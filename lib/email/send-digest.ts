@@ -66,7 +66,7 @@ export interface SendWeeklyDigestInput {
 
 export async function sendWeeklyDigest(input: SendWeeklyDigestInput): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY
-  const from = process.env.RESEND_FROM_EMAIL || 'ShipReady <alerts@shipready.app>'
+  const from = process.env.RESEND_FROM_EMAIL || 'Glook <alerts@shipready.app>'
 
   if (!apiKey) throw new Error('RESEND_API_KEY is not configured')
 
@@ -74,10 +74,10 @@ export async function sendWeeklyDigest(input: SendWeeklyDigestInput): Promise<vo
   const resend = new Resend(apiKey)
 
   const subject = diff.totalDelta > 0
-    ? `[ShipReady] ${input.domain} improved by ${diff.totalDelta} pts this week`
+    ? `[Glook] ${input.domain} improved by ${diff.totalDelta} pts this week`
     : diff.totalDelta < 0
-    ? `[ShipReady] ${input.domain} dropped by ${Math.abs(diff.totalDelta)} pts — action needed`
-    : `[ShipReady] Weekly digest for ${input.domain}`
+    ? `[Glook] ${input.domain} dropped by ${Math.abs(diff.totalDelta)} pts — action needed`
+    : `[Glook] Weekly digest for ${input.domain}`
 
   const scoreRows = Object.entries(diff.scoreDelta)
     .filter(([, delta]) => delta !== 0)
@@ -103,7 +103,7 @@ export async function sendWeeklyDigest(input: SendWeeklyDigestInput): Promise<vo
     ].filter(Boolean).join('\n'),
     html: `
       <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#111827;line-height:1.6;max-width:480px;">
-        <h2 style="margin-bottom:4px;">ShipReady weekly digest</h2>
+        <h2 style="margin-bottom:4px;">Glook weekly digest</h2>
         <p style="margin-top:0;color:#6B7280;">${input.domain}</p>
 
         <div style="margin:20px 0;padding:16px;border-radius:12px;background:#F8FAFC;border:1px solid #E5E7EB;">

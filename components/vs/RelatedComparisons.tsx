@@ -26,7 +26,7 @@ export function RelatedComparisons({ currentSlug }: RelatedComparisonsProps) {
               className="group flex items-center justify-between p-4 rounded-xl bg-[#161618] border border-white/[0.06] hover:border-[#6E56CF]/30 transition-colors"
             >
               <div>
-                <p className="text-sm font-medium">ShipReady vs {c.name}</p>
+                <p className="text-sm font-medium">Glook vs {c.name}</p>
                 <p className="text-xs text-[#5A5955] mt-0.5">{c.pricingRange}</p>
               </div>
               <span className="text-[#5A5955] group-hover:text-[#6E56CF] transition-colors text-sm shrink-0 ml-3">→</span>

@@ -13,7 +13,7 @@ test.describe('/vs — index page', () => {
   test('renders 5 competitor cards', async ({ page }) => {
     await page.goto('/vs')
     for (const name of Object.values(COMPETITOR_NAMES)) {
-      await expect(page.getByText(`ShipReady vs ${name}`)).toBeVisible()
+      await expect(page.getByText(`Glook vs ${name}`)).toBeVisible()
     }
   })
 
@@ -28,7 +28,7 @@ test.describe('/vs — index page', () => {
 test.describe('/vs/ahrefs', () => {
   test('h1 + FAQPage JSON-LD + CTA', async ({ page }) => {
     await page.goto('/vs/ahrefs')
-    await expect(page.locator('h1')).toContainText('ShipReady vs Ahrefs')
+    await expect(page.locator('h1')).toContainText('Glook vs Ahrefs')
 
     // Find FAQPage JSON-LD — may not be the first script tag on the page
     const scripts = await page.locator('script[type="application/ld+json"]').all()
@@ -60,7 +60,7 @@ test.describe('/vs/[slug] — all competitors', () => {
 
     test(`${slug} — feature table rendered`, async ({ page }) => {
       await page.goto(`/vs/${slug}`)
-      await expect(page.getByText('ShipReady').first()).toBeVisible()
+      await expect(page.getByText('Glook').first()).toBeVisible()
       // Table has AI visibility row
       await expect(page.getByText('AI visibility score').first()).toBeVisible()
     })

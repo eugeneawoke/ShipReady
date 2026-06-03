@@ -21,14 +21,14 @@ test('parseRobotsTxt applies user-agent specific rules with wildcard fallback', 
 User-agent: *
 Disallow: /private
 
-User-agent: ShipReadyBot
+User-agent: GlookBot
 Allow: /private/allowed
 Disallow: /private
 `)
 
-  assert.equal(isRobotsAllowed(robots, 'ShipReadyBot', 'https://example.com/'), true)
-  assert.equal(isRobotsAllowed(robots, 'ShipReadyBot', 'https://example.com/private'), false)
-  assert.equal(isRobotsAllowed(robots, 'ShipReadyBot', 'https://example.com/private/allowed'), true)
+  assert.equal(isRobotsAllowed(robots, 'GlookBot', 'https://example.com/'), true)
+  assert.equal(isRobotsAllowed(robots, 'GlookBot', 'https://example.com/private'), false)
+  assert.equal(isRobotsAllowed(robots, 'GlookBot', 'https://example.com/private/allowed'), true)
 })
 
 test('crawlSite respects same-origin boundaries, deduplicates URLs, and enforces depth/page limits', async () => {
@@ -58,7 +58,7 @@ test('crawlSite respects same-origin boundaries, deduplicates URLs, and enforces
     options: {
       maxDepth: 2,
       maxPages: 3,
-      userAgent: 'ShipReadyBot',
+      userAgent: 'GlookBot',
     },
     loadRobotsTxt: async () => `
 User-agent: *

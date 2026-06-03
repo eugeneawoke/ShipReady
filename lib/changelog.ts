@@ -37,7 +37,7 @@ export const changelog: ChangelogEntry[] = [
   {
     date: '2026-05-29',
     title: 'Competitor comparison pages (/vs)',
-    summary: '5 side-by-side comparison pages live: ShipReady vs Ahrefs, Screaming Frog, Semrush, SE Ranking, and Otterly.',
+    summary: '5 side-by-side comparison pages live: Glook vs Ahrefs, Screaming Frog, Semrush, SE Ranking, and Otterly.',
     items: [
       'Category-filtered feature comparison tables',
       '/vs index page with all competitors listed',
@@ -248,7 +248,7 @@ export const changelog: ChangelogEntry[] = [
   },
   {
     date: '2026-04-05',
-    title: 'ShipReady launched',
+    title: 'Glook launched',
     summary: 'Initial launch: 25+ checks, Lighthouse audit, AI summary, report UI, auth, billing scaffold, Railway scanner, i18n EN/RU.',
     items: [
       '25+ checks across performance, SEO, security, mobile, and accessibility',

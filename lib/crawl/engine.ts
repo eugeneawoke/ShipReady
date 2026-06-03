@@ -44,7 +44,7 @@ interface QueueEntry {
   depth: number
 }
 
-const DEFAULT_USER_AGENT = 'ShipReadyBot'
+const DEFAULT_USER_AGENT = 'GlookBot'
 
 function extractLinks(html: string, currentUrl: string): string[] {
   const $ = load(html)

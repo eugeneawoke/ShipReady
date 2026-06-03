@@ -7,7 +7,7 @@ export function CompetitorWins({ wins, competitorName }: CompetitorWinsProps) {
   return (
     <div className="mb-12">
       <p className="text-[11px] font-mono uppercase tracking-[0.14em] text-[#5A5955] mb-5">
-        Why ShipReady wins vs {competitorName}
+        Why Glook wins vs {competitorName}
       </p>
       <div className="grid gap-4 sm:grid-cols-3">
         {wins.map((win, i) => (

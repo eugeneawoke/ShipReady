@@ -215,7 +215,7 @@ async function enrichWithOAuthData(
         severity: 'low',
         title: 'Connect Google to unlock real indexation & traffic data',
         description: 'Google Search Console and GA4 are not connected.',
-        plainEnglish: 'Connecting your Google account lets ShipReady verify real indexation status from GSC and detect high bounce rates from GA4 — turning heuristic checks into verified facts.',
+        plainEnglish: 'Connecting your Google account lets Glook verify real indexation status from GSC and detect high bounce rates from GA4 — turning heuristic checks into verified facts.',
         fixPrompt: 'Go to Dashboard → Integrations and connect your Google account to enable GSC and GA4 enrichment.',
         confidence: 'likely',
         scoreEligible: false,
@@ -320,7 +320,7 @@ async function enrichWithOAuthData(
         severity: 'low',
         title: 'Connect Yandex to unlock indexation & traffic data for Russian search',
         description: 'Yandex Webmaster and Яндекс Метрика are not connected.',
-        plainEnglish: 'Connecting Yandex lets ShipReady verify real indexation in Yandex Search and detect high bounce rates from Метрика — critical if your audience is in Russia or CIS.',
+        plainEnglish: 'Connecting Yandex lets Glook verify real indexation in Yandex Search and detect high bounce rates from Метрика — critical if your audience is in Russia or CIS.',
         fixPrompt: 'Go to Dashboard → Integrations and connect your Yandex account to enable Webmaster and Метрика enrichment.',
         confidence: 'likely',
         scoreEligible: false,
@@ -516,7 +516,7 @@ export async function runAllChecks(url: string, scanId: string, scanGoal?: ScanG
           options: {
             maxDepth: budget.crawl.maxDepth,
             maxPages: budget.crawl.maxPages,
-            userAgent: 'ShipReadyBot',
+            userAgent: 'GlookBot',
           },
           loadRobotsTxt: async (origin) => {
             try {

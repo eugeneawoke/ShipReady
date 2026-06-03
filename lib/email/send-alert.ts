@@ -22,7 +22,7 @@ function renderIssueList(issues: Issue[]) {
 
 export async function sendMonitoringAlert(input: SendMonitoringAlertInput): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY
-  const from = process.env.RESEND_FROM_EMAIL || 'ShipReady <alerts@shipready.app>'
+  const from = process.env.RESEND_FROM_EMAIL || 'Glook <alerts@shipready.app>'
 
   if (!apiKey) {
     throw new Error('RESEND_API_KEY is not configured')
@@ -30,8 +30,8 @@ export async function sendMonitoringAlert(input: SendMonitoringAlertInput): Prom
 
   const resend = new Resend(apiKey)
   const subject = input.scoreDrop > 10
-    ? `[ShipReady] ${input.domain} score dropped by ${input.scoreDrop} points`
-    : `[ShipReady] ${input.domain} has new critical or high issues`
+    ? `[Glook] ${input.domain} score dropped by ${input.scoreDrop} points`
+    : `[Glook] ${input.domain} has new critical or high issues`
 
   const intro = input.scoreDrop > 10
     ? `Your weekly monitoring scan found a meaningful regression for ${input.domain}.`
@@ -55,7 +55,7 @@ export async function sendMonitoringAlert(input: SendMonitoringAlertInput): Prom
     ].filter(Boolean).join('\n'),
     html: `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #111827; line-height: 1.6;">
-        <h2 style="margin-bottom: 8px;">ShipReady monitoring alert</h2>
+        <h2 style="margin-bottom: 8px;">Glook monitoring alert</h2>
         <p>${intro}</p>
         <div style="margin: 16px 0; padding: 16px; border-radius: 12px; background: #F8FAFC; border: 1px solid #E5E7EB;">
           <div><strong>Domain:</strong> ${input.domain}</div>

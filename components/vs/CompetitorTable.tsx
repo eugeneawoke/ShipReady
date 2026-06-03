@@ -33,7 +33,7 @@ export function CompetitorTable({ features, competitorName }: CompetitorTablePro
         {/* Header */}
         <div className="grid grid-cols-[1fr_120px_120px] bg-[#161618] border-b border-white/[0.08] px-5 py-3">
           <div />
-          <div className="text-center text-[11px] text-[#a78bfa] uppercase tracking-[0.12em] font-mono">ShipReady</div>
+          <div className="text-center text-[11px] text-[#a78bfa] uppercase tracking-[0.12em] font-mono">Glook</div>
           <div className="text-center text-[11px] text-[#5A5955] uppercase tracking-[0.12em] font-mono">{competitorName}</div>
         </div>
 

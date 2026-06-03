@@ -110,7 +110,7 @@ async function getRedditMentionCount(hostname: string): Promise<number | null> {
     const res = await fetchSafeResource(
       `https://www.reddit.com/search.json?q=${encodedQuery}&limit=5&type=link`,
       {
-        headers: { 'User-Agent': 'ShipReady-Audit/1.0 (web audit tool)' },
+        headers: { 'User-Agent': 'Glook-Audit/1.0 (web audit tool)' },
         signal: AbortSignal.timeout(4000),
       },
     )
@@ -131,7 +131,7 @@ async function getGithubRepoCount(hostname: string): Promise<number | null> {
       {
         headers: {
           'Accept': 'application/vnd.github+json',
-          'User-Agent': 'ShipReady-Audit/1.0',
+          'User-Agent': 'Glook-Audit/1.0',
         },
         signal: AbortSignal.timeout(4000),
       },

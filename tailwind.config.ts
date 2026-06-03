@@ -1,7 +1,7 @@
 import type { Config } from 'tailwindcss';
 
 /**
- * ShipReady Tailwind config.
+ * Glook Tailwind config.
  *
  * Tailwind v4 handles the live theme via @theme in globals.css.
  * This file exists for shadcn/ui CLI compatibility and documents

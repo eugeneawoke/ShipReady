@@ -11,7 +11,7 @@ export interface McpToolDefinition {
 export const MCP_TOOLS: McpToolDefinition[] = [
   {
     name: 'scan_url',
-    description: 'Submit a URL for a full ShipReady audit. Returns a scan ID. Poll get_report for results.',
+    description: 'Submit a URL for a full Glook audit. Returns a scan ID. Poll get_report for results.',
     inputSchema: {
       type: 'object',
       properties: {

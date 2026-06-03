@@ -36,7 +36,7 @@ export async function fetchSSLLabsData(
   try {
     const res = await fetch(apiUrl, {
       signal: AbortSignal.timeout(timeoutMs),
-      headers: { 'User-Agent': 'ShipReady/1.0 site-audit-tool' },
+      headers: { 'User-Agent': 'Glook/1.0 site-audit-tool' },
     })
 
     if (!res.ok) {
