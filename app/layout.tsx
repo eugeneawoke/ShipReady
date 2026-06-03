@@ -11,7 +11,7 @@ import './globals.css'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('Metadata')
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://shipready.app'
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://glook.dev'
 
   return {
     title: t('layoutTitle'),
@@ -33,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description: t('appDescription'),
       siteName: t('appTitle'),
       type: 'website',
-      images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'ShipReady — Free Website Audit: SEO, AI Visibility & Security' }],
+      images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Glook — Free Website Audit: SEO, AI Visibility & Security' }],
     },
     twitter: {
       card: 'summary_large_image',
@@ -42,6 +42,7 @@ export async function generateMetadata(): Promise<Metadata> {
       images: ['/opengraph-image'],
     },
     icons: {
+      icon: '/favicon.svg',
       apple: '/logo.svg',
     },
     manifest: '/manifest.json',
@@ -53,9 +54,9 @@ export async function generateMetadata(): Promise<Metadata> {
 const organizationSchema = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
-  name: 'ShipReady',
-  url: (process.env.NEXT_PUBLIC_APP_URL || 'https://shipready.app').replace(/\/$/, ''),
-  logo: `${(process.env.NEXT_PUBLIC_APP_URL || 'https://shipready.app').replace(/\/$/, '')}/logo.svg`,
+  name: 'Glook',
+  url: (process.env.NEXT_PUBLIC_APP_URL || 'https://glook.dev').replace(/\/$/, ''),
+  logo: `${(process.env.NEXT_PUBLIC_APP_URL || 'https://glook.dev').replace(/\/$/, '')}/logo.svg`,
   description: 'Free website audit tool. Find out why your site is not showing up in Google, ChatGPT, Claude, or Perplexity — and get the exact fix.',
   sameAs: [
     'https://x.com/eugenegusakov',
@@ -71,8 +72,8 @@ const deployTimestamp = process.env.VERCEL_GIT_COMMIT_TIMESTAMP
 const webApplicationSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
-  name: 'ShipReady',
-  url: (process.env.NEXT_PUBLIC_APP_URL || 'https://shipready.app').replace(/\/$/, ''),
+  name: 'Glook',
+  url: (process.env.NEXT_PUBLIC_APP_URL || 'https://glook.dev').replace(/\/$/, ''),
   applicationCategory: 'BusinessApplication',
   operatingSystem: 'Web',
   datePublished: '2025-05-01',
@@ -100,11 +101,11 @@ const webApplicationSchema = {
   ],
 }
 
-const base = (process.env.NEXT_PUBLIC_APP_URL || 'https://shipready.app').replace(/\/$/, '')
+const base = (process.env.NEXT_PUBLIC_APP_URL || 'https://glook.dev').replace(/\/$/, '')
 const webSiteSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
-  name: 'ShipReady',
+  name: 'Glook',
   url: base,
   potentialAction: {
     '@type': 'SearchAction',

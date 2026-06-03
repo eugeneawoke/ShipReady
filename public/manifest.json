@@ -1,12 +1,13 @@
 {
-  "name": "ShipReady",
-  "short_name": "ShipReady",
+  "name": "Glook",
+  "short_name": "Glook",
   "description": "Free website audit. SEO, AI visibility & security in 30 seconds.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0E0E0F",
   "theme_color": "#0E0E0F",
   "icons": [
-    { "src": "/logo.svg", "sizes": "any", "type": "image/svg+xml" }
+    { "src": "/logo.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
   ]
 }

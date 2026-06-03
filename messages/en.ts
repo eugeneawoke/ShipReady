@@ -1,20 +1,20 @@
 const en = {
   Metadata: {
-    appTitle: 'ShipReady',
+    appTitle: 'Glook',
     appDescription: 'Free website audit: SEO, AI visibility, and security. Find out why your site isn\'t showing up in Google, ChatGPT, Claude, or Perplexity.',
-    layoutTitle: 'ShipReady — Free Website Audit: SEO, AI Visibility & Security',
+    layoutTitle: 'Glook — Free Website Audit: SEO, AI Visibility & Security',
     layoutDescription: 'Find out why your site isn\'t showing up in Google, ChatGPT, Claude, or Perplexity — and get the exact fix. SEO, AI visibility, and security audit in 30 seconds. Free.',
-    pricingTitle: 'Pricing - ShipReady',
-    pricingDescription: 'ShipReady pricing — free website audit with SEO, AI visibility, and security checks. Upgrade for unlimited scans and AI fix prompts.',
-    roadmapTitle: 'Roadmap - ShipReady',
-    roadmapDescription: 'What has been built, what is being built, and what is coming next for ShipReady.',
-    privacyTitle: 'Privacy Policy - ShipReady',
-    privacyDescription: 'How ShipReady collects, uses, and protects your data.',
-    termsTitle: 'Terms of Service - ShipReady',
-    termsDescription: 'Terms and conditions for using ShipReady.',
-    notFoundTitle: '404 - ShipReady',
-    methodologyTitle: 'Methodology — ShipReady',
-    methodologyDescription: 'How ShipReady checks your site: 6 categories, evidence-based confidence model, and honest measurement states.',
+    pricingTitle: 'Pricing - Glook',
+    pricingDescription: 'Glook pricing — free website audit with SEO, AI visibility, and security checks. Upgrade for unlimited scans and AI fix prompts.',
+    roadmapTitle: 'Roadmap - Glook',
+    roadmapDescription: 'What has been built, what is being built, and what is coming next for Glook.',
+    privacyTitle: 'Privacy Policy - Glook',
+    privacyDescription: 'How Glook collects, uses, and protects your data.',
+    termsTitle: 'Terms of Service - Glook',
+    termsDescription: 'Terms and conditions for using Glook.',
+    notFoundTitle: '404 - Glook',
+    methodologyTitle: 'Methodology — Glook',
+    methodologyDescription: 'How Glook checks your site: 6 categories, evidence-based confidence model, and honest measurement states.',
   },
   LanguageSwitcher: {
     ariaLabel: 'Switch language',
@@ -27,7 +27,7 @@ const en = {
     back: 'Back',
   },
   SiteHeader: {
-    brandAlt: 'ShipReady logo',
+    brandAlt: 'Glook logo',
   },
   AdminGrowth: {
     adminOnly: 'Admin only',
@@ -126,7 +126,7 @@ const en = {
     },
   },
   Auth: {
-    altBrand: 'ShipReady',
+    altBrand: 'Glook',
     modes: {
       signin: {
         title: 'Welcome back',
@@ -525,7 +525,7 @@ const en = {
     },
     title: 'Roadmap',
     heading: "Where we're going",
-    intro: 'ShipReady is being built in the open. This roadmap shows what is already shipped, what is almost launch-ready, and what comes next after the first users are onboard.',
+    intro: 'Glook is being built in the open. This roadmap shows what is already shipped, what is almost launch-ready, and what comes next after the first users are onboard.',
     featureRequest: 'Have a feature request?',
     emailUs: 'Email us',
     inProgressBadge: 'In progress',
@@ -751,22 +751,22 @@ const en = {
       items: [
         {
           q: 'How do I make my website appear in ChatGPT, Claude, and Perplexity?',
-          a: 'AI search engines need three things: access (your robots.txt must allow GPTBot, ClaudeBot, and PerplexityBot), structure (FAQ schema, Organization sameAs links, and llms.txt help AI parse your content), and answer-first content (pages should answer their main question in the first paragraph). ShipReady\'s AI Visibility scan checks all of this automatically and gives you a fix for each gap.',
+          a: 'AI search engines need three things: access (your robots.txt must allow GPTBot, ClaudeBot, and PerplexityBot), structure (FAQ schema, Organization sameAs links, and llms.txt help AI parse your content), and answer-first content (pages should answer their main question in the first paragraph). Glook\'s AI Visibility scan checks all of this automatically and gives you a fix for each gap.',
         },
         {
           q: 'How do I check if my website has security vulnerabilities?',
-          a: 'The most impactful security issues are misconfigured HTTP headers — missing CSP, HSTS, X-Frame-Options, and Referrer-Policy expose your site to XSS and clickjacking attacks. ShipReady runs 20+ security checks for free: paste your URL and get a report in under a minute, with exact fix prompts for each issue.',
+          a: 'The most impactful security issues are misconfigured HTTP headers — missing CSP, HSTS, X-Frame-Options, and Referrer-Policy expose your site to XSS and clickjacking attacks. Glook runs 20+ security checks for free: paste your URL and get a report in under a minute, with exact fix prompts for each issue.',
         },
         {
           q: 'How do I audit my website\'s SEO for free?',
-          a: 'A proper SEO audit checks title tags, meta descriptions, canonical URLs, Open Graph tags, robots.txt, sitemap.xml, structured data, and image alt text. ShipReady runs all of these in 30 seconds — free, no signup required for the first scan.',
+          a: 'A proper SEO audit checks title tags, meta descriptions, canonical URLs, Open Graph tags, robots.txt, sitemap.xml, structured data, and image alt text. Glook runs all of these in 30 seconds — free, no signup required for the first scan.',
         },
         {
           q: 'What is AI visibility and why does it matter for my site?',
-          a: 'AI search (ChatGPT, Claude, Perplexity, Google AI Overview) now handles over 40% of information queries. If an AI can\'t find or cite your site, you don\'t exist for that audience. AI visibility is whether AI crawlers can access your pages, whether your structured data gives them context, and whether your content is structured to be cited. ShipReady checks all of this with a dedicated AI Visibility category.',
+          a: 'AI search (ChatGPT, Claude, Perplexity, Google AI Overview) now handles over 40% of information queries. If an AI can\'t find or cite your site, you don\'t exist for that audience. AI visibility is whether AI crawlers can access your pages, whether your structured data gives them context, and whether your content is structured to be cited. Glook checks all of this with a dedicated AI Visibility category.',
         },
         {
-          q: 'Is ShipReady free to use?',
+          q: 'Is Glook free to use?',
           a: '3 scans per month are free — no credit card required. You get all category scores and issue descriptions. Upgrade to Pro ($14/mo) for unlimited scans, full AI fix prompts, PDF export, and weekly domain monitoring.',
         },
       ],
@@ -793,7 +793,7 @@ const en = {
       tgLabel: 'Telegram',
       privacy: 'Privacy Policy',
       terms: 'Terms of Service',
-      copy: '© 2026 ShipReady · Website audit for anyone who wants to be found online',
+      copy: '© 2026 Glook · Website audit for anyone who wants to be found online',
       cinematic: {
         marquee: [
           'SEO Audit',
@@ -816,7 +816,7 @@ const en = {
   },
   Methodology: {
     eyebrow: 'Methodology',
-    title: 'How ShipReady checks your site',
+    title: 'How Glook checks your site',
     subtitle: "Every finding is backed by evidence. We tell you what we measured, what we inferred, and what we couldn't reach — because a failed check should never look like a pass.",
 
     categories: {
@@ -849,7 +849,7 @@ const en = {
 
     confidence: {
       heading: 'Confidence model',
-      subtitle: 'Not every finding can be confirmed with equal certainty. ShipReady labels every issue so you know how much weight to give it.',
+      subtitle: 'Not every finding can be confirmed with equal certainty. Glook labels every issue so you know how much weight to give it.',
       verified: {
         label: 'Verified',
         desc: 'Confirmed by direct measurement or HTTP response. This finding is a fact. Verified issues are score-eligible.',
