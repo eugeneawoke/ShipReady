@@ -474,7 +474,7 @@ export function CinematicFooter({
           <div className="relative z-20 flex w-full flex-col items-center justify-between gap-3 px-6 pb-52 md:flex-row md:gap-6 md:px-12 md:pb-8">
 
             <div className="order-3 text-[#5A5955] text-[10px] font-semibold uppercase tracking-widest md:order-1 md:text-xs">
-              © {new Date().getFullYear()} ShipReady · {t.allRightsReserved}
+              © {new Date().getFullYear()} Glook · {t.allRightsReserved}
             </div>
 
             <div className="sr-glass-pill order-1 flex items-center gap-2 rounded-full px-6 py-3 md:order-2 cursor-default">

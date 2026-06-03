@@ -32,7 +32,7 @@ export async function SiteMicroFooter({ currentPage }: SiteMicroFooterProps) {
         </p>
 
         <p>
-          © {year} ShipReady. {t('allRightsReserved')}
+          © {year} Glook. {t('allRightsReserved')}
           {currentPage !== 'privacy' && (
             <>
               {' · '}
