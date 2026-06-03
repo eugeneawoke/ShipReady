@@ -4,7 +4,7 @@ import { createServiceClient } from '@/lib/supabase'
 import { BlogEditor } from './BlogEditor'
 
 export const metadata: Metadata = {
-  title: 'Edit Post — ShipReady Admin',
+  title: 'Edit Post — Glook Admin',
   robots: { index: false, follow: false },
 }
 

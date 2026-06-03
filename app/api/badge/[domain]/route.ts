@@ -56,8 +56,8 @@ function badgeSvg(score: number): NextResponse {
   <rect rx="3" x="80" width="60" height="20" fill="${color}"/>
   <rect rx="3" width="140" height="20" fill="url(#s)"/>
   <g fill="#fff" text-anchor="middle" font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size="11">
-    <text x="40" y="15" fill="#010101" fill-opacity=".3">ShipReady</text>
-    <text x="40" y="14">ShipReady</text>
+    <text x="40" y="15" fill="#010101" fill-opacity=".3">Glook</text>
+    <text x="40" y="14">Glook</text>
     <text x="110" y="15" fill="#010101" fill-opacity=".3">${score}/100</text>
     <text x="110" y="14">${score}/100</text>
   </g>

@@ -15,64 +15,64 @@ type Slug = typeof SLUGS[number]
 
 const META: Record<Slug, { title: string; description: string; heading: string; body: string }> = {
   performance: {
-    title: 'Website Performance Checker — Core Web Vitals & LCP | ShipReady',
+    title: 'Website Performance Checker — Core Web Vitals & LCP | Glook',
     description: 'Check your site\'s Core Web Vitals, LCP, CLS, FCP, and TTFB. See how your performance compares to audited sites worldwide.',
     heading: 'Website Performance Audit',
-    body: 'ShipReady measures Core Web Vitals (LCP, CLS, FCP, TTFB), JavaScript payload, render-blocking resources, and image optimization in a single free scan.',
+    body: 'Glook measures Core Web Vitals (LCP, CLS, FCP, TTFB), JavaScript payload, render-blocking resources, and image optimization in a single free scan.',
   },
   seo: {
-    title: 'Free SEO Checker — Meta Tags, Canonical, Structured Data | ShipReady',
+    title: 'Free SEO Checker — Meta Tags, Canonical, Structured Data | Glook',
     description: 'Audit your site\'s SEO fundamentals: meta tags, canonical URLs, structured data, heading hierarchy, and indexability. Free SEO checker.',
     heading: 'SEO Audit Checker',
-    body: 'ShipReady audits title tags, meta descriptions, canonical links, robots directives, Open Graph tags, structured data, and sitemap presence.',
+    body: 'Glook audits title tags, meta descriptions, canonical links, robots directives, Open Graph tags, structured data, and sitemap presence.',
   },
   security: {
-    title: 'Website Security Checker — Headers, HTTPS, Exposed Files | ShipReady',
+    title: 'Website Security Checker — Headers, HTTPS, Exposed Files | Glook',
     description: 'Scan your site for security vulnerabilities: missing HTTP headers, exposed .env files, API keys in HTML, HTTPS issues. Free security check.',
     heading: 'Website Security Check',
-    body: 'ShipReady checks HSTS, CSP, X-Frame-Options, Referrer-Policy, HTTPS enforcement, exposed sensitive files, and API keys leaked in page source.',
+    body: 'Glook checks HSTS, CSP, X-Frame-Options, Referrer-Policy, HTTPS enforcement, exposed sensitive files, and API keys leaked in page source.',
   },
   mobile: {
-    title: 'Mobile Readiness Checker — Tap Targets, Font Size | ShipReady',
+    title: 'Mobile Readiness Checker — Tap Targets, Font Size | Glook',
     description: 'Check if your site is mobile-friendly: tap target sizes, font readability, viewport configuration. Free mobile audit.',
     heading: 'Mobile Readiness Audit',
-    body: 'ShipReady audits viewport meta, tap target sizes, font sizes for readability, and Lighthouse mobile performance scores.',
+    body: 'Glook audits viewport meta, tap target sizes, font sizes for readability, and Lighthouse mobile performance scores.',
   },
   'ai-visibility': {
-    title: 'AI Visibility Checker — ChatGPT, Claude, Perplexity | ShipReady',
+    title: 'AI Visibility Checker — ChatGPT, Claude, Perplexity | Glook',
     description: 'Check if ChatGPT, Claude, and Perplexity can crawl and cite your site. Audit llms.txt, structured data, and AI crawler access.',
     heading: 'AI Visibility Audit',
-    body: 'ShipReady checks llms.txt presence and validity, AI crawler access (GPTBot, ClaudeBot, PerplexityBot), FAQ schema, author entity, and answer-first content structure.',
+    body: 'Glook checks llms.txt presence and validity, AI crawler access (GPTBot, ClaudeBot, PerplexityBot), FAQ schema, author entity, and answer-first content structure.',
   },
   accessibility: {
-    title: 'Website Accessibility Checker — WCAG & A11y | ShipReady',
+    title: 'Website Accessibility Checker — WCAG & A11y | Glook',
     description: 'Audit your site for common accessibility issues: alt text, ARIA labels, color contrast, form labels. Free accessibility check.',
     heading: 'Accessibility Audit',
-    body: 'ShipReady checks image alt attributes, form label associations, ARIA landmark usage, and basic WCAG 2.1 compliance signals.',
+    body: 'Glook checks image alt attributes, form label associations, ARIA landmark usage, and basic WCAG 2.1 compliance signals.',
   },
   lcp: {
-    title: 'LCP Checker — Largest Contentful Paint | ShipReady',
+    title: 'LCP Checker — Largest Contentful Paint | Glook',
     description: 'Check your Largest Contentful Paint score and find exactly what\'s slowing it down. Free LCP audit tool.',
     heading: 'LCP (Largest Contentful Paint) Checker',
-    body: 'LCP measures how long it takes for the largest visible element to load. ShipReady identifies slow LCP and surfaces the exact cause — large images, render-blocking scripts, or slow server response.',
+    body: 'LCP measures how long it takes for the largest visible element to load. Glook identifies slow LCP and surfaces the exact cause — large images, render-blocking scripts, or slow server response.',
   },
   'csp-headers': {
-    title: 'CSP Header Checker — Content Security Policy | ShipReady',
+    title: 'CSP Header Checker — Content Security Policy | Glook',
     description: 'Check if your Content Security Policy is set, enforced, and correct. Free CSP header checker.',
     heading: 'CSP Header Checker',
-    body: 'A missing or report-only Content Security Policy leaves your site vulnerable to XSS attacks. ShipReady checks for CSP presence, mode (enforce vs report-only), and basic directive coverage.',
+    body: 'A missing or report-only Content Security Policy leaves your site vulnerable to XSS attacks. Glook checks for CSP presence, mode (enforce vs report-only), and basic directive coverage.',
   },
   'llms-txt': {
-    title: 'llms.txt Checker — AI Crawler Instructions | ShipReady',
+    title: 'llms.txt Checker — AI Crawler Instructions | Glook',
     description: 'Check if your site has a valid llms.txt file. Help ChatGPT, Claude, and Perplexity understand your content.',
     heading: 'llms.txt Checker',
-    body: 'llms.txt is the emerging standard for telling AI crawlers what your site is about and how to use it. ShipReady validates presence, format, and content quality.',
+    body: 'llms.txt is the emerging standard for telling AI crawlers what your site is about and how to use it. Glook validates presence, format, and content quality.',
   },
   'structured-data': {
-    title: 'Structured Data Checker — Schema.org JSON-LD | ShipReady',
+    title: 'Structured Data Checker — Schema.org JSON-LD | Glook',
     description: 'Validate your Schema.org structured data: required fields, types, and common errors. Free structured data checker.',
     heading: 'Structured Data Checker',
-    body: 'Structured data helps Google and AI assistants understand your content. ShipReady checks for schema presence, required fields (name, description, url), and common implementation errors.',
+    body: 'Structured data helps Google and AI assistants understand your content. Glook checks for schema presence, required fields (name, description, url), and common implementation errors.',
   },
 }
 
@@ -86,7 +86,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  if (!SLUGS.includes(slug as Slug)) return { title: 'Not Found — ShipReady' }
+  if (!SLUGS.includes(slug as Slug)) return { title: 'Not Found — Glook' }
   const meta = META[slug as Slug]
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://shipready.app'
   return {

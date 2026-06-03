@@ -8,8 +8,8 @@ import { MobileDockSpacer } from '@/components/navigation/MobileDockSpacer'
 export const revalidate = 3600
 
 export const metadata: Metadata = {
-  title: 'Site Audit Reports — ShipReady',
-  description: 'In-depth editorial audits of well-known websites. See real scores, top issues, and expert analysis from ShipReady.',
+  title: 'Site Audit Reports — Glook',
+  description: 'In-depth editorial audits of well-known websites. See real scores, top issues, and expert analysis from Glook.',
 }
 
 type AuditRow = {

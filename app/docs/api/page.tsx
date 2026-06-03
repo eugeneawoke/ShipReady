@@ -4,9 +4,9 @@ import Link from 'next/link'
 import { MCP_TOOLS } from '@/lib/mcp/tools'
 
 export const metadata: Metadata = {
-  title: 'API Documentation — ShipReady',
+  title: 'API Documentation — Glook',
   description:
-    'REST API and MCP JSON-RPC documentation for ShipReady. Integrate website audits into your CI/CD pipeline, dashboards, and AI agents.',
+    'REST API and MCP JSON-RPC documentation for Glook. Integrate website audits into your CI/CD pipeline, dashboards, and AI agents.',
 }
 
 function CodeBlock({ code, lang = 'bash' }: { code: string; lang?: string }) {
@@ -57,12 +57,12 @@ export default function ApiDocsPage() {
         {/* Header */}
         <div className="mb-2">
           <Link href="/" className="text-sm text-[#8B8A85] hover:text-[#F1F0EE]">
-            ← ShipReady
+            ← Glook
           </Link>
         </div>
         <h1 className="mt-4 text-3xl font-bold tracking-tight">API Reference</h1>
         <p className="mt-3 text-[#8B8A85]">
-          Integrate ShipReady audits into your CI/CD, dashboards, and AI agents.
+          Integrate Glook audits into your CI/CD, dashboards, and AI agents.
           Base URL: <code className="rounded bg-[#1A1A18] px-1.5 py-0.5 text-xs">https://shipready.app</code>
         </p>
 
@@ -111,7 +111,7 @@ export default function ApiDocsPage() {
         <SectionHeading id="rest">REST Endpoints</SectionHeading>
 
         <SubHeading id="post-scan">POST /api/v1/scan</SubHeading>
-        <p className="mb-3 text-sm text-[#A8A7A3]">Submit a URL for a ShipReady audit. Returns the scan ID immediately; poll <code className="rounded bg-[#1A1A18] px-1 text-xs">GET /api/scan/:id</code> for results.</p>
+        <p className="mb-3 text-sm text-[#A8A7A3]">Submit a URL for a Glook audit. Returns the scan ID immediately; poll <code className="rounded bg-[#1A1A18] px-1 text-xs">GET /api/scan/:id</code> for results.</p>
         <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#8B8A85]">Request body</p>
         <CodeBlock lang="json" code={`{
   "url": "https://example.com",       // required
@@ -146,12 +146,12 @@ export default function ApiDocsPage() {
         <p className="mb-3 text-sm text-[#A8A7A3]">Returns an SVG badge with the domain&apos;s latest public score. Requires <code className="rounded bg-[#1A1A18] px-1 text-xs">badge_enabled = true</code> on the scan.</p>
         <CodeBlock code={`curl https://shipready.app/api/badge/example.com`} />
         <p className="mt-3 mb-2 text-xs font-semibold uppercase tracking-wide text-[#8B8A85]">Markdown embed</p>
-        <CodeBlock code={`![ShipReady score](https://shipready.app/api/badge/example.com)`} />
+        <CodeBlock code={`![Glook score](https://shipready.app/api/badge/example.com)`} />
 
         {/* MCP tools */}
         <SectionHeading id="mcp">MCP JSON-RPC Tools</SectionHeading>
         <p className="mb-4 text-sm text-[#A8A7A3]">
-          ShipReady exposes a JSON-RPC 2.0 MCP endpoint at <code className="rounded bg-[#1A1A18] px-1 text-xs">POST /api/mcp</code>.
+          Glook exposes a JSON-RPC 2.0 MCP endpoint at <code className="rounded bg-[#1A1A18] px-1 text-xs">POST /api/mcp</code>.
           Use it with Claude Code, Cursor, or any MCP-compatible client to run audits from within your editor.
         </p>
         <CodeBlock code={`# Claude Code: add to settings.json under mcpServers

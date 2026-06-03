@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'
-export const alt = 'ShipReady — Site audits that understand your client\'s business'
+export const alt = 'Glook — Site audits that understand your client\'s business'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -48,7 +48,7 @@ export default function OGImage() {
         {/* Title */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <span style={{ color: '#F1F0EE', fontSize: '72px', fontWeight: 600, letterSpacing: '-2px', lineHeight: 1 }}>
-            ShipReady
+            Glook
           </span>
           <span style={{ color: '#8B8A85', fontSize: '28px', fontWeight: 400 }}>
             Site audits that understand your client&apos;s business

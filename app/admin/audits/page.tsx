@@ -5,7 +5,7 @@ import { createServiceClient } from '@/lib/supabase'
 import { AdminAuditActions } from './AdminAuditActions'
 
 export const metadata: Metadata = {
-  title: 'Audit Reports Admin — ShipReady',
+  title: 'Audit Reports Admin — Glook',
   robots: { index: false, follow: false },
 }
 

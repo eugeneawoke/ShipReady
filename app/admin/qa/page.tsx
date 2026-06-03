@@ -4,7 +4,7 @@ import { readFile } from 'fs/promises'
 import path from 'path'
 
 export const metadata: Metadata = {
-  title: 'QA Report — ShipReady Admin',
+  title: 'QA Report — Glook Admin',
   robots: { index: false, follow: false },
 }
 

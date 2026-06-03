@@ -4,14 +4,14 @@ import { SiteBrandLink } from '@/components/SiteHeader'
 import { createServiceClient } from '@/lib/supabase'
 import type { ScanResult } from '@/types/scan'
 
-export const revalidate = 21600 // 6 hours
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'AI Readiness Ranking — Top Sites for ChatGPT, Claude & Perplexity | ShipReady',
+  title: 'AI Readiness Ranking — Top Sites for ChatGPT, Claude & Perplexity | Glook',
   description: 'See which sites are best optimized for AI search engines like ChatGPT, Claude, and Perplexity. Live AI readiness leaderboard updated every 6 hours.',
   alternates: { canonical: 'https://shipready.app/ai-readiness-report' },
   openGraph: {
-    title: 'AI Readiness Ranking — ShipReady',
+    title: 'AI Readiness Ranking — Glook',
     description: 'Live leaderboard of sites best optimized for ChatGPT, Claude, and Perplexity.',
     url: 'https://shipready.app/ai-readiness-report',
     type: 'website',
@@ -72,7 +72,7 @@ export default async function AIReadinessReportPage() {
           <h1 className="text-3xl font-bold text-[#F1F0EE]">AI Readiness Ranking</h1>
           <p className="mt-2 text-sm text-[#8B8A85]">
             Sites ranked by their readiness to be found, crawled, and cited by AI search engines.
-            Updated every 6 hours from verified ShipReady audits.
+            Updated every 6 hours from verified Glook audits.
           </p>
         </div>
 

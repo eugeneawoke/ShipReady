@@ -5,9 +5,9 @@ import { readFileSync } from 'fs'
 import path from 'path'
 
 export const metadata: Metadata = {
-  title: 'GitHub Action — ShipReady',
+  title: 'GitHub Action — Glook',
   description:
-    'Block PRs that break your site score. ShipReady GitHub Action audits your deployment URL on every PR and fails CI if score drops below your threshold.',
+    'Block PRs that break your site score. Glook GitHub Action audits your deployment URL on every PR and fails CI if score drops below your threshold.',
 }
 
 function Step({ n, children }: { n: number; children: React.ReactNode }) {

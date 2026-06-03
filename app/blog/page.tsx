@@ -10,7 +10,7 @@ import { ChangelogFeed } from '@/components/blog/ChangelogFeed'
 export const revalidate = 3600
 
 export const metadata: Metadata = {
-  title: 'Blog — ShipReady',
+  title: 'Blog — Glook',
   description: 'Practical articles on SEO, AI visibility, web security, and site performance. Written for founders and developers.',
 }
 

@@ -5,19 +5,19 @@ import { LandingNavAuth } from '@/components/landing/LandingNavAuth'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'SEO Audit — ShipReady',
+  title: 'SEO Audit — Glook',
   description: 'Find out why Google can\'t find your site. Check Core Web Vitals, indexability, structured data, and canonical issues. Free SEO audit in 60 seconds.',
   alternates: { canonical: 'https://shipready.app/seo' },
   openGraph: {
-    title: 'Free SEO Audit — ShipReady',
+    title: 'Free SEO Audit — Glook',
     description: 'Find out why Google can\'t find your site. Check Core Web Vitals, indexability, structured data, and canonical issues. Free SEO audit in 60 seconds.',
     url: 'https://shipready.app/seo',
     type: 'website',
-    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'ShipReady — Free SEO Audit' }],
+    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Glook — Free SEO Audit' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Free SEO Audit — ShipReady',
+    title: 'Free SEO Audit — Glook',
     description: 'Find out why Google can\'t find your site. Free SEO audit in 60 seconds.',
     images: ['/opengraph-image'],
   },

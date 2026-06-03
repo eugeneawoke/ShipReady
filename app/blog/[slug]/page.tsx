@@ -58,7 +58,7 @@ export async function generateMetadata({ params, searchParams }: {
   const description = post.meta_description || post.excerpt || undefined
 
   return {
-    title: `${title} — ShipReady Blog`,
+    title: `${title} — Glook Blog`,
     description,
     openGraph: post.og_image_url ? {
       images: [{ url: post.og_image_url }],
@@ -89,8 +89,8 @@ export default async function BlogArticlePage({ params, searchParams }: {
     description: post.excerpt ?? undefined,
     image: post.og_image_url ?? undefined,
     datePublished: post.published_at ?? undefined,
-    author: { '@type': 'Organization', name: 'ShipReady', url: BASE },
-    publisher: { '@type': 'Organization', name: 'ShipReady', url: BASE },
+    author: { '@type': 'Organization', name: 'Glook', url: BASE },
+    publisher: { '@type': 'Organization', name: 'Glook', url: BASE },
   }
 
   return (
@@ -155,7 +155,7 @@ export default async function BlogArticlePage({ params, searchParams }: {
             href="/"
             className="inline-flex items-center gap-2 text-sm px-5 py-2.5 rounded-xl bg-[#6E56CF] text-white hover:bg-[#7C68D4] transition-colors font-medium"
           >
-            Try ShipReady free →
+            Try Glook free →
           </Link>
         </div>
       </main>

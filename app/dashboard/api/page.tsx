@@ -45,7 +45,7 @@ export default async function DashboardApiPage() {
           <p className="mt-1 text-sm text-[#8B8A85]">
             Use these keys to call the{' '}
             <Link href="/docs/api" className="underline hover:text-[#F1F0EE]">
-              ShipReady REST API
+              Glook REST API
             </Link>
             . Keys are valid for Agency plan. Daily limit: 1,000 requests per key.
           </p>

@@ -4,7 +4,7 @@ import { createServiceClient } from '@/lib/supabase'
 import { AuditEditor } from './AuditEditor'
 
 export const metadata: Metadata = {
-  title: 'Edit Audit Report — ShipReady Admin',
+  title: 'Edit Audit Report — Glook Admin',
   robots: { index: false, follow: false },
 }
 

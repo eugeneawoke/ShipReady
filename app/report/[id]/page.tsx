@@ -1031,7 +1031,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
             className="flex items-center gap-1.5 text-sm text-[#8B8A85] transition-colors hover:text-[#F1F0EE]"
           >
             <ArrowLeft className="h-4 w-4" />
-            {isLoggedIn ? t('dashboard') : 'ShipReady'}
+            {isLoggedIn ? t('dashboard') : 'Glook'}
           </Link>
         </div>
         {rescanError && (
@@ -1461,7 +1461,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
         {plan === 'pro' && (
           <div className="hidden print:flex items-center justify-between pt-6 border-t border-black/10 mt-4">
             <span className="text-xs text-black/40">
-              {t('generatedBy')} <span className="font-semibold text-black/60">ShipReady</span> · shipready.app
+              {t('generatedBy')} <span className="font-semibold text-black/60">Glook</span> · shipready.app
             </span>
             <span className="text-xs text-black/40 font-mono">{domain}</span>
           </div>

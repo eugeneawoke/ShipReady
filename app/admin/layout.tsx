@@ -16,7 +16,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-[#0E0E0F]/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center gap-6 px-6 py-3">
           <Link href="/" className="text-xs font-mono text-[#5a5a52] hover:text-[#F1F0EE] transition-colors">
-            ← ShipReady
+            ← Glook
           </Link>
           <span className="text-[#2a2a28]">|</span>
           <span className="text-xs font-mono text-[#c8f03a] tracking-widest uppercase">Admin</span>

@@ -42,12 +42,12 @@ export default async function PrivacyPage() {
           <Section title={isRu ? '1. Кто мы' : '1. Who we are'}>
             {isRu ? (
               <>
-                ShipReady — это инструмент аудита качества веб-приложений, который создаёт и поддерживает Eugene Gusakov.
+                Glook — это инструмент аудита качества веб-приложений, который создаёт и поддерживает Eugene Gusakov.
                 Связаться с нами можно по адресу <a href={`mailto:${EMAIL}`} className="text-[#6E56CF] hover:underline">{EMAIL}</a>.
               </>
             ) : (
               <>
-                ShipReady is a web quality audit tool built and operated by Eugene Gusakov.
+                Glook is a web quality audit tool built and operated by Eugene Gusakov.
                 You can reach us at <a href={`mailto:${EMAIL}`} className="text-[#6E56CF] hover:underline">{EMAIL}</a>.
               </>
             )}
@@ -91,7 +91,7 @@ export default async function PrivacyPage() {
               </>
             ) : (
               <>
-                <p>PayPro Global acts as Merchant of Record and processes all payment and customer billing data on ShipReady&apos;s behalf. We do not store card numbers, payment credentials, or sensitive payment information — all payment processing is handled exclusively by PayPro Global in accordance with their privacy policy.</p>
+                <p>PayPro Global acts as Merchant of Record and processes all payment and customer billing data on Glook&apos;s behalf. We do not store card numbers, payment credentials, or sensitive payment information — all payment processing is handled exclusively by PayPro Global in accordance with their privacy policy.</p>
                 <p>We receive webhooks from PayPro Global containing subscription status events (paid, overdue, cancelled). This information is used solely to grant or revoke access to your account and platform features.</p>
               </>
             )}

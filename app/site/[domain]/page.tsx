@@ -37,13 +37,13 @@ async function fetchDomainReport(slug: string) {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { domain } = await params
   const data = await fetchDomainReport(domain)
-  if (!data) return { title: 'Not Found — ShipReady' }
+  if (!data) return { title: 'Not Found — Glook' }
 
   const { row } = data
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://shipready.app'
 
   return {
-    title: row.title ?? `${row.domain} — Site Audit | ShipReady`,
+    title: row.title ?? `${row.domain} — Site Audit | Glook`,
     description: row.description ?? `Full website audit for ${row.domain}: SEO, security, performance, and AI visibility.`,
     alternates: { canonical: `${appUrl}/site/${domain}` },
     openGraph: {

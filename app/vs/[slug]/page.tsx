@@ -23,8 +23,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   const year = new Date().getFullYear()
   return {
-    title: `ShipReady vs ${c.name} — ${year} Comparison`,
-    description: `Compare ShipReady and ${c.name} across AI visibility, security, SEO auditing, and pricing. See which tool fits your workflow.`,
+    title: `Glook vs ${c.name} — ${year} Comparison`,
+    description: `Compare Glook and ${c.name} across AI visibility, security, SEO auditing, and pricing. See which tool fits your workflow.`,
     alternates: {
       canonical: `/vs/${slug}`,
     },
@@ -54,7 +54,7 @@ export default async function VsPage({ params }: { params: Promise<{ slug: strin
         <div className="mb-12">
           <p className="text-[11px] text-[#6E56CF] uppercase tracking-[0.15em] mb-3 font-mono">Compare · {year}</p>
           <h1 className="text-[28px] sm:text-[40px] font-semibold tracking-tight mb-4">
-            ShipReady vs {c.name}
+            Glook vs {c.name}
           </h1>
           <p className="text-[#8B8A85] text-sm leading-relaxed max-w-xl mb-6">
             {c.tagline}
@@ -68,7 +68,7 @@ export default async function VsPage({ params }: { params: Promise<{ slug: strin
         {/* Price comparison */}
         <div className="grid grid-cols-2 gap-4 mb-12">
           <div className="p-5 rounded-xl bg-[#6E56CF]/[0.06] border border-[#6E56CF]/20 text-center">
-            <p className="text-[10px] font-mono text-[#6E56CF] uppercase tracking-widest mb-2">ShipReady</p>
+            <p className="text-[10px] font-mono text-[#6E56CF] uppercase tracking-widest mb-2">Glook</p>
             <p className="text-2xl font-bold text-[#F1F0EE]">$14<span className="text-sm font-normal text-[#8B8A85]">/mo</span></p>
             <p className="text-[11px] text-[#5A5955] mt-1">Free tier — no credit card</p>
           </div>
@@ -79,7 +79,7 @@ export default async function VsPage({ params }: { params: Promise<{ slug: strin
           </div>
         </div>
 
-        {/* Why ShipReady wins */}
+        {/* Why Glook wins */}
         <CompetitorWins wins={c.whyWins} competitorName={c.name} />
 
         {/* Feature comparison table */}
@@ -93,7 +93,7 @@ export default async function VsPage({ params }: { params: Promise<{ slug: strin
         {/* Mid-page CTA */}
         <div className="mb-12 rounded-2xl bg-[#6E56CF]/[0.06] border border-[#6E56CF]/25 p-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-medium text-[#F1F0EE] mb-1">Try ShipReady free</p>
+            <p className="text-sm font-medium text-[#F1F0EE] mb-1">Try Glook free</p>
             <p className="text-xs text-[#8B8A85]">No credit card required. Full report in under a minute.</p>
           </div>
           <Link
@@ -130,7 +130,7 @@ export default async function VsPage({ params }: { params: Promise<{ slug: strin
         {/* CTA */}
         <div className="rounded-2xl bg-[#6E56CF]/[0.06] border border-[#6E56CF]/25 p-10 text-center">
           <p className="text-[11px] font-mono text-[#6E56CF] uppercase tracking-widest mb-3">Get started</p>
-          <h2 className="text-xl font-semibold tracking-tight mb-2">Try ShipReady free</h2>
+          <h2 className="text-xl font-semibold tracking-tight mb-2">Try Glook free</h2>
           <p className="text-[#8B8A85] text-sm mb-6 max-w-sm mx-auto">
             No credit card required. Scan your site and get a full AI visibility, security, and SEO report in under a minute.
           </p>
@@ -138,7 +138,7 @@ export default async function VsPage({ params }: { params: Promise<{ slug: strin
             href="/"
             className="inline-flex items-center gap-2 text-sm px-6 py-2.5 rounded-xl bg-[#6E56CF] text-white hover:bg-[#7C68D4] transition-colors font-medium"
           >
-            Try ShipReady free — no credit card →
+            Try Glook free — no credit card →
           </Link>
         </div>
       </main>

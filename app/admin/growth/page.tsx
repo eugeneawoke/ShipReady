@@ -5,7 +5,7 @@ import { SiteHeader } from '@/components/SiteHeader'
 import { createClient, createServiceClient } from '@/lib/supabase'
 
 export const metadata: Metadata = {
-  title: 'Growth Admin - ShipReady',
+  title: 'Growth Admin - Glook',
   robots: { index: false, follow: false },
 }
 

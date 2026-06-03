@@ -53,7 +53,7 @@ export async function generateMetadata({ params, searchParams }: {
   const audit = await getAudit(slug, preview === 'true')
   if (!audit) return {}
   return {
-    title: `${audit.company_name} Site Audit — ShipReady`,
+    title: `${audit.company_name} Site Audit — Glook`,
     description: audit.editorial_summary ?? `An independent site audit of ${audit.company_website} covering SEO, AI visibility, security, and performance.`,
     openGraph: audit.og_image_url ? { images: [{ url: audit.og_image_url }] } : undefined,
     alternates: { canonical: `${BASE}/audits/${slug}` },
@@ -124,7 +124,7 @@ export default async function AuditReportPage({ params, searchParams }: {
     headline: `${audit.company_name} Site Audit`,
     description: audit.editorial_summary ?? undefined,
     datePublished: audit.published_at ?? undefined,
-    author: { '@type': 'Organization', name: 'ShipReady', url: BASE },
+    author: { '@type': 'Organization', name: 'Glook', url: BASE },
     about: { '@type': 'WebSite', url: audit.company_website },
   }
 
@@ -217,7 +217,7 @@ export default async function AuditReportPage({ params, searchParams }: {
           <p className="text-[#8B8A85] text-sm mb-4">Free scan — no signup required for the first scan.</p>
           <Link href="/"
             className="inline-flex items-center gap-2 text-sm px-5 py-2.5 rounded-xl bg-[#6E56CF] text-white hover:bg-[#7C68D4] transition-colors font-medium">
-            Try ShipReady free
+            Try Glook free
           </Link>
         </div>
       </main>
