@@ -40,7 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!data) return { title: 'Not Found — Glook' }
 
   const { row } = data
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://shipready.app'
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://glook.dev'
 
   return {
     title: row.title ?? `${row.domain} — Site Audit | Glook`,

@@ -88,7 +88,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   if (!SLUGS.includes(slug as Slug)) return { title: 'Not Found — Glook' }
   const meta = META[slug as Slug]
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://shipready.app'
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://glook.dev'
   return {
     title: meta.title,
     description: meta.description,

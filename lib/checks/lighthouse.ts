@@ -32,7 +32,7 @@ interface LighthouseRunProfile {
 }
 
 const DEFAULT_LIGHTHOUSE_TIMEOUT_MS = 90_000
-const LIGHTHOUSE_QUEUE_KEY = Symbol.for('shipready.lighthouseQueue')
+const LIGHTHOUSE_QUEUE_KEY = Symbol.for('glook.lighthouseQueue')
 
 const LIGHTHOUSE_PRIMARY_PROFILE: LighthouseRunProfile = {
   label: 'mobile-full',

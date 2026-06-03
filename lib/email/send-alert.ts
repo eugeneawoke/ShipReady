@@ -22,7 +22,7 @@ function renderIssueList(issues: Issue[]) {
 
 export async function sendMonitoringAlert(input: SendMonitoringAlertInput): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY
-  const from = process.env.RESEND_FROM_EMAIL || 'Glook <alerts@shipready.app>'
+  const from = process.env.RESEND_FROM_EMAIL || 'Glook <alerts@glook.dev>'
 
   if (!apiKey) {
     throw new Error('RESEND_API_KEY is not configured')

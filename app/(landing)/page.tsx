@@ -627,7 +627,7 @@ function ReportPreviewSection({ t }: { t: Translations }) {
               <div className="w-3 h-3 rounded-full bg-[#28C840]" />
             </div>
             <div className="flex-1 mx-2 px-3 py-1 rounded-md bg-[#1E1E21] text-xs font-mono text-[#5A5955] truncate">
-              shipready.app/report/vercel-com-demo
+              glook.dev/report/vercel-com-demo
             </div>
             <span className="shrink-0 text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#6E56CF]/15 border border-[#6E56CF]/25 text-[#CBBEFF] uppercase tracking-[0.08em]">
               Live example

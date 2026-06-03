@@ -9,11 +9,11 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: 'AI Readiness Ranking — Top Sites for ChatGPT, Claude & Perplexity | Glook',
   description: 'See which sites are best optimized for AI search engines like ChatGPT, Claude, and Perplexity. Live AI readiness leaderboard updated every 6 hours.',
-  alternates: { canonical: 'https://shipready.app/ai-readiness-report' },
+  alternates: { canonical: 'https://glook.dev/ai-readiness-report' },
   openGraph: {
     title: 'AI Readiness Ranking — Glook',
     description: 'Live leaderboard of sites best optimized for ChatGPT, Claude, and Perplexity.',
-    url: 'https://shipready.app/ai-readiness-report',
+    url: 'https://glook.dev/ai-readiness-report',
     type: 'website',
     images: [{ url: '/opengraph-image', width: 1200, height: 630 }],
   },

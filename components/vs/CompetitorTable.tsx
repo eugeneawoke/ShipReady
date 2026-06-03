@@ -65,7 +65,7 @@ export function CompetitorTable({ features, competitorName }: CompetitorTablePro
                       <span className="text-[11px] text-[#3A3A3A] shrink-0 hidden md:inline">{row.note}</span>
                     )}
                   </div>
-                  <FeatureCell value={row.shipready} highlight />
+                  <FeatureCell value={row.glook} highlight />
                   <FeatureCell value={row.competitor} />
                 </div>
               )

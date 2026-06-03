@@ -8,7 +8,7 @@ export const runtime = 'nodejs'
 export const maxDuration = 120
 
 function filenameForDomain(domain: string) {
-  return `${domain.replace(/[^a-z0-9.-]+/gi, '-')}-shipready-report.pdf`
+  return `${domain.replace(/[^a-z0-9.-]+/gi, '-')}-glook-report.pdf`
 }
 
 export async function GET(

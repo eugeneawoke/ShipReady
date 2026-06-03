@@ -18,7 +18,7 @@ import type { ScanResult, Issue } from '@/types/scan'
 
 export const revalidate = 3600
 
-const BASE = (process.env.NEXT_PUBLIC_APP_URL || 'https://shipready.app').replace(/\/$/, '')
+const BASE = (process.env.NEXT_PUBLIC_APP_URL || 'https://glook.dev').replace(/\/$/, '')
 const TIPTAP_EXTENSIONS = [StarterKit, ExtLink, ExtImage, ExtHighlight, ExtTypography]
 
 type AuditReport = {

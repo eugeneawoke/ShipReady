@@ -7,11 +7,11 @@ import Link from 'next/link'
 export const metadata: Metadata = {
   title: 'SEO Audit — Glook',
   description: 'Find out why Google can\'t find your site. Check Core Web Vitals, indexability, structured data, and canonical issues. Free SEO audit in 60 seconds.',
-  alternates: { canonical: 'https://shipready.app/seo' },
+  alternates: { canonical: 'https://glook.dev/seo' },
   openGraph: {
     title: 'Free SEO Audit — Glook',
     description: 'Find out why Google can\'t find your site. Check Core Web Vitals, indexability, structured data, and canonical issues. Free SEO audit in 60 seconds.',
-    url: 'https://shipready.app/seo',
+    url: 'https://glook.dev/seo',
     type: 'website',
     images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Glook — Free SEO Audit' }],
   },

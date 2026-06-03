@@ -3,7 +3,7 @@ export const locales = ['en', 'ru'] as const
 export type AppLocale = (typeof locales)[number]
 
 export const defaultLocale: AppLocale = 'en'
-export const localeCookieName = 'shipready-locale'
+export const localeCookieName = 'glook-locale'
 
 export function normalizeLocale(value: string | null | undefined): AppLocale | undefined {
   if (!value) return undefined

@@ -7,11 +7,11 @@ import Link from 'next/link'
 export const metadata: Metadata = {
   title: 'AI Visibility Audit — Glook',
   description: 'Check if ChatGPT, Claude, and Perplexity can find and cite your site. Generate llms.txt, schema.org markup, and FAQ structured data instantly.',
-  alternates: { canonical: 'https://shipready.app/ai-visibility' },
+  alternates: { canonical: 'https://glook.dev/ai-visibility' },
   openGraph: {
     title: 'AI Visibility Audit — Glook',
     description: 'Check if ChatGPT, Claude, and Perplexity can find and cite your site. Generate llms.txt, schema.org markup, and FAQ structured data instantly.',
-    url: 'https://shipready.app/ai-visibility',
+    url: 'https://glook.dev/ai-visibility',
     type: 'website',
     images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Glook — AI Visibility Audit' }],
   },

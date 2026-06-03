@@ -7,11 +7,11 @@ import Link from 'next/link'
 export const metadata: Metadata = {
   title: 'Security Audit — Glook',
   description: 'Scan your site for security vulnerabilities. Check HTTPS, security headers, exposed .env files, API keys in HTML. Free security audit in 30 seconds.',
-  alternates: { canonical: 'https://shipready.app/security' },
+  alternates: { canonical: 'https://glook.dev/security' },
   openGraph: {
     title: 'Free Security Audit — Glook',
     description: 'Scan your site for security vulnerabilities. Check HTTPS, security headers, exposed .env files, API keys in HTML. Free security audit in 30 seconds.',
-    url: 'https://shipready.app/security',
+    url: 'https://glook.dev/security',
     type: 'website',
     images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Glook — Free Security Audit' }],
   },

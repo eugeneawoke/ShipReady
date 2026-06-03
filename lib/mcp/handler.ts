@@ -183,7 +183,7 @@ export async function handleMcpRequest(
         result: {
           protocolVersion: '2024-11-05',
           capabilities: { tools: {} },
-          serverInfo: { name: 'shipready-mcp', version: '1.0.0' },
+          serverInfo: { name: 'glook-mcp', version: '1.0.0' },
         },
       },
     }

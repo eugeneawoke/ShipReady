@@ -40,8 +40,8 @@ describe('competitors data', () => {
   it('Glook feature value is never null/undefined', () => {
     for (const slug of REQUIRED_SLUGS) {
       for (const f of competitors[slug].features) {
-        expect(f.shipready).not.toBeUndefined()
-        expect(f.shipready).not.toBeNull()
+        expect(f.glook).not.toBeUndefined()
+        expect(f.glook).not.toBeNull()
       }
     }
   })

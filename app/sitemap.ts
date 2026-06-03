@@ -5,7 +5,7 @@ import { competitorSlugs } from '@/lib/vs/competitors'
 export const revalidate = 3600
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = (process.env.NEXT_PUBLIC_APP_URL || 'https://shipready.app').replace(/\/$/, '')
+  const base = (process.env.NEXT_PUBLIC_APP_URL || 'https://glook.dev').replace(/\/$/, '')
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${base}/`, lastModified: new Date('2026-05-26'), changeFrequency: 'weekly', priority: 1.0 },
     { url: `${base}/seo`, lastModified: new Date('2026-05-26'), changeFrequency: 'weekly', priority: 0.9 },

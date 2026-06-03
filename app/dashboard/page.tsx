@@ -136,7 +136,7 @@ export default async function DashboardPage() {
                     : t('billing.billingMonthly')}
                   {' · '}
                   {t('billing.cancelNote')}{' '}
-                  <a href="mailto:support@shipready.app" className="text-[#8B8A85] underline underline-offset-2 hover:text-[#F1F0EE]">
+                  <a href="mailto:support@glook.dev" className="text-[#8B8A85] underline underline-offset-2 hover:text-[#F1F0EE]">
                     {t('billing.cancelEmail')}
                   </a>
                 </p>

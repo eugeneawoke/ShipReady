@@ -228,7 +228,7 @@ const ru: AppMessages = {
       suspended: 'Подписка приостановлена',
       suspendedSub: 'Доступ Pro заморожен. Свяжитесь с поддержкой для восстановления.',
       cancelNote: 'Для отмены подписки напишите на',
-      cancelEmail: 'support@shipready.app',
+      cancelEmail: 'support@glook.dev',
     },
   },
   Monitoring: {

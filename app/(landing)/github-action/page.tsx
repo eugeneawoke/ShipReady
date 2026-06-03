@@ -23,12 +23,12 @@ function Step({ n, children }: { n: number; children: React.ReactNode }) {
 
 export default function GitHubActionPage() {
   // Read template from public/ at build time
-  const yamlPath = path.join(process.cwd(), 'public', 'github-action', 'shipready.yml')
+  const yamlPath = path.join(process.cwd(), 'public', 'github-action', 'glook.yml')
   let yaml = ''
   try {
     yaml = readFileSync(yamlPath, 'utf8')
   } catch {
-    yaml = '# Template not found — download from https://shipready.app/github-action/shipready.yml'
+    yaml = '# Template not found — download from https://glook.dev/github-action/glook.yml'
   }
 
   return (
@@ -49,8 +49,8 @@ export default function GitHubActionPage() {
             Get Agency plan →
           </Link>
           <a
-            href="/github-action/shipready.yml"
-            download="shipready.yml"
+            href="/github-action/glook.yml"
+            download="glook.yml"
             className="rounded-lg border border-[#2A2A2A] px-5 py-2.5 text-sm font-semibold text-[#F1F0EE] transition-colors hover:border-[#3A3A3A]"
           >
             Download template
@@ -89,13 +89,13 @@ export default function GitHubActionPage() {
             <strong className="text-[#F1F0EE]">Add the secret to your repo</strong>
             <p className="mt-0.5">
               In your GitHub repo: <em>Settings → Secrets and variables → Actions → New repository secret</em>.
-              Name: <code className="rounded bg-[#1A1A18] px-1 text-xs">SHIPREADY_API_KEY</code>.
+              Name: <code className="rounded bg-[#1A1A18] px-1 text-xs">GLOOK_API_KEY</code>.
             </p>
           </Step>
           <Step n={3}>
             <strong className="text-[#F1F0EE]">Add the workflow file</strong>
             <p className="mt-0.5">
-              Copy the template below to <code className="rounded bg-[#1A1A18] px-1 text-xs">.github/workflows/shipready.yml</code> in your repo.
+              Copy the template below to <code className="rounded bg-[#1A1A18] px-1 text-xs">.github/workflows/glook.yml</code> in your repo.
               Set <code className="rounded bg-[#1A1A18] px-1 text-xs">DEPLOYMENT_URL</code> to your preview URL (e.g. from Vercel output).
             </p>
           </Step>
@@ -104,7 +104,7 @@ export default function GitHubActionPage() {
         {/* Template */}
         <h2 className="mt-14 mb-4 text-xl font-semibold">Workflow template</h2>
         <p className="mb-4 text-sm text-[#8B8A85]">
-          Copy this into <code className="rounded bg-[#1A1A18] px-1 text-xs">.github/workflows/shipready.yml</code>:
+          Copy this into <code className="rounded bg-[#1A1A18] px-1 text-xs">.github/workflows/glook.yml</code>:
         </p>
         <pre className="overflow-x-auto rounded-xl bg-[#0A0A09] p-5 text-xs leading-relaxed text-[#A8A7A3]">
           <code>{yaml}</code>

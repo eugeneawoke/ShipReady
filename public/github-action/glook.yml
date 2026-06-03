@@ -1,17 +1,17 @@
-# public/github-action/shipready.yml
-# ShipReady CI Score Check
-# Copy this file to .github/workflows/shipready.yml in your repo.
-# Requires: SHIPREADY_API_KEY secret in your repo settings (Agency plan key).
+# public/github-action/glook.yml
+# Glook CI Score Check
+# Copy this file to .github/workflows/glook.yml in your repo.
+# Requires: GLOOK_API_KEY secret in your repo settings (Agency plan key).
 # Optional: set DEPLOYMENT_URL env var before this job runs (e.g. from Vercel preview URL).
 
-name: ShipReady Score Check
+name: Glook Score Check
 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
 
 jobs:
-  shipready:
+  glook:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -20,10 +20,10 @@ jobs:
       - name: Submit scan
         id: scan
         env:
-          API_KEY: ${{ secrets.SHIPREADY_API_KEY }}
-          BASE_URL: ${{ vars.SHIPREADY_BASE_URL || 'https://shipready.app' }}
+          API_KEY: ${{ secrets.GLOOK_API_KEY }}
+          BASE_URL: ${{ vars.GLOOK_BASE_URL || 'https://glook.dev' }}
           DEPLOYMENT_URL: ${{ env.DEPLOYMENT_URL || github.event.pull_request.head.repo.html_url }}
-          FAIL_THRESHOLD: ${{ vars.SHIPREADY_FAIL_THRESHOLD || '70' }}
+          FAIL_THRESHOLD: ${{ vars.GLOOK_FAIL_THRESHOLD || '70' }}
         run: |
           set -e
           echo "Scanning: $DEPLOYMENT_URL"
@@ -40,7 +40,7 @@ jobs:
       - name: Poll for results
         id: result
         env:
-          API_KEY: ${{ secrets.SHIPREADY_API_KEY }}
+          API_KEY: ${{ secrets.GLOOK_API_KEY }}
           BASE_URL: ${{ steps.scan.outputs.base_url }}
           SCAN_ID: ${{ steps.scan.outputs.scan_id }}
         run: |
@@ -82,7 +82,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.issue.number,
-                body: '⏳ **ShipReady**: Scan timed out after 10 minutes. Check [ShipReady](https://shipready.app) directly.',
+                body: '⏳ **Glook**: Scan timed out after 10 minutes. Check [Glook](https://glook.dev) directly.',
               })
               return
             }
@@ -91,7 +91,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.issue.number,
-                body: '❌ **ShipReady**: Scan failed. Review scanner logs or try re-running.',
+                body: '❌ **Glook**: Scan failed. Review scanner logs or try re-running.',
               })
               return
             }
@@ -107,7 +107,7 @@ jobs:
             }).join('\n')
 
             const body = [
-              `## ShipReady Score: **${score}/100** ${emoji}`,
+              `## Glook Score: **${score}/100** ${emoji}`,
               '',
               `| Category | Score |`,
               `|---|---|`,
@@ -117,7 +117,7 @@ jobs:
                 ? `⚠️ Score **${score}** is below threshold **${threshold}**. Fix the issues above before merging.`
                 : `🚀 Score meets the threshold of ${threshold}.`,
               '',
-              `[View full report](${data.results?.url ? 'https://shipready.app' : 'https://shipready.app'})`,
+              `[View full report](${data.results?.url ? 'https://glook.dev' : 'https://glook.dev'})`,
             ].join('\n')
 
             await github.rest.issues.createComment({

@@ -789,7 +789,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
       link.href = downloadUrl
       link.download = filenameFromDisposition(
         response.headers.get('Content-Disposition'),
-        `${domain.replace(/[^a-z0-9.-]+/gi, '-')}-shipready-report.pdf`,
+        `${domain.replace(/[^a-z0-9.-]+/gi, '-')}-glook-report.pdf`,
       )
       document.body.appendChild(link)
       link.click()
@@ -1461,7 +1461,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
         {plan === 'pro' && (
           <div className="hidden print:flex items-center justify-between pt-6 border-t border-black/10 mt-4">
             <span className="text-xs text-black/40">
-              {t('generatedBy')} <span className="font-semibold text-black/60">Glook</span> · shipready.app
+              {t('generatedBy')} <span className="font-semibold text-black/60">Glook</span> · glook.dev
             </span>
             <span className="text-xs text-black/40 font-mono">{domain}</span>
           </div>

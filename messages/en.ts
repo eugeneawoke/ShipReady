@@ -226,7 +226,7 @@ const en = {
       suspended: 'Subscription suspended',
       suspendedSub: 'Your Pro access is on hold. Contact support to reactivate.',
       cancelNote: 'To cancel your subscription, email',
-      cancelEmail: 'support@shipready.app',
+      cancelEmail: 'support@glook.dev',
     },
   },
   Monitoring: {

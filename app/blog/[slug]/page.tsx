@@ -16,7 +16,7 @@ import type { JSONContent } from '@tiptap/react'
 
 export const revalidate = 3600
 
-const BASE = (process.env.NEXT_PUBLIC_APP_URL || 'https://shipready.app').replace(/\/$/, '')
+const BASE = (process.env.NEXT_PUBLIC_APP_URL || 'https://glook.dev').replace(/\/$/, '')
 
 type BlogPost = {
   id: string

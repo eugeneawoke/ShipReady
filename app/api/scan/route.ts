@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     const raw = body.url as string
     const scanGoal = (['seo', 'security', 'ai_visibility', 'full'] as const)
       .includes(body.scanGoal) ? body.scanGoal as ScanGoal : null
-    const userLocale = request.cookies.get('shipready-locale')?.value === 'ru' ? 'ru' : undefined
+    const userLocale = request.cookies.get('glook-locale')?.value === 'ru' ? 'ru' : undefined
 
     if (!raw || !isValidUrl(normalizeUrl(raw))) {
       return NextResponse.json({ error: 'Invalid URL' }, { status: 400 })

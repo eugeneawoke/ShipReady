@@ -63,7 +63,7 @@ export default function ApiDocsPage() {
         <h1 className="mt-4 text-3xl font-bold tracking-tight">API Reference</h1>
         <p className="mt-3 text-[#8B8A85]">
           Integrate Glook audits into your CI/CD, dashboards, and AI agents.
-          Base URL: <code className="rounded bg-[#1A1A18] px-1.5 py-0.5 text-xs">https://shipready.app</code>
+          Base URL: <code className="rounded bg-[#1A1A18] px-1.5 py-0.5 text-xs">https://glook.dev</code>
         </p>
 
         <CtaBanner />
@@ -78,7 +78,7 @@ export default function ApiDocsPage() {
           </Link>{' '}
           (Agency plan required).
         </p>
-        <CodeBlock code={`curl -H "Authorization: Bearer sk_live_..." https://shipready.app/api/v1/scan`} />
+        <CodeBlock code={`curl -H "Authorization: Bearer sk_live_..." https://glook.dev/api/v1/scan`} />
 
         {/* Rate limits */}
         <SectionHeading id="rate-limits">Rate Limits</SectionHeading>
@@ -120,7 +120,7 @@ export default function ApiDocsPage() {
         <p className="mt-3 mb-2 text-xs font-semibold uppercase tracking-wide text-[#8B8A85]">Response 200</p>
         <CodeBlock lang="json" code={`{ "id": "7f3d9..." }`} />
         <p className="mt-3 mb-2 text-xs font-semibold uppercase tracking-wide text-[#8B8A85]">curl example</p>
-        <CodeBlock code={`curl -X POST https://shipready.app/api/v1/scan \\
+        <CodeBlock code={`curl -X POST https://glook.dev/api/v1/scan \\
   -H "Authorization: Bearer sk_live_..." \\
   -H "Content-Type: application/json" \\
   -d '{"url":"https://example.com","goal":"full"}'`} />
@@ -139,14 +139,14 @@ export default function ApiDocsPage() {
   }
 }`} />
         <p className="mt-3 mb-2 text-xs font-semibold uppercase tracking-wide text-[#8B8A85]">curl example</p>
-        <CodeBlock code={`curl https://shipready.app/api/scan/7f3d9... \\
+        <CodeBlock code={`curl https://glook.dev/api/scan/7f3d9... \\
   -H "Authorization: Bearer sk_live_..."`} />
 
         <SubHeading id="get-badge">GET /api/badge/:domain</SubHeading>
         <p className="mb-3 text-sm text-[#A8A7A3]">Returns an SVG badge with the domain&apos;s latest public score. Requires <code className="rounded bg-[#1A1A18] px-1 text-xs">badge_enabled = true</code> on the scan.</p>
-        <CodeBlock code={`curl https://shipready.app/api/badge/example.com`} />
+        <CodeBlock code={`curl https://glook.dev/api/badge/example.com`} />
         <p className="mt-3 mb-2 text-xs font-semibold uppercase tracking-wide text-[#8B8A85]">Markdown embed</p>
-        <CodeBlock code={`![Glook score](https://shipready.app/api/badge/example.com)`} />
+        <CodeBlock code={`![Glook score](https://glook.dev/api/badge/example.com)`} />
 
         {/* MCP tools */}
         <SectionHeading id="mcp">MCP JSON-RPC Tools</SectionHeading>
@@ -156,10 +156,10 @@ export default function ApiDocsPage() {
         </p>
         <CodeBlock code={`# Claude Code: add to settings.json under mcpServers
 {
-  "shipready": {
+  "glook": {
     "command": "npx",
-    "args": ["mcp-client", "https://shipready.app/api/mcp"],
-    "env": { "SHIPREADY_API_KEY": "sk_live_..." }
+    "args": ["mcp-client", "https://glook.dev/api/mcp"],
+    "env": { "GLOOK_API_KEY": "sk_live_..." }
   }
 }`} />
 

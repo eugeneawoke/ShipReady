@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
   }
 
   const supabase = createServiceClient()
-  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://shipready.app').replace(/\/$/, '')
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://glook.dev').replace(/\/$/, '')
 
   // Fetch active monitored domains where digest is overdue
   const { data: domains } = await supabase
