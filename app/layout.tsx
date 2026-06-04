@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { GeistSans } from 'geist/font/sans'
 import { GeistMono } from 'geist/font/mono'
@@ -8,6 +7,7 @@ import { getLocale, getMessages } from 'next-intl/server'
 import { headers } from 'next/headers'
 import { MobileBottomDockClient } from '@/components/MobileBottomDockClient'
 import { CookieConsentBanner } from '@/components/CookieConsentBanner'
+import { AnalyticsGate } from '@/components/AnalyticsGate'
 import './globals.css'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -166,15 +166,7 @@ export default async function RootLayout({
         </NextIntlClientProvider>
         <MobileBottomDockClient />
         <CookieConsentBanner />
-        <Analytics
-          beforeSend={(event) => {
-            if (typeof document === 'undefined') return event
-            const hasConsent = document.cookie
-              .split(';')
-              .some((c) => c.trim() === 'glook-consent=accepted')
-            return hasConsent ? event : null
-          }}
-        />
+        <AnalyticsGate />
         <SpeedInsights />
       </body>
     </html>
