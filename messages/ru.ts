@@ -642,6 +642,7 @@ const ru: AppMessages = {
   },
   CookieConsent: {
     ariaLabel: 'Согласие на использование cookies',
+    title: 'Настройки cookies',
     text: 'Мы используем Vercel Analytics, чтобы понять, как люди пользуются Glook. Персональные данные не собираются и не передаются.',
     privacyLink: 'Политика конфиденциальности',
     accept: 'Принять',

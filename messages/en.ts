@@ -640,6 +640,7 @@ const en = {
   },
   CookieConsent: {
     ariaLabel: 'Cookie consent',
+    title: 'Cookie preferences',
     text: 'We use Vercel Analytics to understand how people use Glook. No personal data is collected or shared.',
     privacyLink: 'Privacy Policy',
     accept: 'Accept',
