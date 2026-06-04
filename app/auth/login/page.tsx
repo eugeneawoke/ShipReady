@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
@@ -78,25 +78,25 @@ function IconCheck() {
 export default function LoginPage() {
   const router = useRouter()
   const t = useTranslations('Auth')
-  const [mode, setMode] = useState<Mode>(() => {
-    if (typeof window === 'undefined') return 'signin'
-    const candidate = new URLSearchParams(window.location.search).get('mode')
-    return candidate === 'signup' || candidate === 'signin' || candidate === 'reset'
-      ? candidate
-      : 'signin'
-  })
+  const [mode, setMode] = useState<Mode>('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
-  const [error, setError] = useState<string | null>(() => {
-    if (typeof window === 'undefined') return null
-    return new URLSearchParams(window.location.search).get('error') === 'auth'
-      ? 'Sign-in failed. Please try again.'
-      : null
-  })
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const candidate = params.get('mode')
+    if (candidate === 'signup' || candidate === 'signin' || candidate === 'reset') {
+      setMode(candidate)
+    }
+    if (params.get('error') === 'auth') {
+      setError('Sign-in failed. Please try again.')
+    }
+  }, [])
 
   function resetForm() {
     setEmail('')
