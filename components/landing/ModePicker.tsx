@@ -1,36 +1,35 @@
+'use client'
+
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 
 const MODES = [
   {
     href: '/seo',
     icon: '🔍',
-    title: 'SEO',
-    tagline: 'Get found on Google',
-    description: 'Find out why you\'re invisible to search engines. Core Web Vitals, indexability, structured data.',
+    key: 'seo' as const,
     color: 'from-blue-500/10 to-transparent border-blue-500/20',
   },
   {
     href: '/security',
     icon: '🛡️',
-    title: 'Security',
-    tagline: 'Protect your site',
-    description: 'Scan headers, SSL, exposed credentials, and privacy compliance in 60 seconds.',
+    key: 'security' as const,
     color: 'from-orange-500/10 to-transparent border-orange-500/20',
   },
   {
     href: '/ai-visibility',
     icon: '🤖',
-    title: 'AI Visibility',
-    tagline: 'Get cited by ChatGPT & Claude',
-    description: 'Check if AI crawlers can read your site. Generate llms.txt, schema.org, and FAQ markup.',
+    key: 'aiVisibility' as const,
     color: 'from-violet-500/10 to-transparent border-violet-500/20',
   },
 ]
 
 export function ModePicker() {
+  const t = useTranslations('Landing.modePicker')
+
   return (
     <section className="mx-auto max-w-4xl px-6 py-12">
-      <p className="mb-6 text-center text-sm text-[#8B8A85]">Or start with a focused report:</p>
+      <p className="mb-6 text-center text-sm text-[#8B8A85]">{t('orStart')}</p>
       <div className="grid gap-4 sm:grid-cols-3">
         {MODES.map((mode) => (
           <Link
@@ -40,12 +39,12 @@ export function ModePicker() {
           >
             <div className="flex items-center gap-2">
               <span className="text-xl" aria-hidden="true">{mode.icon}</span>
-              <span className="font-semibold text-[#F1F0EE]">{mode.title}</span>
+              <span className="font-semibold text-[#F1F0EE]">{t(`modes.${mode.key}.title`)}</span>
             </div>
-            <p className="text-sm font-medium text-[#F1F0EE]/80">{mode.tagline}</p>
-            <p className="text-xs leading-relaxed text-[#8B8A85]">{mode.description}</p>
+            <p className="text-sm font-medium text-[#F1F0EE]/80">{t(`modes.${mode.key}.tagline`)}</p>
+            <p className="text-xs leading-relaxed text-[#8B8A85]">{t(`modes.${mode.key}.description`)}</p>
             <span className="mt-auto text-xs text-[#6E56CF] group-hover:text-[#7C68D4]">
-              Run {mode.title} report →
+              {t(`modes.${mode.key}.run`)}
             </span>
           </Link>
         ))}

@@ -113,7 +113,7 @@ export function ScanForm({
     <form onSubmit={handleSubmit} className={`w-full min-w-0 ${compact ? '' : 'max-w-[560px] mx-auto'} ${className}`}>
       <div className={`flex min-w-0 gap-2 ${compact ? 'h-10' : 'h-auto min-[430px]:h-[52px] flex-col min-[430px]:flex-row'}`}>
         <label htmlFor="scan-url-input" className="sr-only">
-          Website URL to audit
+          {t('urlLabel')}
         </label>
         <input
           id="scan-url-input"
@@ -185,7 +185,7 @@ export function ScanForm({
             <p className="text-[#8B8A85] text-xs">
               {t('contactPrefix')}{' '}
               <a href="https://t.me/eugenegusakov" target="_blank" rel="noopener noreferrer" className="text-[#6E56CF] hover:underline">{t('contactTelegram')}</a>
-              {' '}or{' '}
+              {' '}{t('or')}{' '}
               <a href="mailto:egusakov74@gmail.com" className="text-[#6E56CF] hover:underline">{t('contactEmail')}</a>
             </p>
           )}

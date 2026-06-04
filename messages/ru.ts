@@ -107,6 +107,8 @@ const ru: AppMessages = {
     placeholder: 'https://yoursite.com',
     defaultSubmit: 'Сканировать ->',
     scanning: 'Сканируем...',
+    urlLabel: 'URL сайта для аудита',
+    or: 'или',
     goalTitle: 'Какая у вас главная цель? (опционально)',
     goalHint: 'Выберите одну цель, и мы сместим акцент в summary и рекомендациях на этот результат.',
     goals: {
@@ -577,7 +579,7 @@ const ru: AppMessages = {
       },
       {
         id: '04',
-        title: 'Growth & Quality Tooling',
+        title: 'Инструменты роста и качества',
         subtitle: 'Чеклист, digest, MCP Server и SEO-страницы запущены',
         status: 'done',
         releaseDate: '2026-05-28',
@@ -669,12 +671,35 @@ const ru: AppMessages = {
       getStarted: 'Начать',
       dashboard: 'Дашборд',
     },
+    modePicker: {
+      orStart: 'Или начните с конкретного отчёта:',
+      modes: {
+        seo: {
+          title: 'SEO',
+          tagline: 'Найдитесь в Google',
+          description: 'Узнайте, почему вас не видят поисковики. Core Web Vitals, индексируемость, структурированные данные.',
+          run: 'Запустить SEO-отчёт →',
+        },
+        security: {
+          title: 'Безопасность',
+          tagline: 'Защитите сайт',
+          description: 'Сканируем заголовки, SSL, утечки ключей и соответствие требованиям приватности за 60 секунд.',
+          run: 'Запустить отчёт по безопасности →',
+        },
+        aiVisibility: {
+          title: 'AI Visibility',
+          tagline: 'Попадите в ответы ChatGPT и Claude',
+          description: 'Проверяем, могут ли AI-краулеры читать ваш сайт. Генерируем llms.txt, schema.org и FAQ-разметку.',
+          run: 'Запустить AI Visibility отчёт →',
+        },
+      },
+    },
     hero: {
       h1a: 'Аудит сайтов, который понимает',
       h1b: 'бизнес вашего клиента.',
       sub: 'Отсканируйте любой URL за минуты. Evidence-based проверки производительности, SEO, безопасности и AI visibility — с промптами, готовыми для любого AI-инструмента.',
       noSignup: 'Первый скан без регистрации',
-      aiCompatibilityBadge: 'AI-ready fixes',
+      aiCompatibilityBadge: 'AI-ready фиксы',
       worksWith: 'Выберите цель, запустите скан и вставьте рекомендации в любой AI-инструмент для кода.',
       worksWithExamples: 'v0, Bolt, Lovable и другие',
     },

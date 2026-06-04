@@ -105,6 +105,8 @@ const en = {
     placeholder: 'https://yoursite.com',
     defaultSubmit: 'Scan ->',
     scanning: 'Scanning...',
+    urlLabel: 'Website URL to audit',
+    or: 'or',
     goalTitle: "What's your main goal? (optional)",
     goalHint: 'Pick one and we will bias the scan summary and fix guidance toward that outcome.',
     goals: {
@@ -666,6 +668,29 @@ const en = {
       signIn: 'Sign in',
       getStarted: 'Get started',
       dashboard: 'Dashboard',
+    },
+    modePicker: {
+      orStart: 'Or start with a focused report:',
+      modes: {
+        seo: {
+          title: 'SEO',
+          tagline: 'Get found on Google',
+          description: "Find out why you're invisible to search engines. Core Web Vitals, indexability, structured data.",
+          run: 'Run SEO report →',
+        },
+        security: {
+          title: 'Security',
+          tagline: 'Protect your site',
+          description: 'Scan headers, SSL, exposed credentials, and privacy compliance in 60 seconds.',
+          run: 'Run Security report →',
+        },
+        aiVisibility: {
+          title: 'AI Visibility',
+          tagline: 'Get cited by ChatGPT & Claude',
+          description: 'Check if AI crawlers can read your site. Generate llms.txt, schema.org, and FAQ markup.',
+          run: 'Run AI Visibility report →',
+        },
+      },
     },
     hero: {
       h1a: 'Find out why your site',

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { createBrowserClient } from '@supabase/ssr'
+import { useTranslations } from 'next-intl'
 
 /**
  * Auth-aware nav button for focused landing pages (/seo, /security, /ai-visibility).
@@ -10,6 +11,7 @@ import { createBrowserClient } from '@supabase/ssr'
  * on the client side as a small island. Shows "Dashboard" if logged in, "Sign in" otherwise.
  */
 export function LandingNavAuth() {
+  const t = useTranslations('Landing.nav')
   const [isLoggedIn, setIsLoggedIn] = useState(false)
 
   useEffect(() => {
@@ -36,7 +38,7 @@ export function LandingNavAuth() {
         href="/dashboard"
         className="rounded-lg bg-[#6E56CF] px-4 py-1.5 text-sm font-medium text-white hover:bg-[#7C68D4] transition-colors"
       >
-        Dashboard
+        {t('dashboard')}
       </Link>
     )
   }
@@ -46,7 +48,7 @@ export function LandingNavAuth() {
       href="/auth/login"
       className="rounded-lg bg-[#6E56CF] px-4 py-1.5 text-sm font-medium text-white hover:bg-[#7C68D4] transition-colors"
     >
-      Sign in
+      {t('signIn')}
     </Link>
   )
 }
