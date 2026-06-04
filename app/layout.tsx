@@ -4,18 +4,20 @@ import { SpeedInsights } from '@vercel/speed-insights/next'
 import { GeistSans } from 'geist/font/sans'
 import { GeistMono } from 'geist/font/mono'
 import { NextIntlClientProvider } from 'next-intl'
-import { getLocale, getMessages, getTranslations } from 'next-intl/server'
+import { getLocale, getMessages } from 'next-intl/server'
 import { headers } from 'next/headers'
 import { MobileBottomDockClient } from '@/components/MobileBottomDockClient'
 import './globals.css'
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations('Metadata')
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://glook.dev'
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://glook.dev').replace(/\/$/, '')
+
+  const title = 'Glook — Free Website Audit: SEO, AI Visibility & Security'
+  const description = 'Find out why Google, ChatGPT, Claude, and Perplexity can\'t find your site. Free SEO, AI visibility, and security audit in 60 seconds.'
 
   return {
-    title: t('layoutTitle'),
-    description: t('layoutDescription'),
+    title,
+    description,
     keywords: [
       'free website SEO audit',
       'AI visibility checker',
@@ -29,16 +31,17 @@ export async function generateMetadata(): Promise<Metadata> {
       'Google AI Overview optimization',
     ],
     openGraph: {
-      title: t('appTitle'),
-      description: t('appDescription'),
-      siteName: t('appTitle'),
+      title: 'Glook — Free Website Audit',
+      description,
+      siteName: 'Glook',
+      url: `${appUrl}/`,
       type: 'website',
       images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Glook — Free Website Audit: SEO, AI Visibility & Security' }],
     },
     twitter: {
       card: 'summary_large_image',
-      title: t('appTitle'),
-      description: t('appDescription'),
+      title: 'Glook — Free Website Audit',
+      description,
       images: ['/opengraph-image'],
     },
     icons: {
@@ -47,7 +50,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     manifest: '/manifest.json',
     metadataBase: new URL(appUrl),
-    alternates: { canonical: appUrl.replace(/\/$/, '') + '/' },
+    alternates: { canonical: `${appUrl}/` },
   }
 }
 
@@ -151,8 +154,16 @@ export default async function RootLayout({
         className="min-h-full flex flex-col bg-[#0E0E0F] text-[#F1F0EE] antialiased"
         suppressHydrationWarning
       >
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-black"
+        >
+          Skip to main content
+        </a>
         <NextIntlClientProvider locale={locale} messages={messages}>
-          {children}
+          <div id="main-content">
+            {children}
+          </div>
         </NextIntlClientProvider>
         <MobileBottomDockClient />
         <Analytics />

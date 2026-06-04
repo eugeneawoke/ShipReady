@@ -7,6 +7,20 @@ export const metadata: Metadata = {
   title: 'API Documentation — Glook',
   description:
     'REST API and MCP JSON-RPC documentation for Glook. Integrate website audits into your CI/CD pipeline, dashboards, and AI agents.',
+  alternates: { canonical: 'https://glook.dev/docs/api' },
+  openGraph: {
+    title: 'API Documentation — Glook',
+    description: 'REST API and MCP JSON-RPC documentation for Glook. Integrate website audits into your CI/CD pipeline, dashboards, and AI agents.',
+    url: 'https://glook.dev/docs/api',
+    type: 'website',
+    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Glook API Documentation' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'API Documentation — Glook',
+    description: 'REST API and MCP JSON-RPC documentation for Glook.',
+    images: ['/opengraph-image'],
+  },
 }
 
 function CodeBlock({ code, lang = 'bash' }: { code: string; lang?: string }) {

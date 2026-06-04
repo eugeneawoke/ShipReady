@@ -112,7 +112,11 @@ export function ScanForm({
   return (
     <form onSubmit={handleSubmit} className={`w-full min-w-0 ${compact ? '' : 'max-w-[560px] mx-auto'} ${className}`}>
       <div className={`flex min-w-0 gap-2 ${compact ? 'h-10' : 'h-auto min-[430px]:h-[52px] flex-col min-[430px]:flex-row'}`}>
+        <label htmlFor="scan-url-input" className="sr-only">
+          Website URL to audit
+        </label>
         <input
+          id="scan-url-input"
           type="text"
           value={url}
           onChange={e => setUrl(e.target.value)}
@@ -153,7 +157,7 @@ export function ScanForm({
               </p>
             </div>
           </div>
-          <div className="mt-3 flex flex-nowrap gap-1.5 overflow-x-auto pb-0.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          <div role="group" aria-label={t('goalTitle')} className="mt-3 flex flex-nowrap gap-1.5 overflow-x-auto pb-0.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {SCAN_GOALS.map(goal => (
               <button
                 key={goal.value}

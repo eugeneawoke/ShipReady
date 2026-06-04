@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { ScanForm } from '@/components/landing/ScanForm'
 import { SiteBrandLink } from '@/components/SiteHeader'
 import { LandingNavAuth } from '@/components/landing/LandingNavAuth'
+import { SiteMicroFooter } from '@/components/SiteMicroFooter'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
@@ -82,6 +83,7 @@ export default function SeoLandingPage() {
           ))}
         </div>
       </section>
+      <SiteMicroFooter />
     </div>
   )
 }

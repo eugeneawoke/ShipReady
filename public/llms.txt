@@ -1,12 +1,12 @@
-# ShipReady
+# Glook
 
-> ShipReady is a free website audit tool that shows you exactly why your site
+> Glook is a free website audit tool that shows you exactly why your site
 > isn't showing up in Google, ChatGPT, Claude, or Perplexity — and gives you
-> the exact fix for each issue. Scan any URL in 30 seconds. No signup required.
+> the exact fix for each issue. Scan any URL in 60 seconds. No signup required.
 
 ## Description
 
-ShipReady runs 35+ automated checks across five audit categories and produces a
+Glook runs 40+ automated checks across five audit categories and produces a
 structured report with evidence-grounded confidence ratings: verified (measured
 directly from HTTP/HTML signals), likely (strong heuristic with clear evidence),
 and heuristic (AI inference from ambiguous signals). Every finding includes the
@@ -24,7 +24,7 @@ audience: web and SEO agencies auditing client sites before delivery.
 
 ## Author
 
-ShipReady — https://shipready.app
+Glook — https://glook.dev
 
 ## Key Concepts
 
@@ -34,7 +34,7 @@ ShipReady — https://shipready.app
 - Fast Truth Pass (under 30s) + Deep Pass (Lighthouse + AI enrichment)
 - Fix prompts tailored to detected tech stack (Next.js, Shopify, WordPress, etc.)
 
-## What ShipReady Checks
+## What Glook Checks
 
 ### SEO
 Title tags, meta descriptions, canonical URLs, Open Graph tags, Twitter/X cards,
@@ -71,7 +71,7 @@ Q: How do I make my website appear in ChatGPT, Claude, and Perplexity?
 A: AI search engines need three things: access (robots.txt must allow GPTBot,
 ClaudeBot, and PerplexityBot), structure (FAQ schema, Organization sameAs, and
 llms.txt help AI parse your content), and answer-first content (pages should
-answer their main question in the first 130-170 words). ShipReady's AI Visibility
+answer their main question in the first 130-170 words). Glook's AI Visibility
 scan checks all of this automatically.
 
 Q: What is GEO and how is it different from SEO?
@@ -80,7 +80,7 @@ Optimization) optimizes for citations within AI-generated answers from ChatGPT,
 Claude, Perplexity, and Google AI Overview. Both matter in 2026 — AI search
 handles over 40% of information queries.
 
-Q: Is ShipReady free?
+Q: Is Glook free?
 A: Yes. 3 scans per month are free, no credit card required. Pro ($14/mo) adds
 unlimited scans, full AI fix prompts, PDF export, and weekly monitoring.
 
@@ -88,13 +88,17 @@ Q: How long does a scan take?
 A: Initial findings appear in under 30 seconds. The full report with Lighthouse
 scores and AI fix prompts takes 1-3 minutes.
 
-Q: What fix prompts does ShipReady generate?
+Q: What fix prompts does Glook generate?
 A: Each issue gets a specific, ready-to-paste prompt with file paths and code
 examples for the detected tech stack. Prompts work with any AI assistant —
 Claude, ChatGPT, or any tool you paste text into.
 
 ## Pages
 
-- https://shipready.app/ — Homepage, run a free scan
-- https://shipready.app/pricing — Pricing plans (Free, Pro, Agency)
-- https://shipready.app/roadmap — Product roadmap
+- https://glook.dev/ — Homepage, run a free scan
+- https://glook.dev/seo — SEO audit landing page
+- https://glook.dev/security — Security audit landing page
+- https://glook.dev/ai-visibility — AI visibility audit landing page
+- https://glook.dev/pricing — Pricing plans (Free, Pro, Agency)
+- https://glook.dev/roadmap — Product roadmap
+- https://glook.dev/docs/api — REST API and MCP documentation
