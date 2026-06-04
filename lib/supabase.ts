@@ -37,7 +37,6 @@ export async function createClient() {
               cookieStore.set(name, value, {
                 ...options,
                 maxAge: SESSION_MAX_AGE,
-                httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'lax',
               }))
