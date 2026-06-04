@@ -1,4 +1,5 @@
 import { headers } from 'next/headers'
+import Link from 'next/link'
 
 const faqSchema = {
   '@context': 'https://schema.org',
@@ -55,9 +56,14 @@ export default async function LandingLayout({ children }: { children: React.Reac
       <script
         nonce={nonce}
         type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       {children}
+      <div className="sr-only">
+        <Link href="/privacy">Privacy Policy</Link>
+        <Link href="/terms">Terms of Service</Link>
+      </div>
     </>
   )
 }

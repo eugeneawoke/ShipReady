@@ -8,7 +8,8 @@ import { localeCookieName, type AppLocale } from '@/lib/i18n'
 const LOCALES: AppLocale[] = ['en', 'ru']
 
 function persistLocale(locale: AppLocale) {
-  document.cookie = `${localeCookieName}=${locale}; path=/; max-age=31536000; samesite=lax`
+  const secure = location.protocol === 'https:' ? '; secure' : ''
+  document.cookie = `${localeCookieName}=${locale}; path=/; max-age=31536000; samesite=lax${secure}`
   document.documentElement.lang = locale
 }
 
