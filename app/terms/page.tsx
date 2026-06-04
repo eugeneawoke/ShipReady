@@ -15,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const UPDATED = 'May 11, 2026'
-const EMAIL = 'egusakov74@gmail.com'
+const EMAIL = 'support@glook.dev'
 
 export default async function TermsPage() {
   const locale = await getLocale()
@@ -97,7 +97,7 @@ export default async function TermsPage() {
               </li>
               <li>{isRu ? 'Отмена подписки. Вы можете отменить подписку в любой момент. Отмена вступает в силу в конце текущего платёжного периода. Возврат за частично использованные периоды по умолчанию не предоставляется.' : 'Cancellation. You may cancel at any time. Cancellation takes effect at the end of the current billing period. Refunds for partial periods are not provided by default.'}</li>
               <li>{isRu ? 'Возвраты и спорные платежи обрабатываются в соответствии с политиками платёжного провайдера PayPro Global.' : 'Refunds and chargebacks are handled according to PayPro Global payment provider policies.'}</li>
-              <li>{isRu ? 'Agency план: доступен по индивидуальному соглашению. Функциональность и цены обсуждаются при запросе. За подробностями обратитесь к egusakov74@gmail.com.' : 'Agency plan: available by manual arrangement. Features and pricing are discussed on request. Contact egusakov74@gmail.com for details.'}</li>
+              <li>{isRu ? 'Agency план: доступен по индивидуальному соглашению. Функциональность и цены обсуждаются при запросе. За подробностями обратитесь к support@glook.dev.' : 'Agency plan: available by manual arrangement. Features and pricing are discussed on request. Contact support@glook.dev for details.'}</li>
               <li>{isRu ? 'Beta Pro доступ: временный промо-доступ, предоставляемый во время beta-тестирования. Beta Pro grants не являются платными подписками, не связаны с биллингом и могут истечь или быть отменены в любой момент без уведомления.' : 'Beta Pro access: temporary promotional access granted during beta testing. Beta Pro grants are not paid subscriptions, are separate from billing, and may expire or be revoked at any time without notice.'}</li>
               <li>{isRu ? 'Цены могут меняться с уведомлением за 30 дней на email вашего аккаунта.' : 'Prices may change with 30 days advance notice to your account email.'}</li>
             </ul>

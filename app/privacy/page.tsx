@@ -15,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const UPDATED = 'May 11, 2026'
-const EMAIL = 'egusakov74@gmail.com'
+const EMAIL = 'support@glook.dev'
 
 export default async function PrivacyPage() {
   const locale = await getLocale()

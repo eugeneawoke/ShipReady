@@ -128,7 +128,7 @@ export default async function RoadmapPage() {
             {t.ctaBody}
           </p>
           <a
-            href="mailto:egusakov74@gmail.com"
+            href="mailto:support@glook.dev"
             className="inline-flex items-center gap-2 text-sm px-5 py-2.5 rounded-xl bg-[#6E56CF] text-white hover:bg-[#7C68D4] transition-colors font-medium"
           >
             {t.cta}
