@@ -163,9 +163,9 @@ export default async function RootLayout({
         </a>
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}
+          <MobileBottomDockClient />
+          <CookieConsentBanner />
         </NextIntlClientProvider>
-        <MobileBottomDockClient />
-        <CookieConsentBanner />
         <AnalyticsGate />
         <SpeedInsights />
       </body>
