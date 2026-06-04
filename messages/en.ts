@@ -638,6 +638,13 @@ const en = {
     privacy: 'Privacy',
     terms: 'Terms',
   },
+  CookieConsent: {
+    ariaLabel: 'Cookie consent',
+    text: 'We use Vercel Analytics to understand how people use Glook. No personal data is collected or shared.',
+    privacyLink: 'Privacy Policy',
+    accept: 'Accept',
+    decline: 'Decline',
+  },
   NotFound: {
     eyebrow: 'Page not found',
     title: 'Nothing to ship here.',

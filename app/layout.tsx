@@ -7,6 +7,7 @@ import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
 import { headers } from 'next/headers'
 import { MobileBottomDockClient } from '@/components/MobileBottomDockClient'
+import { CookieConsentBanner } from '@/components/CookieConsentBanner'
 import './globals.css'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -164,7 +165,16 @@ export default async function RootLayout({
           {children}
         </NextIntlClientProvider>
         <MobileBottomDockClient />
-        <Analytics />
+        <CookieConsentBanner />
+        <Analytics
+          beforeSend={(event) => {
+            if (typeof document === 'undefined') return event
+            const hasConsent = document.cookie
+              .split(';')
+              .some((c) => c.trim() === 'glook-consent=accepted')
+            return hasConsent ? event : null
+          }}
+        />
         <SpeedInsights />
       </body>
     </html>

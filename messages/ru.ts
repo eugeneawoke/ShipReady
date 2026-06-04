@@ -640,6 +640,13 @@ const ru: AppMessages = {
     privacy: 'Конфиденциальность',
     terms: 'Условия',
   },
+  CookieConsent: {
+    ariaLabel: 'Согласие на использование cookies',
+    text: 'Мы используем Vercel Analytics, чтобы понять, как люди пользуются Glook. Персональные данные не собираются и не передаются.',
+    privacyLink: 'Политика конфиденциальности',
+    accept: 'Принять',
+    decline: 'Отклонить',
+  },
   NotFound: {
     eyebrow: 'Страница не найдена',
     title: 'Здесь нечего деплоить.',
