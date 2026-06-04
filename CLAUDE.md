@@ -7,14 +7,16 @@
 
 ## Startup Ritual
 
-Read these before proposing architecture, features, or status:
+Before proposing architecture, features, or status — in order:
 
-1. `docs/project-spec.md` — current product specification
-2. `PLAN.md` — current phase
-3. `TODO.md` — beta checklist
-4. `DECISIONS.md` — accepted and rejected decisions
-5. `EVIDENCE.md` — verified facts and outdated assumptions
-6. `MEMORY.md` — persistent context
+0. **Ruflo RAG recall** — search relevant past insights: `mcp__ruflo__memory_search {query: "<current topic>"}`. Apply any relevant findings before proceeding.
+1. `AGENTS.md` — unified agent context, tool mapping, current blockers
+2. `docs/project-spec.md` — current product specification
+3. `PLAN.md` — current phase
+4. `TODO.md` — beta checklist
+5. `DECISIONS.md` — accepted and rejected decisions
+6. `EVIDENCE.md` — verified facts and outdated assumptions
+7. `MEMORY.md` — persistent context
 
 After a completed change, update the relevant doc instead of leaving stale plans behind.
 
@@ -215,12 +217,17 @@ BING_OAUTH_CLIENT_SECRET
 BING_OAUTH_TENANT_ID
 BING_OAUTH_REDIRECT_URI
 SERPER_API_KEY
+PAYPRO_VALIDATION_KEY
+PAYPRO_PRODUCT_PRO_MONTHLY
+PAYPRO_PRODUCT_PRO_YEARLY
+PAYPRO_SANDBOX
+PAYPRO_SECRET_KEY
 ```
 
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **ShipReady** (3935 symbols, 6726 relationships, 300 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **ShipReady** (4062 symbols, 6972 relationships, 300 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 

@@ -68,6 +68,7 @@ ruvector.db
 limerank_research_summary.md
 sitepravo-ru-reverse-engineering.md
 AGENTS.md
+.hermes.md
 
 # debug
 npm-debug.log*
@@ -84,3 +85,4 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+.worktrees/

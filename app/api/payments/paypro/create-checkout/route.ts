@@ -1,3 +1,5 @@
+export const runtime = 'nodejs'
+
 import { createClient } from '@/lib/supabase'
 import { createCheckoutUrl } from '@/lib/payments/paypro/checkout'
 import type { PayProPlanId } from '@/lib/payments/paypro/config'
