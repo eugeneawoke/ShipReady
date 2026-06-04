@@ -134,6 +134,8 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        {/* Sitemap link — lets AI/SEO scanners find /sitemap.xml from HTML without HTTP probe */}
+        <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
         <script
           nonce={nonce}
           suppressHydrationWarning

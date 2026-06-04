@@ -28,8 +28,13 @@ function isTlsError(err: unknown): boolean {
 }
 
 function fetchValidatedResource(safeUrl: string, init: RequestInit = {}): Promise<Response> {
+  const headers = new Headers(init.headers as HeadersInit | undefined)
+  if (!headers.has('User-Agent')) {
+    headers.set('User-Agent', 'Glook-Scanner/1.0 (website audit; +https://glook.dev)')
+  }
   return fetch(safeUrl, {
     ...init,
+    headers,
     redirect: 'manual',
   })
 }
@@ -100,7 +105,13 @@ export async function fetchWithHeadFallback(
     if (head.ok) {
       return { ok: true, status: head.status, method: 'HEAD' }
     }
-    if (head.status !== 405 && head.status !== 403) {
+    // Fall through to GET for: 405 Method Not Allowed, 403 Forbidden, any 3xx redirect
+    // (redirect: 'manual' returns raw 3xx — do a GET to actually follow/check)
+    const shouldFallToGet =
+      head.status === 405 ||
+      head.status === 403 ||
+      (head.status >= 300 && head.status < 400)
+    if (!shouldFallToGet) {
       return { ok: false, status: head.status, method: 'HEAD' }
     }
   } catch {

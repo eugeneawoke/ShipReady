@@ -404,7 +404,7 @@ export async function runAIVisibilityChecks(
   let hasSitemapFile = false
   try {
     const { fetchWithHeadFallback } = await import('@/lib/checks/fetch-context')
-    const sitemapResult = await fetchWithHeadFallback(`${origin}/sitemap.xml`, 2500)
+    const sitemapResult = await fetchWithHeadFallback(`${origin}/sitemap.xml`, 5000)
     hasSitemapFile = sitemapResult.ok
   } catch {
     hasSitemapFile = false
