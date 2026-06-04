@@ -44,6 +44,7 @@ export function CookieConsentBanner({ initialConsent }: { initialConsent: string
     <>
       {/* Desktop: floating card bottom-right */}
       <div
+        id="cookie-consent"
         role="dialog"
         aria-label={t('ariaLabel')}
         data-cookie-consent="true"
@@ -89,6 +90,7 @@ export function CookieConsentBanner({ initialConsent }: { initialConsent: string
 
       {/* Mobile: bottom sheet full-width */}
       <div
+        id="cookie-consent-mobile"
         role="dialog"
         aria-label={t('ariaLabel')}
         data-cookie-consent="true"

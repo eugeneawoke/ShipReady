@@ -23,6 +23,14 @@ const SEVERITY_COLORS: Record<string, string> = {
   low: '#4A9EFF',
 }
 
+const SEVERITY_ORDER: Record<string, number> = {
+  critical: 0,
+  high: 1,
+  medium: 2,
+  low: 3,
+  pass: 4,
+}
+
 interface CategoryCardProps {
   category: IssueCategory
   data: CategoryScore
@@ -51,6 +59,10 @@ export function CategoryCard({ category, data }: CategoryCardProps) {
     poor: t('scoreLabels.poor'),
     unavailable: t('scoreLabels.unavailable'),
   }
+
+  const sortedIssues = [...data.issues].sort(
+    (a, b) => (SEVERITY_ORDER[a.severity] ?? 9) - (SEVERITY_ORDER[b.severity] ?? 9)
+  )
 
   const passedChecks = getPassedChecksForIssues(category, data.issues)
 
@@ -119,7 +131,7 @@ export function CategoryCard({ category, data }: CategoryCardProps) {
             </div>
           ) : (
             <>
-              {data.issues.map(issue => (
+              {sortedIssues.map(issue => (
                 <button
                   key={issue.id}
                   onClick={() => scrollToIssue(issue.id)}

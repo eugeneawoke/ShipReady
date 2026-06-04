@@ -3,15 +3,9 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
-import { localeCookieName, type AppLocale } from '@/lib/i18n'
+import { type AppLocale } from '@/lib/i18n'
 
 const LOCALES: AppLocale[] = ['en', 'ru']
-
-function persistLocale(locale: AppLocale) {
-  const secure = location.protocol === 'https:' ? '; secure' : ''
-  document.cookie = `${localeCookieName}=${locale}; path=/; max-age=31536000; samesite=lax${secure}`
-  document.documentElement.lang = locale
-}
 
 export function LanguageSwitcher() {
   const locale = useLocale() as AppLocale
@@ -25,12 +19,15 @@ export function LanguageSwitcher() {
       setOpen(false)
       return
     }
-
-    persistLocale(nextLocale)
     setOpen(false)
-
-    startTransition(() => {
-      router.refresh()
+    // httpOnly cookie must be set via API — document.cookie cannot write httpOnly
+    fetch('/api/set-locale', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ locale: nextLocale }),
+    }).then(() => {
+      document.documentElement.lang = nextLocale
+      startTransition(() => { router.refresh() })
     })
   }
 

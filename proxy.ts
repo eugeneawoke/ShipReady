@@ -55,7 +55,7 @@ export async function proxy(request: NextRequest) {
           path: '/',
           maxAge: 60 * 60 * 24 * 365,
           sameSite: 'lax',
-          httpOnly: false,
+          httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
         })
         return r
