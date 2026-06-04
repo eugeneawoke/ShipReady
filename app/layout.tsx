@@ -161,9 +161,7 @@ export default async function RootLayout({
           Skip to main content
         </a>
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <div id="main-content">
-            {children}
-          </div>
+          {children}
         </NextIntlClientProvider>
         <MobileBottomDockClient />
         <Analytics />
