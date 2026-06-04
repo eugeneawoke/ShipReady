@@ -37,7 +37,7 @@ export function LtdFounderDeal({ active, proCheckoutUrl, agencyCheckoutUrl }: Lt
           Founder Deal
         </span>
         <h2 className="mt-2 text-2xl font-bold text-white">
-          Invest in ShipReady — Own it forever
+          Invest in Glook — Own it forever
         </h2>
         <p className="mt-2 text-sm text-zinc-400">
           One-time payment. Same features as monthly. No renewals, ever.
