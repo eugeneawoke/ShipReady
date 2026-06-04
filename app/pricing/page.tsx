@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase'
 import { SiteHeader } from '@/components/SiteHeader'
@@ -9,6 +10,8 @@ import { PricingCtas } from '@/components/pricing/PricingCtas'
 import { ChecksAccordion } from '@/components/pricing/ChecksAccordion'
 import { MobileDockSpacer } from '@/components/navigation/MobileDockSpacer'
 import { FeatureCell } from '@/components/shared/FeatureCell'
+import { LtdFounderDeal } from '@/components/pricing/LtdFounderDeal'
+import { BetaIntroBanner } from '@/components/pricing/BetaIntroBanner'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('Metadata')
@@ -229,19 +232,27 @@ export default async function PricingPage() {
           <p className="text-[#8B8A85] text-sm max-w-sm mx-auto leading-relaxed">{tpricing('sub')}</p>
         </div>
 
+        {/* beta intro banner — shown when ?ref= campaign param is present */}
+        <Suspense fallback={null}>
+          <BetaIntroBanner />
+        </Suspense>
+
         {/* plan strip */}
         <div className="mb-8">
-          <PricingCtas
-            isLoggedIn={!!user}
-            plans={plans}
-            popularLabel={tpricing('popular')}
-            comingSoonLabel={tpricing('comingSoon')}
-            cancelLabel={tpricing('cancelAnytime')}
-            toggleMonthly={tpricing('toggleMonthly')}
-            toggleYearly={tpricing('toggleYearly')}
-            proYearlyPrice={tpricing('proYearlyPrice')}
-            proYearlySavings={tpricing('proYearlySavings')}
-          />
+          <Suspense fallback={
+            <div className="h-64 rounded-2xl bg-[#161618] animate-pulse" />
+          }>
+            <PricingCtas
+              isLoggedIn={!!user}
+              plans={plans}
+              popularLabel={tpricing('popular')}
+              comingSoonLabel={tpricing('comingSoon')}
+              cancelLabel={tpricing('cancelAnytime')}
+              toggleMonthly={tpricing('toggleMonthly')}
+              toggleYearly={tpricing('toggleYearly')}
+              proYearlyPrice={tpricing('proYearlyPrice')}
+            />
+          </Suspense>
         </div>
 
         {/* scroll invitation */}
@@ -305,6 +316,13 @@ export default async function PricingPage() {
           </div>
           </div>
         </div>
+
+        {/* ltd founder deal */}
+        <LtdFounderDeal
+          active={false}
+          proCheckoutUrl={undefined}
+          agencyCheckoutUrl={undefined}
+        />
 
         {/* checks accordion */}
         <div className="mb-20">

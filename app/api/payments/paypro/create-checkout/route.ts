@@ -2,9 +2,10 @@ export const runtime = 'nodejs'
 
 import { createClient } from '@/lib/supabase'
 import { createCheckoutUrl } from '@/lib/payments/paypro/checkout'
+import { PAYPRO_PLANS } from '@/lib/payments/paypro/config'
 import type { PayProPlanId } from '@/lib/payments/paypro/config'
 
-const VALID_PLAN_IDS: PayProPlanId[] = ['pro_monthly', 'pro_yearly']
+const VALID_PLAN_IDS: PayProPlanId[] = Object.keys(PAYPRO_PLANS) as PayProPlanId[]
 
 export async function POST(request: Request): Promise<Response> {
   const supabase = await createClient()

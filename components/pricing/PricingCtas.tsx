@@ -1,8 +1,24 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+
+const EARLY_ACCESS_REF = 'earlybird'
+const EARLY_MONTHLY_PRICE = '$14'
+const EARLY_YEARLY_PRICE = '$152'
+
+// Numeric constants for savings badge computation
+const REGULAR_MONTHLY = 19
+const REGULAR_YEARLY = 190
+const EARLY_MONTHLY_NUM = 14
+const EARLY_YEARLY_NUM = 152
+const EARLY_PROMO_MONTHS = 3 // first 3 months at earlybird rate, then regular
+
+const regularSavingsPct = Math.round((1 - REGULAR_YEARLY / (REGULAR_MONTHLY * 12)) * 100)
+const earlyAnnualMonthly = EARLY_PROMO_MONTHS * EARLY_MONTHLY_NUM + (12 - EARLY_PROMO_MONTHS) * REGULAR_MONTHLY
+const earlySavingsPct = Math.round((1 - EARLY_YEARLY_NUM / earlyAnnualMonthly) * 100)
 
 interface Plan {
   nameKey: string
@@ -22,7 +38,6 @@ interface PricingCtasProps {
   toggleMonthly: string
   toggleYearly: string
   proYearlyPrice: string
-  proYearlySavings: string
 }
 
 export function PricingCtas({
@@ -34,12 +49,19 @@ export function PricingCtas({
   toggleMonthly,
   toggleYearly,
   proYearlyPrice,
-  proYearlySavings,
 }: PricingCtasProps) {
   const [billing, setBilling] = useState<'monthly' | 'yearly'>('monthly')
   const [loading, setLoading] = useState(false)
   const [checkoutError, setCheckoutError] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
   const router = useRouter()
+  const params = useSearchParams()
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const isEarlyAccess = mounted && params.get('ref') === EARLY_ACCESS_REF
 
   async function handleProCheckout() {
     if (!isLoggedIn) {
@@ -50,7 +72,9 @@ export function PricingCtas({
     setLoading(true)
     setCheckoutError(null)
     try {
-      const planId = billing === 'yearly' ? 'pro_yearly' : 'pro_monthly'
+      const planId = billing === 'yearly'
+        ? (isEarlyAccess ? 'pro_earlybird_yearly' : 'pro_yearly')
+        : (isEarlyAccess ? 'pro_earlybird_monthly' : 'pro_monthly')
       const res = await fetch('/api/payments/paypro/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -70,7 +94,7 @@ export function PricingCtas({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-8">
       {/* Monthly / yearly toggle */}
       <div className="flex justify-center">
         <div className="inline-flex items-center gap-1 p-1 rounded-xl bg-[#161618] border border-white/[0.06]">
@@ -98,7 +122,7 @@ export function PricingCtas({
                 ? 'bg-white/20 text-white'
                 : 'bg-[#6E56CF]/20 text-[#a78bfa]'
             }`}>
-              {proYearlySavings}
+              {isEarlyAccess ? `Save ${earlySavingsPct}%` : `Save ${regularSavingsPct}%`}
             </span>
           </button>
         </div>
@@ -116,6 +140,9 @@ export function PricingCtas({
           const isAgency = plan.coming
           const displayPrice = isPro && billing === 'yearly' ? proYearlyPrice : plan.price
           const displayPeriod = isPro && billing === 'yearly' ? '/yr' : plan.period
+          const earlyPrice = isPro
+            ? (billing === 'yearly' ? EARLY_YEARLY_PRICE : EARLY_MONTHLY_PRICE)
+            : null
 
           return (
             <div
@@ -142,7 +169,14 @@ export function PricingCtas({
               <p className="text-[10px] text-[#5A5955] uppercase tracking-[0.15em] font-mono">{plan.nameKey}</p>
 
               <div className="flex items-baseline gap-1">
-                <span className="text-[34px] font-mono font-medium leading-none">{displayPrice}</span>
+                {isEarlyAccess && earlyPrice ? (
+                  <>
+                    <span className="text-[22px] font-mono font-medium leading-none line-through text-[#5A5955]">{displayPrice}</span>
+                    <span className="text-[34px] font-mono font-medium leading-none text-emerald-400">{earlyPrice}</span>
+                  </>
+                ) : (
+                  <span className="text-[34px] font-mono font-medium leading-none">{displayPrice}</span>
+                )}
                 {displayPeriod && <span className="text-[#8B8A85] text-sm">{displayPeriod}</span>}
               </div>
 
