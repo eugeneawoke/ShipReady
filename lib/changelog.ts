@@ -9,6 +9,45 @@ export interface ChangelogEntry {
 
 export const changelog: ChangelogEntry[] = [
   {
+    date: '2026-06-04',
+    title: 'GDPR consent, security hardening, and scanner fixes',
+    summary: 'Cookie consent banner with analytics gate, production security fixes, and self-scan now correctly detects llms.txt and sitemap.xml.',
+    items: [
+      'GDPR cookie consent banner — floating card on desktop, bottom sheet on mobile, analytics gated behind consent',
+      'httpOnly and Secure flags on locale cookie, SSR-rendered privacy links',
+      'Timing-safe token comparison, production remediation pass (security + SEO + a11y)',
+      'Issue list sorted by severity — critical issues surface first',
+      'Scanner self-scan fix — llms.txt and sitemap.xml now detected correctly when scanning glook.dev itself',
+    ],
+    category: 'security',
+    tags: ['Security', 'UI'],
+  },
+  {
+    date: '2026-06-02',
+    title: 'OAuth scan enrichment and Vercel Analytics',
+    summary: 'Yandex Webmaster, GA4, and Yandex Metrika data now wired into reports. Vercel Analytics and Speed Insights added.',
+    items: [
+      'Yandex Webmaster, Google Analytics 4, and Yandex Metrika OAuth data wired into scan enrichment',
+      'Authenticated users notified when Google or Yandex integrations are not connected',
+      'Vercel Analytics and Speed Insights integrated for performance monitoring',
+    ],
+    category: 'improvement',
+    tags: ['UI'],
+  },
+  {
+    date: '2026-06-01',
+    title: 'Security hardening — IDOR fix, SSRF, timing-safe tokens',
+    summary: 'Backend security pass: timing-safe comparisons, IDOR fix on report access, SSRF hardening, performance and SEO improvements.',
+    items: [
+      'Timing-safe token comparison — prevents timing-based secret inference',
+      'IDOR fix — report access now enforces ownership check',
+      'SSRF hardening — stricter URL validation on scan input',
+      'Performance and SEO improvements in scan pipeline',
+    ],
+    category: 'security',
+    tags: ['Security'],
+  },
+  {
     date: '2026-05-31',
     title: 'AI tool brand icons + footer mobile fix',
     summary: 'Official SVG logos for Cursor, Claude Code, Windsurf, Codex, and Gemini chips. Compare dropdown now works on touch devices.',
