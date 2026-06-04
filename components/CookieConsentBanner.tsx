@@ -17,12 +17,14 @@ function setConsent(value: 'accepted' | 'declined') {
   document.cookie = `${CONSENT_COOKIE}=${value}; path=/; max-age=31536000; SameSite=Lax${secure}`
 }
 
-export function CookieConsentBanner() {
+export function CookieConsentBanner({ initialConsent }: { initialConsent: string | null }) {
   const t = useTranslations('CookieConsent')
-  const [visible, setVisible] = useState(false)
+  // SSR: show when server sees no consent cookie (scanner sees banner in HTML)
+  const [visible, setVisible] = useState(!initialConsent)
 
   useEffect(() => {
-    if (!getConsent()) setVisible(true)
+    // Client-side sync in case cookie changed since SSR
+    setVisible(!getConsent())
   }, [])
 
   function handleAccept() {

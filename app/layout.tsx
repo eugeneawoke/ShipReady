@@ -4,7 +4,7 @@ import { GeistSans } from 'geist/font/sans'
 import { GeistMono } from 'geist/font/mono'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
-import { headers } from 'next/headers'
+import { headers, cookies } from 'next/headers'
 import { MobileBottomDockClient } from '@/components/MobileBottomDockClient'
 import { CookieConsentBanner } from '@/components/CookieConsentBanner'
 import { AnalyticsGate } from '@/components/AnalyticsGate'
@@ -124,6 +124,8 @@ export default async function RootLayout({
   const locale = await getLocale()
   const messages = await getMessages()
   const nonce = (await headers()).get('x-nonce') ?? undefined
+  const cookieStore = await cookies()
+  const consentCookie = cookieStore.get('glook-consent')?.value ?? null
 
   return (
     <html
@@ -164,7 +166,7 @@ export default async function RootLayout({
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}
           <MobileBottomDockClient />
-          <CookieConsentBanner />
+          <CookieConsentBanner initialConsent={consentCookie} />
         </NextIntlClientProvider>
         <AnalyticsGate />
         <SpeedInsights />
