@@ -59,10 +59,11 @@ docs/deferred-security-issues.md
 docs/shipready-growth-roadmap.md
 docs/shipready_competitors.md
 
-# Agent/AI runtime databases
+# Agent/AI runtime databases and configs
 agentdb.rvf
 agentdb.rvf.lock
 ruvector.db
+.claude-flow/
 
 # Research / competitive analysis docs (root level)
 limerank_research_summary.md

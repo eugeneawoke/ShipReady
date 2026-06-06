@@ -583,6 +583,12 @@ function HowItWorksSection({ t }: { t: Translations }) {
             </motion.div>
           ))}
         </div>
+
+        <motion.div {...fadeUp(0.3)} className="mt-10 text-center">
+          <Link href="/methodology" className="text-sm text-[#5A5955] hover:text-[#8B8A85] transition-colors">
+            {t.how.methodologyLink}
+          </Link>
+        </motion.div>
       </div>
     </section>
   )

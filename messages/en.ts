@@ -715,6 +715,7 @@ const en = {
         { step: '02', emoji: '2', title: '90+ checks run', desc: 'Fast truth checks run first, then deeper analysis follows for performance and noisier heuristics.' },
         { step: '03', emoji: '3', title: 'Get AI fix prompts', desc: 'Each issue has a plain-English explanation and one ready-to-paste prompt you can use in any AI coding tool.' },
       ],
+      methodologyLink: 'How we score →',
     },
     preview: {
       eyebrow: 'The report',
