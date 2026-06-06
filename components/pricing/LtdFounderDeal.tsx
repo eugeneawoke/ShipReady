@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { WaitlistModal } from '@/components/WaitlistModal'
 
 interface SlotData {
   total: number
@@ -21,6 +22,7 @@ interface LtdFounderDealProps {
 
 export function LtdFounderDeal({ active, proCheckoutUrl, agencyCheckoutUrl }: LtdFounderDealProps) {
   const [slots, setSlots] = useState<LtdSlots | null>(null)
+  const [waitlistOpen, setWaitlistOpen] = useState(false)
 
   useEffect(() => {
     if (!active) return
@@ -31,58 +33,67 @@ export function LtdFounderDeal({ active, proCheckoutUrl, agencyCheckoutUrl }: Lt
   }, [active])
 
   return (
-    <section className="mt-16 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-8">
-      <div className="mb-6 text-center">
-        <span className="mb-2 inline-block rounded-full bg-amber-500/20 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-amber-400">
-          Founder Deal
-        </span>
-        <h2 className="mt-2 text-2xl font-bold text-white">
-          Invest in Glook — Own it forever
-        </h2>
-        <p className="mt-2 text-sm text-zinc-400">
-          One-time payment. Same features as monthly. No renewals, ever.
-        </p>
-      </div>
+    <>
+      <section className="mt-16 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-8">
+        <div className="mb-6 text-center">
+          <span className="mb-2 inline-block rounded-full bg-amber-500/20 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-amber-400">
+            Founder Deal
+          </span>
+          <h2 className="mt-2 text-2xl font-bold text-white">
+            Invest in Glook — Own it forever
+          </h2>
+          <p className="mt-2 text-sm text-zinc-400">
+            One-time payment. Same features as monthly. No renewals, ever.
+          </p>
+        </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <LtdCard
-          tier="Pro Founder"
-          price="$149"
-          features={[
-            'Everything in Pro',
-            'Unlimited scans forever',
-            'All AI fix prompts',
-            'PDF export + weekly monitoring',
-          ]}
-          slots={slots?.pro ?? null}
-          active={active}
-          checkoutUrl={proCheckoutUrl}
-        />
-        <LtdCard
-          tier="Agency Founder"
-          price="$349"
-          features={[
-            'Everything in Agency',
-            '10 monitored domains forever',
-            'MCP Server for AI agents',
-            'White-label PDF + API',
-          ]}
-          slots={slots?.agency ?? null}
-          active={active}
-          checkoutUrl={agencyCheckoutUrl}
-        />
-      </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <LtdCard
+            tier="Pro Founder"
+            price="$149"
+            features={[
+              'Everything in Pro',
+              'Unlimited scans forever',
+              'All AI fix prompts',
+              'PDF export + weekly monitoring',
+            ]}
+            slots={slots?.pro ?? null}
+            active={active}
+            checkoutUrl={proCheckoutUrl}
+            onWaitlist={() => setWaitlistOpen(true)}
+          />
+          <LtdCard
+            tier="Agency Founder"
+            price="$349"
+            features={[
+              'Everything in Agency',
+              '10 monitored domains forever',
+              'MCP Server for AI agents',
+              'White-label PDF + API',
+            ]}
+            slots={slots?.agency ?? null}
+            active={active}
+            checkoutUrl={agencyCheckoutUrl}
+            onWaitlist={() => setWaitlistOpen(true)}
+          />
+        </div>
 
-      {!active && (
-        <p className="mt-6 text-center text-sm text-zinc-500">
-          Founder Deal activates at public launch.{' '}
-          <a href="#waitlist" className="text-amber-400 underline underline-offset-2">
-            Join the waitlist
-          </a>{' '}
-          to be notified.
-        </p>
-      )}
-    </section>
+        {!active && (
+          <p className="mt-6 text-center text-sm text-zinc-500">
+            Founder Deal activates at public launch.{' '}
+            <button
+              onClick={() => setWaitlistOpen(true)}
+              className="text-amber-400 underline underline-offset-2 hover:text-amber-300 transition-colors"
+            >
+              Join the waitlist
+            </button>{' '}
+            to be notified.
+          </p>
+        )}
+      </section>
+
+      <WaitlistModal open={waitlistOpen} onClose={() => setWaitlistOpen(false)} />
+    </>
   )
 }
 
@@ -93,6 +104,7 @@ function LtdCard({
   slots,
   active,
   checkoutUrl,
+  onWaitlist,
 }: {
   tier: string
   price: string
@@ -100,9 +112,11 @@ function LtdCard({
   slots: SlotData | null
   active: boolean
   checkoutUrl?: string
+  onWaitlist: () => void
 }) {
   const remaining = slots?.remaining ?? null
   const pct = slots ? Math.round((slots.remaining / slots.total) * 100) : 100
+  const soldOut = remaining === 0
 
   return (
     <div className="rounded-xl border border-zinc-700 bg-zinc-900 p-6">
@@ -137,12 +151,21 @@ function LtdCard({
       </ul>
 
       {active ? (
-        <a
-          href={checkoutUrl ?? '#'}
-          className="block w-full rounded-lg bg-amber-500 py-2.5 text-center text-sm font-semibold text-black transition hover:bg-amber-400"
-        >
-          {remaining === 0 ? 'Join Waitlist' : `Get ${tier} — ${price}`}
-        </a>
+        soldOut ? (
+          <button
+            onClick={onWaitlist}
+            className="block w-full rounded-lg bg-amber-500 py-2.5 text-center text-sm font-semibold text-black transition hover:bg-amber-400"
+          >
+            Join Waitlist
+          </button>
+        ) : (
+          <a
+            href={checkoutUrl ?? '#'}
+            className="block w-full rounded-lg bg-amber-500 py-2.5 text-center text-sm font-semibold text-black transition hover:bg-amber-400"
+          >
+            {`Get ${tier} — ${price}`}
+          </a>
+        )
       ) : (
         <button
           disabled
