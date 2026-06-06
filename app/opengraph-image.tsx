@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'
-export const alt = 'Glook — Site audits that understand your client\'s business'
+export const alt = 'Glook — Free Website Audit. Why can\'t Google, ChatGPT, and Perplexity find your site?'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -51,10 +51,10 @@ export default function OGImage() {
             Glook
           </span>
           <span style={{ color: '#8B8A85', fontSize: '28px', fontWeight: 400 }}>
-            Site audits that understand your client&apos;s business
+            Why can&apos;t Google, ChatGPT, and Perplexity find your site?
           </span>
           <span style={{ color: '#5A5955', fontSize: '20px', marginTop: '8px' }}>
-            40+ checks · fast truth pass · AI fix prompts
+            90+ checks · SEO · AI visibility · Security · Free
           </span>
         </div>
 
