@@ -585,8 +585,13 @@ function HowItWorksSection({ t }: { t: Translations }) {
         </div>
 
         <motion.div {...fadeUp(0.3)} className="mt-10 text-center">
-          <Link href="/methodology" className="text-sm text-[#5A5955] hover:text-[#8B8A85] transition-colors">
-            {t.how.methodologyLink}
+          <Link href="/methodology" className="inline-flex items-center text-sm transition-colors">
+            <AnimatedShinyText
+              shimmerWidth={100}
+              className="text-[#5A5955] hover:text-[#8B8A85]"
+            >
+              {t.how.methodologyLink}
+            </AnimatedShinyText>
           </Link>
         </motion.div>
       </div>

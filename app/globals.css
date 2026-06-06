@@ -284,14 +284,7 @@ h1, h2, h3, h4 {
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.06);
   cursor: default;
-  transition: background 0.4s ease;
   display: inline-block;
-}
-
-.works-chip:hover {
-  background: linear-gradient(135deg, #6E56CF 0%, #FF8C42 30%, #4A9EFF 60%, #3DDC84 85%, #6E56CF 100%);
-  background-size: 300% 300%;
-  animation: borderGradientSpin 2.5s ease infinite;
 }
 
 .works-chip-inner {
@@ -306,7 +299,6 @@ h1, h2, h3, h4 {
   font-size: 0.75rem;
   color: #8B8A85;
   user-select: none;
-  transition: color 0.3s;
   white-space: nowrap;
 }
 
@@ -315,10 +307,6 @@ h1, h2, h3, h4 {
   width: 15px;
   height: 15px;
   flex-shrink: 0;
-}
-
-.works-chip:hover .works-chip-inner {
-  color: #F1F0EE;
 }
 
 /* ─── Scan progress bar shimmer ────────────────────────────────────── */
