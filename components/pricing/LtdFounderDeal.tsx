@@ -83,7 +83,7 @@ export function LtdFounderDeal({ active, proCheckoutUrl, agencyCheckoutUrl }: Lt
             Founder Deal activates at public launch.{' '}
             <button
               onClick={() => setWaitlistOpen(true)}
-              className="text-amber-400 underline underline-offset-2 hover:text-amber-300 transition-colors"
+              className="cursor-pointer text-amber-400 underline underline-offset-2 hover:text-amber-300 transition-colors"
             >
               Join the waitlist
             </button>{' '}
