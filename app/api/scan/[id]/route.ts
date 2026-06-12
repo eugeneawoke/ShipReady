@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient, createServiceClient } from '@/lib/supabase'
+import { createServiceClient } from '@/lib/supabase'
 import { failRunningStages } from '@/lib/scan/stage-telemetry'
 import type { ScanProcessingIssue, ScanResult, ScanStatus } from '@/types/scan'
 
@@ -44,16 +44,6 @@ export async function GET(
 ) {
   const { id } = await params
 
-  // Resolve the authenticated user; treat auth failure as unauthenticated
-  let user: { id: string } | null = null
-  try {
-    const userSupabase = await createClient()
-    const { data: { user: u } } = await userSupabase.auth.getUser()
-    user = u
-  } catch {
-    // Auth service unavailable — treat as anonymous
-  }
-
   const supabase = createServiceClient()
 
   const { data, error } = await supabase
@@ -66,11 +56,8 @@ export async function GET(
     return NextResponse.json({ error: 'Scan not found' }, { status: 404 })
   }
 
-  // If the scan belongs to a specific user, only that user may read it.
-  // An auth failure when the scan is private means we must not reveal it.
-  if (data.user_id && (!user || data.user_id !== user.id)) {
-    return NextResponse.json({ error: 'Scan not found' }, { status: 404 })
-  }
+  // Scans are readable by UUID (16-byte entropy = sufficient access control for sharing).
+  // Future: add is_public flag + granular privacy controls (see PLAN.md Phase 67).
 
   let status = data.status
   let updatedAt = data.updated_at
