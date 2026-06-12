@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-const UPDATED = 'May 11, 2026'
+const UPDATED = 'June 12, 2026'
 const EMAIL = 'support@glook.dev'
 
 export default async function PrivacyPage() {
@@ -80,6 +80,9 @@ export default async function PrivacyPage() {
               <li><strong className="text-[#F1F0EE]">PayPro Global</strong> {isRu ? '— обработка платежей и выставление счетов (Merchant of Record).' : '— payment processing and billing (Merchant of Record).'} <a href="https://payproglobal.com/privacy-policy" className="text-[#6E56CF] hover:underline" target="_blank" rel="noopener noreferrer">{isRu ? 'Политика конфиденциальности' : 'Privacy policy'}</a>.</li>
               <li><strong className="text-[#F1F0EE]">Vercel</strong> {isRu ? '— хостинг и edge functions.' : '— hosting and edge functions.'} <a href="https://vercel.com/legal/privacy-policy" className="text-[#6E56CF] hover:underline" target="_blank" rel="noopener noreferrer">{isRu ? 'Политика конфиденциальности' : 'Privacy policy'}</a>.</li>
               <li><strong className="text-[#F1F0EE]">OpenAI</strong> {isRu ? '— AI-enrichment отчётов и промпты для исправлений. URL и данные по issue могут отправляться для генерации промптов.' : '— AI-generated report enrichment and fix prompts. URLs and issue data are sent to generate prompts.'} <a href="https://openai.com/policies/privacy-policy/" className="text-[#6E56CF] hover:underline" target="_blank" rel="noopener noreferrer">{isRu ? 'Политика конфиденциальности' : 'Privacy policy'}</a>.</li>
+              <li><strong className="text-[#F1F0EE]">RDAP (rdap.org)</strong> {isRu ? '— публичный сервис для определения возраста домена. Имя домена сканируемого сайта передаётся для получения даты регистрации.' : '— public domain registry service used to determine domain age. The scanned domain name is sent to retrieve its registration date.'}</li>
+              <li><strong className="text-[#F1F0EE]">Reddit Search API</strong> {isRu ? '— публичный поисковый API Reddit. Имя домена отправляется для проверки упоминаний сайта на Reddit.' : '— Reddit\'s public search API. The domain name is sent to check for mentions of the site on Reddit.'}</li>
+              <li><strong className="text-[#F1F0EE]">GitHub Search API</strong> {isRu ? '— публичный API GitHub. Имя домена отправляется для поиска связанных репозиториев.' : '— GitHub\'s public API. The domain name is sent to search for associated repositories.'}</li>
             </ul>
           </Section>
 

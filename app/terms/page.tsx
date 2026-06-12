@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-const UPDATED = 'May 11, 2026'
+const UPDATED = 'June 12, 2026'
 const EMAIL = 'support@glook.dev'
 
 export default async function TermsPage() {
@@ -47,8 +47,8 @@ export default async function TermsPage() {
 
           <Section title={isRu ? '2. Описание сервиса' : '2. Description of service'}>
             {isRu
-              ? 'Glook — это автоматизированный инструмент аудита сайтов для веб-агентств и разработчиков. Он сканирует публично доступные URL и формирует отчёты по производительности, SEO, безопасности и мобильной готовности. В отчёты также входят AI-промпты для Cursor, Claude Code и Windsurf.'
-              : 'Glook is an automated site audit tool for web agencies and developers. It scans publicly accessible URLs and generates reports covering performance, SEO, security, and mobile readiness. Reports include AI-generated fix prompts for use with Cursor, Claude Code, and Windsurf.'}
+              ? 'Glook — это автоматизированный инструмент аудита сайтов для веб-агентств и разработчиков. Он сканирует публично доступные URL и формирует отчёты по производительности, SEO, безопасности и мобильной готовности. В отчёты также входят AI-промпты для Cursor, Claude Code и Windsurf. В рамках аудита Glook читает публично доступные конфигурационные файлы сайта (robots.txt, sitemap.xml, llms.txt) и проверяет, разрешён ли доступ AI-краулерам (GPTBot, ClaudeBot, PerplexityBot и другим) — чтобы сообщить владельцу сайта о возможных ограничениях видимости в AI-поисковиках. Glook не имитирует и не запускает ни один из этих краулеров.'
+              : 'Glook is an automated site audit tool for web agencies and developers. It scans publicly accessible URLs and generates reports covering performance, SEO, security, and mobile readiness. Reports include AI-generated fix prompts for use with Cursor, Claude Code, and Windsurf. As part of the audit, Glook reads publicly accessible configuration files (robots.txt, sitemap.xml, llms.txt) and checks whether AI crawlers (GPTBot, ClaudeBot, PerplexityBot, and others) are permitted access — to inform site owners of potential AI search visibility issues. Glook does not impersonate or operate any of these crawlers.'}
           </Section>
 
           <Section title={isRu ? '3. Допустимое использование' : '3. Acceptable use'}>
