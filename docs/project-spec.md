@@ -1,13 +1,25 @@
-# ShipReady Project Specification
+# Glook Project Specification
 
-Last updated: 2026-05-24
+Last updated: 2026-08-13
 Status: private beta readiness
 
 ## Purpose
 
-ShipReady is a web audit tool for founders, developers, and agencies who want their site found — by Google, by AI assistants, and by real users. Paste a URL and get a confidence-scored report across SEO, AI visibility, security, performance, mobile, and accessibility.
+Glook is an evidence-based website audit for business owners who suspect that something is wrong with their site but do not yet know the cause. It finds blind spots that can prevent customers from discovering the business or trusting the website, then turns the evidence into priorities and ready-to-use fixes.
 
-The product serves three tiers: solo founders who scan and fix manually; developers and tech leads who use fix prompts and copy-paste artifacts; freelancers and agencies who use the API and MCP server (coming soon) for client audits and bulk workflows.
+The primary buyer is a business owner. Initial use-case segments include SaaS and online services, ecommerce, local businesses, and agencies auditing client websites. Developers, marketers, and agency staff remain important users and implementation partners, but the public entry point is the owner's symptom: "something is wrong with my website."
+
+The two primary product pillars are **Visibility** (Google and AI discovery/readiness) and **Security** (external website security posture and trust). Performance, mobile, and accessibility provide supporting evidence for the unified diagnosis.
+
+The confirmed brand message is:
+
+- RU: **«У вашего сайта есть слепые зоны. Glook их находит.»**
+- EN: **“Your website has blind spots. Glook finds them.”**
+
+Hero support copy:
+
+- RU: «Glook показывает, что мешает клиентам находить ваш бизнес и доверять вашему сайту. В отчёте — проверенные причины, чёткие приоритеты и готовые исправления.»
+- EN: “Glook reveals what keeps customers from finding your business and trusting your website—with verified findings, clear priorities, and ready-to-use fixes.”
 
 The product promise is trust-first: the report says what was verified, what is likely, what is heuristic, and what could not be measured. AI improves wording, prioritization, and fix prompts, but must not invent technical findings.
 
@@ -15,13 +27,7 @@ The product promise is trust-first: the report says what was verified, what is l
 
 Current operating phase: **Private Beta Readiness**.
 
-This sits between the old planning phases:
-
-- Phase 9, Quality Overhaul: mostly implemented in code.
-- Phase 10, Pro Features: core code is present, production setup still needs verification.
-- Phase 7, Launch: not public launch yet; today’s target is controlled beta with real users.
-
-Practical interpretation: ShipReady is close enough to show to first beta users, as long as the beta is framed honestly and production setup is verified before inviting them.
+Practical interpretation: the scanner and core beta flow have been verified in production. Current work is owner-first positioning, customer validation, report redesign, OAuth production verification, and selecting a viable payment/tax model after the PayPro and FastSpring rejections.
 
 ## Product Scope
 
@@ -44,7 +50,7 @@ Practical interpretation: ShipReady is close enough to show to first beta users,
 - Auth, dashboard, and owned reports.
 - PDF export for Pro/Agency users.
 - Weekly monitoring toggle for Pro/Agency users.
-- Email alert pipeline after Resend production setup is complete.
+- Email alert pipeline through the verified Resend sender.
 - Three focused landing pages: `/seo`, `/security`, `/ai-visibility` with pre-selected scanGoal.
 - Per-platform AI readiness breakdown (ChatGPT, Claude, Perplexity, Google AI) in report.
 - Generated artifacts: llms.txt, Schema.org JSON-LD, security headers config (copy-paste blocks in report).
@@ -57,10 +63,10 @@ Practical interpretation: ShipReady is close enough to show to first beta users,
 ### Out of scope for beta
 
 - Full public paid launch.
-- Agency/team workflows.
-- CI/CD integrations.
-- Multi-page crawl mode.
+- A polished Agency/team dashboard workflow (core API, MCP, team primitives and CI template already exist).
+- Marketplace distribution and production hardening of CI/CD integrations.
 - Deep DAST, runtime XSS testing, or auth bypass testing.
+- Repository/source-code security audit of customer applications.
 - Dedicated scanner outbound firewall/proxy infrastructure.
 
 ## Architecture
@@ -76,7 +82,7 @@ Practical interpretation: ShipReady is close enough to show to first beta users,
 ### Key decisions
 
 - Supabase is the database and auth provider.
-- Payment provider is PayPro Global (Merchant of Record). Lemon Squeezy and Stripe are explicitly rejected. See D-28.
+- Payment strategy is reopened. PayPro Global and FastSpring declined the project; no production payment processor is currently approved. See D-41.
 - Railway is used for scanner execution because Vercel Hobby is not a good fit for heavy Chromium scans.
 - AI is one compact enrichment call for normal scans, with Pro/Agency wow insights as a separate add-on.
 - PageSpeed Insights is only a future benchmark, not the default scanner path.
@@ -116,6 +122,19 @@ Heavy checks should expose measurement state:
 
 A failed measurement must never look like a pass.
 
+## Target Report Experience
+
+The current report already exposes category scores, evidence-backed issues, priorities, prompts, and generated artifacts. The next report iteration will reorganize that information without weakening the evidence model:
+
+1. **Unified diagnosis** — a concise explanation of the site's overall condition.
+2. **Key causes** — verified, likely, heuristic, and unavailable evidence shown separately.
+3. **Visibility card** — Google and AI discoverability/readiness.
+4. **Security card** — external security posture and trust risks.
+5. **Prioritized plan** — what to address first, next, and later.
+6. **Ready fixes** — deterministic artifacts, implementation instructions, and technical prompts.
+
+The diagnosis must not claim that an issue caused traffic, revenue, or lead loss unless connected first-party data proves the relationship. It may explain plausible impact with the appropriate confidence label.
+
 ## AI Model
 
 Current active implementation:
@@ -140,6 +159,8 @@ Rules:
 - AI must respect confidence and evidence.
 - AI failures are timeout-bounded and must not block scan completion forever.
 
+The functional core often described as an "AI Visibility Agent" already exists: deterministic checks, per-platform readiness, trust signals, evidence, and grounded enrichment. It should evolve through orchestration and verification rather than be rewritten as an autonomous agent from zero.
+
 Obsolete plan:
 
 - `docs/superpowers/plans/2026-04-07-ai-prompts-v4.md`
@@ -147,10 +168,9 @@ Obsolete plan:
 
 ## Access Model
 
-- Anonymous scans are readable by report URL.
-- Authenticated scans are private to the owner.
-- Authenticated report polling uses an ownership check.
-- Future public sharing for authenticated reports must use a separate share token or explicit public flag.
+- Current scans are readable by their unguessable UUID report URL; the UUID acts as a bearer token for both anonymous and authenticated scans.
+- This is acceptable for the current controlled beta but is not equivalent to explicit privacy controls.
+- Phase 67 adds `is_public`/share controls and blocks private authenticated scans for other users.
 - Public badges require explicit `badge_enabled = true`; default is `false`.
 
 ## Monetization And Paid Features
@@ -158,29 +178,44 @@ Obsolete plan:
 Current code state:
 
 - Free / Pro / Agency plan model exists.
-- Free scan limits exist for user/IP.
+- Anonymous and Free users are limited to 3 scans per month (anonymous by IP).
 - Pricing UI exists.
 - PDF export exists for Pro/Agency.
 - Weekly monitoring exists for Pro/Agency.
 - Email alert pipeline exists.
-- PayPro Global checkout + IPN webhook + SHA256 verification implemented (D-28).
+- Legacy PayPro Global checkout + IPN webhook + SHA256 verification remains implemented, but the provider declined the project and the flow cannot be used for production payments.
 - `subscriptions` table + `payment_events` audit log (migration 015).
 - `beta_access_grants` + referral campaigns infrastructure (migration 014).
 - Effective plan: paid sub > beta_access_grant > profiles.plan (`getEffectivePlanForUserId`).
 - REST API v1 (`/api/v1/scan`) with Bearer API key auth + rate limiting.
 
-Production setup still required before relying on paid features:
+Current production state:
 
-- Apply Supabase migrations 001–015 in production.
-- Create Pro Monthly/Yearly products in PayPro dashboard; get Product IDs.
-- Configure PayPro IPN URL and env vars (`PAYPRO_VALIDATION_KEY`, `PAYPRO_VENDOR_ID`, etc.).
-- Configure Resend API key and verified sender.
-- Verify the Railway scanner and shared `SCANNER_SECRET`.
-- Run end-to-end production smoke test.
+- Railway scanner, AI enrichment, PDF export, weekly monitoring and the verified Resend sender have been confirmed in production.
+- PayPro declined the application without an explanation. FastSpring also declined because the requested statements were unavailable.
+- FastSpring recommended using a non-MoR processor temporarily and reapplying after several months of operating history. This is an option to evaluate, not an approved implementation decision.
+- No public checkout should be enabled until processor availability, KYC, payout, tax/VAT/sales-tax responsibility, chargebacks, and jurisdictional constraints are reviewed.
+- OAuth routes and scan-flow integrations exist; Google/Yandex/Bing production OAuth E2E and report-data verification remain follow-up work.
 
-For today’s beta, manual invite/manual Pro access is acceptable and safer than rushing full paid launch.
+For the controlled beta, manual invite/manual Pro access is the current path while the payment strategy is re-evaluated.
 
 ## Security Posture
+
+### Customer-facing audit boundary
+
+The current Glook URL scan measures **external website security posture**: HTTPS/TLS, security headers, DNS and email-security signals, cookie flags, exposed-file/key patterns, and limited endpoint probes. It is not a penetration test and does not perform deep DAST, exploit validation, authenticated attack simulation, or auth-bypass testing.
+
+Security auditing of customer websites remains part of Glook, not a separate third product. The future deeper mode requires:
+
+- explicit proof of ownership or written authorization;
+- a declared target scope;
+- safe rate limits and stop conditions;
+- auditable consent and scan logs;
+- isolated DAST infrastructure.
+
+Codex Security is appropriate for a customer repository or source tree that the customer explicitly connects. It is not a drop-in URL scanner for arbitrary client websites. Agent roles may orchestrate checks, validate evidence, prioritize remediation, and support ongoing monitoring under the hood, but deterministic measurements remain the source of technical facts.
+
+### Glook application posture
 
 Fixed in code:
 
@@ -203,23 +238,22 @@ Still operational, not code-only:
 
 ## Beta Readiness
 
-Beta can start after these are true in production:
+Core beta readiness confirmed by the latest project checklist:
 
-- `OPENAI_API_KEY` is funded and set where scanner code runs.
-- Supabase JWT expiry is saved as `1800` seconds.
-- Supabase migrations are applied, including monitoring and `badge_enabled`.
-- Vercel and Railway env vars are present.
-- At least one production scan completes from landing page to report.
-- A stalled scan shows partial report or clear failure instead of infinite loading.
-- Authenticated dashboard opens and shows user scans.
-- The owner has a direct feedback/support path for beta users.
+- Railway scans complete and save results in production.
+- AI enrichment and generated artifacts are active.
+- PDF export and weekly monitoring have been verified.
+- Resend sender/domain is configured.
+- The manual smoke checklist has been completed.
 
-Not required for beta:
+Remaining beta follow-up:
 
-- Full paid launch.
-- Email alerts, if Resend sender domain is not verified yet.
-- Dedicated egress firewall/proxy.
-- Agency/team workflows.
+- owner interviews and feedback loop;
+- owner-first public messaging;
+- OAuth production E2E/report verification;
+- telemetry baseline and richer abuse observability.
+
+Not required for controlled beta: full paid launch, a payment processor, dedicated egress firewall/proxy, or a polished Agency/team UI.
 
 ## Current Launch Recommendation
 
@@ -227,7 +261,7 @@ Launch as **controlled private beta**, not broad public paid launch.
 
 Recommended wording:
 
-> ShipReady is in private beta. Reports are evidence-based, and some deeper checks may still be marked as unavailable when they cannot be measured reliably. Feedback is welcome while we harden the scanner and paid workflows.
+> Glook is in private beta. Reports are evidence-based, and some deeper checks may still be marked as unavailable when they cannot be measured reliably. Feedback is welcome while we validate the product with business owners and harden paid workflows.
 
 ## Post-Beta Roadmap
 
@@ -236,7 +270,8 @@ Priority 1:
 - Production observability for scan failures by phase.
 - Real p50/p95/p99 scan duration telemetry.
 - End-to-end paid flow verification.
-- Resend sender verification and monitoring alerts.
+- Owner-first messaging and customer interviews.
+- Diagnosis-first report information architecture.
 - Better report onboarding explaining verified / likely / heuristic.
 
 Priority 2:
@@ -248,32 +283,31 @@ Priority 2:
 
 Priority 3:
 
-- Agency workflows.
-- Team seats.
-- API access.
-- GitHub Action and deployment integrations.
-- Multi-page crawl and broader accessibility checks.
+- Production-hardened Agency dashboard workflows around the existing API, MCP and team primitives.
+- GitHub Marketplace distribution and deploy-integration hardening.
+- Broader authorized security testing and accessibility coverage.
 
 ### Coming Soon
 
 - IntentLead AI integration — post-audit "Who You're Missing" overlay layer
-- Growth Bundle (ShipReady Agency + IntentLead) — bundled pricing
-- REST API public documentation and SDK examples
-- GSC + Яндекс Вебмастер OAuth integration — real indexation data in report
-- GA4 + Яндекс Метрика OAuth integration — traffic data in report
+- Growth Bundle (Glook Agency + IntentLead) — bundled pricing
+- Production verification for GSC, Яндекс Вебмастер, GA4, Яндекс Метрика and Bing OAuth flows
+- Authorized deeper website security audit after ownership verification
+- Optional connected-repository security audit through Codex Security
 - Rank tracking via DataForSEO
 - Competitor analysis (keywords gap + backlinks)
 
 ## Agency/Pro Integrations Roadmap
 
-These integrations require OAuth or paid APIs and are not part of the current scanner.
+OAuth routes and scan-flow integrations exist, but production E2E/report verification is still pending. Paid data-provider integrations remain future work.
 
 | Integration | What it adds | When |
 |---|---|---|
-| Google Search Console | Real indexation, Coverage report, CTR per page | Pro tier, future phase |
-| Яндекс Вебмастер | Яндекс indexation, diagnostics | Pro tier, future phase |
-| Google Analytics 4 | Traffic, goals, conversions | Agency tier |
-| Яндекс Метрика | Same for RU/CIS market | Agency tier |
+| Google Search Console | Real indexation, Coverage report, CTR per page | Code shipped; prod verification pending |
+| Яндекс Вебмастер | Яндекс indexation, diagnostics | Code shipped; prod verification pending |
+| Google Analytics 4 | Traffic and engagement signals | Code shipped; prod verification pending |
+| Яндекс Метрика | Same for RU/CIS market | Code shipped; prod verification pending |
+| Bing Webmaster | Crawl/indexing diagnostics | Code shipped; prod verification deferred for beta |
 | Rank tracking | Keyword positions via DataForSEO / SerpAPI | Agency tier |
 | Competitor analysis | Keywords gap + backlink comparison via DataForSEO | Agency tier |
 
